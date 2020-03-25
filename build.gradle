@@ -19,13 +19,13 @@ version '0.0.1-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
-def artifactory_user = System.getenv('ARTIFACTORY_USER')
+def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
 def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
 
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.hasTask(artifactoryPublish) &&
-            (artifactory_user == null || artifactory_password == null)) {
-        throw new GradleException("Set env vars ARTIFACTORY_USER and ARTIFACTORY_PASSWORD to publish")
+            (artifactory_username == null || artifactory_password == null)) {
+        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
     }
 }
 
@@ -34,6 +34,8 @@ repositories {
 }
 
 dependencies {
+    // this is just a random dependency added to make sure I am doing it right, remove when we have a real one
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
 }
 
 test {
@@ -59,7 +61,7 @@ artifactory {
         contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
         repository {
             repoKey = 'libs-snapshot-local' // The Artifactory repository key to publish to
-            username = "${artifactory_user}" // The publisher user name
+            username = "${artifactory_username}" // The publisher user name
             password = "${artifactory_password}" // The publisher password
         }
         defaults {
