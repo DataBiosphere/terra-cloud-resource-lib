@@ -31,11 +31,17 @@ gradle.taskGraph.whenReady { taskGraph ->
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
     // this is just a random dependency added to make sure I am doing it right, remove when we have a real one
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
+    compile group: 'com.uber.cadence', name: 'cadence-client', version: '2.7.1'
+    compile group: 'commons-configuration', name: 'commons-configuration', version: '1.9'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+    compile 'com.google.cloud:google-cloud-storage:1.106.0'
+    compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
 }
 
 test {
