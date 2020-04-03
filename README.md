@@ -11,3 +11,9 @@ Build and run unit tests:
 ```
 ./gradlew build test
 ```
+
+## Linter
+Automatically fix linting issues:
+```
+./gradlew spotlessApply
+```

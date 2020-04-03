@@ -12,6 +12,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'com.jfrog.artifactory' version '4.13.0'
+    id 'com.diffplug.gradle.spotless' version '3.27.2'
 }
 
 group 'bio.terra'
@@ -75,6 +76,13 @@ artifactory {
             // Publish generated POM files to Artifactory (true by default)
             publishPom = true
         }
+    }
+}
+
+// Linter
+spotless {
+    java {
+        googleJavaFormat()
     }
 }
 
