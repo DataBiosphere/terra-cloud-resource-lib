@@ -9,9 +9,11 @@ import com.google.common.collect.ImmutableList;
 
 public class GoogleCloudStorage {
     private Storage storage;
+    private Credentials credentials;
 
     public GoogleCloudStorage(Credentials credentials) {
-        storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        this.storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        this.credentials = credentials;
     }
 
     public boolean deleteBucketRaw(String bucketName) {
@@ -32,6 +34,14 @@ public class GoogleCloudStorage {
                                         BucketInfo.LifecycleRule.LifecycleCondition.newBuilder().setAge(ageDays).build())))
                 .build()
                 .update();
+    }
+
+    public void createBucketRaw(String bucketName, String projectId) {
+        getService(projectId).create(BucketInfo.of(bucketName));
+    }
+
+    private Storage getService(String projectId) {
+        return StorageOptions.newBuilder().setProjectId(projectId).setCredentials(credentials).build().getService();
     }
 }
 
