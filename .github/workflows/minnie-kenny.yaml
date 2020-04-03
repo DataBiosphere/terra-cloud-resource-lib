@@ -1,0 +1,32 @@
+name: minnie-kenny
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ '**' ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  minnie-kenny:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current code
+        uses: actions/checkout@master
+      - name: Check for secrets
+        id: minnie-kenny-step
+        run: |
+          # Clone the git-secrets repo
+          git clone https://github.com/awslabs/git-secrets.git
+          # Change directories to the git secrets directory
+          pushd git-secrets >/dev/null
+          # Checkout whatever version you'd like
+          git checkout 1.3.0
+          # Add the `git secrets` directory to the PATH
+          export PATH="${PATH}:${PWD}"
+          # Change back to the previous working directory
+          popd >/dev/null
+          # Continue running your tests...
+

@@ -79,7 +79,7 @@ artifactory {
 }
 
 task minniekenny(type: Exec) {
-    commandLine "./minnie-kenny.sh"
+    commandLine 'sh', './minnie-kenny.sh'
 }
 
 test.dependsOn minniekenny
