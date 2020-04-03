@@ -10,12 +10,17 @@ public class GoogleCloudStorageActivitiesImpl implements GoogleCloudStorageActiv
     }
 
     @Override
+    public void createBucket(String bucketName, String projectId) {
+        DoNotRetrySupport.wrapDoNotRetry(() -> this.googleCloudStorage.createBucketRaw(bucketName, projectId));
+    }
+
+    @Override
     public boolean deleteBucket(String bucketName) {
         return DoNotRetrySupport.wrapDoNotRetry(() -> this.googleCloudStorage.deleteBucketRaw(bucketName));
     }
 
     @Override
-    public void setDeleteLifecycleRaw(String bucketName, Integer ageDays) {
+    public void setDeleteLifecycle(String bucketName, Integer ageDays) {
         DoNotRetrySupport.wrapDoNotRetry(() -> {
             try {
                 this.googleCloudStorage.setDeleteLifecycleRaw(bucketName, ageDays);

@@ -1,5 +1,7 @@
-package bio.terra.cloudres.google.storage;
+package bio.terra.cloudres.google.workflow;
 
+import bio.terra.cloudres.google.storage.GoogleCloudStorage;
+import bio.terra.cloudres.google.storage.GoogleCloudStorageActivitiesImpl;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.uber.cadence.client.WorkflowClient;
 import com.uber.cadence.client.WorkflowOptions;
