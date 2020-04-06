@@ -1,11 +1,8 @@
 package bio.terra.cloudres;
 
-
-/**
- * Hello
- */
+/** Hello */
 public class Hello {
-    public String hello() {
-        return "hello";
-    }
+  public String hello() {
+    return "hello";
+  }
 }

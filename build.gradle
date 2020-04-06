@@ -12,6 +12,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'com.jfrog.artifactory' version '4.13.0'
+    id 'com.diffplug.gradle.spotless' version '3.27.2'
 }
 
 group 'bio.terra'
@@ -78,8 +79,15 @@ artifactory {
     }
 }
 
+// Linter
+spotless {
+    java {
+        googleJavaFormat()
+    }
+}
+
 task minniekenny(type: Exec) {
-    commandLine "./minnie-kenny.sh"
+    commandLine 'sh', './minnie-kenny.sh'
 }
 
 test.dependsOn minniekenny
