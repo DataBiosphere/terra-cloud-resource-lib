@@ -8,25 +8,27 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpCredentialsAdapter;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 public class GoogleCloudBilling {
-    private Cloudbilling cloudBilling;
+  private Cloudbilling cloudBilling;
 
-    public GoogleCloudBilling(Credentials credentials) throws IOException, GeneralSecurityException {
-        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+  public GoogleCloudBilling(Credentials credentials) throws IOException, GeneralSecurityException {
+    HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+    JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
 
-        this.cloudBilling = new Cloudbilling.Builder(httpTransport, jsonFactory, new HttpCredentialsAdapter(credentials))
-                .setApplicationName("terra")
-                .build();
-    }
+    this.cloudBilling =
+        new Cloudbilling.Builder(
+                httpTransport, jsonFactory, new HttpCredentialsAdapter(credentials))
+            .setApplicationName("terra")
+            .build();
+  }
 
-    public ProjectBillingInfo setBillingRaw(String projectId, String billingAccount) throws IOException {
-        ProjectBillingInfo content = new ProjectBillingInfo().setBillingAccountName(billingAccount);
+  public ProjectBillingInfo setBillingRaw(String projectId, String billingAccount)
+      throws IOException {
+    ProjectBillingInfo content = new ProjectBillingInfo().setBillingAccountName(billingAccount);
 
-        return cloudBilling.projects().updateBillingInfo("projects/" + projectId, content).execute();
-    }
+    return cloudBilling.projects().updateBillingInfo("projects/" + projectId, content).execute();
+  }
 }

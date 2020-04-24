@@ -13,6 +13,8 @@ plugins {
     id 'maven-publish'
     id 'com.jfrog.artifactory' version '4.13.0'
     id 'com.diffplug.gradle.spotless' version '3.27.2'
+    id 'org.springframework.boot' version '2.2.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 }
 
 group 'bio.terra'
@@ -43,11 +45,21 @@ dependencies {
 
     compile 'com.google.cloud:google-cloud-storage:1.106.0'
     compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
+    compile 'com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0'
+    compile 'com.google.apis:google-api-services-serviceusage:v1beta1-rev255-1.25.0'
+    compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev563-1.25.0'
+
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 }
 
 test {
     useJUnitPlatform {
-        includeTags 'unit'
+        includeTags 'unit', 'integration'
     }
 }
 
