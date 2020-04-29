@@ -13,7 +13,7 @@ public class GPAllocService {
   }
 
   public Project getProject() {
-    return this.restTemplate.getForObject(baseUrl + "/api/googleproject", Project.class); // todo: this needs to include an auth header for gpalloc to consume
+    return this.restTemplate.getForObject(baseUrl + "/api/googleproject", Project.class);
   }
 
   public void releaseProject(String projectName) {

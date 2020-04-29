@@ -7,4 +7,6 @@ public class Project implements Serializable {
   private String cromwellAuthBucketUrl;
 
   public String getProjectName() { return this.projectName; }
+
+  public String getCromwellAuthBucketUrl() { return this.cromwellAuthBucketUrl; }
 }
