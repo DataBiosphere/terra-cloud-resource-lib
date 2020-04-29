@@ -49,12 +49,12 @@ dependencies {
     compile 'com.google.apis:google-api-services-serviceusage:v1beta1-rev255-1.25.0'
     compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev563-1.25.0'
 
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jdbc'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    testImplementation 'org.hamcrest:hamcrest:2.2'
-
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 }
 
 test {
