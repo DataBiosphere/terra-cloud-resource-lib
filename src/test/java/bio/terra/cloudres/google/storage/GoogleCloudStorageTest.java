@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 import bio.terra.cloudres.app.Main;
+import bio.terra.cloudres.util.GPAllocService;
+import bio.terra.cloudres.util.Project;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Bucket;
@@ -14,11 +16,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import bio.terra.cloudres.util.GPAllocService;
-import bio.terra.cloudres.util.Project;
 
 @Tag("integration")
 @ExtendWith(SpringExtension.class)
@@ -38,7 +38,9 @@ public class GoogleCloudStorageTest {
     GoogleCloudStorage cloudStorageService = new GoogleCloudStorage(credentials);
 
     Project project = gpAllocService.getProject();
-    String projectName = project.getProjectName(); // todo: now we need to get SA credentials for this project somehow
+    String projectName =
+        project
+            .getProjectName(); // todo: now we need to get SA credentials for this project somehow
     String bucketName = String.format("mtalbott-%s", UUID.randomUUID().toString());
 
     Bucket createdBucket = cloudStorageService.create(BucketInfo.newBuilder(bucketName).build());

@@ -5,7 +5,6 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.common.collect.ImmutableList;
 
 public class GoogleCloudStorage {
   private Storage storage;
@@ -20,41 +19,11 @@ public class GoogleCloudStorage {
     return storage.delete(bucketName);
   }
 
-  public void setDeleteLifecycleRaw(String bucketName, Integer ageDays) {
-    Bucket bucket = storage.get(bucketName);
-    if (bucket == null) {
-      throw new BucketDoesNotExistException(bucketName);
-    }
-    bucket
-        .toBuilder()
-        .setLifecycleRules(
-            ImmutableList.of(
-                new BucketInfo.LifecycleRule(
-                    BucketInfo.LifecycleRule.LifecycleAction.newDeleteAction(),
-                    BucketInfo.LifecycleRule.LifecycleCondition.newBuilder()
-                        .setAge(ageDays)
-                        .build())))
-        .build()
-        .update();
-  }
-
-  public void createBucketRaw(String bucketName, String projectId) {
-    getService(projectId).create(BucketInfo.of(bucketName));
-  }
-
   public Bucket create(BucketInfo bucketInfo, Storage.BucketTargetOption... options) {
     return storage.create(bucketInfo, options);
   }
 
   public Bucket get(String bucketName, Storage.BucketGetOption... options) {
     return storage.get(bucketName, options);
-  }
-
-  private Storage getService(String projectId) {
-    return StorageOptions.newBuilder()
-        .setProjectId(projectId)
-        .setCredentials(credentials)
-        .build()
-        .getService();
   }
 }
