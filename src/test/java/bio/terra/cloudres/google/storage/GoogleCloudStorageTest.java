@@ -11,16 +11,20 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import java.io.FileInputStream;
 import java.util.UUID;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class GoogleCloudStorageTest {
+  Config conf = ConfigFactory.load();
 
   @Test
   public void shouldCreateBuckets() throws Exception {
     // todo: how do we get service account credentials in other integration/automation tests
-    String saKeyFile = "/Users/mtalbott/Downloads/mtalbott-test-billing-project-ef361ecead75.json";
+    String saKeyFile = conf.getConfig("test").getString("saKeyFile");
     GoogleCredentials credentials =
         ServiceAccountCredentials.fromStream(new FileInputStream(saKeyFile))
             .createScoped("https://www.googleapis.com/auth/cloud-platform");

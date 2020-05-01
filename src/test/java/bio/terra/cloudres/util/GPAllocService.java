@@ -1,6 +1,10 @@
 package bio.terra.cloudres.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -9,14 +13,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 
-import java.util.ArrayList;
-
 public class GPAllocService {
+  Config conf = ConfigFactory.load();
+
   private final HttpClient client;
   private final ObjectMapper mapper;
-
   // todo: read this from config to get projects in test vs quality orgs
-  private final String baseUrl = "https://gpalloc-dev.dsp-techops.broadinstitute.org";
+  private final String baseUrl = conf.getConfig("test").getString("gpallocBaseUrl");
 
   // todo: how to get this token for the right user/SA
   private final String token = "";
