@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.threeten.bp.Duration;
 
-import java.io.IOException;
-
 /** Google Resource Manager Related APIs using Google API Client*/
 public class GoogleCloudResourceManagerClient {
     private final Logger logger =
@@ -49,6 +47,5 @@ public class GoogleCloudResourceManagerClient {
             logger.error("Failed to create Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
             throw new CloudResourceException("Failed to create Google Project", e);
         }
-
     }
 }

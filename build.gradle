@@ -108,3 +108,7 @@ task minniekenny(type: Exec) {
 }
 
 test.dependsOn minniekenny
+
+dependencies {
+    testImplementation('junit:junit:4.13')
+}

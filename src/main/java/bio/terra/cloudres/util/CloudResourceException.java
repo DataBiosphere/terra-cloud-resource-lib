@@ -4,11 +4,12 @@ import com.google.cloud.http.BaseHttpServiceException;
 
 /** Terra Cloud Resource Library exception.*/
 public class CloudResourceException extends Exception {
+    // VisiableForTesting
+    static final String ERROR_MESSAGE_CONNECTOR = " the error from the original cloud provider: ";
+
     private final int code;
     private final boolean retryable;
     private final String reason;
-    private final String location;
-    private final String debugInfo;
 
     public CloudResourceException(String message) {
         this(message, null);
@@ -16,10 +17,8 @@ public class CloudResourceException extends Exception {
 
     /** Constructor for Google API related exceptions. */
     public CloudResourceException(String message, BaseHttpServiceException ex) {
-        super(message, ex);
-        this.debugInfo = ex.getDebugInfo();
+        super(message + ERROR_MESSAGE_CONNECTOR + ex.getMessage(), ex);
         this.retryable = ex.isRetryable();
-        this.location = ex.getLocation();
         this.reason = ex.getReason();
         this.code = ex.getCode();
     }
@@ -34,13 +33,5 @@ public class CloudResourceException extends Exception {
 
     public String getReason() {
         return reason;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public String getDebugInfo() {
-        return debugInfo;
     }
 }
