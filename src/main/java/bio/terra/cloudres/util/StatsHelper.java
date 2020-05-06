@@ -53,21 +53,21 @@ public class StatsHelper {
      * */
     public static final Measure.MeasureDouble METHOD_RECEIVED =
             Measure.MeasureDouble.create(
-                    CLOUD_RESOURCE_PREFIX + "/received", "Number of the public method being called by CRL clients", COUNT);
+                    CLOUD_RESOURCE_PREFIX + "/method", "Number of the public method being called by CRL clients", COUNT);
 
     /**
      * {@link Measure} for number of errors.
      * */
     public static final Measure.MeasureDouble ERROR_COUNT =
             Measure.MeasureDouble.create(
-                    CLOUD_RESOURCE_PREFIX + "/error", "Number of the erros ", COUNT);
+                    CLOUD_RESOURCE_PREFIX + "/cloud/error", "Number of the errors ", COUNT);
 
     /**
      * Record the latency for Cloud API calls.
      *
      * @param method The method where error happens, e.g, GoogleCloudResourceManager.createProject()
-     * @param method, the error's code
-     * @param latency, the client which use this library.
+     * @param method, The error's code
+     * @param latency, The client which use this library.
      * */
     public static void recordCloudApiLatency(String clientName, String method, Long latency) {
         TagContext tctx = tagger.emptyBuilder().put(KEY_LATENCY, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(clientName), tagMetadata).build();
@@ -83,7 +83,7 @@ public class StatsHelper {
      * @param method The method where error happens, e.g, GoogleCloudResourceManager.createProject()
      * @param error, the error's code
      * @param clientName, the client which use this library.
-     */
+     * */
     public static void recordCloudError(String clientName, String method, String error) {
         TagContext tctx = tagger.emptyBuilder()
                 .put(KEY_METHOD, TagValue.create(error), tagMetadata)
