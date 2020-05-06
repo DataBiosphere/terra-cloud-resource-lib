@@ -1,55 +1,79 @@
 package bio.terra.cloudres.google.crm;
 
 import bio.terra.cloudres.util.CloudResourceException;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.cloudresourcemanager.CloudResourceManager;
-import com.google.api.services.cloudresourcemanager.model.ResourceId;
-import com.google.api.services.cloudresourcemanager.model.Operation;
-import com.google.api.services.cloudresourcemanager.model.Project;
+import bio.terra.cloudres.util.StatsHelper;
+import com.google.api.gax.retrying.RetrySettings;
 import com.google.auth.Credentials;
-import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.cloud.resourcemanager.*;
+import com.google.cloud.resourcemanager.ProjectInfo.ResourceId;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.bp.Duration;
+import io.opencensus.common.Scope;
+import io.opencensus.trace.Tracer;
+import io.opencensus.trace.Tracing;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
-/** Sample Code of using Google API Service direcrtly instead of using Google Client Library. */
+/** Google Resource Manager Related APIs using Google API Client*/
 public class GoogleCloudResourceManager {
     private final Logger logger =
-            LoggerFactory.getLogger("bio.terra.cloudres.google.crm.GoogleCloudResourceManager");
+            LoggerFactory.getLogger("bio.terra.cloudres.google.crm.GoogleCloudResourceManagerClient");
 
-    private CloudResourceManager cloudResourceManager;
+    private static final Tracer tracer = Tracing.getTracer();
 
-    public GoogleCloudResourceManager(Credentials credentials) throws IOException, GeneralSecurityException {
-        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    private static final String CLOUD_RESOURCE_MANAGER_PREFIX = "GoogleCloudResourceManager";
 
-        this.cloudResourceManager = new CloudResourceManager.Builder(httpTransport, jsonFactory, new HttpCredentialsAdapter(credentials))
-                .setApplicationName("terra")
-                .build();
+    private final ResourceManager resourceManager;
+    private final String clientName;
+
+    public GoogleCloudResourceManager(Credentials credentials, String clientName) {
+        // Sample code if we want to customize our own retry setting:
+        RetrySettings retrySettings = RetrySettings.newBuilder().setMaxAttempts(6).
+                setTotalTimeout(Duration.ofMillis(50_000L)).build();
+        ResourceManagerOptions options = ResourceManagerOptions.newBuilder().setCredentials(credentials).setRetrySettings(retrySettings).build();
+
+        this.resourceManager = options.getService();
+        this.clientName = clientName;
+    }
+
+    public GoogleCloudResourceManager(String clientName) {
+        // See https://github.com/googleapis/google-cloud-java#authentication:
+        // When using google-cloud libraries from within Compute/App Engine, no additional authentication steps are
+        // necessary.
+        this.resourceManager = ResourceManagerOptions.getDefaultInstance().getService();
+        this.clientName = clientName;
     }
 
     /**
      *  Creates Google Project.
      *
      * @param projectId The project id to be create
-     * @param parentResourceId The parent resource id to create
+     * @param parentResourceId The resource id to create
+     * @return the project being created.
      */
-    public Operation createProjectRaw(String projectId, ResourceId parentResourceId) throws CloudResourceException {
-        try {
-            Project requestBody = new Project().setProjectId(projectId).setParent(parentResourceId);
-            logger.debug("Creating Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
-            return cloudResourceManager.projects().create(requestBody).execute();
-        } catch(IOException e) {
-            logger.error("Failed to create Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
-            // TODO(yonghao): Make CloudResourceException can also take IOException or all exception if we  want to use
-            // this class.
-            throw new CloudResourceException("Failed to create Google Project");
-        }
+    public Project createProject(String projectId, ResourceId parentResourceId) throws CloudResourceException {
+        logger.debug("Creating Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
 
+        // Record the method usage.
+        StatsHelper.recordClientUsageCount(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject");
+
+        try(Scope ss = tracer.spanBuilder("GoogleCloudResourceManagerClient.createProject").startScopedSpan()) {
+            // Record the Cloud API usage.
+            // TODO(yonghao): All Gloud API name would Enum value in a central place.
+            StatsHelper.recordCloudApiCount(clientName, "GoogleCreateProject");
+            tracer.getCurrentSpan().addAnnotation("Starting the work.");
+            try {
+                return resourceManager.create(resourceManager.create(ProjectInfo.newBuilder(projectId).setParent(parentResourceId).build()));
+            } catch(ResourceManagerException e) {
+                logger.error("Failed to create Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
+
+                // Record the error. For now use the error code.
+                StatsHelper.recordCloudError(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject", String.valueOf(e.getCode()));
+                throw new CloudResourceException("Failed to create Google Project", e);
+            } finally {
+                tracer.getCurrentSpan().addAnnotation("Finished working.");
+            }
+        }
     }
 }

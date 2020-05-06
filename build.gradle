@@ -43,6 +43,7 @@ dependencies {
     compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev563-1.25.0'
 
     compile 'org.slf4j:slf4j-api:1.7.28' // Logging
+    compile 'io.opencensus:opencensus-api:0.26.0' // Metrics
 
     compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha' // Google Resource Manager API Client
     compile 'com.google.cloud:google-cloud-storage:1.108.0' // Google Storage API Client
