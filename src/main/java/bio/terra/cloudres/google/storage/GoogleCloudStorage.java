@@ -15,6 +15,11 @@ public class GoogleCloudStorage {
     this.credentials = credentials;
   }
 
+  public GoogleCloudStorage(Credentials credentials, String projectId) {
+    this.storage = StorageOptions.newBuilder().setProjectId(projectId).setCredentials(credentials).build().getService();
+    this.credentials = credentials;
+  }
+
   public boolean deleteBucketRaw(String bucketName) {
     return storage.delete(bucketName);
   }

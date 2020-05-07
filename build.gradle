@@ -36,22 +36,15 @@ repositories {
 }
 
 dependencies {
-    // this is just a random dependency added to make sure I am doing it right, remove when we have a real one
-    compile group: 'com.uber.cadence', name: 'cadence-client', version: '2.7.1'
-    compile group: 'commons-configuration', name: 'commons-configuration', version: '1.9'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'com.typesafe', name: 'config', version: '1.4.0'
 
     compile 'com.google.cloud:google-cloud-storage:1.106.0'
     compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
-    compile 'com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0'
-    compile 'com.google.apis:google-api-services-serviceusage:v1beta1-rev255-1.25.0'
-    compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev563-1.25.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testCompile 'org.apache.httpcomponents.client5:httpclient5:5.0'
     testCompile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
-    testCompile group: 'com.typesafe', name: 'config', version: '1.4.0'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 }

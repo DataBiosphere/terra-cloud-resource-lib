@@ -21,13 +21,10 @@ public class GPAllocService {
   // todo: read this from config to get projects in test vs quality orgs
   private final String baseUrl = conf.getConfig("test").getString("gpallocBaseUrl");
 
-  // todo: how to get this token for the right user/SA
-  private final String token = "";
-
-  public GPAllocService() {
+  public GPAllocService(String token) {
     this.mapper = new ObjectMapper();
 
-    ArrayList<Header> headers = new ArrayList<Header>();
+    ArrayList<Header> headers = new ArrayList<>();
     headers.add(new BasicHeader("Authorization", String.format("Bearer %s", token)));
     this.client = HttpClients.custom().setDefaultHeaders(headers).build();
   }

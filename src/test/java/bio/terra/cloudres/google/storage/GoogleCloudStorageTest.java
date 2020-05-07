@@ -29,13 +29,13 @@ public class GoogleCloudStorageTest {
         ServiceAccountCredentials.fromStream(new FileInputStream(saKeyFile))
             .createScoped("https://www.googleapis.com/auth/cloud-platform");
 
-    GPAllocService gpAllocService = new GPAllocService();
-    GoogleCloudStorage cloudStorageService = new GoogleCloudStorage(credentials);
-
+    GPAllocService gpAllocService = new GPAllocService(credentials.refreshAccessToken().getTokenValue());
     Project project = gpAllocService.getProject();
     String projectName =
         project
             .getProjectName(); // todo: now we need to get SA credentials for this project somehow
+
+    GoogleCloudStorage cloudStorageService = new GoogleCloudStorage(credentials, projectName);
     String bucketName = String.format("mtalbott-%s", UUID.randomUUID().toString());
 
     Bucket createdBucket = cloudStorageService.create(BucketInfo.newBuilder(bucketName).build());
