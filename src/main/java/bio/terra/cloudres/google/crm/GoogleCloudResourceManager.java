@@ -48,12 +48,11 @@ public class GoogleCloudResourceManager {
     /**
      *  Creates Google Project.
      *
-     * @param projectId The project id to be create
-     * @param parentResourceId The resource id to create
+     * @param projectInfo The {@link ProjectInfo} of the project to create
      * @return the project being created.
      */
-    public Project createProject(String projectId, ResourceId parentResourceId) throws CloudResourceException {
-        logger.debug("Creating Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
+    public Project createProject(ProjectInfo projectInfo) throws CloudResourceException {
+        logger.debug("Creating Google project: projectInfo = " + projectInfo);
 
         // Record the method usage.
         StatsHelper.recordClientUsageCount(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject");
@@ -64,9 +63,9 @@ public class GoogleCloudResourceManager {
             StatsHelper.recordCloudApiCount(clientName, "GoogleCreateProject");
             tracer.getCurrentSpan().addAnnotation("Starting the work.");
             try {
-                return resourceManager.create(resourceManager.create(ProjectInfo.newBuilder(projectId).setParent(parentResourceId).build()));
+                return resourceManager.create(resourceManager.create(projectInfo));
             } catch(ResourceManagerException e) {
-                logger.error("Failed to create Google project: projectId = {}, resourceId = {} " + projectId, parentResourceId);
+                logger.error("Failed to create Google project: projectInfo = " + projectInfo);
 
                 // Record the error. For now use the error code.
                 StatsHelper.recordCloudError(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject", String.valueOf(e.getCode()));

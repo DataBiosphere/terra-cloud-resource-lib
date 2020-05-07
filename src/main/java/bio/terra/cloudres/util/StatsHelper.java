@@ -18,7 +18,7 @@ public class StatsHelper {
     private static final StatsRecorder statsRecorder = Stats.getStatsRecorder();
 
     // Opencensus tag keys
-    // The tag "clientname"
+    // The tag "client"
     private static final TagKey KEY_CLIENT = TagKey.create("client");
     // The tag "latency"
     private static final TagKey KEY_LATENCY = TagKey.create("latency");
@@ -29,7 +29,7 @@ public class StatsHelper {
     // The tag "method"
     private static final TagKey KEY_ERROR = TagKey.create("error_code");
 
-    private static final String CLOUD_RESOURCE_PREFIX = "cloudresourcelibrary";
+    private static final String CLOUD_RESOURCE_PREFIX = "terra/cloudresourcelibrary";
 
     /** Unit string for count. */
     private static final String COUNT = "1";
@@ -69,8 +69,8 @@ public class StatsHelper {
      * @param method, The error's code
      * @param latency, The client which use this library.
      * */
-    public static void recordCloudApiLatency(String clientName, String method, Long latency) {
-        TagContext tctx = tagger.emptyBuilder().put(KEY_LATENCY, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(clientName), tagMetadata).build();
+    public static void recordCloudApiLatency(String client, String method, Long latency) {
+        TagContext tctx = tagger.emptyBuilder().put(KEY_LATENCY, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(client), tagMetadata).build();
         try (Scope ss = tagger.withTagContext(tctx)) {
             statsRecorder.newMeasureMap().put(CLOUD_GOOGLE_API_LATENCY, latency).record(tctx);
         }
@@ -78,30 +78,30 @@ public class StatsHelper {
 
     /** Records the latency for Cloud API calls.
      *
-     * <p> This will be in path /cloud/latency with clientName and methodName as tags,
+     * <p> This will be in path /cloud/latency with client and methodName as tags,
      *
      * @param method The method where error happens, e.g, GoogleCloudResourceManager.createProject()
      * @param error, the error's code
-     * @param clientName, the client which use this library.
+     * @param client, the client which use this library.
      * */
-    public static void recordCloudError(String clientName, String method, String error) {
+    public static void recordCloudError(String client, String method, String error) {
         TagContext tctx = tagger.emptyBuilder()
                 .put(KEY_METHOD, TagValue.create(error), tagMetadata)
-                .put(KEY_ERROR, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(clientName), tagMetadata).build();
+                .put(KEY_ERROR, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(client), tagMetadata).build();
         statsRecorder.newMeasureMap().put(ERROR_COUNT, 1).record(tctx);
     }
 
     /** Records API sent to Cloud API .*/
-    public static void recordCloudApiCount(String clientName, String method) {
-        TagContext tctx = tagger.emptyBuilder().put(KEY_CLOUD_API, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(clientName), tagMetadata).build();
+    public static void recordCloudApiCount(String client, String method) {
+        TagContext tctx = tagger.emptyBuilder().put(KEY_CLOUD_API, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(client), tagMetadata).build();
         try (Scope ss = tagger.withTagContext(tctx)) {
             statsRecorder.newMeasureMap().put(ERROR_COUNT, 1).record(tctx);
         }
     }
 
     /** Records the number of each method are used by clients .*/
-    public static void recordClientUsageCount(String clientName, String method) {
-        TagContext tctx = tagger.emptyBuilder().put(KEY_METHOD, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(clientName), tagMetadata).build();
+    public static void recordClientUsageCount(String client, String method) {
+        TagContext tctx = tagger.emptyBuilder().put(KEY_METHOD, TagValue.create(method), tagMetadata).put(KEY_CLIENT, TagValue.create(client), tagMetadata).build();
         try (Scope ss = tagger.withTagContext(tctx)) {
             statsRecorder.newMeasureMap().put(METHOD_RECEIVED, 1).record(tctx);
         }
