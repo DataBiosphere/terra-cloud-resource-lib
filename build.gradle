@@ -48,6 +48,7 @@ dependencies {
     compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha' // Google Resource Manager API Client
     compile 'com.google.cloud:google-cloud-storage:1.108.0' // Google Storage API Client
 
+    implementation("com.google.guava:guava:29.0-jre") // Guava
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testCompile 'org.apache.httpcomponents.client5:httpclient5:5.0'

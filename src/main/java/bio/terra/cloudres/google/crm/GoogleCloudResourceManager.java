@@ -1,7 +1,7 @@
 package bio.terra.cloudres.google.crm;
 
 import bio.terra.cloudres.util.CloudResourceException;
-import bio.terra.cloudres.util.StatsHelper;
+import bio.terra.cloudres.util.MetricsHelper;
 import com.google.api.gax.retrying.RetrySettings;
 import com.google.auth.Credentials;
 import com.google.cloud.resourcemanager.*;
@@ -18,7 +18,7 @@ import io.opencensus.trace.Tracing;
 /** Google Resource Manager Related APIs using Google API Client*/
 public class GoogleCloudResourceManager {
     private final Logger logger =
-            LoggerFactory.getLogger("bio.terra.cloudres.google.crm.GoogleCloudResourceManagerClient");
+            LoggerFactory.getLogger("bio.terra.cloudres.google.crm.GoogleCloudResourceManager");
 
     private static final Tracer tracer = Tracing.getTracer();
 
@@ -55,12 +55,12 @@ public class GoogleCloudResourceManager {
         logger.debug("Creating Google project: projectInfo = " + projectInfo);
 
         // Record the method usage.
-        StatsHelper.recordClientUsageCount(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject");
+        MetricsHelper.recordClientUsageCount(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject");
 
         try(Scope ss = tracer.spanBuilder("GoogleCloudResourceManagerClient.createProject").startScopedSpan()) {
             // Record the Cloud API usage.
             // TODO(yonghao): All Gloud API name would Enum value in a central place.
-            StatsHelper.recordCloudApiCount(clientName, "GoogleCreateProject");
+            MetricsHelper.recordCloudApiCount(clientName, "GoogleCreateProject");
             tracer.getCurrentSpan().addAnnotation("Starting the work.");
             try {
                 return resourceManager.create(resourceManager.create(projectInfo));
@@ -68,7 +68,7 @@ public class GoogleCloudResourceManager {
                 logger.error("Failed to create Google project: projectInfo = " + projectInfo);
 
                 // Record the error. For now use the error code.
-                StatsHelper.recordCloudError(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject", String.valueOf(e.getCode()));
+                MetricsHelper.recordCloudError(clientName, CLOUD_RESOURCE_MANAGER_PREFIX + "createProject", String.valueOf(e.getCode()));
                 throw new CloudResourceException("Failed to create Google Project", e);
             } finally {
                 tracer.getCurrentSpan().addAnnotation("Finished working.");
