@@ -45,4 +45,8 @@ public abstract class BaseGoogleResourceClient<SO extends ServiceOptions<S, SO>,
     protected void recordCloudApiLatency(Duration duration, CloudApiMethod cloudApiName) {
         MetricsHelper.recordCloudApiLatency(options.getClient(), cloudApiName, duration);
     }
+
+    protected void addTracerAnnotation(String annotation) {
+        tracer.getCurrentSpan().addAnnotation(annotation);
+    }
 }
