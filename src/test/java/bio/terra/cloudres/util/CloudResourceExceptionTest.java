@@ -1,18 +1,16 @@
 package bio.terra.cloudres.util;
 
 import com.google.cloud.resourcemanager.ResourceManagerException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 import static bio.terra.cloudres.util.CloudResourceException.ERROR_MESSAGE_CONNECTOR;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
+@Tag("unit")
 public class CloudResourceExceptionTest {
 
     private static final String CRL_ERROR_MESSAGE = "error1";
@@ -21,13 +19,13 @@ public class CloudResourceExceptionTest {
 
     @Test
     public void testCloudResourceException() {
-        CloudResourceException exception = new CloudResourceException(CRL_ERROR_MESSAGE, new ResourceManagerException(500, ORIGINAl_ERROR_MESSAGE);
+        CloudResourceException exception = new CloudResourceException(CRL_ERROR_MESSAGE, new ResourceManagerException(500, ORIGINAl_ERROR_MESSAGE));
         assertEquals(500, exception.getCode());
         assertEquals(ERROR_MESSAGE, exception.getMessage());
         assertNull(exception.getReason());
         assertTrue(exception.isRetryable());
 
-        exception = new CloudResourceException(CRL_ERROR_MESSAGE, new ResourceManagerException(403, ORIGINAl_ERROR_MESSAGE);
+        exception = new CloudResourceException(CRL_ERROR_MESSAGE, new ResourceManagerException(403, ORIGINAl_ERROR_MESSAGE));
         assertEquals(403, exception.getCode());
         assertEquals(ERROR_MESSAGE, exception.getMessage());
         assertNull(exception.getReason());
@@ -39,6 +37,6 @@ public class CloudResourceExceptionTest {
         assertEquals(ERROR_MESSAGE, exception.getMessage());
         assertNull(exception.getReason());
         assertFalse(exception.isRetryable());
-        assertSame(cause, exception.getCause());
+        assertSame(cause, exception.getCause().getCause());
     }
 }

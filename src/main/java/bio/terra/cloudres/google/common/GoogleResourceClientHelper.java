@@ -13,7 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
-/** Helper class to use Google Resource clients. */
+/**
+ * Helper class to use Google Resource clients.
+ */
 public class GoogleResourceClientHelper {
     private final Logger logger =
             LoggerFactory.getLogger("bio.terra.cloudres.google.common.GoogleResourceClientHelper");
@@ -27,33 +29,35 @@ public class GoogleResourceClientHelper {
     }
 
     public <R> R executeGoogleCloudCall(Callable<R> googleCall, CloudApiMethod cloudApiMethod) throws Exception {
-        try(Scope ss = tracer.spanBuilder(cloudApiMethod.name()).startScopedSpan()) {
+        long startTimeNs = System.nanoTime();
+        try (Scope ss = tracer.spanBuilder(cloudApiMethod.name()).startScopedSpan()) {
             // Record the Cloud API usage.
             recordCloudApiCount(cloudApiMethod);
+
             addTracerAnnotation("Starting Google Call.");
             try {
                 return googleCall.call();
-            } catch(BaseHttpServiceException e) {
+            } catch (BaseHttpServiceException e) {
                 logger.error("Failed to execute Google Call: " + googleCall.toString());
                 recordCloudErrors(String.valueOf(e.getCode()), cloudApiMethod);
                 throw new CloudResourceException("Failed on " + cloudApiMethod.name(), e);
             } finally {
+                recordCloudApiLatency(startTimeNs, cloudApiMethod);
                 addTracerAnnotation("Finishing Google Call.");
             }
         }
     }
 
     private void recordCloudApiCount(CloudApiMethod cloudApiName) {
-        // TODO(yonghao): All Gloud API name would Enum value in a central place.
         MetricsHelper.recordCloudApiCount(options.getClient(), cloudApiName);
     }
 
     private void recordCloudErrors(String errorCode, CloudApiMethod cloudApiName) {
-        MetricsHelper.recordCloudError(options.getClient(), cloudApiName，errorCode);
+        MetricsHelper.recordCloudError(options.getClient(), cloudApiName, errorCode);
     }
 
-    private void recordCloudApiLatency(Duration duration, CloudApiMethod cloudApiName) {
-        MetricsHelper.recordCloudApiLatency(options.getClient(), cloudApiName, duration);
+    private void recordCloudApiLatency(long startNs, CloudApiMethod cloudApiName) {
+        MetricsHelper.recordCloudApiLatency(options.getClient(), cloudApiName, Duration.ofNanos(System.nanoTime() - startNs));
     }
 
     private void addTracerAnnotation(String annotation) {

@@ -7,9 +7,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Helper class to hold all configs to use Terra CRL to manage Google resources. */
 public class GoogleResourceClientOptions {
-    private Credentials credentials;
-    private RetrySettings retrySettings;
-    private String client;
+    private final Credentials credentials;
+    private final RetrySettings retrySettings;
+    private final String client;
 
     // The default retry settings if not present.
     private static final RetrySettings DEFAULT_RETRY_SETTINGS = RetrySettings.newBuilder().build();
@@ -25,8 +25,7 @@ public class GoogleResourceClientOptions {
         this.retrySettings = builder.retrySettings == null ? DEFAULT_RETRY_SETTINGS: builder.retrySettings;
     }
 
-    /** Gets the credential from the config.
-     * @return*/
+    /** Gets the credential from the config. */
     public Credentials getCredential() {
         checkNotNull(credentials);
         return credentials;
