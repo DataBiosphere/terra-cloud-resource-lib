@@ -68,12 +68,12 @@ public class MetricsHelper {
     private static final Aggregation countAggregation = Aggregation.Count.create();
 
     // Define all views
-    public static final View.Name LATENCY_VIEW_NAME = View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
+    public static final View.Name CLOUD_LATENCY_VIEW_NAME = View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
     public static final View.Name CLOUD_API_VIEW_NAME = View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");
-    public static final View.Name ERROR_VIEW_NAME = View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/error");
-    public static final View LATENCY_VIEW = View.create(LATENCY_VIEW_NAME, "The distribution of latencies", CLOUD_API_LATENCY, latencyDistribution, Collections.unmodifiableList(Arrays.asList(KEY_LATENCY, KEY_CLOUD_API)));
+    public static final View.Name CLOUD_ERROR_VIEW_NAME = View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/error");
+    public static final View LATENCY_VIEW = View.create(CLOUD_LATENCY_VIEW_NAME, "The distribution of latencies", CLOUD_API_LATENCY, latencyDistribution, Collections.unmodifiableList(Arrays.asList(KEY_LATENCY, KEY_CLOUD_API)));
     public static final View CLOUD_API_VIEW = View.create(CLOUD_API_VIEW_NAME, "The number of cloud api calls", CLOUD_API_METHOD_COUNT, countAggregation, Collections.unmodifiableList(Arrays.asList(KEY_CLOUD_API, KEY_CLIENT)));
-    public static final View ERROR_VIEW = View.create(ERROR_VIEW_NAME, "The distribution of line lengths", CLOUD_API_METHOD_COUNT, countAggregation, Collections.unmodifiableList(Arrays.asList(KEY_ERROR, KEY_CLOUD_API, KEY_CLIENT)));
+    public static final View ERROR_VIEW = View.create(CLOUD_ERROR_VIEW_NAME, "The distribution of line lengths", CLOUD_API_METHOD_COUNT, countAggregation, Collections.unmodifiableList(Arrays.asList(KEY_ERROR, KEY_CLOUD_API, KEY_CLIENT)));
     private static final View[] views = new View[]{LATENCY_VIEW, CLOUD_API_VIEW, ERROR_VIEW};
 
     public static final ViewManager viewManager = Stats.getViewManager();

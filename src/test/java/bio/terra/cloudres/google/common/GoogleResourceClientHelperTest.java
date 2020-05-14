@@ -1,6 +1,7 @@
 package bio.terra.cloudres.google.common;
 
 import bio.terra.cloudres.util.CloudApiMethod;
+import bio.terra.cloudres.util.CloudResourceException;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -21,26 +22,27 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 /**
  * Test for {@link GoogleResourceClientHelper}
  */
 @Tag("unit")
 public class GoogleResourceClientHelperTest {
-    private static final StatsRecorder statsRecorder = Stats.getStatsRecorder();
-
     private static final String CLIENT = "TestClient";
+    private static final List<TagValue> CLOUD_API_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()));
+    private static final List<TagValue> CLOUD_ERROR_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()), null);
+
     private GoogleResourceClientHelper helper;
     private GoogleResourceClientOptions options;
     private Credentials credentials;
-
-    private Map<List<TagValue>, AggregationData> expectedAggregationMap;
 
     @Mock
     private Callable<Project> mockCallable = mock(Callable.class);
@@ -50,24 +52,26 @@ public class GoogleResourceClientHelperTest {
         credentials = GoogleCredentials.getApplicationDefault();
         options = GoogleResourceClientOptions.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
         helper = new GoogleResourceClientHelper(options);
-        expectedAggregationMap = new HashMap<>();
     }
 
     @Test
     public void testExecuteGoogleCloudCall_success() throws Exception {
-         helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT);
-        System.out.println("~~~~~ testing");
+        helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT);
 
-        expectedAggregationMap.put()
-        System.out.println(MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap());
-        System.out.println(MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get());
-         MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap();
+        // One cloud api count
+        assertEquals(AggregationData.CountData.create(1), MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get(CLOUD_API_COUNT));
+        // no errors
+        assertNull(MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_ERROR_VIEW_NAME).getAggregationMap().get(CLOUD_ERROR_COUNT));
     }
 
-//    @Test
-//    public void testExecuteGoogleCloudCall_withException() throws Exception {
-//        when(mockCallable.call()).thenThrow(ResourceManagerException.class);
-//        helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT);
-//        verify(mockCallable).call();
-//    }
+    @Test
+    public void testExecuteGoogleCloudCall_withException() throws Exception {
+        when(mockCallable.call()).thenThrow(ResourceManagerException.class);
+
+        assertThrows(CloudResourceException.class, () -> helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT));
+        // One cloud api count
+        assertEquals(AggregationData.CountData.create(1), MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get(CLOUD_API_COUNT));
+        // One cloud a errors
+        assertNull(MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get(CLOUD_API_COUNT));
+    }
 }

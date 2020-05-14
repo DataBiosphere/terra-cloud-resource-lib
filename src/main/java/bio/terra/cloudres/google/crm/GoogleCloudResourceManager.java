@@ -14,7 +14,7 @@ import io.opencensus.tags.Tags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GoogleCloudResourceManagerClient {
+public class GoogleCloudResourceManager {
     private final Logger logger =
             LoggerFactory.getLogger("bio.terra.cloudres.google.crm.GoogleCloudResourceManager");
 
@@ -23,7 +23,7 @@ public class GoogleCloudResourceManagerClient {
     private final ResourceManagerOptions resourceManagerOptions;
     private final ResourceManager resourceManager;
 
-    public GoogleCloudResourceManagerClient(GoogleResourceClientOptions options) {
+    public GoogleCloudResourceManager(GoogleResourceClientOptions options) {
         this.options = options;
         this.resourceManagerOptions =  ResourceManagerOptions.newBuilder().setCredentials(options.getCredential()).setRetrySettings(options.getRetrySettings()).build();
         this.helper = new GoogleResourceClientHelper(options);
