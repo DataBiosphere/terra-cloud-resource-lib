@@ -1,35 +1,25 @@
 package bio.terra.cloudres.google.common;
 
 import bio.terra.cloudres.util.CloudApiMethod;
-import bio.terra.cloudres.util.CloudResourceException;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.auth.Credentials;
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.NoCredentials;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ResourceManagerException;
 import io.opencensus.stats.AggregationData;
-import io.opencensus.stats.MeasureMap;
-import io.opencensus.stats.Stats;
-import io.opencensus.stats.StatsRecorder;
 import io.opencensus.tags.TagValue;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test for {@link GoogleResourceClientHelper}
@@ -37,8 +27,8 @@ import static org.junit.Assert.*;
 @Tag("unit")
 public class GoogleResourceClientHelperTest {
     private static final String CLIENT = "TestClient";
-    private static final List<TagValue> CLOUD_API_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()));
-    private static final List<TagValue> CLOUD_ERROR_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()), null);
+    private static final List<TagValue> API_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()));
+    private static final List<TagValue> ERROR_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()), null);
 
     private GoogleResourceClientHelper helper;
     private GoogleResourceClientOptions options;
@@ -49,7 +39,7 @@ public class GoogleResourceClientHelperTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        credentials = GoogleCredentials.getApplicationDefault();
+        credentials = NoCredentials.getInstance();
         options = GoogleResourceClientOptions.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
         helper = new GoogleResourceClientHelper(options);
     }
@@ -59,19 +49,19 @@ public class GoogleResourceClientHelperTest {
         helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT);
 
         // One cloud api count
-        assertEquals(AggregationData.CountData.create(1), MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get(CLOUD_API_COUNT));
+        assertEquals(AggregationData.CountData.create(1), MetricsHelper.viewManager.getView(MetricsHelper.API_VIEW_NAME).getAggregationMap().get(API_COUNT));
         // no errors
-        assertNull(MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_ERROR_VIEW_NAME).getAggregationMap().get(CLOUD_ERROR_COUNT));
+        assertNull(MetricsHelper.viewManager.getView(MetricsHelper.ERROR_VIEW_NAME).getAggregationMap().get(ERROR_COUNT));
     }
 
     @Test
     public void testExecuteGoogleCloudCall_withException() throws Exception {
         when(mockCallable.call()).thenThrow(ResourceManagerException.class);
 
-        assertThrows(CloudResourceException.class, () -> helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT));
+        assertThrows(ResourceManagerException.class, () -> helper.executeGoogleCloudCall(mockCallable, CloudApiMethod.GOOGLE_CREATE_PROJECT));
         // One cloud api count
-        assertEquals(AggregationData.CountData.create(1), MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get(CLOUD_API_COUNT));
+        assertEquals(AggregationData.CountData.create(1), MetricsHelper.viewManager.getView(MetricsHelper.API_VIEW_NAME).getAggregationMap().get(API_COUNT));
         // One cloud a errors
-        assertNull(MetricsHelper.viewManager.getView(MetricsHelper.CLOUD_API_VIEW_NAME).getAggregationMap().get(CLOUD_API_COUNT));
+        assertNull(MetricsHelper.viewManager.getView(MetricsHelper.API_VIEW_NAME).getAggregationMap().get(API_COUNT));
     }
 }
