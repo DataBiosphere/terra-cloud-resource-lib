@@ -1,7 +1,7 @@
 package bio.terra.cloudres.google.crm;
 
 import bio.terra.cloudres.google.common.GoogleResourceClientHelper;
-import bio.terra.cloudres.google.common.GoogleResourceClientOptions;
+import bio.terra.cloudres.google.common.GoogleClientConfig;
 import bio.terra.cloudres.util.CloudApiMethod;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
@@ -18,17 +18,12 @@ public class GoogleCloudResourceManager {
     private final Logger logger =
             LoggerFactory.getLogger(GoogleCloudResourceManager.class);
 
-    private final GoogleResourceClientOptions options;
+    private final GoogleClientConfig options;
     private final GoogleResourceClientHelper helper;
     private final ResourceManagerOptions resourceManagerOptions;
     private final ResourceManager resourceManager;
 
-    public GoogleCloudResourceManager(GoogleResourceClientOptions options) {
-        this(options, ResourceManagerOptions.newBuilder().setCredentials(options.getCredential()).setRetrySettings(options.getRetrySettings()).build());
-    }
-
-    @VisibleForTesting
-    GoogleCloudResourceManager(GoogleResourceClientOptions options, ResourceManagerOptions resourceManagerOptions) {
+    public GoogleCloudResourceManager(GoogleClientConfig options, ResourceManagerOptions resourceManagerOptions) {
         this.options = options;
         this.resourceManagerOptions = resourceManagerOptions;
         this.helper = new GoogleResourceClientHelper(options);

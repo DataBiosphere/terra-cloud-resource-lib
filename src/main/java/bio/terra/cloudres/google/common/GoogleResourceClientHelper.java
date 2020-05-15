@@ -21,9 +21,9 @@ public class GoogleResourceClientHelper {
 
     private static final Tracer tracer = Tracing.getTracer();
 
-    private final GoogleResourceClientOptions options;
+    private final GoogleClientConfig options;
 
-    public GoogleResourceClientHelper(GoogleResourceClientOptions options) {
+    public GoogleResourceClientHelper(GoogleClientConfig options) {
         this.options = options;
     }
 

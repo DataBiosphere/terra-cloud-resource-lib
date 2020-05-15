@@ -31,7 +31,7 @@ public class GoogleResourceClientHelperTest {
     private static final List<TagValue> ERROR_COUNT = Arrays.asList(TagValue.create(CLIENT), TagValue.create(CloudApiMethod.GOOGLE_CREATE_PROJECT.name()), null);
 
     private GoogleResourceClientHelper helper;
-    private GoogleResourceClientOptions options;
+    private GoogleClientConfig options;
     private Credentials credentials;
 
     @Mock
@@ -40,7 +40,7 @@ public class GoogleResourceClientHelperTest {
     @BeforeEach
     public void setUp() throws Exception {
         credentials = NoCredentials.getInstance();
-        options = GoogleResourceClientOptions.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
+        options = GoogleClientConfig.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
         helper = new GoogleResourceClientHelper(options);
     }
 

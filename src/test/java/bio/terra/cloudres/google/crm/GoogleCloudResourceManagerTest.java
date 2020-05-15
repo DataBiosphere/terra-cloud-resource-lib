@@ -1,6 +1,6 @@
 package bio.terra.cloudres.google.crm;
 
-import bio.terra.cloudres.google.common.GoogleResourceClientOptions;
+import bio.terra.cloudres.google.common.GoogleClientConfig;
 import com.google.auth.Credentials;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.resourcemanager.*;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 public class GoogleCloudResourceManagerTest {
     private static final String CLIENT = "TestClient";
 
-    private GoogleResourceClientOptions options;
+    private GoogleClientConfig options;
     private GoogleCloudResourceManager googleCloudResourceManager;
     private Credentials credentials;
 
@@ -38,7 +38,7 @@ public class GoogleCloudResourceManagerTest {
     @BeforeEach
     public void setUp() throws Exception {
         credentials = NoCredentials.getInstance();
-        options = GoogleResourceClientOptions.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
+        options = GoogleClientConfig.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
 
         when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
         when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);
