@@ -2,12 +2,11 @@ package bio.terra.cloudres.google.crm;
 
 import bio.terra.cloudres.google.common.GoogleResourceClientHelper;
 import bio.terra.cloudres.google.common.GoogleClientConfig;
-import bio.terra.cloudres.util.CloudApiMethod;
+import bio.terra.cloudres.util.CloudOperation;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +37,6 @@ public class GoogleCloudResourceManager {
      */
     public Project createProject(ProjectInfo projectInfo) throws Exception {
         logger.debug("Creating Google project: projectInfo = " + projectInfo);
-        return helper.executeGoogleCloudCall(() -> resourceManager.create(projectInfo), CloudApiMethod.GOOGLE_CREATE_PROJECT);
+        return helper.executeGoogleCloudCall(() -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
     }
 }

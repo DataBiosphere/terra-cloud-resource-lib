@@ -1,6 +1,6 @@
 package bio.terra.cloudres.google.common;
 
-import bio.terra.cloudres.util.CloudApiMethod;
+import bio.terra.cloudres.util.CloudOperation;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
 import io.opencensus.common.Scope;
@@ -27,7 +27,7 @@ public class GoogleResourceClientHelper {
         this.options = options;
     }
 
-    public <R> R executeGoogleCloudCall(Callable<R> googleCall, CloudApiMethod cloudApiMethod) throws Exception {
+    public <R> R executeGoogleCloudCall(Callable<R> googleCall, CloudOperation cloudApiMethod) throws Exception {
         long startTimeNs = System.nanoTime();
         logger.debug("Executing Google Calls" + cloudApiMethod);
         try (Scope ss = tracer.spanBuilder(cloudApiMethod.name()).startScopedSpan()) {
@@ -45,15 +45,15 @@ public class GoogleResourceClientHelper {
         }
     }
 
-    private void recordApiCount(CloudApiMethod cloudApiName) {
+    private void recordApiCount(CloudOperation cloudApiName) {
         MetricsHelper.recordApiCount(options.getClient(), cloudApiName);
     }
 
-    private void recordErrors(String errorCode, CloudApiMethod cloudApiName) {
+    private void recordErrors(String errorCode, CloudOperation cloudApiName) {
         MetricsHelper.recordError(options.getClient(), cloudApiName, errorCode);
     }
 
-    private void recordLatency(long startNs, CloudApiMethod cloudApiName) {
+    private void recordLatency(long startNs, CloudOperation cloudApiName) {
         MetricsHelper.recordLatency(options.getClient(), cloudApiName, Duration.ofNanos(System.nanoTime() - startNs));
     }
 }

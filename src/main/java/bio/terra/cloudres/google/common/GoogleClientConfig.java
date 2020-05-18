@@ -5,7 +5,7 @@ import com.google.api.gax.retrying.RetrySettings;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Config class to use Terra CRL to manage Google resources.
+ * Config clas to manage Google resources.
  *
  * <p> It contains:
  * <ul>
@@ -18,15 +18,13 @@ public class GoogleClientConfig {
     // The default retry settings if not present.
     private static final RetrySettings DEFAULT_RETRY_SETTINGS = RetrySettings.newBuilder().build();
 
-    private GoogleClientConfig(GoogleClientConfig.Builder builder) {
-        checkNotNull(builder.client, "client name must be set");
+    private GoogleClientConfig(String client) {
+        checkNotNull(client, "client name must be set");
 
-        this.client = builder.client;
+        this.client = client;
     }
 
-    /**
-     * Gets the client name from the config.
-     */
+    /** Gets the client name from the config. */
     public String getClient() {
         return client;
     }
@@ -37,26 +35,18 @@ public class GoogleClientConfig {
 
         private String client;
 
-        private Builder self() {
+        public Builder setClient(String client) {
+            this.client = client;
             return this;
         }
 
-        /**
-         * Sets client name.
-         *
-         * @return the builder
-         */
-        public Builder setClient(String client) {
-            this.client = client;
-            return self();
-        }
-
+        /** Builder for {@link GoogleClientConfig}. */
         public static Builder newBuilder() {
             return new Builder();
         }
 
         public GoogleClientConfig build() {
-            return new GoogleClientConfig(this);
+            return new GoogleClientConfig(this.client);
         }
     }
 }
