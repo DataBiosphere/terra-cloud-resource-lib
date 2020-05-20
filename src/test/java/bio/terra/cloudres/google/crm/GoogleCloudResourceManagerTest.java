@@ -38,7 +38,7 @@ public class GoogleCloudResourceManagerTest {
     @BeforeEach
     public void setUp() throws Exception {
         credentials = NoCredentials.getInstance();
-        options = GoogleClientConfig.Builder.newBuilder().setCredential(credentials).setClient(CLIENT).build();
+        options = GoogleClientConfig.Builder.newBuilder().setClient(CLIENT).build();
 
         when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
         when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);

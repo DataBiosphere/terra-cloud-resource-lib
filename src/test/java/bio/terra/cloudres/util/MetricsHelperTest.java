@@ -13,9 +13,7 @@ import java.util.List;
 import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
 import static org.junit.Assert.*;
 
-/**
- * Test for {@link MetricsHelper}
- */
+/** Test for {@link MetricsHelper} */
 @Tag("unit")
 public class MetricsHelperTest {
     private static final String CLIENT = "TestClient";

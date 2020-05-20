@@ -10,6 +10,9 @@ import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectInfoToJson;
+import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectToJson;
+
 /**
  * A Wrapper for Google API Client Library: {@link ResourceManager}
  */
@@ -36,7 +39,9 @@ public class GoogleCloudResourceManager {
      * @return the project being created.
      */
     public Project createProject(ProjectInfo projectInfo) throws Exception {
-        logger.debug("Creating Google project: projectInfo = " + projectInfo);
-        return helper.executeGoogleCloudCall(() -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
+        logger.debug("Creating Google project: projectInfo = " + convertGoogleProjectInfoToJson(projectInfo));
+        Project project = helper.executeGoogleCloudCall(() -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
+        logger.debug("Created Google Project: " + convertGoogleProjectToJson(project));
+        return project;
     }
 }

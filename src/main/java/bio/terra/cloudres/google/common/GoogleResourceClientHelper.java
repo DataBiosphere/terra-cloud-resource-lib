@@ -36,7 +36,7 @@ public class GoogleResourceClientHelper {
             try {
                 return googleCall.call();
             } catch (BaseHttpServiceException e) {
-                logger.error("Failed to execute Google Call: " + googleCall.toString());
+                logger.warn("Failed to execute Google Call for : " + cloudApiMethod);
                 recordErrors(String.valueOf(e.getCode()), cloudApiMethod);
                 throw e;
             } finally {

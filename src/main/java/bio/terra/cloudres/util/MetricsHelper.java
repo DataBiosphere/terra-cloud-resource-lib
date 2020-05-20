@@ -96,9 +96,9 @@ public class MetricsHelper {
      *
      * <p> This will be in path /cloud/error with client and methodName as tags,
      *
-     * @param method  The cloud api where error happens.
-     * @param error,  the error's code
      * @param client, the client which use this library.
+     * @param method  The Cloud API calls.
+     * @param error,  the error's code
      */
     public static void recordError(String client, CloudOperation method, String error) {
         TagContext tctx = tagger.emptyBuilder()

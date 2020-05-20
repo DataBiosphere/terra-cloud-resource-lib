@@ -52,6 +52,8 @@ dependencies {
     compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha' // Google Resource Manager API Client
     compile 'com.google.cloud:google-cloud-storage:1.108.0' // Google Storage API Client
 
+    implementation 'com.google.code.gson:gson:2.8.6' // gson
+
     dependencies { testCompile "org.mockito:mockito-core:2.+" } // mockito
 
     implementation("com.google.guava:guava:29.0-jre") // Guava
