@@ -13,6 +13,6 @@ public class JsonConverter {
 
   public static String convertGoogleProjectToJson(Project project) {
     Gson gson = new Gson();
-    return gson.toJson(project);
+    return gson.toJson(project, Project.class);
   }
 }

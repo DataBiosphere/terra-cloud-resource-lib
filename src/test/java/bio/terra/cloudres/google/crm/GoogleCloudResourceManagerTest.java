@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import java.io.IOException;
+
 /** Test for {@link GoogleCloudResourceManager} */
 @Tag("unit")
 public class GoogleCloudResourceManagerTest {
@@ -55,5 +57,9 @@ public class GoogleCloudResourceManagerTest {
     assertThrows(
         ResourceManagerException.class,
         () -> googleCloudResourceManager.createProject(PROJECT_INFO));
+
+    assertThrows(
+            ResourceManagerException.class,
+            () -> {throw new ResourceManagerException(new IOException("test"));});
   }
 }

@@ -77,7 +77,7 @@ public class MetricsHelper {
       View.create(
           ERROR_VIEW_NAME,
           "The distribution of line lengths",
-          API_COUNT,
+          ERROR_COUNT,
           countAggregation,
           Collections.unmodifiableList(Arrays.asList(KEY_ERROR, KEY_CLOUD_API, KEY_CLIENT)));
   private static final View[] views = new View[] {LATENCY_VIEW, CLOUD_API_VIEW, ERROR_VIEW};

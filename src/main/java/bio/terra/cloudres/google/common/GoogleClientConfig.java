@@ -25,7 +25,11 @@ public class GoogleClientConfig {
     this.client = client;
   }
 
-  /** Gets the client name from the config. */
+  /**
+   * Gets the client name from the config.
+   *
+   * @return the client name
+   */
   public String getClient() {
     return client;
   }
