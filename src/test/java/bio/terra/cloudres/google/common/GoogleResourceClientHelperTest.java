@@ -5,19 +5,16 @@ import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ResourceManagerException;
 import io.opencensus.stats.AggregationData;
-import io.opencensus.stats.View;
-import io.opencensus.tags.TagValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Callable;
 
-import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
-import static org.junit.Assert.*;
+import static bio.terra.cloudres.testing.MetricsTestUtil.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,19 +22,6 @@ import static org.mockito.Mockito.when;
 @Tag("unit")
 public class GoogleResourceClientHelperTest {
   private static final String CLIENT = "TestClient";
-  private static final List<TagValue> API_COUNT =
-      Arrays.asList(
-          TagValue.create(CLIENT), TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()));
-  private static final List<TagValue> ERROR_COUNT =
-      Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
-          null);
-
-  private static final View.Name API_VIEW_NAME =
-      View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");
-  private static final View.Name ERROR_VIEW_NAME =
-      View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/error");
 
   private GoogleResourceClientHelper helper;
   private GoogleClientConfig options;
@@ -54,27 +38,37 @@ public class GoogleResourceClientHelperTest {
   public void testExecuteGoogleCloudCall_success() throws Exception {
     helper.executeGoogleCloudCall(mockCallable, CloudOperation.GOOGLE_CREATE_PROJECT);
 
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+
     // One cloud api count
     assertEquals(
         AggregationData.CountData.create(1),
         MetricsHelper.viewManager.getView(API_VIEW_NAME).getAggregationMap().get(API_COUNT));
-    // no errors
-    assertNull(
-        MetricsHelper.viewManager.getView(ERROR_VIEW_NAME).getAggregationMap().get(ERROR_COUNT));
+
+    assertCountNotIncrease(ERROR_VIEW_NAME, ERROR_COUNT, errorCount);
   }
 
   @Test
   public void testExecuteGoogleCloudCall_withException() throws Exception {
     when(mockCallable.call()).thenThrow(ResourceManagerException.class);
 
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+
     assertThrows(
         ResourceManagerException.class,
         () -> helper.executeGoogleCloudCall(mockCallable, CloudOperation.GOOGLE_CREATE_PROJECT));
+
     // One cloud api count
     assertEquals(
-        AggregationData.CountData.create(1),
+        AggregationData.CountData.create(1 + apiCount),
         MetricsHelper.viewManager.getView(API_VIEW_NAME).getAggregationMap().get(API_COUNT));
+
+    System.out.println();
     // One cloud a errors
-    assertNull(MetricsHelper.viewManager.getView(API_VIEW_NAME).getAggregationMap().get(API_COUNT));
+    assertEquals(
+        1 + errorCount,
+        MetricsHelper.viewManager.getView(ERROR_VIEW_NAME).getAggregationMap().get(ERROR_COUNT));
   }
 }
