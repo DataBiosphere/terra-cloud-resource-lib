@@ -1,20 +1,19 @@
 package bio.terra.cloudres.google.crm;
 
-import bio.terra.cloudres.common.ClientConfig;
-import com.google.auth.Credentials;
-import com.google.cloud.NoCredentials;
-import com.google.cloud.resourcemanager.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import bio.terra.cloudres.common.ClientConfig;
+import com.google.auth.Credentials;
+import com.google.cloud.NoCredentials;
+import com.google.cloud.resourcemanager.*;
+import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 /** Test for {@link GoogleCloudResourceManager} */
 @Tag("unit")

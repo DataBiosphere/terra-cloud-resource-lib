@@ -1,19 +1,18 @@
 package bio.terra.cloudres.util;
 
+import static bio.terra.cloudres.testing.MetricsTestUtil.*;
+import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
+import static org.junit.Assert.assertEquals;
+
 import bio.terra.cloudres.common.CloudOperation;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
 import io.opencensus.tags.TagValue;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-
-import static bio.terra.cloudres.testing.MetricsTestUtil.*;
-import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 /** Test for {@link MetricsHelper} */
 @Tag("unit")

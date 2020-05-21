@@ -4,7 +4,6 @@ import bio.terra.cloudres.common.CloudOperation;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.*;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;

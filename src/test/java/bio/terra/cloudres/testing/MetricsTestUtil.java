@@ -1,17 +1,16 @@
 package bio.terra.cloudres.testing;
 
+import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.util.MetricsHelper;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
 import io.opencensus.tags.TagValue;
-
 import java.util.Arrays;
 import java.util.List;
-
-import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /** Helper class for metrics in tests. */
 public class MetricsTestUtil {

@@ -3,14 +3,13 @@ package bio.terra.cloudres.common;
 import bio.terra.cloudres.testing.MetricsTestUtil;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ResourceManagerException;
+import java.util.concurrent.Callable;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-
-import java.util.concurrent.Callable;
 
 /** Test for {@link OperationAnnotator} */
 @Tag("unit")

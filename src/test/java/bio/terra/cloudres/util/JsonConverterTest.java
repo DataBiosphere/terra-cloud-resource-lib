@@ -1,16 +1,15 @@
 package bio.terra.cloudres.util;
 
+import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectInfoToJson;
+import static org.junit.Assert.assertEquals;
+
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import java.util.Map;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectInfoToJson;
-import static org.junit.Assert.assertEquals;
 
 /** Test for {@link JsonConverter} */
 @Tag("unit")
@@ -47,8 +46,7 @@ public class JsonConverterTest {
    *   "projectId": "PROJECT_ID",
    *   "labels": "{key1 : value1, key2:value2}"
    * }
-   * }
-   * </pre>
+   * }</pre>
    *
    * <p>There is no public constructor for project, so the test creates Project from Json first then
    * convert it back

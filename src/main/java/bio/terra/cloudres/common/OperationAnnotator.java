@@ -5,11 +5,10 @@ import com.google.cloud.http.BaseHttpServiceException;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Helper class to use Resource clients. */
 public class OperationAnnotator {

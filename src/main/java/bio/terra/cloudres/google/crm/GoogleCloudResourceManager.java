@@ -1,17 +1,17 @@
 package bio.terra.cloudres.google.crm;
 
-import bio.terra.cloudres.common.OperationAnnotator;
+import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectInfoToJson;
+import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectToJson;
+
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
+import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectInfoToJson;
-import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectToJson;
 
 /** A Wrapper for Google API Client Library: {@link ResourceManager} */
 public class GoogleCloudResourceManager {
@@ -23,7 +23,7 @@ public class GoogleCloudResourceManager {
   private final ResourceManager resourceManager;
 
   public GoogleCloudResourceManager(
-          ClientConfig options, ResourceManagerOptions resourceManagerOptions) {
+      ClientConfig options, ResourceManagerOptions resourceManagerOptions) {
     this.options = options;
     this.resourceManagerOptions = resourceManagerOptions;
     this.helper = new OperationAnnotator(options);
