@@ -55,10 +55,10 @@ public class MetricsHelperTest {
     long errorCount403 = getCurrentCount(ERROR_VIEW_NAME, ERROR_403_COUNT);
     long errorCount401 = getCurrentCount(ERROR_VIEW_NAME, ERROR_401_COUNT);
 
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "401");
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "401");
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "401");
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "403");
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 403);
 
     // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
     Thread.sleep(5100);

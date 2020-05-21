@@ -37,12 +37,13 @@ public class GoogleCloudResourceManager {
    * @return the project being created.
    */
   public Project createProject(ProjectInfo projectInfo) throws Exception {
-    logger.debug(
+    // TODO(yonghao): Add identity in logs.
+    logger.info(
         "Creating Google project: projectInfo = " + convertGoogleProjectInfoToJson(projectInfo));
     Project project =
         helper.executeGoogleCall(
             () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
-    logger.debug("Created Google Project: " + convertGoogleProjectToJson(project));
+    logger.info("Created Google Project: " + convertGoogleProjectToJson(project));
     return project;
   }
 }

@@ -38,6 +38,7 @@ public class MetricsHelper {
   private static final Measure.MeasureDouble ERROR_COUNT =
       Measure.MeasureDouble.create(
           CLOUD_RESOURCE_PREFIX + "/cloud/error", "Number of the errors ", COUNT);
+
   private static final Aggregation latencyDistribution =
       Aggregation.Distribution.create(
           BucketBoundaries.create(
@@ -106,17 +107,19 @@ public class MetricsHelper {
    *
    * @param client, the client which use this library.
    * @param method The Cloud API calls.
-   * @param error, the error's code
+   * @param httpStatusCode, the httpStatusCode from cloud.
    */
-  public static void recordError(String client, CloudOperation method, String error) {
+  public static void recordError(String client, CloudOperation method, int httpStatusCode) {
     TagContext tctx =
         tagger
             .emptyBuilder()
-            .put(KEY_ERROR, TagValue.create(error), tagMetadata)
+            .put(KEY_ERROR, TagValue.create(String.valueOf(httpStatusCode)), tagMetadata)
             .put(KEY_CLOUD_API, TagValue.create(method.toString()), tagMetadata)
             .put(KEY_CLIENT, TagValue.create(client), tagMetadata)
             .build();
-    statsRecorder.newMeasureMap().put(ERROR_COUNT, 1).record(tctx);
+    try (Scope ss = tagger.withTagContext(tctx)) {
+      statsRecorder.newMeasureMap().put(ERROR_COUNT, 1).record(tctx);
+    }
   }
 
   /**
