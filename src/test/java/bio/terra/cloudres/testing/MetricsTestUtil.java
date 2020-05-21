@@ -32,7 +32,7 @@ public class MetricsTestUtil {
   /**
    * Helper method to get current stats before test.
    *
-   * <p>The clear stats in opencensue is not public, so we have to keep track of each stats and
+   * <p>The clear stats in opencensus is not public, so we have to keep track of each stats and
    * verify the increment.
    */
   public static long getCurrentCount(View.Name viewName, List<TagValue> tags) {
@@ -43,31 +43,24 @@ public class MetricsTestUtil {
   }
 
   /**
-   * Assert the count increment not increase
+   * Assert the count is a value. 0 is equivalent to no count being present'
    *
-   * <p>The clear stats in opencensue is not public, so we have to keep track of each stats and
+   * <p>The clear stats in opencensus is not public, so we have to keep track of each stats and
    * verify the increment.
    */
-  public static void assertCountNotIncrease(
-      View.Name viewName, List<TagValue> tags, long currentCount) {
-    if (currentCount == 0) {
+  public static void assertCountEquals(
+      View.Name viewName, List<TagValue> tags, long currentCount, long increment) {
+    if (currentCount == 0 && increment == 0) {
       assertNull(MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
     } else {
       assertEquals(
-          currentCount, MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
+              AggregationData.CountData.create(increment + currentCount),
+              MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
     }
   }
 
-  /**
-   * Assert the count increment increase by one
-   *
-   * <p>The clear stats in opencensue is not public, so we have to keep track of each stats and
-   * verify the increment.
-   */
-  public static void assertCountIncrease(
-      View.Name viewName, List<TagValue> tags, long currentCount, long expected) {
-    assertEquals(
-        AggregationData.CountData.create(expected + currentCount),
-        MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
+  /** Wait for a duration longer than reporting duration (5s) to ensure spans are exported. */
+  public static void sleepForSpansExport() throws InterruptedException {
+    Thread.sleep(5100);
   }
 }

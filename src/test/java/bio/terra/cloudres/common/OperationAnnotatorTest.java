@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import static bio.terra.cloudres.testing.MetricsTestUtil.sleepForSpansExport;
+
 /** Test for {@link OperationAnnotator} */
 @Tag("unit")
 public class OperationAnnotatorTest {
@@ -38,15 +40,15 @@ public class OperationAnnotatorTest {
     helper.executeGoogleCall(mockCallable, CloudOperation.GOOGLE_CREATE_PROJECT);
 
     // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
-    Thread.sleep(5100);
+    sleepForSpansExport();
 
     // One cloud api count
-    MetricsTestUtil.assertCountIncrease(
+    MetricsTestUtil.assertCountEquals(
         MetricsTestUtil.API_VIEW_NAME, MetricsTestUtil.API_COUNT, apiCount, 1);
 
     // No error
-    MetricsTestUtil.assertCountNotIncrease(
-        MetricsTestUtil.ERROR_VIEW_NAME, MetricsTestUtil.ERROR_COUNT, errorCount);
+    MetricsTestUtil.assertCountEquals(
+        MetricsTestUtil.ERROR_VIEW_NAME, MetricsTestUtil.ERROR_COUNT, errorCount, 0);
   }
 
   @Test
@@ -64,15 +66,14 @@ public class OperationAnnotatorTest {
         () -> helper.executeGoogleCall(mockCallable, CloudOperation.GOOGLE_CREATE_PROJECT));
 
     // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
-    Thread.sleep(5100);
+    sleepForSpansExport();
 
-    // One cloud api count
-    MetricsTestUtil.assertCountIncrease(
+    // Assert cloud api count increase by 1
+    MetricsTestUtil.assertCountEquals(
         MetricsTestUtil.API_VIEW_NAME, MetricsTestUtil.API_COUNT, apiCount, 1);
 
-    // One cloud a errors
-    MetricsTestUtil.assertCountIncrease(
+    // Assert error count increase by 1
+    MetricsTestUtil.assertCountEquals(
         MetricsTestUtil.ERROR_VIEW_NAME, MetricsTestUtil.ERROR_COUNT, errorCount, 1);
-    // One cloud api count
   }
 }

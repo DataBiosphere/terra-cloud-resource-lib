@@ -2,15 +2,17 @@ package bio.terra.cloudres.common;
 
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
+import com.google.common.base.Stopwatch;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import java.time.Duration;
-import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Helper class to use Resource clients. */
+import java.time.Duration;
+import java.util.concurrent.Callable;
+
+/** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
@@ -22,7 +24,7 @@ public class OperationAnnotator {
 
   public <R> R executeGoogleCall(Callable<R> googleCall, CloudOperation operation)
       throws Exception {
-    long startTimeNs = System.nanoTime();
+    Stopwatch stopwatch = Stopwatch.createStarted();
     logger.debug("Executing Google Calls" + operation);
     try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
@@ -34,7 +36,7 @@ public class OperationAnnotator {
         recordErrors(e.getCode(), operation);
         throw e;
       } finally {
-        recordLatency(startTimeNs, operation);
+        recordLatency(stopwatch.stop().elapsed().toMillis(), operation);
       }
     }
   }

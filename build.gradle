@@ -37,7 +37,6 @@ repositories {
 
 dependencies {
     compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
-    compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev563-1.25.0'
 
     compile 'org.slf4j:slf4j-api:1.7.28' // Logging
     compile 'org.slf4j:slf4j-nop:1.7.25' // Logging

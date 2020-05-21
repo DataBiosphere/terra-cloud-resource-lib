@@ -33,7 +33,7 @@ public class MetricsHelper {
           CLOUD_RESOURCE_PREFIX + "/cloud/api",
           "Number of the public method being called by CRL clients",
           COUNT);
-  /** {@link Measure} for number of errors. */
+  /** {@link Measure} for number of errors from cloud call. */
   private static final Measure.MeasureDouble ERROR_COUNT =
       Measure.MeasureDouble.create(
           CLOUD_RESOURCE_PREFIX + "/cloud/error", "Number of the errors ", COUNT);
@@ -106,7 +106,7 @@ public class MetricsHelper {
    *
    * @param client, the client which use this library.
    * @param method The Cloud API calls.
-   * @param httpStatusCode, the httpStatusCode from cloud.
+   * @param httpStatusCode the httpStatusCode from cloud.
    */
   public static void recordError(String client, CloudOperation method, int httpStatusCode) {
     TagContext tctx =
@@ -127,7 +127,7 @@ public class MetricsHelper {
    * <p>This will be in path /cloud/api with client and methodName as tags,
    *
    * @param method The cloud api where error happens.
-   * @param client, the client which use this library.
+   * @param client the client which use this library.
    */
   public static void recordApiCount(String client, CloudOperation method) {
     TagContext tctx =
