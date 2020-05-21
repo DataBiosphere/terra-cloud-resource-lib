@@ -1,24 +1,23 @@
 package bio.terra.cloudres.util;
 
-import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
-import static org.junit.Assert.*;
-
+import bio.terra.cloudres.common.CloudOperation;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
 import io.opencensus.tags.TagValue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+
+import static bio.terra.cloudres.testing.MetricsTestUtil.*;
+import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
+import static org.junit.Assert.assertEquals;
 
 /** Test for {@link MetricsHelper} */
 @Tag("unit")
 public class MetricsHelperTest {
-  private static final String CLIENT = "TestClient";
-  private static final List<TagValue> API_COUNT =
-      Arrays.asList(
-          TagValue.create(CLIENT), TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()));
   private static final List<TagValue> ERROR_401_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT),
@@ -29,16 +28,6 @@ public class MetricsHelperTest {
           TagValue.create(CLIENT),
           TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
           TagValue.create("403"));
-  private static final List<TagValue> ONE_MS_LATENCY =
-      Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
-          TagValue.create("1"));
-  private static final List<TagValue> TEN_MS_LATENCY =
-      Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
-          TagValue.create("10"));
 
   private static final View.Name LATENCY_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
@@ -49,64 +38,52 @@ public class MetricsHelperTest {
 
   @Test
   public void testRecordApiCount() throws Exception {
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
     MetricsHelper.recordApiCount(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT);
     MetricsHelper.recordApiCount(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT);
     MetricsHelper.recordApiCount(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT);
     MetricsHelper.recordApiCount(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT);
 
-    // One cloud api count
-    assertEquals(
-        AggregationData.CountData.create(3),
-        MetricsHelper.viewManager.getView(API_VIEW_NAME).getAggregationMap().get(API_COUNT));
-    // no errors
-    assertNull(
-        MetricsHelper.viewManager
-            .getView(ERROR_VIEW_NAME)
-            .getAggregationMap()
-            .get(ERROR_401_COUNT));
+    // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
+    Thread.sleep(5100);
+
+    assertCountIncrease(API_VIEW_NAME, API_COUNT, apiCount, 4);
   }
 
   @Test
   public void testRecordErrorCount() throws Exception {
+    long errorCount403 = getCurrentCount(ERROR_VIEW_NAME, ERROR_403_COUNT);
+    long errorCount401 = getCurrentCount(ERROR_VIEW_NAME, ERROR_401_COUNT);
+
     MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "401");
     MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "401");
     MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "401");
     MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, "403");
 
-    // One cloud api count
-    assertEquals(
-        AggregationData.CountData.create(3),
-        MetricsHelper.viewManager
-            .getView(ERROR_VIEW_NAME)
-            .getAggregationMap()
-            .get(ERROR_401_COUNT));
-    assertEquals(
-        AggregationData.CountData.create(1),
-        MetricsHelper.viewManager
-            .getView(ERROR_VIEW_NAME)
-            .getAggregationMap()
-            .get(ERROR_403_COUNT));
+    // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
+    Thread.sleep(5100);
+
+    assertCountIncrease(ERROR_VIEW_NAME, ERROR_401_COUNT, errorCount401, 3);
+    assertCountIncrease(ERROR_VIEW_NAME, ERROR_403_COUNT, errorCount403, 1);
   }
 
   @Test
   public void testRecordLatency() throws Exception {
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
-    MetricsHelper.recordLatency(
-        CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(100));
+    MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(0));
 
-    // One cloud api count
-    assertEquals(
-        AggregationData.CountData.create(2),
-        MetricsHelper.viewManager
-            .getView(LATENCY_VIEW_NAME)
-            .getAggregationMap()
-            .get(ONE_MS_LATENCY));
-    assertEquals(
-        AggregationData.CountData.create(1),
-        MetricsHelper.viewManager
-            .getView(LATENCY_VIEW_NAME)
-            .getAggregationMap()
-            .get(TEN_MS_LATENCY));
+    // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
+    Thread.sleep(5100);
+
+    AggregationData.DistributionData data =
+        (AggregationData.DistributionData)
+            MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
+    // Total count
+    assertEquals(data.getCount(), 3);
+    // 0 ms
+    assertEquals(data.getBucketCounts().get(0).longValue(), 1);
+    // 1ms
+    assertEquals(data.getBucketCounts().get(1).longValue(), 2);
   }
 }

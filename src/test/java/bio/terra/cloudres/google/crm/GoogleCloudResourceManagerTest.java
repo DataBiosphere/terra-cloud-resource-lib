@@ -1,11 +1,6 @@
 package bio.terra.cloudres.google.crm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import bio.terra.cloudres.google.common.GoogleClientConfig;
+import bio.terra.cloudres.common.ClientConfig;
 import com.google.auth.Credentials;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.resourcemanager.*;
@@ -16,18 +11,20 @@ import org.mockito.Mock;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /** Test for {@link GoogleCloudResourceManager} */
 @Tag("unit")
 public class GoogleCloudResourceManagerTest {
   private static final String CLIENT = "TestClient";
-
-  private GoogleClientConfig options;
-  private GoogleCloudResourceManager googleCloudResourceManager;
-  private Credentials credentials;
-
   private static final String PROJECT_ID = "1111";
   private static final ProjectInfo PROJECT_INFO = ProjectInfo.newBuilder(PROJECT_ID).build();
-
+  private ClientConfig options;
+  private GoogleCloudResourceManager googleCloudResourceManager;
+  private Credentials credentials;
   @Mock private ResourceManager mockResourceManager = mock(ResourceManager.class);
 
   @Mock
@@ -38,7 +35,7 @@ public class GoogleCloudResourceManagerTest {
   @BeforeEach
   public void setUp() throws Exception {
     credentials = NoCredentials.getInstance();
-    options = GoogleClientConfig.Builder.newBuilder().setClient(CLIENT).build();
+    options = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
 
     when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
     when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);
@@ -59,7 +56,9 @@ public class GoogleCloudResourceManagerTest {
         () -> googleCloudResourceManager.createProject(PROJECT_INFO));
 
     assertThrows(
-            ResourceManagerException.class,
-            () -> {throw new ResourceManagerException(new IOException("test"));});
+        ResourceManagerException.class,
+        () -> {
+          throw new ResourceManagerException(new IOException("test"));
+        });
   }
 }

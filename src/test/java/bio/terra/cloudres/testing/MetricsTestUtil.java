@@ -1,6 +1,6 @@
 package bio.terra.cloudres.testing;
 
-import bio.terra.cloudres.util.CloudOperation;
+import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.util.MetricsHelper;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNull;
 
 /** Helper class for metrics in tests. */
 public class MetricsTestUtil {
-  private static final String CLIENT = "TestClient";
+  public static final String CLIENT = "TestClient";
   public static final List<TagValue> API_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT), TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()));
@@ -23,7 +23,7 @@ public class MetricsTestUtil {
       Arrays.asList(
           TagValue.create(CLIENT),
           TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
-          null);
+          TagValue.create("0"));
 
   public static final View.Name API_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");
@@ -60,18 +60,15 @@ public class MetricsTestUtil {
   }
 
   /**
-   * Assert the count increment not increase
+   * Assert the count increment increase by one
    *
    * <p>The clear stats in opencensue is not public, so we have to keep track of each stats and
    * verify the increment.
    */
   public static void assertCountIncrease(
-      View.Name viewName, List<TagValue> tags, long currentCount, long expectedCount) {
-    if (currentCount == 0) {
-      assertNull(MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
-    } else {
-      assertEquals(
-          expectedCount, MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
-    }
+      View.Name viewName, List<TagValue> tags, long currentCount, long expected) {
+    assertEquals(
+        AggregationData.CountData.create(expected + currentCount),
+        MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
   }
 }
