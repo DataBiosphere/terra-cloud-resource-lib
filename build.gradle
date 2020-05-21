@@ -36,6 +36,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
     compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev563-1.25.0'
 
     compile 'org.slf4j:slf4j-api:1.7.28' // Logging
@@ -44,8 +45,9 @@ dependencies {
     compile 'io.opencensus:opencensus-api:0.26.0' // Metrics
     runtime 'io.opencensus:opencensus-impl:0.26.0' // 
 
-    implementation 'com.google.code.gson:gson:2.8.6' // gson
+    compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha' // Google Resource Manager API Client
 
+    implementation 'com.google.code.gson:gson:2.8.6'
     dependencies { testCompile "org.mockito:mockito-core:2.+" } // mockito
 
     implementation("com.google.guava:guava:29.0-jre") // Guava
