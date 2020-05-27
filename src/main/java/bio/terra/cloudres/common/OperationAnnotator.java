@@ -32,13 +32,14 @@ public class OperationAnnotator {
       recordApiCount(operation);
       try {
         return googleCall.call();
-      } catch (BaseHttpServiceException e) {
-        logger.warn("Failed to execute Google Call for : " + operation);
-        recordErrors(e.getCode(), operation);
-        throw e;
       } catch (Exception e) {
-        logger.warn("An internal error happens during Google call : " + operation);
-        recordErrors(GENERIC_UNKNOWN_ERROR_CODE, operation);
+        if (e instanceof BaseHttpServiceException) {
+          logger.warn("Failed to execute Google Call for : " + operation);
+          recordErrors(((BaseHttpServiceException) e).getCode(), operation);
+        } else {
+          logger.warn("An internal error happens during Google call : " + operation);
+          recordErrors(GENERIC_UNKNOWN_ERROR_CODE, operation);
+        }
         throw e;
       } finally {
         recordLatency(stopwatch.stop().elapsed(), operation);
