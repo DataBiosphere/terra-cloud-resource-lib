@@ -12,15 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** A Wrapper for Google API Client Library: {@link ResourceManager} */
-public class CowResourceManager {
-  private final Logger logger = LoggerFactory.getLogger(CowResourceManager.class);
+public class ResourceManagerCow {
+  private final Logger logger = LoggerFactory.getLogger(ResourceManagerCow.class);
 
   private final ClientConfig options;
   private final OperationAnnotator helper;
   private final ResourceManagerOptions resourceManagerOptions;
   private final ResourceManager resourceManager;
 
-  public CowResourceManager(ClientConfig options, ResourceManagerOptions resourceManagerOptions) {
+  public ResourceManagerCow(ClientConfig options, ResourceManagerOptions resourceManagerOptions) {
     this.options = options;
     this.resourceManagerOptions = resourceManagerOptions;
     this.helper = new OperationAnnotator(options);

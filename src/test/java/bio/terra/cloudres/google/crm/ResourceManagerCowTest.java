@@ -13,14 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-/** Test for {@link CowResourceManager} */
+/** Test for {@link ResourceManagerCow} */
 @Tag("unit")
-public class CowResourceManagerTest {
+public class ResourceManagerCowTest {
   private static final String CLIENT = "TestClient";
   private static final String PROJECT_ID = "1111";
   private static final ProjectInfo PROJECT_INFO = ProjectInfo.newBuilder(PROJECT_ID).build();
   private ClientConfig options;
-  private CowResourceManager cowResourceManager;
+  private ResourceManagerCow resourceManagerCow;
   @Mock private ResourceManager mockResourceManager = mock(ResourceManager.class);
 
   @Mock
@@ -34,12 +34,12 @@ public class CowResourceManagerTest {
 
     when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
     when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);
-    cowResourceManager = new CowResourceManager(options, mockResourceManagerOptions);
+    resourceManagerCow = new ResourceManagerCow(options, mockResourceManagerOptions);
   }
 
   @Test
   public void testCreateGoogleProject_success() throws Exception {
-    assertEquals(cowResourceManager.createProject(PROJECT_INFO), mockProject);
+    assertEquals(resourceManagerCow.createProject(PROJECT_INFO), mockProject);
   }
 
   @Test
@@ -48,6 +48,6 @@ public class CowResourceManagerTest {
         .thenThrow(ResourceManagerException.class);
 
     assertThrows(
-        ResourceManagerException.class, () -> cowResourceManager.createProject(PROJECT_INFO));
+        ResourceManagerException.class, () -> resourceManagerCow.createProject(PROJECT_INFO));
   }
 }
