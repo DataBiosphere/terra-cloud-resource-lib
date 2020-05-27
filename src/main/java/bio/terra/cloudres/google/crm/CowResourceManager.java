@@ -1,7 +1,5 @@
 package bio.terra.cloudres.google.crm;
 
-import static bio.terra.cloudres.util.JsonConverter.convertToJson;
-
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
@@ -22,8 +20,7 @@ public class CowResourceManager {
   private final ResourceManagerOptions resourceManagerOptions;
   private final ResourceManager resourceManager;
 
-  public CowResourceManager(
-      ClientConfig options, ResourceManagerOptions resourceManagerOptions) {
+  public CowResourceManager(ClientConfig options, ResourceManagerOptions resourceManagerOptions) {
     this.options = options;
     this.resourceManagerOptions = resourceManagerOptions;
     this.helper = new OperationAnnotator(options);
@@ -39,11 +36,11 @@ public class CowResourceManager {
   public Project createProject(ProjectInfo projectInfo) throws Exception {
     // TODO(yonghao): Add identity in logs.
     logger.info(
-        "Creating Google project: projectInfo = " + JsonConverter.convertToJson(projectInfo));
+        "Creating Google project: projectInfo = " + JsonConverter.convert(projectInfo));
     Project project =
         helper.executeGoogleCall(
             () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
-    logger.info("Created Google Project: " + JsonConverter.convertToJson(project));
+    logger.info("Created Google Project: " + JsonConverter.convert(project));
     return project;
   }
 }

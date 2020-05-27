@@ -1,6 +1,7 @@
 package bio.terra.cloudres.util;
 
 import bio.terra.cloudres.common.CloudOperation;
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.*;
@@ -8,11 +9,16 @@ import io.opencensus.tags.*;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.OptionalInt;
 
 /** Util class to hold common variable and method used by OpenCensus in tracing and stats. */
 public class MetricsHelper {
   public static final String CLOUD_RESOURCE_PREFIX = "terra/cloudresourcelibrary";
   public static final ViewManager viewManager = Stats.getViewManager();
+
+  @VisibleForTesting
+  static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
+
   private static final Tagger tagger = Tags.getTagger();
   private static final TagMetadata tagMetadata =
       TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION);
@@ -112,13 +118,14 @@ public class MetricsHelper {
    *
    * @param client, the client which use this library.
    * @param method The Cloud API calls.
-   * @param httpStatusCode the httpStatusCode from cloud.
+   * @param httpStatusCode the httpStatusCode from cloud. If things goes wrong within CRL, use the default generic error code(1) instead.
    */
-  public static void recordError(String client, CloudOperation method, int httpStatusCode) {
+  public static void recordError(String client, CloudOperation method, OptionalInt httpStatusCode) {
+    int errorCode = httpStatusCode.isPresent() ? httpStatusCode.getAsInt() : GENERIC_UNKNOWN_ERROR_CODE;
     TagContext tctx =
         tagger
             .emptyBuilder()
-            .put(KEY_ERROR, TagValue.create(String.valueOf(httpStatusCode)), tagMetadata)
+            .put(KEY_ERROR, TagValue.create(String.valueOf(errorCode)), tagMetadata)
             .put(KEY_CLOUD_API, TagValue.create(method.toString()), tagMetadata)
             .put(KEY_CLIENT, TagValue.create(client), tagMetadata)
             .build();

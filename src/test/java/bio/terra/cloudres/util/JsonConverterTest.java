@@ -1,6 +1,6 @@
 package bio.terra.cloudres.util;
 
-import static bio.terra.cloudres.util.JsonConverter.convertToJson;
+import static bio.terra.cloudres.util.JsonConverter.convert;
 import static org.junit.Assert.assertEquals;
 
 import com.google.cloud.resourcemanager.Project;
@@ -35,7 +35,7 @@ public class JsonConverterTest {
     // Expected result in Json format
     assertEquals(
         "{\"name\":\"myProj\",\"projectId\":\"project-id\",\"labels\":{\"k1\":\"v1\",\"k2\":\"v2\"}}",
-        JsonConverter.convertToJson(PROJECT_INFO));
+        JsonConverter.convert(PROJECT_INFO));
   }
 
   /**
@@ -64,6 +64,6 @@ public class JsonConverterTest {
     assertEquals(PROJECT_LABELS, project.getLabels());
 
     // Verify project cast to json
-    assertEquals(expectedJson, convertToJson(project));
+    assertEquals(expectedJson, convert(project));
   }
 }

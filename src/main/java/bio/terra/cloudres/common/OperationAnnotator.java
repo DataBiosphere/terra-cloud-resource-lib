@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.OptionalInt;
 import java.util.concurrent.Callable;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
@@ -17,7 +18,6 @@ public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
   private final ClientConfig options;
-  private final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   public OperationAnnotator(ClientConfig options) {
     this.options = options;
@@ -33,13 +33,12 @@ public class OperationAnnotator {
       try {
         return googleCall.call();
       } catch (Exception e) {
-        if (e instanceof BaseHttpServiceException) {
-          logger.warn("Failed to execute Google Call for : " + operation);
-          recordErrors(((BaseHttpServiceException) e).getCode(), operation);
-        } else {
-          logger.warn("An internal error happens during Google call : " + operation);
-          recordErrors(GENERIC_UNKNOWN_ERROR_CODE, operation);
-        }
+        recordErrors(
+                e instanceof BaseHttpServiceException
+                        ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
+                        : OptionalInt.empty(),
+                operation);
+        logger.info("Failed to execute Google Call for : " + operation);
         throw e;
       } finally {
         recordLatency(stopwatch.stop().elapsed(), operation);
@@ -51,7 +50,7 @@ public class OperationAnnotator {
     MetricsHelper.recordApiCount(options.getClient(), operation);
   }
 
-  private void recordErrors(int httpStatusCode, CloudOperation operation) {
+  private void recordErrors(OptionalInt httpStatusCode, CloudOperation operation) {
     MetricsHelper.recordError(options.getClient(), operation, httpStatusCode);
   }
 

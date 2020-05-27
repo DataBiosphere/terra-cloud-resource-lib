@@ -11,12 +11,12 @@ import com.google.gson.Gson;
  */
 public class JsonConverter {
   /** Converts {@link ProjectInfo} to json */
-  public static String convertToJson(ProjectInfo projectinfo) {
+  public static String convert(ProjectInfo projectinfo) {
     Gson gson = new Gson();
     return gson.toJson(projectinfo);
   }
 
-  public static String convertToJson(Project project) {
+  public static String convert(Project project) {
     Gson gson = new Gson();
     return gson.toJson(project, Project.class);
   }

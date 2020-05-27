@@ -1,18 +1,21 @@
 package bio.terra.cloudres.util;
 
-import static bio.terra.cloudres.testing.MetricsTestUtil.*;
-import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
-import static org.junit.Assert.assertEquals;
-
 import bio.terra.cloudres.common.CloudOperation;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
 import io.opencensus.tags.TagValue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import java.util.OptionalInt;
+
+import static bio.terra.cloudres.testing.MetricsTestUtil.*;
+import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
+import static bio.terra.cloudres.util.MetricsHelper.GENERIC_UNKNOWN_ERROR_CODE;
+import static org.junit.Assert.assertEquals;
 
 /** Test for {@link MetricsHelper} */
 @Tag("unit")
@@ -27,6 +30,11 @@ public class MetricsHelperTest {
           TagValue.create(CLIENT),
           TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
           TagValue.create("403"));
+  private static final List<TagValue> ERROR_GENERIC_COUNT =
+      Arrays.asList(
+          TagValue.create(CLIENT),
+          TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
+          TagValue.create(String.valueOf(GENERIC_UNKNOWN_ERROR_CODE)));
 
   private static final View.Name LATENCY_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
@@ -52,16 +60,19 @@ public class MetricsHelperTest {
   public void testRecordErrorCount() throws Exception {
     long errorCount403 = getCurrentCount(ERROR_VIEW_NAME, ERROR_403_COUNT);
     long errorCount401 = getCurrentCount(ERROR_VIEW_NAME, ERROR_401_COUNT);
+    long errorCountGeneric = getCurrentCount(ERROR_VIEW_NAME, ERROR_GENERIC_COUNT);
 
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
-    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 403);
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(401));
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(401));
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(401));
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(403));
+    MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.empty());
 
     sleepForSpansExport();
 
     assertCountIncremented(ERROR_VIEW_NAME, ERROR_401_COUNT, errorCount401, 3);
     assertCountIncremented(ERROR_VIEW_NAME, ERROR_403_COUNT, errorCount403, 1);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_GENERIC_COUNT, errorCountGeneric, 1);
   }
 
   @Test

@@ -37,7 +37,6 @@ public class OperationAnnotatorTest {
     long apiCount =
         MetricsTestUtil.getCurrentCount(MetricsTestUtil.API_VIEW_NAME, MetricsTestUtil.API_COUNT);
 
-    // Let the thread sleep 5s to test the latency.
     helper.executeGoogleCall(() -> {Thread.sleep(4100);
       return null;
     }, CloudOperation.GOOGLE_CREATE_PROJECT);
