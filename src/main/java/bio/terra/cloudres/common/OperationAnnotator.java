@@ -17,6 +17,7 @@ public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
   private final ClientConfig options;
+  private final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   public OperationAnnotator(ClientConfig options) {
     this.options = options;
@@ -35,8 +36,12 @@ public class OperationAnnotator {
         logger.warn("Failed to execute Google Call for : " + operation);
         recordErrors(e.getCode(), operation);
         throw e;
+      } catch (Exception e) {
+        logger.warn("An internal error happens during Google call : " + operation);
+        recordErrors(GENERIC_UNKNOWN_ERROR_CODE, operation);
+        throw e;
       } finally {
-        recordLatency(stopwatch.stop().elapsed().toMillis(), operation);
+        recordLatency(stopwatch.stop().elapsed(), operation);
       }
     }
   }
@@ -49,8 +54,7 @@ public class OperationAnnotator {
     MetricsHelper.recordError(options.getClient(), operation, httpStatusCode);
   }
 
-  private void recordLatency(long startNs, CloudOperation operation) {
-    MetricsHelper.recordLatency(
-        options.getClient(), operation, Duration.ofNanos(System.nanoTime() - startNs));
+  private void recordLatency(Duration duration, CloudOperation operation) {
+    MetricsHelper.recordLatency(options.getClient(), operation, duration);
   }
 }

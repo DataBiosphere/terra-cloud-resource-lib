@@ -4,6 +4,7 @@ import bio.terra.cloudres.common.CloudOperation;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.*;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +39,10 @@ public class MetricsHelper {
       Measure.MeasureDouble.create(
           CLOUD_RESOURCE_PREFIX + "/cloud/error", "Number of the errors ", COUNT);
 
+  /**
+   * This bucketing is our first pass guess at what might be interesting to see for latencies. It is
+   * not backed by data.
+   */
   private static final Aggregation latencyDistribution =
       Aggregation.Distribution.create(
           BucketBoundaries.create(
@@ -45,6 +50,7 @@ public class MetricsHelper {
                   0.0, 1.0, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0, 120.0, 140.0, 160.0,
                   180.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 2000.0,
                   4000.0, 8000.0, 16000.0, 32000.0, 64000.0)));
+
   private static final Aggregation countAggregation = Aggregation.Count.create();
   private static final View.Name LATENCY_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");

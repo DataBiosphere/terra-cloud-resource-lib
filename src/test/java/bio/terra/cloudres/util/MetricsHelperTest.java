@@ -43,10 +43,9 @@ public class MetricsHelperTest {
     MetricsHelper.recordApiCount(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT);
     MetricsHelper.recordApiCount(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT);
 
-    // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
     sleepForSpansExport();
 
-    assertCountEquals(API_VIEW_NAME, API_COUNT, apiCount, 4);
+    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 4);
   }
 
   @Test
@@ -59,11 +58,10 @@ public class MetricsHelperTest {
     MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 401);
     MetricsHelper.recordError(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, 403);
 
-    // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
     sleepForSpansExport();
 
-    assertCountEquals(ERROR_VIEW_NAME, ERROR_401_COUNT, errorCount401, 3);
-    assertCountEquals(ERROR_VIEW_NAME, ERROR_403_COUNT, errorCount403, 1);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_401_COUNT, errorCount401, 3);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_403_COUNT, errorCount403, 1);
   }
 
   @Test
@@ -72,7 +70,6 @@ public class MetricsHelperTest {
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(0));
 
-    // Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
     sleepForSpansExport();
 
     AggregationData.DistributionData data =

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 
@@ -46,10 +47,8 @@ public class GoogleCloudResourceManagerTest {
 
   @Test
   public void testCreateGoogleProject_error() throws Exception {
-    assertThrows(
-        ResourceManagerException.class,
-        () -> {
-          throw new ResourceManagerException(new IOException("test"));
-        });
+    Mockito.when(mockResourceManager.create(PROJECT_INFO)).thenThrow(ResourceManagerException.class);
+
+    assertThrows(ResourceManagerException.class, () -> googleCloudResourceManager.createProject(PROJECT_INFO));
   }
 }

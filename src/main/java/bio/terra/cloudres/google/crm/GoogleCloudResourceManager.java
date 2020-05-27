@@ -1,11 +1,11 @@
 package bio.terra.cloudres.google.crm;
 
-import static bio.terra.cloudres.util.JsonConverter.convertGoogleProjectInfo;
-import static bio.terra.cloudres.util.JsonConverter.convertGoogleProject;
+import static bio.terra.cloudres.util.JsonConverter.convertToJson;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.util.JsonConverter;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
@@ -39,11 +39,11 @@ public class GoogleCloudResourceManager {
   public Project createProject(ProjectInfo projectInfo) throws Exception {
     // TODO(yonghao): Add identity in logs.
     logger.info(
-        "Creating Google project: projectInfo = " + convertGoogleProjectInfo(projectInfo));
+        "Creating Google project: projectInfo = " + JsonConverter.convertToJson(projectInfo));
     Project project =
         helper.executeGoogleCall(
             () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
-    logger.info("Created Google Project: " + convertGoogleProject(project));
+    logger.info("Created Google Project: " + JsonConverter.convertToJson(project));
     return project;
   }
 }

@@ -28,6 +28,8 @@ public class MetricsTestUtil {
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");
   public static final View.Name ERROR_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/error");
+  public static final View.Name LATENCY_VIEW_NAME =
+          View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
 
   /**
    * Helper method to get current stats before test.
@@ -48,18 +50,22 @@ public class MetricsTestUtil {
    * <p>The clear stats in opencensus is not public, so we have to keep track of each stats and
    * verify the increment.
    */
-  public static void assertCountEquals(
-      View.Name viewName, List<TagValue> tags, long currentCount, long increment) {
-    if (currentCount == 0 && increment == 0) {
+  public static void assertCountIncremented(
+      View.Name viewName, List<TagValue> tags, long previous, long increment) {
+    if (previous == 0 && increment == 0) {
       assertNull(MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
     } else {
       assertEquals(
-              AggregationData.CountData.create(increment + currentCount),
+              AggregationData.CountData.create(increment + previous),
               MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
     }
   }
 
-  /** Wait for a duration longer than reporting duration (5s) to ensure spans are exported. */
+  /**
+   * Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
+   *
+   * Values from https://github.com/census-instrumentation/opencensus-java/blob/master/examples/src/main/java/io/opencensus/examples/helloworld/QuickStart.java#L106
+   * */
   public static void sleepForSpansExport() throws InterruptedException {
     Thread.sleep(5100);
   }
