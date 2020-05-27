@@ -11,7 +11,9 @@ import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A Wrapper for Google API Client Library: {@link ResourceManager} */
+/**
+ * A Cloud Object Wrapper(COW) for Google API Client Library: {@link ResourceManager}
+ */
 public class ResourceManagerCow {
   private final Logger logger = LoggerFactory.getLogger(ResourceManagerCow.class);
 
