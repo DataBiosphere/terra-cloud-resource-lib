@@ -15,6 +15,10 @@ public class MetricsHelper {
   public static final String CLOUD_RESOURCE_PREFIX = "terra/cloudresourcelibrary";
   public static final ViewManager viewManager = Stats.getViewManager();
 
+  /**
+   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
+   * non-HTTP status errors in a single metric.
+   */
   @VisibleForTesting static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   private static final Tagger tagger = Tags.getTagger();
@@ -120,8 +124,8 @@ public class MetricsHelper {
    *     default generic error code(1) instead.
    */
   public static void recordError(String client, CloudOperation method, OptionalInt httpStatusCode) {
-    int errorCode =
-        httpStatusCode.isPresent() ? httpStatusCode.getAsInt() : GENERIC_UNKNOWN_ERROR_CODE;
+    int errorCode = httpStatusCode.orElse(GENERIC_UNKNOWN_ERROR_CODE);
+
     TagContext tctx =
         tagger
             .emptyBuilder()

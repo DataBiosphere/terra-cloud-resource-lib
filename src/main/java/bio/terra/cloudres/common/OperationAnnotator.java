@@ -32,11 +32,7 @@ public class OperationAnnotator {
       try {
         return googleCall.call();
       } catch (Exception e) {
-        recordErrors(
-            e instanceof BaseHttpServiceException
-                ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
-                : OptionalInt.empty(),
-            operation);
+        recordErrors(getHttpErrorCode(e), operation);
         logger.info("Failed to execute Google Call for : " + operation);
         throw e;
       } finally {
@@ -55,5 +51,11 @@ public class OperationAnnotator {
 
   private void recordLatency(Duration duration, CloudOperation operation) {
     MetricsHelper.recordLatency(clientConfig.getClientName(), operation, duration);
+  }
+
+  private OptionalInt getHttpErrorCode(Exception e) {
+    return e instanceof BaseHttpServiceException
+        ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
+        : OptionalInt.empty();
   }
 }
