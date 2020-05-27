@@ -4,12 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Config class to manage Google resources. */
 public class ClientConfig {
-  private final String client;
+  private final String clientName;
 
-  private ClientConfig(String client) {
-    checkNotNull(client, "client name must be set");
+  private ClientConfig(String clientName) {
+    checkNotNull(clientName, "client name must be set");
 
-    this.client = client;
+    this.clientName = clientName;
   }
 
   /**
@@ -17,8 +17,8 @@ public class ClientConfig {
    *
    * @return the client name
    */
-  public String getClient() {
-    return client;
+  public String getClientName() {
+    return clientName;
   }
 
   public static class Builder {

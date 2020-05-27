@@ -46,14 +46,14 @@ public class OperationAnnotator {
   }
 
   private void recordApiCount(CloudOperation operation) {
-    MetricsHelper.recordApiCount(clientConfig.getClient(), operation);
+    MetricsHelper.recordApiCount(clientConfig.getClientName(), operation);
   }
 
   private void recordErrors(OptionalInt httpStatusCode, CloudOperation operation) {
-    MetricsHelper.recordError(clientConfig.getClient(), operation, httpStatusCode);
+    MetricsHelper.recordError(clientConfig.getClientName(), operation, httpStatusCode);
   }
 
   private void recordLatency(Duration duration, CloudOperation operation) {
-    MetricsHelper.recordLatency(clientConfig.getClient(), operation, duration);
+    MetricsHelper.recordLatency(clientConfig.getClientName(), operation, duration);
   }
 }
