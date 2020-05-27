@@ -19,7 +19,7 @@ public class ResourceManagerCowTest {
   private static final String CLIENT = "TestClient";
   private static final String PROJECT_ID = "1111";
   private static final ProjectInfo PROJECT_INFO = ProjectInfo.newBuilder(PROJECT_ID).build();
-  private ClientConfig options;
+  private ClientConfig clientConfig;
   private ResourceManagerCow resourceManagerCow;
   @Mock private ResourceManager mockResourceManager = mock(ResourceManager.class);
 
@@ -30,11 +30,11 @@ public class ResourceManagerCowTest {
 
   @BeforeEach
   public void setUp() throws Exception {
-    options = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
+    clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
 
     when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
     when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);
-    resourceManagerCow = new ResourceManagerCow(options, mockResourceManagerOptions);
+    resourceManagerCow = new ResourceManagerCow(clientConfig, mockResourceManagerOptions);
   }
 
   @Test

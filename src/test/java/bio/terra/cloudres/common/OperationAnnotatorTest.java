@@ -17,13 +17,13 @@ import org.junit.jupiter.api.Test;
 public class OperationAnnotatorTest {
   private static final String CLIENT = "TestClient";
 
-  private OperationAnnotator helper;
-  private ClientConfig options;
+  private OperationAnnotator operationAnnotator;
+  private ClientConfig clientConfig;
 
   @BeforeEach
   public void setUp() throws Exception {
-    options = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
-    helper = new OperationAnnotator(options);
+    clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
+    operationAnnotator = new OperationAnnotator(clientConfig);
   }
 
   @Test
@@ -31,7 +31,7 @@ public class OperationAnnotatorTest {
     long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    helper.executeGoogleCall(
+    operationAnnotator.executeGoogleCall(
         () -> {
           Thread.sleep(4100);
           return null;
@@ -65,7 +65,7 @@ public class OperationAnnotatorTest {
     Assert.assertThrows(
         ResourceManagerException.class,
         () ->
-            helper.executeGoogleCall(
+            operationAnnotator.executeGoogleCall(
                 () -> {
                   throw new ResourceManagerException(new IOException("test"));
                 },

@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
-  private final ClientConfig options;
+  private final ClientConfig clientConfig;
 
-  public OperationAnnotator(ClientConfig options) {
-    this.options = options;
+  public OperationAnnotator(ClientConfig clientConfig) {
+    this.clientConfig = clientConfig;
   }
 
   public <R> R executeGoogleCall(Callable<R> googleCall, CloudOperation operation)
@@ -46,14 +46,14 @@ public class OperationAnnotator {
   }
 
   private void recordApiCount(CloudOperation operation) {
-    MetricsHelper.recordApiCount(options.getClient(), operation);
+    MetricsHelper.recordApiCount(clientConfig.getClient(), operation);
   }
 
   private void recordErrors(OptionalInt httpStatusCode, CloudOperation operation) {
-    MetricsHelper.recordError(options.getClient(), operation, httpStatusCode);
+    MetricsHelper.recordError(clientConfig.getClient(), operation, httpStatusCode);
   }
 
   private void recordLatency(Duration duration, CloudOperation operation) {
-    MetricsHelper.recordLatency(options.getClient(), operation, duration);
+    MetricsHelper.recordLatency(clientConfig.getClient(), operation, duration);
   }
 }
