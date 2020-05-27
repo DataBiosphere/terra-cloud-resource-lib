@@ -85,8 +85,7 @@ public class MetricsHelperTest {
     AggregationData.DistributionData data =
         (AggregationData.DistributionData)
             MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
-    // Total count
-    assertEquals(data.getCount(), 3);
+
     // this is mapped to the Distribution defined in MetricsHelper, i.e.
     // 0ms being within the first bucket & 1 ms in the second.
 

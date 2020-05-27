@@ -38,10 +38,10 @@ public class MetricsTestUtil {
    * verify the increment.
    */
   public static long getCurrentCount(View.Name viewName, List<TagValue> tags) {
-    AggregationData.CountData currentErrorCount =
+    AggregationData.CountData currentCount =
         (AggregationData.CountData)
             (MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
-    return currentErrorCount == null ? 0 : currentErrorCount.getCount();
+    return currentCount == null ? 0 : currentCount.getCount();
   }
 
   /**
