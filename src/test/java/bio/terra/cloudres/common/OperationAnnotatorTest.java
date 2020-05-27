@@ -1,19 +1,17 @@
 package bio.terra.cloudres.common;
 
+import static bio.terra.cloudres.testing.MetricsTestUtil.*;
+import static org.junit.Assert.assertEquals;
+
 import bio.terra.cloudres.testing.MetricsTestUtil;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.ResourceManagerException;
-
-import java.io.IOException;
-
 import io.opencensus.stats.AggregationData;
+import java.io.IOException;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static bio.terra.cloudres.testing.MetricsTestUtil.*;
-import static org.junit.Assert.assertEquals;
 
 /** Test for {@link OperationAnnotator} */
 @Tag("unit")
@@ -37,9 +35,12 @@ public class OperationAnnotatorTest {
     long apiCount =
         MetricsTestUtil.getCurrentCount(MetricsTestUtil.API_VIEW_NAME, MetricsTestUtil.API_COUNT);
 
-    helper.executeGoogleCall(() -> {Thread.sleep(4100);
-      return null;
-    }, CloudOperation.GOOGLE_CREATE_PROJECT);
+    helper.executeGoogleCall(
+        () -> {
+          Thread.sleep(4100);
+          return null;
+        },
+        CloudOperation.GOOGLE_CREATE_PROJECT);
 
     sleepForSpansExport();
 
@@ -51,11 +52,12 @@ public class OperationAnnotatorTest {
     MetricsTestUtil.assertCountIncremented(
         MetricsTestUtil.ERROR_VIEW_NAME, MetricsTestUtil.ERROR_COUNT, errorCount, 0);
 
-    // This rely on the latency DistributionData defined in {@link MetricHelper} where 4s - 8s are in the same bucket.
+    // This rely on the latency DistributionData defined in {@link MetricHelper} where 4s - 8s are
+    // in the same bucket.
     // This would expect the latency falls into the 4s-8s bucket(25th).
     AggregationData.DistributionData data =
-            (AggregationData.DistributionData)
-                    MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
+        (AggregationData.DistributionData)
+            MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
     // Total count
     assertEquals(data.getCount(), 1);
     // 4~8s bucket,
@@ -72,7 +74,12 @@ public class OperationAnnotatorTest {
 
     Assert.assertThrows(
         ResourceManagerException.class,
-        () -> helper.executeGoogleCall(() -> {throw new ResourceManagerException(new IOException("test"));}, CloudOperation.GOOGLE_CREATE_PROJECT));
+        () ->
+            helper.executeGoogleCall(
+                () -> {
+                  throw new ResourceManagerException(new IOException("test"));
+                },
+                CloudOperation.GOOGLE_CREATE_PROJECT));
 
     sleepForSpansExport();
 

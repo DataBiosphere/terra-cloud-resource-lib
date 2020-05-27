@@ -6,12 +6,11 @@ import com.google.common.base.Stopwatch;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.util.OptionalInt;
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
@@ -34,10 +33,10 @@ public class OperationAnnotator {
         return googleCall.call();
       } catch (Exception e) {
         recordErrors(
-                e instanceof BaseHttpServiceException
-                        ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
-                        : OptionalInt.empty(),
-                operation);
+            e instanceof BaseHttpServiceException
+                ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
+                : OptionalInt.empty(),
+            operation);
         logger.info("Failed to execute Google Call for : " + operation);
         throw e;
       } finally {

@@ -29,7 +29,7 @@ public class MetricsTestUtil {
   public static final View.Name ERROR_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/error");
   public static final View.Name LATENCY_VIEW_NAME =
-          View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
+      View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
 
   /**
    * Helper method to get current stats before test.
@@ -56,16 +56,17 @@ public class MetricsTestUtil {
       assertNull(MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
     } else {
       assertEquals(
-              AggregationData.CountData.create(increment + previous),
-              MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
+          AggregationData.CountData.create(increment + previous),
+          MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
     }
   }
 
   /**
    * Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
    *
-   * Values from https://github.com/census-instrumentation/opencensus-java/blob/5be70440b53815eec1ab59513390aadbcec5cc9c/examples/src/main/java/io/opencensus/examples/helloworld/QuickStart.java#L106
-   * */
+   * <p>Values from
+   * https://github.com/census-instrumentation/opencensus-java/blob/5be70440b53815eec1ab59513390aadbcec5cc9c/examples/src/main/java/io/opencensus/examples/helloworld/QuickStart.java#L106
+   */
   public static void sleepForSpansExport() throws InterruptedException {
     Thread.sleep(5100);
   }

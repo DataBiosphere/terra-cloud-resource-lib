@@ -35,8 +35,7 @@ public class CowResourceManager {
    */
   public Project createProject(ProjectInfo projectInfo) throws Exception {
     // TODO(yonghao): Add identity in logs.
-    logger.info(
-        "Creating Google project: projectInfo = " + JsonConverter.convert(projectInfo));
+    logger.info("Creating Google project: projectInfo = " + JsonConverter.convert(projectInfo));
     Project project =
         helper.executeGoogleCall(
             () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);

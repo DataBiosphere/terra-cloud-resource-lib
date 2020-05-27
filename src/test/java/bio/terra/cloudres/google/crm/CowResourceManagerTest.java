@@ -1,5 +1,10 @@
 package bio.terra.cloudres.google.crm;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.cloud.resourcemanager.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,11 +12,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /** Test for {@link CowResourceManager} */
 @Tag("unit")
@@ -34,8 +34,7 @@ public class CowResourceManagerTest {
 
     when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
     when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);
-    cowResourceManager =
-        new CowResourceManager(options, mockResourceManagerOptions);
+    cowResourceManager = new CowResourceManager(options, mockResourceManagerOptions);
   }
 
   @Test
@@ -45,8 +44,10 @@ public class CowResourceManagerTest {
 
   @Test
   public void testCreateGoogleProject_error() throws Exception {
-    Mockito.when(mockResourceManager.create(PROJECT_INFO)).thenThrow(ResourceManagerException.class);
+    Mockito.when(mockResourceManager.create(PROJECT_INFO))
+        .thenThrow(ResourceManagerException.class);
 
-    assertThrows(ResourceManagerException.class, () -> cowResourceManager.createProject(PROJECT_INFO));
+    assertThrows(
+        ResourceManagerException.class, () -> cowResourceManager.createProject(PROJECT_INFO));
   }
 }
