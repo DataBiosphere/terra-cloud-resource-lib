@@ -8,21 +8,19 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** Test for {@link GoogleCloudResourceManager} */
+/** Test for {@link CowResourceManager} */
 @Tag("unit")
-public class GoogleCloudResourceManagerTest {
+public class CowResourceManagerTest {
   private static final String CLIENT = "TestClient";
   private static final String PROJECT_ID = "1111";
   private static final ProjectInfo PROJECT_INFO = ProjectInfo.newBuilder(PROJECT_ID).build();
   private ClientConfig options;
-  private GoogleCloudResourceManager googleCloudResourceManager;
+  private CowResourceManager cowResourceManager;
   @Mock private ResourceManager mockResourceManager = mock(ResourceManager.class);
 
   @Mock
@@ -36,19 +34,19 @@ public class GoogleCloudResourceManagerTest {
 
     when(mockResourceManagerOptions.getService()).thenReturn(mockResourceManager);
     when(mockResourceManager.create(PROJECT_INFO)).thenReturn(mockProject);
-    googleCloudResourceManager =
-        new GoogleCloudResourceManager(options, mockResourceManagerOptions);
+    cowResourceManager =
+        new CowResourceManager(options, mockResourceManagerOptions);
   }
 
   @Test
   public void testCreateGoogleProject_success() throws Exception {
-    assertEquals(googleCloudResourceManager.createProject(PROJECT_INFO), mockProject);
+    assertEquals(cowResourceManager.createProject(PROJECT_INFO), mockProject);
   }
 
   @Test
   public void testCreateGoogleProject_error() throws Exception {
     Mockito.when(mockResourceManager.create(PROJECT_INFO)).thenThrow(ResourceManagerException.class);
 
-    assertThrows(ResourceManagerException.class, () -> googleCloudResourceManager.createProject(PROJECT_INFO));
+    assertThrows(ResourceManagerException.class, () -> cowResourceManager.createProject(PROJECT_INFO));
   }
 }
