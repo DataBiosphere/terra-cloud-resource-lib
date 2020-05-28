@@ -4,7 +4,11 @@ import bio.terra.cloudres.common.CloudOperation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
+
+import io.opencensus.trace.TraceId;
 import org.slf4j.Logger;
+
+import javax.annotation.Nullable;
 
 /** Helper class to log events in CRL. */
 public class LoggerHelper {
@@ -37,9 +41,10 @@ public class LoggerHelper {
 
   /** Logs cloud calls. This should be in debug level. */
   public static void logEvent(
-          Logger logger, CloudOperation operation, String clientName, String request, String response, OptionalInt errorCode) {
+          Logger logger, TraceId traceId, CloudOperation operation, String clientName, String request, @Nullable String response, OptionalInt errorCode) {
     if (logger.isDebugEnabled()) {
       Map<String, String> jsonMap = new HashMap<>();
+      jsonMap.put("traceId: ", traceId.toString());
       jsonMap.put("operation: ", operation.name());
       jsonMap.put("clientName: ", clientName);
       jsonMap.put("request: ", request);

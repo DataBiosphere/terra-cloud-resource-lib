@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 @Tag("unit")
 public class OperationAnnotatorTest {
   private static final String CLIENT = "TestClient";
+  private static final String REQUEST = "request";
 
   private OperationAnnotator operationAnnotator;
   private ClientConfig clientConfig;
@@ -40,7 +41,7 @@ public class OperationAnnotatorTest {
           }
           return null;
         },
-        CloudOperation.GOOGLE_CREATE_PROJECT);
+        CloudOperation.GOOGLE_CREATE_PROJECT, REQUEST);
 
     sleepForSpansExport();
 
@@ -73,7 +74,7 @@ public class OperationAnnotatorTest {
                 () -> {
                   throw new ResourceManagerException(new IOException("test"));
                 },
-                CloudOperation.GOOGLE_CREATE_PROJECT));
+                CloudOperation.GOOGLE_CREATE_PROJECT, REQUEST));
 
     sleepForSpansExport();
 

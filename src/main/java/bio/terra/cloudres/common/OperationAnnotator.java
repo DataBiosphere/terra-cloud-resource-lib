@@ -1,20 +1,24 @@
 package bio.terra.cloudres.common;
 
-import static bio.terra.cloudres.util.LoggerHelper.logFailEvent;
-
+import bio.terra.cloudres.util.JsonConverter;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.base.Stopwatch;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import java.time.Duration;
-import java.util.OptionalInt;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
+import java.time.Duration;
+import java.util.OptionalInt;
+import java.util.function.Supplier;
+
+import static bio.terra.cloudres.util.LoggerHelper.logEvent;
+
+/**
+ * Annotates executing cloud operations with logs, traces, and metrics to record what happens.
+ */
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
@@ -24,18 +28,38 @@ public class OperationAnnotator {
     this.clientConfig = clientConfig;
   }
 
-  public <R> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation) {
+  /**
+   * Executes the Google call.
+   *
+   * @param googleCall: the google call to make
+   * @param operation: the {@link CloudOperation}
+   * @param request: the formatted request, this is used for logging.
+   */
+  public <R> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, String request) {
+    OptionalInt errorCode = OptionalInt.empty();
+    R response = null;
+
     Stopwatch stopwatch = Stopwatch.createStarted();
     try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
+      ;
       recordApiCount(operation);
       try {
-        return googleCall.get();
+        response = googleCall.get();
+        return response;
       } catch (Exception e) {
-        recordErrors(getHttpErrorCode(e), operation);
-        logFailEvent(logger, operation, clientConfig.getClientName(), getHttpErrorCode(e));
+        errorCode = getHttpErrorCode(e);
+        recordErrors(errorCode, operation);
         throw e;
       } finally {
+        logEvent(
+                /*logger=*/ logger,
+                /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
+                /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
+                /* clientName=*/clientConfig.getClientName(),
+                /* request=*/ request,
+                /* response=*/ JsonConverter.convert(response),
+                /* response=*/errorCode);
         recordLatency(stopwatch.stop().elapsed(), operation);
       }
     }

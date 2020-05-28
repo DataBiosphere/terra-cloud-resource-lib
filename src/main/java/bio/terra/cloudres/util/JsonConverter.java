@@ -15,17 +15,23 @@ import java.util.Map;
  * good format
  */
 public class JsonConverter {
-  /** Converts {@link Project} to json */
-  public static String convert(Project project) {
+  /** Converts a generic type to json */
+  public static<R> String convert(R object) {
     Gson gson = new Gson();
-    return gson.toJson(project, Project.class);
+    return gson.toJson(object, object.getClass());
   }
-
-  /** Converts map to format */
-  public static String convert(ProjectInfo projectInfo) {
-    Gson gson = new Gson();
-    return gson.toJson(projectInfo);
-  }
+//
+//  /** Converts {@link Project} to json */
+//  public static String convert(Project project) {
+//    Gson gson = new Gson();
+//    return gson.toJson(project, Project.class);
+//  }
+//
+//  /** Converts map to format */
+//  public static String convert(ProjectInfo projectInfo) {
+//    Gson gson = new Gson();
+//    return gson.toJson(projectInfo);
+//  }
 
   /** Converts map to format */
   public static String convert(Map<String, String> map) {
