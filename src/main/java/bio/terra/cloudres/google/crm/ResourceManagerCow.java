@@ -1,17 +1,16 @@
 package bio.terra.cloudres.google.crm;
 
-import static bio.terra.cloudres.util.LoggerHelper.logSuccessEvent;
-
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.util.JsonConverter;
-import com.google.cloud.resourcemanager.Project;
-import com.google.cloud.resourcemanager.ProjectInfo;
-import com.google.cloud.resourcemanager.ResourceManager;
-import com.google.cloud.resourcemanager.ResourceManagerOptions;
+import com.google.cloud.resourcemanager.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.OptionalInt;
+
+import static bio.terra.cloudres.util.LoggerHelper.logEvent;
 
 /**
  * A Cloud Object Wrapper(COW) for Google API Client Library: {@link ResourceManager}
@@ -41,14 +40,25 @@ public class ResourceManagerCow {
    */
   public Project createProject(ProjectInfo projectInfo) {
     // TODO(yonghao): Add identity in logs.
-    Project project =
-        operationAnnotator.executeGoogleCall(
-            () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
-    logSuccessEvent(
-        logger,
-        CloudOperation.GOOGLE_CREATE_PROJECT,
-        options.getClientName(),
-        JsonConverter.convert(project));
-    return project;
+    OptionalInt errorCode = OptionalInt.empty();
+    Project project = null;
+
+    try {
+      project =
+              operationAnnotator.executeGoogleCall(
+                      () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
+      return project;
+    } catch (ResourceManagerException e) {
+      errorCode = OptionalInt.of(e.getCode());
+      throw e;
+    } finally {
+      logEvent(
+              /*logger=*/ logger,
+              /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
+              /* clientName=*/options.getClientName(),
+              /* request=*/ JsonConverter.convert(projectInfo),
+              /* response=*/ JsonConverter.convert(project),
+              /* response=*/errorCode);
+    }
   }
 }

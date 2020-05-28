@@ -1,8 +1,11 @@
 package bio.terra.cloudres.util;
 
 import com.google.cloud.resourcemanager.Project;
+import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import java.util.Map;
 
 /**
@@ -16,6 +19,12 @@ public class JsonConverter {
   public static String convert(Project project) {
     Gson gson = new Gson();
     return gson.toJson(project, Project.class);
+  }
+
+  /** Converts map to format */
+  public static String convert(ProjectInfo projectInfo) {
+    Gson gson = new Gson();
+    return gson.toJson(projectInfo);
   }
 
   /** Converts map to format */

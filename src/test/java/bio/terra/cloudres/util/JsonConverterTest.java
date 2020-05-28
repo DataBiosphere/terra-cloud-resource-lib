@@ -19,8 +19,7 @@ public class JsonConverterTest {
   private static final Map<String, String> PROJECT_LABELS = ImmutableMap.of("k1", "v1", "k2", "v2");
   private static final ProjectInfo PROJECT_INFO =
       ProjectInfo.newBuilder(PROJECT_ID).setName(PROJECT_NAME).setLabels(PROJECT_LABELS).build();
-  private static final Map<String, String> JSON_MAP =
-      ImmutableMap.of("name1", "value1", "name2", "value2");
+  private static final Map<String, String> JSON_MAP = ImmutableMap.of("name1", "value1", "name2" , "value2");
 
   /**
    * Expected result in JSON format for projectInfo:
@@ -35,7 +34,27 @@ public class JsonConverterTest {
   @Test
   public void testConvertMap() throws Exception {
     // Expected result in Json format
-    assertEquals("{\"name1\":\"value1\",\"name2\":\"value2\"}", JsonConverter.convert(JSON_MAP));
+    assertEquals(
+        "{\"name1\":\"value1\",\"name2\":\"value2\"}",
+        JsonConverter.convert(JSON_MAP));
+  }
+
+  /**
+   * Expected result in JSON format for projectInfo:
+   *
+   * <pre>{@code
+   * { "name": "PROJECT_NAME",
+   *   "projectId": "PROJECT_ID",
+   *   "labels": "{key1 : value1, key2: value2}"
+   * }
+   * }</pre>
+   */
+  @Test
+  public void testConvertGoogleProjectInfo() throws Exception {
+    // Expected result in Json format
+    assertEquals(
+            "{\"name\":\"myProj\",\"projectId\":\"project-id\",\"labels\":{\"k1\":\"v1\",\"k2\":\"v2\"}}",
+            JsonConverter.convert(PROJECT_INFO));
   }
 
   /**

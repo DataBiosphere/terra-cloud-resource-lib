@@ -34,4 +34,19 @@ public class LoggerHelper {
     String logString = JsonConverter.convert(jsonMap);
     logger.info(logString);
   }
+
+  /** Logs cloud calls. This should be in debug level. */
+  public static void logEvent(
+          Logger logger, CloudOperation operation, String clientName, String request, String response, OptionalInt errorCode) {
+    if (logger.isDebugEnabled()) {
+      Map<String, String> jsonMap = new HashMap<>();
+      jsonMap.put("operation: ", operation.name());
+      jsonMap.put("clientName: ", clientName);
+      jsonMap.put("request: ", request);
+      jsonMap.put("response: ", response);
+      if (errorCode.isPresent()) {
+        jsonMap.put("errorCode: ", String.valueOf(errorCode.getAsInt()));
+      }
+    }
+  }
 }
