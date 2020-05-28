@@ -7,7 +7,8 @@ import java.io.FileInputStream;
 /** Provides cloud credentials to use in integration tests. */
 public class IntegrationCredentials {
   /** Path to the service account credentials file. */
-  private static final String GOOGLE_SERVICE_ACCOUNT_PATH = "src/test/resources/integration_service_account.json";
+  private static final String GOOGLE_SERVICE_ACCOUNT_PATH =
+      "src/test/resources/integration_service_account.json";
 
   public static GoogleCredentials getGoogleCredentialsOrDie() {
     try {

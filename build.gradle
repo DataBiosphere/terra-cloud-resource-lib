@@ -103,6 +103,3 @@ task minniekenny(type: Exec) {
 }
 
 test.dependsOn minniekenny
-tasks.named("check") {
-    dependsOn integrationTest
-}
