@@ -25,7 +25,7 @@ Broad employees can get the credentials from Vault with:
 ```
 docker run -it --rm -v $HOME:/root broadinstitute/dsde-toolbox:dev \
   vault read -format json secret/dsde/terra/crl-test/default/service-account.json \
-| jq .data > src/test/resources/integration_service_account.json
+  | jq .data > src/test/resources/integration_service_account.json
 ```
 
 TODO: Make this easier, consider making credentials path configurable.
