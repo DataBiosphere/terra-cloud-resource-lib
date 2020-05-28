@@ -49,3 +49,5 @@ jobs:
         run: ./gradlew build -x minniekenny # skip minniekenny
       - name: Test
         run: ./gradlew test -x minniekenny
+      - name: Integration Test
+        run: ./gradlew integrationTest
