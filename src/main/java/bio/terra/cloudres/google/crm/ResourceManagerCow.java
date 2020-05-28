@@ -33,7 +33,7 @@ public class ResourceManagerCow {
    * @param projectInfo The {@link ProjectInfo} of the project to create
    * @return the project being created.
    */
-  public Project createProject(ProjectInfo projectInfo) throws Exception {
+  public Project createProject(ProjectInfo projectInfo) {
     // TODO(yonghao): Add identity in logs.
     logger.info("Creating Google project: projectInfo = " + JsonConverter.convert(projectInfo));
     Project project =

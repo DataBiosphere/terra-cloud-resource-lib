@@ -8,7 +8,7 @@ import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.time.Duration;
 import java.util.OptionalInt;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +22,14 @@ public class OperationAnnotator {
     this.clientConfig = clientConfig;
   }
 
-  public <R> R executeGoogleCall(Callable<R> googleCall, CloudOperation operation)
-      throws Exception {
+  public <R> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     logger.debug("Executing Google Calls" + operation);
     try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
       recordApiCount(operation);
       try {
-        return googleCall.call();
+        return googleCall.get();
       } catch (Exception e) {
         recordErrors(getHttpErrorCode(e), operation);
         logger.info("Failed to execute Google Call for : " + operation);

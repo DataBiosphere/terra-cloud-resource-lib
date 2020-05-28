@@ -33,7 +33,11 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.executeGoogleCall(
         () -> {
-          Thread.sleep(4100);
+          try {
+            Thread.sleep(4100);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           return null;
         },
         CloudOperation.GOOGLE_CREATE_PROJECT);
