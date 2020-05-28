@@ -32,17 +32,29 @@ gradle.taskGraph.whenReady { taskGraph ->
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
-    // this is just a random dependency added to make sure I am doing it right, remove when we have a real one
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
+    compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
+
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 }
 
 test {
     useJUnitPlatform {
         includeTags 'unit'
     }
+}
+
+def integrationTest = tasks.register("integrationTest", Test) {
+    useJUnitPlatform {
+        includeTags "integration"
+    }
+    shouldRunAfter test
 }
 
 java {
@@ -91,3 +103,6 @@ task minniekenny(type: Exec) {
 }
 
 test.dependsOn minniekenny
+tasks.named("check") {
+    dependsOn integrationTest
+}
