@@ -45,7 +45,7 @@ public class MetricsHelper {
   /** {@link Measure} for number of errors from cloud call. */
   private static final Measure.MeasureDouble ERROR_COUNT =
       Measure.MeasureDouble.create(
-          CLOUD_RESOURCE_PREFIX + "/cloud/error", "Number of the errors ", COUNT);
+          CLOUD_RESOURCE_PREFIX + "/cloud/error", "Number of errors", COUNT);
 
   /**
    * This bucketing is our first pass guess at what might be interesting to see for latencies. It is
