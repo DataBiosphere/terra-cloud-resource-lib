@@ -1,5 +1,7 @@
 package bio.terra.cloudres.common;
 
+import static bio.terra.cloudres.util.LoggerHelper.logFailEvent;
+
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.base.Stopwatch;
@@ -24,7 +26,6 @@ public class OperationAnnotator {
 
   public <R> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation) {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    logger.debug("Executing Google Calls" + operation);
     try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
       recordApiCount(operation);
@@ -32,7 +33,7 @@ public class OperationAnnotator {
         return googleCall.get();
       } catch (Exception e) {
         recordErrors(getHttpErrorCode(e), operation);
-        logger.info("Failed to execute Google Call for : " + operation);
+        logFailEvent(logger, operation, clientConfig.getClientName(), getHttpErrorCode(e));
         throw e;
       } finally {
         recordLatency(stopwatch.stop().elapsed(), operation);

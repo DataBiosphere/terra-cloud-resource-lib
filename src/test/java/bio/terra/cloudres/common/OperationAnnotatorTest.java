@@ -36,7 +36,7 @@ public class OperationAnnotatorTest {
           try {
             Thread.sleep(4100);
           } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
           }
           return null;
         },

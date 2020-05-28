@@ -1,5 +1,7 @@
 package bio.terra.cloudres.google.crm;
 
+import static bio.terra.cloudres.util.LoggerHelper.logSuccessEvent;
+
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
@@ -11,7 +13,11 @@ import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A Cloud Object Wrapper(COW) for Google API Client Library: {@link ResourceManager} */
+/**
+ * A Cloud Object Wrapper(COW) for Google API Client Library: {@link ResourceManager}
+ *
+ * <p>Eventually there might be multiple COW classes for each resource type, e.g. ProjectCow.
+ */
 public class ResourceManagerCow {
   private final Logger logger = LoggerFactory.getLogger(ResourceManagerCow.class);
 
@@ -35,11 +41,14 @@ public class ResourceManagerCow {
    */
   public Project createProject(ProjectInfo projectInfo) {
     // TODO(yonghao): Add identity in logs.
-    logger.info("Creating Google project: projectInfo = " + JsonConverter.convert(projectInfo));
     Project project =
         operationAnnotator.executeGoogleCall(
             () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT);
-    logger.info("Created Google Project: " + JsonConverter.convert(project));
+    logSuccessEvent(
+        logger,
+        CloudOperation.GOOGLE_CREATE_PROJECT,
+        options.getClientName(),
+        JsonConverter.convert(project));
     return project;
   }
 }
