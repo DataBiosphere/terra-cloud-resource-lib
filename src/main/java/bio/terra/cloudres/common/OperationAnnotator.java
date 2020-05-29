@@ -1,5 +1,7 @@
 package bio.terra.cloudres.common;
 
+import static bio.terra.cloudres.util.LoggerHelper.logEvent;
+
 import bio.terra.cloudres.util.JsonConverter;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
@@ -7,18 +9,13 @@ import com.google.common.base.Stopwatch;
 import io.opencensus.common.Scope;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static bio.terra.cloudres.util.LoggerHelper.logEvent;
-
-/**
- * Annotates executing cloud operations with logs, traces, and metrics to record what happens.
- */
+/** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
@@ -53,13 +50,13 @@ public class OperationAnnotator {
         throw e;
       } finally {
         logEvent(
-                /*logger=*/ logger,
-                /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
-                /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
-                /* clientName=*/clientConfig.getClientName(),
-                /* request=*/ request,
-                /* response=*/ JsonConverter.convert(response),
-                /* response=*/errorCode);
+            /*logger=*/ logger,
+            /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
+            /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
+            /* clientName=*/ clientConfig.getClientName(),
+            /* request=*/ request,
+            /* response=*/ JsonConverter.convert(response),
+            /* response=*/ errorCode);
         recordLatency(stopwatch.stop().elapsed(), operation);
       }
     }

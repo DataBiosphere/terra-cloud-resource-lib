@@ -3,9 +3,7 @@ package bio.terra.cloudres.util;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import java.util.Map;
 
 /**
@@ -16,22 +14,25 @@ import java.util.Map;
  */
 public class JsonConverter {
   /** Converts a generic type to json */
-  public static<R> String convert(R object) {
+  public static <R> String convert(R object) {
+    if (object == null) {
+      return null;
+    }
     Gson gson = new Gson();
     return gson.toJson(object, object.getClass());
   }
-//
-//  /** Converts {@link Project} to json */
-//  public static String convert(Project project) {
-//    Gson gson = new Gson();
-//    return gson.toJson(project, Project.class);
-//  }
-//
-//  /** Converts map to format */
-//  public static String convert(ProjectInfo projectInfo) {
-//    Gson gson = new Gson();
-//    return gson.toJson(projectInfo);
-//  }
+
+  /** Converts {@link Project} to json */
+  public static String convert(Project project) {
+    Gson gson = new Gson();
+    return gson.toJson(project, Project.class);
+  }
+
+  /** Converts map to format */
+  public static String convert(ProjectInfo projectInfo) {
+    Gson gson = new Gson();
+    return gson.toJson(projectInfo);
+  }
 
   /** Converts map to format */
   public static String convert(Map<String, String> map) {
@@ -40,10 +41,9 @@ public class JsonConverter {
   }
 
   /** Merges a json format string with a map. */
-  public static String merge(String jsonString, Map<String, String> map) {
+  public static JsonObject appendFormattedString(JsonObject jsonObject, String key, String value) {
     Gson gson = new Gson();
-    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
-    map.forEach((k, v) -> jsonObject.add(k, gson.toJsonTree(v)));
-    return jsonObject.toString();
+    jsonObject.add(key, gson.fromJson(value, JsonObject.class));
+    return jsonObject;
   }
 }

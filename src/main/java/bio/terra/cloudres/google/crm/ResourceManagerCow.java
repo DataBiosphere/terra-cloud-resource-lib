@@ -8,10 +8,6 @@ import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.OptionalInt;
 
 /**
  * A Cloud Object Wrapper(COW) for Google API Client Library: {@link ResourceManager}
@@ -24,7 +20,8 @@ public class ResourceManagerCow {
   private final ResourceManagerOptions resourceManagerOptions;
   private final ResourceManager resourceManager;
 
-  public ResourceManagerCow(ClientConfig clientConfig, ResourceManagerOptions resourceManagerOptions) {
+  public ResourceManagerCow(
+      ClientConfig clientConfig, ResourceManagerOptions resourceManagerOptions) {
     this.clientConfig = clientConfig;
     this.resourceManagerOptions = resourceManagerOptions;
     this.operationAnnotator = new OperationAnnotator(clientConfig);
@@ -38,8 +35,9 @@ public class ResourceManagerCow {
    * @return the project being created.
    */
   public Project createProject(ProjectInfo projectInfo) {
-    return
-            operationAnnotator.executeGoogleCall(
-                    () -> resourceManager.create(projectInfo), CloudOperation.GOOGLE_CREATE_PROJECT, JsonConverter.convert(projectInfo));
+    return operationAnnotator.executeGoogleCall(
+        () -> resourceManager.create(projectInfo),
+        CloudOperation.GOOGLE_CREATE_PROJECT,
+        JsonConverter.convert(projectInfo));
   }
 }

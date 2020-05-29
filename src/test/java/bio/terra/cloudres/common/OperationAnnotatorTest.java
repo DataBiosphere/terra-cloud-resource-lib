@@ -41,7 +41,8 @@ public class OperationAnnotatorTest {
           }
           return null;
         },
-        CloudOperation.GOOGLE_CREATE_PROJECT, REQUEST);
+        CloudOperation.GOOGLE_CREATE_PROJECT,
+        REQUEST);
 
     sleepForSpansExport();
 
@@ -74,7 +75,8 @@ public class OperationAnnotatorTest {
                 () -> {
                   throw new ResourceManagerException(new IOException("test"));
                 },
-                CloudOperation.GOOGLE_CREATE_PROJECT, REQUEST));
+                CloudOperation.GOOGLE_CREATE_PROJECT,
+                REQUEST));
 
     sleepForSpansExport();
 
