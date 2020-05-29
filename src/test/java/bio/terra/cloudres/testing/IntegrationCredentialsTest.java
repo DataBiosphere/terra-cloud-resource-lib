@@ -2,7 +2,6 @@ package bio.terra.cloudres.testing;
 
 import static org.junit.Assert.fail;
 
-import bio.terra.cloudres.testing.IntegrationCredentials;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +11,7 @@ public class IntegrationCredentialsTest {
   public void googleCredentialsAreAccessible() {
     try {
       IntegrationCredentials.getGoogleCredentialsOrDie();
-    } catch(Exception e) {
+    } catch (Exception e) {
       fail("Should not have thrown any exception getting credentials, but threw " + e);
     }
   }
