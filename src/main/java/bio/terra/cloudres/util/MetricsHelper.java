@@ -143,8 +143,8 @@ public class MetricsHelper {
    *
    * <p>This will be in path /cloud/api with client and methodName as tags,
    *
-   * @param method The cloud api where error happens.
    * @param client the client which use this library.
+   * @param method The cloud api where error happens.
    */
   public static void recordApiCount(String client, CloudOperation method) {
     TagContext tctx =
