@@ -1,4 +1,4 @@
-package bio.terra.cloudres.common;
+package bio.terra.cloudres.testing;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
