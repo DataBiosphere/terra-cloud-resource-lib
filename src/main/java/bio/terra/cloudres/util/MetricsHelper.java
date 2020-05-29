@@ -83,7 +83,7 @@ public class MetricsHelper {
   private static final View ERROR_VIEW =
       View.create(
           ERROR_VIEW_NAME,
-          "The distribution of line lengths",
+          "The number and types of errors",
           ERROR_COUNT,
           countAggregation,
           Collections.unmodifiableList(Arrays.asList(KEY_ERROR, KEY_CLOUD_API, KEY_CLIENT)));
