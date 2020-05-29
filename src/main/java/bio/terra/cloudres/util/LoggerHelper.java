@@ -12,7 +12,16 @@ import org.slf4j.Logger;
 
 /** Helper class to log events in CRL. */
 public class LoggerHelper {
-  /** Logs cloud calls. This should be in debug level. */
+  /**
+   * Logs cloud calls. This should be in debug level.
+   *
+   * @param logger the logger to log things.
+   * @param traceId the traceId where log happens
+   * @param operation the operation to log.
+   * @param clientName the client name of the operation
+   * @param request the request of the log
+   * @param response the request of the log
+   */
   public static <R, T> void logEvent(
       Logger logger,
       TraceId traceId,
