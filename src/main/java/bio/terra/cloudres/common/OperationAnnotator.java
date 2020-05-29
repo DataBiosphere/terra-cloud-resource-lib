@@ -2,7 +2,6 @@ package bio.terra.cloudres.common;
 
 import static bio.terra.cloudres.util.LoggerHelper.logEvent;
 
-import bio.terra.cloudres.util.JsonConverter;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.base.Stopwatch;
@@ -29,10 +28,7 @@ public class OperationAnnotator {
    * Executes the Google call.
    *
    * @param googleCall: the google call to make
-   * @param operation: the {@link CloudOperation}
-   * @param request: the formatted request, this is used for logging.
-   */
-  public <R> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, String request) {
+   * @param operation: the {@link CloudOperation}r
     OptionalInt errorCode = OptionalInt.empty();
     R response = null;
 
@@ -45,6 +41,12 @@ public class OperationAnnotator {
         response = googleCall.get();
         return response;
       } catch (Exception e) {
+      recordApiCount(operation);
+      try {
+        response = googleCall.get();
+        recordLatency(stopwatch.stop().elapsed(), operation);
+        return response;
+      } catch (Exception e) {
         errorCode = getHttpErrorCode(e);
         recordErrors(errorCode, operation);
         throw e;
@@ -54,10 +56,6 @@ public class OperationAnnotator {
             /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
             /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
             /* clientName=*/ clientConfig.getClientName(),
-            /* request=*/ request,
-            /* response=*/ JsonConverter.convert(response),
-            /* response=*/ errorCode);
-        recordLatency(stopwatch.stop().elapsed(), operation);
       }
     }
   }

@@ -1,7 +1,5 @@
 package bio.terra.cloudres.util;
 
-import com.google.cloud.resourcemanager.Project;
-import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.util.Map;
@@ -13,7 +11,6 @@ import java.util.Map;
  * good format
  */
 public class JsonConverter {
-  /** Converts a generic type to json */
   public static <R> String convert(R object) {
     if (object == null) {
       return null;
@@ -34,13 +31,17 @@ public class JsonConverter {
     return gson.toJson(projectInfo);
   }
 
-  /** Converts map to format */
+  /**
+   * Converts map to format
+   *
+   * @param map the Map to convert.
+   * @return the formatted Json in String
+   */
   public static String convert(Map<String, String> map) {
     Gson gson = new Gson();
     return gson.toJson(map);
   }
 
-  /** Merges a json format string with a map. */
   public static JsonObject appendFormattedString(JsonObject jsonObject, String key, String value) {
     Gson gson = new Gson();
     jsonObject.add(key, gson.fromJson(value, JsonObject.class));
