@@ -53,7 +53,8 @@ jobs:
         run: ./gradlew test -x minniekenny
       - name: Integration Test
         run: ./gradlew integrationTest
-      - uses: actions/upload-artifact@v1
-          with:
-            name: Test Reports
-            path: build/reports/tests
+      - name: Upload Test Reports
+        uses: actions/upload-artifact@v1
+        with:
+          name: Test Reports
+          path: build/reports/tests
