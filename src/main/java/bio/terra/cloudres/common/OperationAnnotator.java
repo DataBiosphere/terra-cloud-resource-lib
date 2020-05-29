@@ -29,7 +29,7 @@ public class OperationAnnotator {
    *
    * @param googleCall: the google call to make
    * @param operation: the {@link CloudOperation}
-   * @param requestFormatter: the function about how to formatted request.
+   * @param request: the request of this execute
    */
   public <R, T> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, T request) {
     OptionalInt errorCode = OptionalInt.empty();
