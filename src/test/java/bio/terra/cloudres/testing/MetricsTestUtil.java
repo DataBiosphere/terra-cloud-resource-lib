@@ -22,7 +22,7 @@ public class MetricsTestUtil {
       Arrays.asList(
           TagValue.create(CLIENT),
           TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
-          TagValue.create("0"));
+          TagValue.create("404"));
 
   public static final View.Name API_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");

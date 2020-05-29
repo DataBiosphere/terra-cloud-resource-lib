@@ -1,7 +1,8 @@
 package bio.terra.cloudres.util;
 
+import static bio.terra.cloudres.common.OperationAnnotator.GENERIC_UNKNOWN_ERROR_CODE;
+
 import bio.terra.cloudres.common.CloudOperation;
-import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.*;
@@ -14,12 +15,6 @@ import java.util.OptionalInt;
 public class MetricsHelper {
   public static final String CLOUD_RESOURCE_PREFIX = "terra/cloudresourcelibrary";
   public static final ViewManager viewManager = Stats.getViewManager();
-
-  /**
-   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
-   * non-HTTP status errors in a single metric.
-   */
-  @VisibleForTesting static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   private static final Tagger tagger = Tags.getTagger();
   private static final TagMetadata tagMetadata =

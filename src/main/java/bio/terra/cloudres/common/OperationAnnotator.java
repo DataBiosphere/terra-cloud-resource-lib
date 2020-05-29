@@ -1,62 +1,71 @@
 package bio.terra.cloudres.common;
 
-import static bio.terra.cloudres.util.LoggerHelper.logEvent;
-
+import bio.terra.cloudres.util.JsonConverter;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.opencensus.common.Scope;
+import io.opencensus.trace.TraceId;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
-  private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
-  private final ClientConfig clientConfig;
+  /**
+   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
+   * non-HTTP status errors in a single metric.
+   */
+  public static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
-  public OperationAnnotator(ClientConfig clientConfig) {
+  private final ClientConfig clientConfig;
+  private final Logger logger;
+
+  public OperationAnnotator(ClientConfig clientConfig, Logger logger) {
     this.clientConfig = clientConfig;
+    this.logger = logger;
   }
 
   /**
    * Executes the Google call.
    *
-   * @param googleCall: the google call to make
-   * @param operation: the {@link CloudOperation}
-   * @param request: the request of this execute
+   * @param cowOperation: the {@link CowOperation} whichs contains all necessary information to
+   *     execute this call.
+   * @return the response from cloud
    */
-  public <R, T> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, T request) {
-    OptionalInt errorCode = OptionalInt.empty();
-    R response = null;
+  public <R> R executeGoogleCall(CowOperation<R> cowOperation) {
+    CloudOperation cloudOperation = cowOperation.getCloudOperation();
+    Optional<Exception> exception = Optional.empty();
 
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
+    try (Scope ss = tracer.spanBuilder(cowOperation.getCloudOperation().name()).startScopedSpan()) {
       // Record the Cloud API usage.
-      recordApiCount(operation);
+      recordApiCount(cloudOperation);
+
+      Stopwatch stopwatch = Stopwatch.createStarted();
       try {
-        response = googleCall.get();
-        recordLatency(stopwatch.stop().elapsed(), operation);
+        R response = cowOperation.execute();
+        recordLatency(stopwatch.stop().elapsed(), cloudOperation);
         return response;
       } catch (Exception e) {
-        recordLatency(stopwatch.stop().elapsed(), operation);
-        errorCode = getHttpErrorCode(e);
-        recordErrors(errorCode, operation);
+        recordLatency(stopwatch.stop().elapsed(), cloudOperation);
+        recordErrors(getHttpErrorCode(e), cloudOperation);
+        exception = Optional.of(e);
         throw e;
       } finally {
         logEvent(
-            /*logger=*/ logger,
             /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
-            /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
-            /* clientName=*/ clientConfig.getClientName(),
-            /* requestFormatter=*/ request,
-            response,
-            /* response=*/ errorCode);
+            /* operation=*/ cloudOperation,
+            /* request=*/ cowOperation.serializeRequest(),
+            /* exception=*/ exception);
       }
     }
   }
@@ -77,5 +86,46 @@ public class OperationAnnotator {
     return e instanceof BaseHttpServiceException
         ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
         : OptionalInt.empty();
+  }
+
+  /**
+   * Logs cloud calls. This should be in debug level.
+   *
+   * @param traceId the traceId where log happens
+   * @param operation the operation to log.
+   * @param request the request of the log
+   * @param exception the exception to log. Optional, only presents when exception happens.
+   */
+  @VisibleForTesting
+  void logEvent(
+      TraceId traceId, CloudOperation operation, String request, Optional<Exception> exception) {
+    if (logger.isDebugEnabled()) {
+      Map<String, String> jsonMap = new LinkedHashMap<>();
+      jsonMap.put("traceId:", traceId.toString());
+      jsonMap.put("operation:", operation.name());
+      jsonMap.put("clientName:", clientConfig.getClientName());
+
+      String jsonString = JsonConverter.convert(jsonMap);
+
+      // Now append the already formatted request & exception.
+      Gson gson = new Gson();
+      JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
+
+      // If exception presents
+      if (exception.isPresent()) {
+        // Nested Exception
+        Map<String, String> exceptionMap = new LinkedHashMap<>();
+        exceptionMap.put("message", exception.get().getMessage());
+        exceptionMap.put(
+            "errorCode",
+            String.valueOf(getHttpErrorCode(exception.get()).orElse(GENERIC_UNKNOWN_ERROR_CODE)));
+
+        JsonConverter.appendFormattedString(
+            jsonObject, "exception:", JsonConverter.convert(exceptionMap));
+      }
+
+      JsonConverter.appendFormattedString(jsonObject, "request:", request);
+      logger.debug(jsonObject.toString());
+    }
   }
 }
