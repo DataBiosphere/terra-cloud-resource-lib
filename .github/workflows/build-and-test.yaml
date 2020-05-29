@@ -10,7 +10,7 @@ on:
     branches: [ '**' ]
 env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
-  VAULT_SERVIC_ACCOUNT_PATH: secret/dsde/terra/crl-test/default/service-account.json
+  VAULT_SERVICE_ACCOUNT_PATH: secret/dsde/terra/crl-test/default/service-account.json
   # Where to store the retrieved service account credentials for Google integration tests.
   SERVICE_ACCOUNT_FILE: src/test/resources/integration_service_account.json
 jobs:
