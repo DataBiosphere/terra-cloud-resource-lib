@@ -31,7 +31,7 @@ public class ResourceManagerCow {
    * Creates a Google Project.
    *
    * @param projectInfo The {@link ProjectInfo} of the project to create
-   * @return the project being created.
+   * @return the project being created
    */
   public Project createProject(ProjectInfo projectInfo) {
     return operationAnnotator.executeGoogleCall(
