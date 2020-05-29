@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.crm;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
-import bio.terra.cloudres.util.JsonConverter;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
@@ -38,6 +37,6 @@ public class ResourceManagerCow {
     return operationAnnotator.executeGoogleCall(
         () -> resourceManager.create(projectInfo),
         CloudOperation.GOOGLE_CREATE_PROJECT,
-        JsonConverter.convert(projectInfo));
+        projectInfo);
   }
 }

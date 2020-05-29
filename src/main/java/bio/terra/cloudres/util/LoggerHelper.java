@@ -13,12 +13,12 @@ import org.slf4j.Logger;
 /** Helper class to log events in CRL. */
 public class LoggerHelper {
   /** Logs cloud calls. This should be in debug level. */
-  public static void logEvent(
+  public static <T> void logEvent(
       Logger logger,
       TraceId traceId,
       CloudOperation operation,
       String clientName,
-      String request,
+      T request,
       @Nullable String response,
       OptionalInt errorCode) {
     if (logger.isDebugEnabled()) {
@@ -35,7 +35,7 @@ public class LoggerHelper {
       // Now append the already formatted request & response.
       Gson gson = new Gson();
       JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
-      JsonConverter.appendFormattedString(jsonObject, "request:", request);
+      JsonConverter.appendFormattedString(jsonObject, "request:", JsonConverter.convert(request));
       JsonConverter.appendFormattedString(jsonObject, "response:", response);
 
       logger.debug(jsonObject.toString());

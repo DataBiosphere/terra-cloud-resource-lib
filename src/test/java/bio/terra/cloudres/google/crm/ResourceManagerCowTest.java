@@ -28,8 +28,6 @@ public class ResourceManagerCowTest {
   @Mock
   private ResourceManagerOptions mockResourceManagerOptions = mock(ResourceManagerOptions.class);
 
-  @Mock private Project mockProject = mock(Project.class);
-
   @BeforeEach
   public void setUp() throws Exception {
     // There is no public constructor for Project, so need to manually convert from a Json object.

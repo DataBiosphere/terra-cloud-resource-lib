@@ -21,8 +21,7 @@ public class LoggerHelperTest {
   private static final String CLIENT_NAME = "test_client";
   private static final String PROJECT_ID = "project-id";
   private static final String PROJECT_NAME = "myProj";
-  private static final String REQUEST = "{\"requestName\":\"request1\"}";
-  private static final String RESPONSE =
+  private static final String PROJECT_INFO_STRING =
       "{\"name\":\"myProj\",\"projectId\":\"project-id\",\"labels\":{\"k1\":\"v1\",\"k2\":\"v2\"}}";
   private static final String TRACE_ID = "1234567890123456";
   private static final Map<String, String> PROJECT_LABELS = ImmutableMap.of("k1", "v1", "k2", "v2");
@@ -71,14 +70,20 @@ public class LoggerHelperTest {
         TraceId.fromBytes(TRACE_ID.getBytes()),
         CloudOperation.GOOGLE_CREATE_PROJECT,
         CLIENT_NAME,
-        REQUEST,
-        RESPONSE,
+        PROJECT_INFO,
+        PROJECT_INFO_STRING,
         OptionalInt.empty());
 
     // Expected result in Json format
     verify(logger).debug(logArgument.capture());
     assertEquals(
-        EXPECTED_LOG_PREFIX + "\"request:\":" + REQUEST + "," + "\"response:\":" + RESPONSE + "}",
+        EXPECTED_LOG_PREFIX
+            + "\"request:\":"
+            + PROJECT_INFO_STRING
+            + ","
+            + "\"response:\":"
+            + PROJECT_INFO_STRING
+            + "}",
         logArgument.getValue());
   }
 
@@ -109,7 +114,7 @@ public class LoggerHelperTest {
         TraceId.fromBytes(TRACE_ID.getBytes()),
         CloudOperation.GOOGLE_CREATE_PROJECT,
         CLIENT_NAME,
-        REQUEST,
+        PROJECT_INFO,
         null,
         OptionalInt.of(404));
 
@@ -119,7 +124,7 @@ public class LoggerHelperTest {
         EXPECTED_LOG_PREFIX
             + "\"errorCode:\":\"404\","
             + "\"request:\":"
-            + REQUEST
+            + PROJECT_INFO_STRING
             + ",\"response:\":null}",
         logArgument.getValue());
   }
@@ -133,7 +138,7 @@ public class LoggerHelperTest {
         TraceId.fromBytes(TRACE_ID.getBytes()),
         CloudOperation.GOOGLE_CREATE_PROJECT,
         CLIENT_NAME,
-        REQUEST,
+        PROJECT_INFO_STRING,
         null,
         OptionalInt.of(404));
     // Expected result in Json format

@@ -30,9 +30,9 @@ public class OperationAnnotator {
    *
    * @param googleCall: the google call to make
    * @param operation: the {@link CloudOperation}
-   * @param request: the formatted request, this is used for logging.
+   * @param requestFormatter: the function about how to formatted request.
    */
-  public <R> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, String request) {
+  public <R, T> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, T request) {
     OptionalInt errorCode = OptionalInt.empty();
     R response = null;
 
@@ -55,7 +55,7 @@ public class OperationAnnotator {
             /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
             /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
             /* clientName=*/ clientConfig.getClientName(),
-            /* request=*/ request,
+            /* requestFormatter=*/ request,
             /* response=*/ JsonConverter.convert(response),
             /* response=*/ errorCode);
       }
