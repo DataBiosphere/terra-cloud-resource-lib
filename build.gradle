@@ -50,6 +50,7 @@ dependencies {
     dependencies { testCompile "org.mockito:mockito-core:2.+" } // mockito
 
     implementation("com.google.guava:guava:29.0-jre") // Guava
+    testImplementation 'junit:junit:4.13'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testCompile 'org.apache.httpcomponents.client5:httpclient5:5.0'
@@ -118,7 +119,3 @@ task minniekenny(type: Exec) {
 }
 
 test.dependsOn minniekenny
-
-dependencies {
-    testImplementation('junit:junit:4.13')
-}
