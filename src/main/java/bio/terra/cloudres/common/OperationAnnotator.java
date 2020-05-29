@@ -39,12 +39,13 @@ public class OperationAnnotator {
     Stopwatch stopwatch = Stopwatch.createStarted();
     try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
-      ;
       recordApiCount(operation);
       try {
         response = googleCall.get();
+        recordLatency(stopwatch.stop().elapsed(), operation);
         return response;
       } catch (Exception e) {
+        recordLatency(stopwatch.stop().elapsed(), operation);
         errorCode = getHttpErrorCode(e);
         recordErrors(errorCode, operation);
         throw e;
@@ -57,7 +58,6 @@ public class OperationAnnotator {
             /* request=*/ request,
             /* response=*/ JsonConverter.convert(response),
             /* response=*/ errorCode);
-        recordLatency(stopwatch.stop().elapsed(), operation);
       }
     }
   }
