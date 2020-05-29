@@ -1,7 +1,5 @@
 package bio.terra.cloudres.util;
 
-import com.google.cloud.resourcemanager.Project;
-import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.util.Map;
@@ -13,25 +11,19 @@ import java.util.Map;
  * good format
  */
 public class JsonConverter {
-  /** Converts a generic type to json */
+  /**
+   * Converts a generic type to json
+   *
+   * <p>For now, it can converts most Google Resource into Json as most of them are passed from
+   * Proto. But it won't work for all types. TODO(yonghao): Find solution for generic Json convert
+   * support(TypeAdaper factory and bind by Class type).
+   */
   public static <R> String convert(R object) {
     if (object == null) {
       return null;
     }
     Gson gson = new Gson();
     return gson.toJson(object, object.getClass());
-  }
-
-  /** Converts {@link Project} to json */
-  public static String convert(Project project) {
-    Gson gson = new Gson();
-    return gson.toJson(project, Project.class);
-  }
-
-  /** Converts map to format */
-  public static String convert(ProjectInfo projectInfo) {
-    Gson gson = new Gson();
-    return gson.toJson(projectInfo);
   }
 
   /** Converts map to format */

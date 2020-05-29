@@ -71,7 +71,7 @@ public class LoggerHelperTest {
         CloudOperation.GOOGLE_CREATE_PROJECT,
         CLIENT_NAME,
         PROJECT_INFO,
-        PROJECT_INFO_STRING,
+        PROJECT_INFO,
         OptionalInt.empty());
 
     // Expected result in Json format

@@ -2,7 +2,6 @@ package bio.terra.cloudres.common;
 
 import static bio.terra.cloudres.util.LoggerHelper.logEvent;
 
-import bio.terra.cloudres.util.JsonConverter;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.base.Stopwatch;
@@ -56,7 +55,7 @@ public class OperationAnnotator {
             /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
             /* clientName=*/ clientConfig.getClientName(),
             /* requestFormatter=*/ request,
-            /* response=*/ JsonConverter.convert(response),
+            response,
             /* response=*/ errorCode);
       }
     }
