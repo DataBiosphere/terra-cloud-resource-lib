@@ -5,7 +5,7 @@ package bio.terra.cloudres.common;
  *
  * <p> We expect each Cow implements its own CowOperations includes:
  * <ul>
- *     <li> The {@Link CloudOperation}
+ *     <li> The {@code CloudOperation}
  *     <li> how to execute this operation
  *     <li> how to serialize Request
  * </ul>
