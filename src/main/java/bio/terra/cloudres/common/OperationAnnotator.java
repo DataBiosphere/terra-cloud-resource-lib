@@ -11,8 +11,6 @@ import io.opencensus.trace.TraceId;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.slf4j.Logger;
@@ -40,9 +38,7 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R> R executeCowOperation(
-      CloudOperation cloudOperation,
-      CowOperation.CowExecute<R> cowExecute,
-      CowOperation.CowSerialize cowSerialize) {
+      CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
     Optional<Exception> executionException = Optional.empty();
 
     try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
@@ -104,14 +100,13 @@ public class OperationAnnotator {
     }
 
     JsonObject logEntry = new JsonObject();
-    logEntry.addProperty("traceId:", traceId.toString());
-    logEntry.addProperty("operation:", operation.name());
-    logEntry.addProperty("clientName:", clientConfig.getClientName());
+    logEntry.addProperty("traceId", traceId.toString());
+    logEntry.addProperty("operation", operation.name());
+    logEntry.addProperty("clientName", clientConfig.getClientName());
 
-    executionException.ifPresent(e -> logEntry.add("exception:", createExceptionEntry(e)));
+    executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));
 
-    Gson gson = new Gson();
-    logEntry.add("request:", request);
+    logEntry.add("request", request);
 
     logger.debug(logEntry.toString());
   }
@@ -124,11 +119,21 @@ public class OperationAnnotator {
 
   private JsonObject createExceptionEntry(Exception executionException) {
     Gson gson = new Gson();
-    // Nested Exception
-    Map<String, String> exceptionMap = new LinkedHashMap<>();
-    exceptionMap.put("message", executionException.getMessage());
+    JsonObject exceptionEntry = new JsonObject();
+    exceptionEntry.addProperty("message", executionException.getMessage());
     getHttpErrorCode(executionException)
-        .ifPresent(i -> exceptionMap.put("errorCode", String.valueOf(i)));
-    return gson.fromJson(gson.toJson(exceptionMap), JsonObject.class);
+        .ifPresent(i -> exceptionEntry.addProperty("errorCode", String.valueOf(i)));
+
+    return exceptionEntry;
+  }
+
+  /** How to execute this operation */
+  public interface CowExecute<R> {
+    R execute();
+  }
+
+  /** How to serialize Request */
+  public interface CowSerialize {
+    JsonObject serializeRequest();
   }
 }

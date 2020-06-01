@@ -54,6 +54,6 @@ public class ResourceManagerCow {
    */
   private static JsonObject convert(ProjectInfo projectInfo) {
     Gson gson = new Gson();
-    return gson.fromJson(gson.toJson(projectInfo, ProjectInfo.class), JsonObject.class);
+    return gson.toJsonTree(projectInfo, ProjectInfo.class).getAsJsonObject();
   }
 }

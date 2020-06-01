@@ -32,20 +32,20 @@ public class OperationAnnotatorTest {
   private static final String TRACE_ID = "1234567890123456";
   private static final String ERROR_MESSAGE = "error!";
   private static final String FORMATTED_EXCEPTION =
-      "\"exception:\":{\"message\":\"error!\",\"errorCode\":\"404\"},";
+      "\"exception\":{\"message\":\"error!\",\"errorCode\":\"404\"},";
   private static final String EXPECTED_LOG_PREFIX =
-      "{\"traceId:\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation:\":\"GOOGLE_CREATE_PROJECT\",\"clientName:\":\"TestClient\",";
+      "{\"traceId\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation\":\"GOOGLE_CREATE_PROJECT\",\"clientName\":\"TestClient\",";
 
   /** use the {@link ResourceManagerException} as an example of a BaseHttpServiceException. */
   private static final ResourceManagerException RM_EXCEPTION =
       new ResourceManagerException(404, ERROR_MESSAGE);
 
-  private static final CowOperation.CowExecute<?> FAILED_COW_EXECUTE =
+  private static final OperationAnnotator.CowExecute<?> FAILED_COW_EXECUTE =
       () -> {
         throw new ResourceManagerException(404, ERROR_MESSAGE);
       };
 
-  private static final CowOperation.CowExecute<?> SUCCESS_COW_EXECUTE =
+  private static final OperationAnnotator.CowExecute<?> SUCCESS_COW_EXECUTE =
       () -> {
         try {
           Thread.sleep(4100);
@@ -55,7 +55,7 @@ public class OperationAnnotatorTest {
         }
       };
 
-  private static final CowOperation.CowSerialize SERIALIZE =
+  private static final OperationAnnotator.CowSerialize SERIALIZE =
       () -> {
         return PROJECT_INFO_JSON_OBJECT;
       };
@@ -119,13 +119,13 @@ public class OperationAnnotatorTest {
    * Expected log in JSON format with no error code
    *
    * <pre>{@code
-   * { "traceId:":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation:":"GOOGLE_CREATE_PROJECT",
-   *   "clientName:":"test_client",
-   *   "request:":{
+   * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
+   *   "operation":"GOOGLE_CREATE_PROJECT",
+   *   "clientName":"test_client",
+   *   "request":{
    *      "requestName":"request1"
    *   },
-   *   "response:":{
+   *   "response":{
    *       "name":"myProj",
    *       "projectId":"project-id",
    *       "labels":{
@@ -153,21 +153,21 @@ public class OperationAnnotatorTest {
     // Expected result in Json format
     verify(mockLogger).debug(logArgument.capture());
     assertEquals(
-        EXPECTED_LOG_PREFIX + "\"request:\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
+        EXPECTED_LOG_PREFIX + "\"request\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
   }
 
   /**
    * Expected log in JSON format with empty response:
    *
    * <pre>{@code
-   * { "traceId:":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation:":"GOOGLE_CREATE_PROJECT",
-   *   "clientName:":"test_client",
-   *   "errorCode:":"404",
-   *   "request:":{
+   * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
+   *   "operation":"GOOGLE_CREATE_PROJECT",
+   *   "clientName":"test_client",
+   *   "errorCode":"404",
+   *   "request":{
    *      "requestName":"request1"
    *   },
-   *   "response:":null
+   *   "response":null
    * }
    * }</pre>
    *
@@ -188,7 +188,7 @@ public class OperationAnnotatorTest {
     // Expected result in Json format
     verify(mockLogger).debug(logArgument.capture());
     assertEquals(
-        EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request:\":" + PROJECT_INFO_STRING + "}",
+        EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request\":" + PROJECT_INFO_STRING + "}",
         logArgument.getValue());
   }
 
