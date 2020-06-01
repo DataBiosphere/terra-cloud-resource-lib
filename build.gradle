@@ -51,6 +51,7 @@ dependencies {
     dependencies { testCompile "org.mockito:mockito-core:2.+" }
 
     implementation("com.google.guava:guava:29.0-jre")
+    testImplementation 'junit:junit:4.13'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testCompile 'org.apache.httpcomponents.client5:httpclient5:5.0'
@@ -64,6 +65,13 @@ test {
     useJUnitPlatform {
         includeTags 'unit'
     }
+}
+
+def integrationTest = tasks.register("integrationTest", Test) {
+    useJUnitPlatform {
+        includeTags "integration"
+    }
+    shouldRunAfter test
 }
 
 java {
@@ -112,7 +120,3 @@ task minniekenny(type: Exec) {
 }
 
 test.dependsOn minniekenny
-
-dependencies {
-    testImplementation('junit:junit:4.13')
-}
