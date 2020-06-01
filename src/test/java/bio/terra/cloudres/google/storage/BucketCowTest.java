@@ -8,17 +8,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("integration")
-public class StorageCowTest {
+public class BucketCowTest {
   @Test
-  public void createGetDeleteBucket() {
+  public void deleteBucket() {
     StorageCow storageCow = IntegrationUtils.defaultStorageCow();
     String bucketName = IntegrationUtils.randomName();
-
-    BucketCow createdBucket = storageCow.create(BucketInfo.of(bucketName));
-    assertEquals(createdBucket.getBucketInfo().getName(), bucketName);
-
-    assertEquals(storageCow.get(bucketName).getBucketInfo().getName(), bucketName);
-
-    assertTrue(storageCow.delete(bucketName));
+    BucketCow bucketCow = storageCow.create(BucketInfo.of(bucketName));
+    assertEquals(bucketCow.getBucketInfo().getName(), bucketName);
+    assertTrue(bucketCow.delete());
   }
 }

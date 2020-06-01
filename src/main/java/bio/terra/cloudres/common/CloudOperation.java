@@ -8,5 +8,6 @@ public enum CloudOperation {
 
   // Storage Operations
   GOOGLE_CREATE_BUCKET,
+  GOOGLE_GET_BUCKET,
   GOOGLE_DELETE_BUCKET;
 }

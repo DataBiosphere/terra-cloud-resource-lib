@@ -28,61 +28,69 @@ public class StorageCow {
 
   /** See {@link Storage#create(BucketInfo, Storage.BucketTargetOption...)}. */
   public BucketCow create(BucketInfo bucketInfo) {
-    Bucket bucket = operationAnnotator.executeCowOperation(new CreateBucketOperation(bucketInfo));
+    Bucket bucket =
+        operationAnnotator.executeCowOperation(
+            new CowOperation<Bucket>() {
+              @Override
+              public CloudOperation getCloudOperation() {
+                return CloudOperation.GOOGLE_CREATE_BUCKET;
+              }
+
+              @Override
+              public Bucket execute() {
+                return storage.create(bucketInfo);
+              }
+
+              @Override
+              public String serializeRequest() {
+                Gson gson = new Gson();
+                return gson.toJson(bucketInfo, BucketInfo.class);
+              }
+            });
     return new BucketCow(clientConfig, bucket);
+  }
+
+  /** See {@link Storage#get(String, Storage.BucketGetOption...)}. */
+  public BucketCow get(String bucket) {
+    Bucket rawBucket =
+        operationAnnotator.executeCowOperation(
+            new CowOperation<Bucket>() {
+              @Override
+              public CloudOperation getCloudOperation() {
+                return CloudOperation.GOOGLE_GET_BUCKET;
+              }
+
+              @Override
+              public Bucket execute() {
+                return storage.get(bucket);
+              }
+
+              @Override
+              public String serializeRequest() {
+                return bucket;
+              }
+            });
+    return new BucketCow(clientConfig, rawBucket);
   }
 
   /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
   public boolean delete(String bucket) {
-    return operationAnnotator.executeCowOperation(new DeleteBucketOperation(bucket));
-  }
+    return operationAnnotator.executeCowOperation(
+        new CowOperation<Boolean>() {
+          @Override
+          public CloudOperation getCloudOperation() {
+            return CloudOperation.GOOGLE_DELETE_BUCKET;
+          }
 
-  /** A {@link CowOperation} for creating buckets. */
-  private class CreateBucketOperation implements CowOperation<Bucket> {
-    private final BucketInfo bucketInfo;
+          @Override
+          public Boolean execute() {
+            return storage.delete(bucket);
+          }
 
-    private CreateBucketOperation(BucketInfo bucketInfo) {
-      this.bucketInfo = bucketInfo;
-    }
-
-    @Override
-    public CloudOperation getCloudOperation() {
-      return CloudOperation.GOOGLE_CREATE_BUCKET;
-    }
-
-    @Override
-    public Bucket execute() {
-      return storage.create(bucketInfo);
-    }
-
-    @Override
-    public String serializeRequest() {
-      Gson gson = new Gson();
-      return gson.toJson(bucketInfo, BucketInfo.class);
-    }
-  }
-
-  /** A {@link CowOperation} for deleting buckets */
-  private class DeleteBucketOperation implements CowOperation<Boolean> {
-    private final String bucket;
-
-    private DeleteBucketOperation(String bucket) {
-      this.bucket = bucket;
-    }
-
-    @Override
-    public CloudOperation getCloudOperation() {
-      return CloudOperation.GOOGLE_DELETE_BUCKET;
-    }
-
-    @Override
-    public Boolean execute() {
-      return storage.delete(bucket);
-    }
-
-    @Override
-    public String serializeRequest() {
-      return bucket;
-    }
+          @Override
+          public String serializeRequest() {
+            return bucket;
+          }
+        });
   }
 }
