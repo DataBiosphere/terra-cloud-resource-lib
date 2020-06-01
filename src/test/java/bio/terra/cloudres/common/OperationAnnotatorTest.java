@@ -10,13 +10,14 @@ import com.google.cloud.resourcemanager.ResourceManagerException;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.trace.TraceId;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Test for {@link OperationAnnotator} */
 @Tag("unit")
@@ -31,37 +32,41 @@ public class OperationAnnotatorTest {
   private static final String EXPECTED_LOG_PREFIX =
       "{\"traceId:\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation:\":\"GOOGLE_CREATE_PROJECT\",\"clientName:\":\"TestClient\",";
 
+  /** use the {@link ResourceManagerException} as an example of a BaseHttpServiceException. */
   private static final ResourceManagerException RM_EXCEPTION =
       new ResourceManagerException(404, ERROR_MESSAGE);
 
-  private OperationAnnotator operationAnnotator;
-  private ClientConfig clientConfig;
+  private static final Supplier FAILED_COW_EXECUTE_SUPPLIER =
+      () -> {
+        throw RM_EXCEPTION;
+      };
+
+  private static final Supplier SUCCESS_COW_EXECUTE_SUPPLIER =
+      () -> {
+        try {
+          Thread.sleep(4100);
+          return null;
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      };
+
   ArgumentCaptor<String> logArgument = ArgumentCaptor.forClass(String.class);
-  @Mock private Logger logger = mock(Logger.class);
-  @Mock private CowOperation mockCowOperation = mock(CowOperation.class);
 
-  @BeforeEach
-  public void setUp() throws Exception {
-    clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
-    operationAnnotator = new OperationAnnotator(clientConfig, logger);
+  private Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
 
-    when(mockCowOperation.getCloudOperation()).thenReturn(CloudOperation.GOOGLE_CREATE_PROJECT);
-    when(mockCowOperation.serializeRequest()).thenReturn(PROJECT_INFO_STRING);
-  }
+  @Mock private Logger mockLogger = mock(Logger.class);
+
+  private ClientConfig clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
+  private OperationAnnotator operationAnnotator = new OperationAnnotator(clientConfig, logger);
+  private TestCowOperation cowOperation = new TestCowOperation(SUCCESS_COW_EXECUTE_SUPPLIER);
 
   @Test
   public void testExecuteGoogleCloudCall_success() throws Exception {
     long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    when(mockCowOperation.execute())
-        .thenAnswer(
-            invocation -> {
-              Thread.sleep(4100);
-              return null;
-            });
-
-    operationAnnotator.executeGoogleCall(mockCowOperation);
+    operationAnnotator.executeCowOperation(cowOperation);
 
     sleepForSpansExport();
 
@@ -87,15 +92,10 @@ public class OperationAnnotatorTest {
     long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    when(mockCowOperation.execute())
-        .thenAnswer(
-            invocation -> {
-              throw RM_EXCEPTION;
-            });
+    cowOperation = new TestCowOperation(FAILED_COW_EXECUTE_SUPPLIER);
 
     Assert.assertThrows(
-        ResourceManagerException.class,
-        () -> operationAnnotator.executeGoogleCall(mockCowOperation));
+        ResourceManagerException.class, () -> operationAnnotator.executeCowOperation(cowOperation));
 
     sleepForSpansExport();
 
@@ -132,7 +132,8 @@ public class OperationAnnotatorTest {
    */
   @Test
   public void testLogEvent_nullError() throws Exception {
-    when(logger.isDebugEnabled()).thenReturn(true);
+    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
+    when(mockLogger.isDebugEnabled()).thenReturn(true);
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
@@ -141,7 +142,7 @@ public class OperationAnnotatorTest {
         Optional.empty());
 
     // Expected result in Json format
-    verify(logger).debug(logArgument.capture());
+    verify(mockLogger).debug(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + "\"request:\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
   }
@@ -166,7 +167,8 @@ public class OperationAnnotatorTest {
    */
   @Test
   public void testLogEvent_nullResponse() throws Exception {
-    when(logger.isDebugEnabled()).thenReturn(true);
+    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
+    when(mockLogger.isDebugEnabled()).thenReturn(true);
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
@@ -175,7 +177,7 @@ public class OperationAnnotatorTest {
         Optional.of(RM_EXCEPTION));
 
     // Expected result in Json format
-    verify(logger).debug(logArgument.capture());
+    verify(mockLogger).debug(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request:\":" + PROJECT_INFO_STRING + "}",
         logArgument.getValue());
@@ -183,7 +185,8 @@ public class OperationAnnotatorTest {
 
   @Test
   public void testLogEvent_disableDebug() throws Exception {
-    when(logger.isDebugEnabled()).thenReturn(false);
+    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
+    when(mockLogger.isDebugEnabled()).thenReturn(false);
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
@@ -191,6 +194,29 @@ public class OperationAnnotatorTest {
         PROJECT_INFO_STRING,
         Optional.of(RM_EXCEPTION));
     // Expected result in Json format
-    verify(logger, never()).debug(anyString());
+    verify(mockLogger, never()).debug(anyString());
+  }
+
+  private static class TestCowOperation<R> implements CowOperation<R> {
+    private Supplier<R> executeFunction;
+
+    TestCowOperation(Supplier<R> executeFunction) {
+      this.executeFunction = executeFunction;
+    }
+
+    @Override
+    public CloudOperation getCloudOperation() {
+      return CloudOperation.GOOGLE_CREATE_PROJECT;
+    }
+
+    @Override
+    public R execute() {
+      return executeFunction.get();
+    }
+
+    @Override
+    public String serializeRequest() {
+      return PROJECT_INFO_STRING;
+    }
   }
 }
