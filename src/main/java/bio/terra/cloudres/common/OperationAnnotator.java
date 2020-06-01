@@ -104,22 +104,12 @@ public class OperationAnnotator {
     }
     Gson gson = new Gson();
 
-    Map<String, String> jsonMap = new LinkedHashMap<>();
-    jsonMap.put("traceId:", traceId.toString());
-    jsonMap.put("operation:", operation.name());
-    jsonMap.put("clientName:", clientConfig.getClientName());
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("traceId:", traceId.toString());
+    jsonObject.addProperty("operation:", operation.name());
+    jsonObject.addProperty("clientName:", clientConfig.getClientName());
 
-    String jsonString = gson.toJson(jsonMap);
-
-    // Now append the already formatted request & exception.
-    JsonObject jsonObject = gson.fromJson(jsonString, JsonObject.class);
-
-    // If exception presents
-    if (executionException.isPresent()) {
-      // Nested Exception
-      Map<String, String> exceptionMap = getExceptionMap(executionException.get());
-      jsonObject.add("exception:", gson.fromJson(gson.toJson(exceptionMap), JsonObject.class));
-    }
+    createExceptionEntry(executionException, jsonObject);
 
     jsonObject.add("request:", gson.fromJson(request, JsonObject.class));
 
@@ -132,13 +122,19 @@ public class OperationAnnotator {
         : OptionalInt.empty();
   }
 
-  private Map<String, String> getExceptionMap(Exception executionException) {
+  private void createExceptionEntry(Optional<Exception> executionException, JsonObject jsonObject) {
+    if (!executionException.isPresent()) {
+      return;
+    }
+
+    Gson gson = new Gson();
     // Nested Exception
     Map<String, String> exceptionMap = new LinkedHashMap<>();
-    exceptionMap.put("message", executionException.getMessage());
+    exceptionMap.put("message", executionException.get().getMessage());
     exceptionMap.put(
         "errorCode",
-        String.valueOf(getHttpErrorCode(executionException).orElse(GENERIC_UNKNOWN_ERROR_CODE)));
-    return exceptionMap;
+        String.valueOf(
+            getHttpErrorCode(executionException.get()).orElse(GENERIC_UNKNOWN_ERROR_CODE)));
+    jsonObject.add("exception:", gson.fromJson(gson.toJson(exceptionMap), JsonObject.class));
   }
 }

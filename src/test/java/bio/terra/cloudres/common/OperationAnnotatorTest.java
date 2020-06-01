@@ -193,7 +193,8 @@ public class OperationAnnotatorTest {
         CloudOperation.GOOGLE_CREATE_PROJECT,
         PROJECT_INFO_STRING,
         Optional.of(RM_EXCEPTION));
-    // Expected result in Json format
+
+    // no expected result in this case
     verify(mockLogger, never()).debug(anyString());
   }
 
