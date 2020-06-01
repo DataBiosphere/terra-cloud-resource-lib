@@ -4,11 +4,11 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.CowOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
-import bio.terra.cloudres.util.JsonConverter;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,29 +40,33 @@ public class ResourceManagerCow {
    * @return the project being created
    */
   public Project createProject(ProjectInfo projectInfo) {
-    return operationAnnotator.executeGoogleCall(new CreateProjectOperation(projectInfo));
+    return operationAnnotator.executeCowOperation(
+        new CowOperation<Project>() {
+          @Override
+          public CloudOperation getCloudOperation() {
+            return CloudOperation.GOOGLE_CREATE_PROJECT;
+          }
+
+          @Override
+          public Project execute() {
+            return resourceManager.create(projectInfo);
+          }
+
+          @Override
+          public String serializeRequest() {
+            return convert(projectInfo);
+          }
+        });
   }
 
-  private class CreateProjectOperation implements CowOperation<Project> {
-    private final ProjectInfo projectInfo;
-
-    CreateProjectOperation(ProjectInfo projectInfo) {
-      this.projectInfo = projectInfo;
-    }
-
-    @Override
-    public CloudOperation getCloudOperation() {
-      return CloudOperation.GOOGLE_CREATE_PROJECT;
-    }
-
-    @Override
-    public Project execute() {
-      return resourceManager.create(projectInfo);
-    }
-
-    @Override
-    public String serializeRequest() {
-      return JsonConverter.convert(projectInfo);
-    }
+  /**
+   * Converts {@link ProjectInfo} to Json formatted String
+   *
+   * @param projectInfo: the projectInfo to convert
+   * @return the formatted Json in String
+   */
+  private static String convert(ProjectInfo projectInfo) {
+    Gson gson = new Gson();
+    return gson.toJson(projectInfo, ProjectInfo.class);
   }
 }
