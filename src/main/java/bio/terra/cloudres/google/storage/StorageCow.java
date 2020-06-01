@@ -32,7 +32,7 @@ public class StorageCow {
     return new BucketCow(clientConfig, bucket);
   }
 
-  /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}.*/
+  /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
   public boolean delete(String bucket) {
     return operationAnnotator.executeGoogleCall(new DeleteBucketOperation(bucket));
   }
@@ -62,27 +62,27 @@ public class StorageCow {
     }
   }
 
-  /** A {@link CowOperation} for deleting buckets*/
+  /** A {@link CowOperation} for deleting buckets */
   private class DeleteBucketOperation implements CowOperation<Boolean> {
-      private final String bucket;
+    private final String bucket;
 
-      private DeleteBucketOperation(String bucket) {
-          this.bucket = bucket;
-      }
+    private DeleteBucketOperation(String bucket) {
+      this.bucket = bucket;
+    }
 
-      @Override
-      public CloudOperation getCloudOperation() {
-          return CloudOperation.GOOGLE_DELETE_BUCKET;
-      }
+    @Override
+    public CloudOperation getCloudOperation() {
+      return CloudOperation.GOOGLE_DELETE_BUCKET;
+    }
 
-      @Override
-      public Boolean execute() {
-          return storage.delete(bucket);
-      }
+    @Override
+    public Boolean execute() {
+      return storage.delete(bucket);
+    }
 
-      @Override
-      public String serializeRequest() {
-          return bucket;
-      }
+    @Override
+    public String serializeRequest() {
+      return bucket;
+    }
   }
 }
