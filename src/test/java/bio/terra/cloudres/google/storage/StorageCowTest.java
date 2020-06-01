@@ -8,10 +8,9 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.StorageOptions;
+import java.util.UUID;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
 
 @Tag("integration")
 public class StorageCowTest {

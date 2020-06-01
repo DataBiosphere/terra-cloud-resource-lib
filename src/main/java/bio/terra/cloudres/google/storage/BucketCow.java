@@ -22,6 +22,6 @@ public class BucketCow {
   }
 
   public BucketInfo getBucketInfo() {
-      return bucket;
+    return bucket;
   }
 }
