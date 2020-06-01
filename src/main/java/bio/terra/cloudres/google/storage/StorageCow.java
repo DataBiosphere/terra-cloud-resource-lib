@@ -28,13 +28,13 @@ public class StorageCow {
 
   /** See {@link Storage#create(BucketInfo, Storage.BucketTargetOption...)}. */
   public BucketCow create(BucketInfo bucketInfo) {
-    Bucket bucket = operationAnnotator.executeGoogleCall(new CreateBucketOperation(bucketInfo));
+    Bucket bucket = operationAnnotator.executeCowOperation(new CreateBucketOperation(bucketInfo));
     return new BucketCow(clientConfig, bucket);
   }
 
   /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
   public boolean delete(String bucket) {
-    return operationAnnotator.executeGoogleCall(new DeleteBucketOperation(bucket));
+    return operationAnnotator.executeCowOperation(new DeleteBucketOperation(bucket));
   }
 
   /** A {@link CowOperation} for creating buckets. */
