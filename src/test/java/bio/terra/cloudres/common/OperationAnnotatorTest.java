@@ -71,7 +71,7 @@ public class OperationAnnotatorTest {
 
   @Test
   public void testExecuteGoogleCloudCall_success() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
     operationAnnotator.executeCowOperation(GOOGLE_CREATE_PROJECT, SUCCESS_COW_EXECUTE, SERIALIZE);
@@ -82,7 +82,7 @@ public class OperationAnnotatorTest {
     assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
 
     // No error
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT, errorCount, 0);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
 
     // This rely on the latency DistributionData defined in {@link MetricHelper} where 4s - 8s are
     // in the same bucket.
@@ -97,7 +97,7 @@ public class OperationAnnotatorTest {
 
   @Test
   public void testExecuteGoogleCloudCall_withException() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
     Assert.assertThrows(
@@ -112,7 +112,7 @@ public class OperationAnnotatorTest {
     assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
 
     // Assert error count increase by 1
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT, errorCount, 1);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
   }
 
   /**
