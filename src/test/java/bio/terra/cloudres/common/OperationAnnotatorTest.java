@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.ResourceManagerException;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.trace.TraceId;
 import java.util.Optional;
@@ -25,6 +27,8 @@ public class OperationAnnotatorTest {
   private static final String CLIENT = "TestClient";
   private static final String PROJECT_INFO_STRING =
       "{\"name\":\"myProj\",\"projectId\":\"project-id\",\"labels\":{\"k1\":\"v1\",\"k2\":\"v2\"}}";
+  private static final JsonObject PROJECT_INFO_JSON_OBJECT =
+      new Gson().fromJson(PROJECT_INFO_STRING, JsonObject.class);
   private static final String TRACE_ID = "1234567890123456";
   private static final String ERROR_MESSAGE = "error!";
   private static final String FORMATTED_EXCEPTION =
@@ -38,7 +42,7 @@ public class OperationAnnotatorTest {
 
   private static final Supplier FAILED_COW_EXECUTE_SUPPLIER =
       () -> {
-        throw RM_EXCEPTION;
+        throw new ResourceManagerException(404, ERROR_MESSAGE);
       };
 
   private static final Supplier SUCCESS_COW_EXECUTE_SUPPLIER =
@@ -53,7 +57,7 @@ public class OperationAnnotatorTest {
 
   ArgumentCaptor<String> logArgument = ArgumentCaptor.forClass(String.class);
 
-  private Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
+  private final Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
 
   @Mock private Logger mockLogger = mock(Logger.class);
 
@@ -138,7 +142,7 @@ public class OperationAnnotatorTest {
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
         CloudOperation.GOOGLE_CREATE_PROJECT,
-        PROJECT_INFO_STRING,
+        PROJECT_INFO_JSON_OBJECT,
         Optional.empty());
 
     // Expected result in Json format
@@ -173,7 +177,7 @@ public class OperationAnnotatorTest {
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
         CloudOperation.GOOGLE_CREATE_PROJECT,
-        PROJECT_INFO_STRING,
+        PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
     // Expected result in Json format
@@ -191,7 +195,7 @@ public class OperationAnnotatorTest {
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
         CloudOperation.GOOGLE_CREATE_PROJECT,
-        PROJECT_INFO_STRING,
+        PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
     // no expected result in this case
@@ -216,8 +220,8 @@ public class OperationAnnotatorTest {
     }
 
     @Override
-    public String serializeRequest() {
-      return PROJECT_INFO_STRING;
+    public JsonObject serializeRequest() {
+      return PROJECT_INFO_JSON_OBJECT;
     }
   }
 }

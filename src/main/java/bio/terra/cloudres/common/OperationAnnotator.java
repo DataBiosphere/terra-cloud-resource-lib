@@ -97,23 +97,23 @@ public class OperationAnnotator {
   void logEvent(
       TraceId traceId,
       CloudOperation operation,
-      String request,
+      JsonObject request,
       Optional<Exception> executionException) {
     if (!logger.isDebugEnabled()) {
       return;
     }
+
+    JsonObject logEntry = new JsonObject();
+    logEntry.addProperty("traceId:", traceId.toString());
+    logEntry.addProperty("operation:", operation.name());
+    logEntry.addProperty("clientName:", clientConfig.getClientName());
+
+    executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));
+
     Gson gson = new Gson();
+    logEntry.add("request:", request);
 
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("traceId:", traceId.toString());
-    jsonObject.addProperty("operation:", operation.name());
-    jsonObject.addProperty("clientName:", clientConfig.getClientName());
-
-    createExceptionEntry(executionException, jsonObject);
-
-    jsonObject.add("request:", gson.fromJson(request, JsonObject.class));
-
-    logger.debug(jsonObject.toString());
+    logger.debug(logEntry.toString());
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {
@@ -122,19 +122,14 @@ public class OperationAnnotator {
         : OptionalInt.empty();
   }
 
-  private void createExceptionEntry(Optional<Exception> executionException, JsonObject jsonObject) {
-    if (!executionException.isPresent()) {
-      return;
-    }
-
+  private JsonObject createExceptionEntry(Exception executionException) {
     Gson gson = new Gson();
     // Nested Exception
     Map<String, String> exceptionMap = new LinkedHashMap<>();
-    exceptionMap.put("message", executionException.get().getMessage());
+    exceptionMap.put("message", executionException.getMessage());
     exceptionMap.put(
         "errorCode",
-        String.valueOf(
-            getHttpErrorCode(executionException.get()).orElse(GENERIC_UNKNOWN_ERROR_CODE)));
-    jsonObject.add("exception:", gson.fromJson(gson.toJson(exceptionMap), JsonObject.class));
+        String.valueOf(getHttpErrorCode(executionException).orElse(GENERIC_UNKNOWN_ERROR_CODE)));
+    return gson.fromJson(gson.toJson(exceptionMap), JsonObject.class);
   }
 }

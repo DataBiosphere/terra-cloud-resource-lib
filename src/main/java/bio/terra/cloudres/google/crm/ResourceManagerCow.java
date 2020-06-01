@@ -9,6 +9,7 @@ import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,20 +54,20 @@ public class ResourceManagerCow {
           }
 
           @Override
-          public String serializeRequest() {
+          public JsonObject serializeRequest() {
             return convert(projectInfo);
           }
         });
   }
 
   /**
-   * Converts {@link ProjectInfo} to Json formatted String
+   * Converts {@link ProjectInfo} to {@link JsonObject}
    *
    * @param projectInfo: the projectInfo to convert
-   * @return the formatted Json in String
+   * @return the formatted JsonObject
    */
-  private static String convert(ProjectInfo projectInfo) {
+  private static JsonObject convert(ProjectInfo projectInfo) {
     Gson gson = new Gson();
-    return gson.toJson(projectInfo, ProjectInfo.class);
+    return gson.fromJson(gson.toJson(projectInfo, ProjectInfo.class), JsonObject.class);
   }
 }
