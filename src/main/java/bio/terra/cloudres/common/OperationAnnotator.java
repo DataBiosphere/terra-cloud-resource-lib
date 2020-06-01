@@ -20,11 +20,6 @@ import org.slf4j.Logger;
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
-  /**
-   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
-   * non-HTTP status errors in a single metric.
-   */
-  public static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   private final ClientConfig clientConfig;
 
@@ -39,24 +34,29 @@ public class OperationAnnotator {
   /**
    * Executes the CowOperation.
    *
-   * @param cowOperation: the {@link CowOperation} whichs contains all necessary information to
-   *     execute this call.
+   * @param cloudOperation: the {@link CloudOperation} to operate.
+   * @param cowExecute: how to execute this cloud operation
+   * @param cowSerialize: how to serialize request
    * @return the result of executing the {@code cowOperation}
    */
-  public <R> R executeCowOperation(CowOperation<R> cowOperation) {
-    CloudOperation cloudOperation = cowOperation.getCloudOperation();
+  public <R> R executeCowOperation(
+      CloudOperation cloudOperation,
+      CowOperation.CowExecute<R> cowExecute,
+      CowOperation.CowSerialize cowSerialize) {
     Optional<Exception> executionException = Optional.empty();
 
-    try (Scope ss = tracer.spanBuilder(cowOperation.getCloudOperation().name()).startScopedSpan()) {
+    try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
       recordApiCount(cloudOperation);
 
       Stopwatch stopwatch = Stopwatch.createStarted();
       try {
-        R response = cowOperation.execute();
+        R response = cowExecute.execute();
         recordLatency(stopwatch.stop().elapsed(), cloudOperation);
         return response;
       } catch (Exception e) {
+        // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
+        // different scenarios.
         recordLatency(stopwatch.stop().elapsed(), cloudOperation);
         recordErrors(getHttpErrorCode(e), cloudOperation);
         executionException = Optional.of(e);
@@ -65,7 +65,7 @@ public class OperationAnnotator {
         logEvent(
             tracer.getCurrentSpan().getContext().getTraceId(),
             cloudOperation,
-            cowOperation.serializeRequest(),
+            cowSerialize.serializeRequest(),
             executionException);
       }
     }
@@ -108,7 +108,7 @@ public class OperationAnnotator {
     logEntry.addProperty("operation:", operation.name());
     logEntry.addProperty("clientName:", clientConfig.getClientName());
 
-    executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));
+    executionException.ifPresent(e -> logEntry.add("exception:", createExceptionEntry(e)));
 
     Gson gson = new Gson();
     logEntry.add("request:", request);
@@ -127,9 +127,8 @@ public class OperationAnnotator {
     // Nested Exception
     Map<String, String> exceptionMap = new LinkedHashMap<>();
     exceptionMap.put("message", executionException.getMessage());
-    exceptionMap.put(
-        "errorCode",
-        String.valueOf(getHttpErrorCode(executionException).orElse(GENERIC_UNKNOWN_ERROR_CODE)));
+    getHttpErrorCode(executionException)
+        .ifPresent(i -> exceptionMap.put("errorCode", String.valueOf(i)));
     return gson.fromJson(gson.toJson(exceptionMap), JsonObject.class);
   }
 }

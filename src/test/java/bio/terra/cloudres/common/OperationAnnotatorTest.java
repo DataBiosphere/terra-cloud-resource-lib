@@ -1,5 +1,6 @@
 package bio.terra.cloudres.common;
 
+import static bio.terra.cloudres.common.CloudOperation.GOOGLE_CREATE_PROJECT;
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,7 +13,6 @@ import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.trace.TraceId;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -40,12 +40,12 @@ public class OperationAnnotatorTest {
   private static final ResourceManagerException RM_EXCEPTION =
       new ResourceManagerException(404, ERROR_MESSAGE);
 
-  private static final Supplier FAILED_COW_EXECUTE_SUPPLIER =
+  private static final CowOperation.CowExecute<?> FAILED_COW_EXECUTE =
       () -> {
         throw new ResourceManagerException(404, ERROR_MESSAGE);
       };
 
-  private static final Supplier SUCCESS_COW_EXECUTE_SUPPLIER =
+  private static final CowOperation.CowExecute<?> SUCCESS_COW_EXECUTE =
       () -> {
         try {
           Thread.sleep(4100);
@@ -53,6 +53,11 @@ public class OperationAnnotatorTest {
         } catch (InterruptedException e) {
           throw new RuntimeException(e);
         }
+      };
+
+  private static final CowOperation.CowSerialize SERIALIZE =
+      () -> {
+        return PROJECT_INFO_JSON_OBJECT;
       };
 
   ArgumentCaptor<String> logArgument = ArgumentCaptor.forClass(String.class);
@@ -63,14 +68,13 @@ public class OperationAnnotatorTest {
 
   private ClientConfig clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
   private OperationAnnotator operationAnnotator = new OperationAnnotator(clientConfig, logger);
-  private TestCowOperation cowOperation = new TestCowOperation(SUCCESS_COW_EXECUTE_SUPPLIER);
 
   @Test
   public void testExecuteGoogleCloudCall_success() throws Exception {
     long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    operationAnnotator.executeCowOperation(cowOperation);
+    operationAnnotator.executeCowOperation(GOOGLE_CREATE_PROJECT, SUCCESS_COW_EXECUTE, SERIALIZE);
 
     sleepForSpansExport();
 
@@ -96,10 +100,11 @@ public class OperationAnnotatorTest {
     long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    cowOperation = new TestCowOperation(FAILED_COW_EXECUTE_SUPPLIER);
-
     Assert.assertThrows(
-        ResourceManagerException.class, () -> operationAnnotator.executeCowOperation(cowOperation));
+        ResourceManagerException.class,
+        () ->
+            operationAnnotator.executeCowOperation(
+                GOOGLE_CREATE_PROJECT, FAILED_COW_EXECUTE, SERIALIZE));
 
     sleepForSpansExport();
 
@@ -141,7 +146,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        CloudOperation.GOOGLE_CREATE_PROJECT,
+        GOOGLE_CREATE_PROJECT,
         PROJECT_INFO_JSON_OBJECT,
         Optional.empty());
 
@@ -176,7 +181,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        CloudOperation.GOOGLE_CREATE_PROJECT,
+        GOOGLE_CREATE_PROJECT,
         PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
@@ -194,34 +199,11 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        CloudOperation.GOOGLE_CREATE_PROJECT,
+        GOOGLE_CREATE_PROJECT,
         PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
     // no expected result in this case
     verify(mockLogger, never()).debug(anyString());
-  }
-
-  private static class TestCowOperation<R> implements CowOperation<R> {
-    private Supplier<R> executeFunction;
-
-    TestCowOperation(Supplier<R> executeFunction) {
-      this.executeFunction = executeFunction;
-    }
-
-    @Override
-    public CloudOperation getCloudOperation() {
-      return CloudOperation.GOOGLE_CREATE_PROJECT;
-    }
-
-    @Override
-    public R execute() {
-      return executeFunction.get();
-    }
-
-    @Override
-    public JsonObject serializeRequest() {
-      return PROJECT_INFO_JSON_OBJECT;
-    }
   }
 }

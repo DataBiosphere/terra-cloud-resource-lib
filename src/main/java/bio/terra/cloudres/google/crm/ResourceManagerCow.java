@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.crm;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
-import bio.terra.cloudres.common.CowOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
@@ -42,22 +41,9 @@ public class ResourceManagerCow {
    */
   public Project createProject(ProjectInfo projectInfo) {
     return operationAnnotator.executeCowOperation(
-        new CowOperation<Project>() {
-          @Override
-          public CloudOperation getCloudOperation() {
-            return CloudOperation.GOOGLE_CREATE_PROJECT;
-          }
-
-          @Override
-          public Project execute() {
-            return resourceManager.create(projectInfo);
-          }
-
-          @Override
-          public JsonObject serializeRequest() {
-            return convert(projectInfo);
-          }
-        });
+        CloudOperation.GOOGLE_CREATE_PROJECT,
+        () -> resourceManager.create(projectInfo),
+        () -> convert(projectInfo));
   }
 
   /**
