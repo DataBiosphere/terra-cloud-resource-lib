@@ -32,22 +32,9 @@ public class StorageCow {
   public BlobCow create(BlobInfo blobInfo) {
     Blob blob =
         operationAnnotator.executeCowOperation(
-            new CowOperation<Blob>() {
-              @Override
-              public CloudOperation getCloudOperation() {
-                return CloudOperation.GOOGLE_CREATE_BLOB;
-              }
-
-              @Override
-              public Blob execute() {
-                return storage.create(blobInfo);
-              }
-
-              @Override
-              public String serializeRequest() {
-                return SerializeUtils.convert(blobInfo);
-              }
-            });
+            CloudOperation.GOOGLE_CREATE_BLOB,
+            () -> storage.create(blobInfo),
+            () -> SerializeUtils.convert(blobInfo));
     return new BlobCow(clientConfig, blob);
   }
 
@@ -61,26 +48,16 @@ public class StorageCow {
     return new BucketCow(clientConfig, bucket);
   }
 
-  /** See {@link Storage#get(BlobId)}. */
+  /** See {@link Storage#get(BlobId)}. Returns null if blob is not found. */
   public BlobCow get(BlobId blob) {
     Blob rawBlob =
         operationAnnotator.executeCowOperation(
-            new CowOperation<Blob>() {
-              @Override
-              public CloudOperation getCloudOperation() {
-                return CloudOperation.GOOGLE_GET_BLOB;
-              }
-
-              @Override
-              public Blob execute() {
-                return storage.get(blob);
-              }
-
-              @Override
-              public String serializeRequest() {
-                return SerializeUtils.convert(blob);
-              }
-            });
+            CloudOperation.GOOGLE_GET_BLOB,
+            () -> storage.get(blob),
+            () -> SerializeUtils.convert(blob));
+    if (rawBlob == null) {
+      return null;
+    }
     return new BlobCow(clientConfig, rawBlob);
   }
 
@@ -103,22 +80,9 @@ public class StorageCow {
   /** See {@link Storage#delete(BlobId)}. */
   public boolean delete(BlobId blob) {
     return operationAnnotator.executeCowOperation(
-        new CowOperation<Boolean>() {
-          @Override
-          public CloudOperation getCloudOperation() {
-            return CloudOperation.GOOGLE_DELETE_BLOB;
-          }
-
-          @Override
-          public Boolean execute() {
-            return storage.delete(blob);
-          }
-
-          @Override
-          public String serializeRequest() {
-            return SerializeUtils.convert(blob);
-          }
-        });
+        CloudOperation.GOOGLE_DELETE_BLOB,
+        () -> storage.delete(blob),
+        () -> SerializeUtils.convert(blob));
   }
 
   /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
@@ -138,21 +102,8 @@ public class StorageCow {
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */
   public WriteChannel writer(BlobInfo blobInfo) {
     return operationAnnotator.executeCowOperation(
-        new CowOperation<WriteChannel>() {
-          @Override
-          public CloudOperation getCloudOperation() {
-            return CloudOperation.GOOGLE_CREATE_BLOB_AND_WRITER;
-          }
-
-          @Override
-          public WriteChannel execute() {
-            return storage.writer(blobInfo);
-          }
-
-          @Override
-          public String serializeRequest() {
-            return SerializeUtils.convert(blobInfo);
-          }
-        });
+        CloudOperation.GOOGLE_CREATE_BLOB_AND_WRITER,
+        () -> storage.writer(blobInfo),
+        () -> SerializeUtils.convert(blobInfo));
   }
 }
