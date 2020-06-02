@@ -2,13 +2,13 @@ package bio.terra.cloudres.google.storage;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
-import bio.terra.cloudres.common.CowOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,23 +30,9 @@ public class StorageCow {
   public BucketCow create(BucketInfo bucketInfo) {
     Bucket bucket =
         operationAnnotator.executeCowOperation(
-            new CowOperation<Bucket>() {
-              @Override
-              public CloudOperation getCloudOperation() {
-                return CloudOperation.GOOGLE_CREATE_BUCKET;
-              }
-
-              @Override
-              public Bucket execute() {
-                return storage.create(bucketInfo);
-              }
-
-              @Override
-              public String serializeRequest() {
-                Gson gson = new Gson();
-                return gson.toJson(bucketInfo, BucketInfo.class);
-              }
-            });
+            CloudOperation.GOOGLE_CREATE_BUCKET,
+            () -> storage.create(bucketInfo),
+            () -> new Gson().toJsonTree(bucketInfo, BucketInfo.class).getAsJsonObject());
     return new BucketCow(clientConfig, bucket);
   }
 
@@ -54,43 +40,23 @@ public class StorageCow {
   public BucketCow get(String bucket) {
     Bucket rawBucket =
         operationAnnotator.executeCowOperation(
-            new CowOperation<Bucket>() {
-              @Override
-              public CloudOperation getCloudOperation() {
-                return CloudOperation.GOOGLE_GET_BUCKET;
-              }
-
-              @Override
-              public Bucket execute() {
-                return storage.get(bucket);
-              }
-
-              @Override
-              public String serializeRequest() {
-                return bucket;
-              }
-            });
+            CloudOperation.GOOGLE_GET_BUCKET,
+            () -> storage.get(bucket),
+            () -> serializeBucketName(bucket));
     return new BucketCow(clientConfig, rawBucket);
   }
 
   /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
   public boolean delete(String bucket) {
     return operationAnnotator.executeCowOperation(
-        new CowOperation<Boolean>() {
-          @Override
-          public CloudOperation getCloudOperation() {
-            return CloudOperation.GOOGLE_DELETE_BUCKET;
-          }
+        CloudOperation.GOOGLE_DELETE_BUCKET,
+        () -> storage.delete(bucket),
+        () -> serializeBucketName(bucket));
+  }
 
-          @Override
-          public Boolean execute() {
-            return storage.delete(bucket);
-          }
-
-          @Override
-          public String serializeRequest() {
-            return bucket;
-          }
-        });
+  private static JsonObject serializeBucketName(String bucketName) {
+    JsonObject result = new JsonObject();
+    result.addProperty("bucket_name", bucketName);
+    return result;
   }
 }

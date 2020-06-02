@@ -2,10 +2,10 @@ package bio.terra.cloudres.google.storage;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
-import bio.terra.cloudres.common.CowOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,21 +28,12 @@ public class BucketCow {
   /** See {@link Bucket#delete(Bucket.BucketSourceOption...)} */
   public boolean delete() {
     return operationAnnotator.executeCowOperation(
-        new CowOperation<Boolean>() {
-          @Override
-          public CloudOperation getCloudOperation() {
-            return CloudOperation.GOOGLE_DELETE_BUCKET;
-          }
-
-          @Override
-          public Boolean execute() {
-            return bucket.delete();
-          }
-
-          @Override
-          public String serializeRequest() {
-            return bucket.getName();
-          }
+        CloudOperation.GOOGLE_DELETE_BUCKET,
+        () -> bucket.delete(),
+        () -> {
+          JsonObject request = new JsonObject();
+          request.addProperty("bucket_name", bucket.getName());
+          return request;
         });
   }
 }
