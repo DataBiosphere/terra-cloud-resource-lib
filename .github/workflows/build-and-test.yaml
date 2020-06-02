@@ -50,11 +50,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x minniekenny # skip minniekenny
       - name: Test
+        id: unit-test
         run: ./gradlew test -x minniekenny
       - name: Integration Test
+        id: integrationn-test
         run: ./gradlew integrationTest
       - name: Upload Test Reports
-        if: ${{ always() }}
+        if: steps.unit-test.outputs.status == 'failure' || steps.integration-test.outputs.status == 'failure'
         uses: actions/upload-artifact@v1
         with:
           name: Test Reports
