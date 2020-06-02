@@ -36,13 +36,19 @@ public class StorageCow {
     return new BucketCow(clientConfig, bucket);
   }
 
-  /** See {@link Storage#get(String, Storage.BucketGetOption...)}. */
+  /**
+   * See {@link Storage#get(String, Storage.BucketGetOption...)}. Returns null if no bucket is
+   * found.
+   */
   public BucketCow get(String bucket) {
     Bucket rawBucket =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_GET_BUCKET,
             () -> storage.get(bucket),
             () -> serializeBucketName(bucket));
+    if (rawBucket == null) {
+      return null;
+    }
     return new BucketCow(clientConfig, rawBucket);
   }
 
