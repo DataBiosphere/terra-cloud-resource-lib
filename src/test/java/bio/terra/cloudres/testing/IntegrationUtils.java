@@ -1,7 +1,6 @@
 package bio.terra.cloudres.testing;
 
 import bio.terra.cloudres.common.ClientConfig;
-
 import java.util.UUID;
 
 /** Utilities for integration tests. */

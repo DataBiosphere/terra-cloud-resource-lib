@@ -4,7 +4,6 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.StorageOptions;
-import java.util.UUID;
 
 /** Utilities for integration tests of the storage package. */
 class StorageIntegrationUtils {

@@ -1,11 +1,11 @@
 package bio.terra.cloudres.google.storage;
 
+import static org.junit.Assert.*;
+
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.storage.BucketInfo;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.Assert.*;
 
 @Tag("integration")
 public class BucketCowTest {
