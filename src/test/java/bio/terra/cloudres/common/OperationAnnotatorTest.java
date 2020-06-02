@@ -1,5 +1,6 @@
 package bio.terra.cloudres.common;
 
+import static bio.terra.cloudres.common.CloudOperation.GOOGLE_CREATE_PROJECT;
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -7,10 +8,11 @@ import static org.mockito.Mockito.*;
 
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.ResourceManagerException;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.trace.TraceId;
 import java.util.Optional;
-import java.util.function.Supplier;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -25,23 +27,25 @@ public class OperationAnnotatorTest {
   private static final String CLIENT = "TestClient";
   private static final String PROJECT_INFO_STRING =
       "{\"name\":\"myProj\",\"projectId\":\"project-id\",\"labels\":{\"k1\":\"v1\",\"k2\":\"v2\"}}";
+  private static final JsonObject PROJECT_INFO_JSON_OBJECT =
+      new Gson().fromJson(PROJECT_INFO_STRING, JsonObject.class);
   private static final String TRACE_ID = "1234567890123456";
   private static final String ERROR_MESSAGE = "error!";
   private static final String FORMATTED_EXCEPTION =
-      "\"exception:\":{\"message\":\"error!\",\"errorCode\":\"404\"},";
+      "\"exception\":{\"message\":\"error!\",\"errorCode\":\"404\"},";
   private static final String EXPECTED_LOG_PREFIX =
-      "{\"traceId:\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation:\":\"GOOGLE_CREATE_PROJECT\",\"clientName:\":\"TestClient\",";
+      "{\"traceId\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation\":\"GOOGLE_CREATE_PROJECT\",\"clientName\":\"TestClient\",";
 
   /** use the {@link ResourceManagerException} as an example of a BaseHttpServiceException. */
   private static final ResourceManagerException RM_EXCEPTION =
       new ResourceManagerException(404, ERROR_MESSAGE);
 
-  private static final Supplier FAILED_COW_EXECUTE_SUPPLIER =
+  private static final OperationAnnotator.CowExecute<?> FAILED_COW_EXECUTE =
       () -> {
-        throw RM_EXCEPTION;
+        throw new ResourceManagerException(404, ERROR_MESSAGE);
       };
 
-  private static final Supplier SUCCESS_COW_EXECUTE_SUPPLIER =
+  private static final OperationAnnotator.CowExecute<?> SUCCESS_COW_EXECUTE =
       () -> {
         try {
           Thread.sleep(4100);
@@ -51,22 +55,26 @@ public class OperationAnnotatorTest {
         }
       };
 
+  private static final OperationAnnotator.CowSerialize SERIALIZE =
+      () -> {
+        return PROJECT_INFO_JSON_OBJECT;
+      };
+
   ArgumentCaptor<String> logArgument = ArgumentCaptor.forClass(String.class);
 
-  private Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
+  private final Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
 
   @Mock private Logger mockLogger = mock(Logger.class);
 
   private ClientConfig clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
   private OperationAnnotator operationAnnotator = new OperationAnnotator(clientConfig, logger);
-  private TestCowOperation cowOperation = new TestCowOperation(SUCCESS_COW_EXECUTE_SUPPLIER);
 
   @Test
   public void testExecuteGoogleCloudCall_success() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    operationAnnotator.executeCowOperation(cowOperation);
+    operationAnnotator.executeCowOperation(GOOGLE_CREATE_PROJECT, SUCCESS_COW_EXECUTE, SERIALIZE);
 
     sleepForSpansExport();
 
@@ -74,7 +82,7 @@ public class OperationAnnotatorTest {
     assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
 
     // No error
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT, errorCount, 0);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
 
     // This rely on the latency DistributionData defined in {@link MetricHelper} where 4s - 8s are
     // in the same bucket.
@@ -89,13 +97,14 @@ public class OperationAnnotatorTest {
 
   @Test
   public void testExecuteGoogleCloudCall_withException() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT);
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    cowOperation = new TestCowOperation(FAILED_COW_EXECUTE_SUPPLIER);
-
     Assert.assertThrows(
-        ResourceManagerException.class, () -> operationAnnotator.executeCowOperation(cowOperation));
+        ResourceManagerException.class,
+        () ->
+            operationAnnotator.executeCowOperation(
+                GOOGLE_CREATE_PROJECT, FAILED_COW_EXECUTE, SERIALIZE));
 
     sleepForSpansExport();
 
@@ -103,20 +112,20 @@ public class OperationAnnotatorTest {
     assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
 
     // Assert error count increase by 1
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT, errorCount, 1);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
   }
 
   /**
    * Expected log in JSON format with no error code
    *
    * <pre>{@code
-   * { "traceId:":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation:":"GOOGLE_CREATE_PROJECT",
-   *   "clientName:":"test_client",
-   *   "request:":{
+   * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
+   *   "operation":"GOOGLE_CREATE_PROJECT",
+   *   "clientName":"test_client",
+   *   "request":{
    *      "requestName":"request1"
    *   },
-   *   "response:":{
+   *   "response":{
    *       "name":"myProj",
    *       "projectId":"project-id",
    *       "labels":{
@@ -137,28 +146,28 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        CloudOperation.GOOGLE_CREATE_PROJECT,
-        PROJECT_INFO_STRING,
+        GOOGLE_CREATE_PROJECT,
+        PROJECT_INFO_JSON_OBJECT,
         Optional.empty());
 
     // Expected result in Json format
     verify(mockLogger).debug(logArgument.capture());
     assertEquals(
-        EXPECTED_LOG_PREFIX + "\"request:\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
+        EXPECTED_LOG_PREFIX + "\"request\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
   }
 
   /**
    * Expected log in JSON format with empty response:
    *
    * <pre>{@code
-   * { "traceId:":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation:":"GOOGLE_CREATE_PROJECT",
-   *   "clientName:":"test_client",
-   *   "errorCode:":"404",
-   *   "request:":{
+   * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
+   *   "operation":"GOOGLE_CREATE_PROJECT",
+   *   "clientName":"test_client",
+   *   "errorCode":"404",
+   *   "request":{
    *      "requestName":"request1"
    *   },
-   *   "response:":null
+   *   "response":null
    * }
    * }</pre>
    *
@@ -172,14 +181,14 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        CloudOperation.GOOGLE_CREATE_PROJECT,
-        PROJECT_INFO_STRING,
+        GOOGLE_CREATE_PROJECT,
+        PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
     // Expected result in Json format
     verify(mockLogger).debug(logArgument.capture());
     assertEquals(
-        EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request:\":" + PROJECT_INFO_STRING + "}",
+        EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request\":" + PROJECT_INFO_STRING + "}",
         logArgument.getValue());
   }
 
@@ -190,33 +199,11 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        CloudOperation.GOOGLE_CREATE_PROJECT,
-        PROJECT_INFO_STRING,
+        GOOGLE_CREATE_PROJECT,
+        PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
-    // Expected result in Json format
+
+    // no expected result in this case
     verify(mockLogger, never()).debug(anyString());
-  }
-
-  private static class TestCowOperation<R> implements CowOperation<R> {
-    private Supplier<R> executeFunction;
-
-    TestCowOperation(Supplier<R> executeFunction) {
-      this.executeFunction = executeFunction;
-    }
-
-    @Override
-    public CloudOperation getCloudOperation() {
-      return CloudOperation.GOOGLE_CREATE_PROJECT;
-    }
-
-    @Override
-    public R execute() {
-      return executeFunction.get();
-    }
-
-    @Override
-    public String serializeRequest() {
-      return PROJECT_INFO_STRING;
-    }
   }
 }

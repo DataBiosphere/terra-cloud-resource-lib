@@ -1,8 +1,7 @@
 package bio.terra.cloudres.util;
 
-import static bio.terra.cloudres.common.OperationAnnotator.GENERIC_UNKNOWN_ERROR_CODE;
-
 import bio.terra.cloudres.common.CloudOperation;
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.common.Scope;
 import io.opencensus.stats.*;
 import io.opencensus.tags.*;
@@ -83,6 +82,12 @@ public class MetricsHelper {
           countAggregation,
           Collections.unmodifiableList(Arrays.asList(KEY_ERROR, KEY_CLOUD_API, KEY_CLIENT)));
   private static final View[] views = new View[] {LATENCY_VIEW, CLOUD_API_VIEW, ERROR_VIEW};
+
+  /**
+   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
+   * non-HTTP status errors in a single metric.
+   */
+  @VisibleForTesting static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   // Register all views
   static {
