@@ -13,6 +13,8 @@ public class BucketCowTest {
   public void deleteCreatedBucket() {
     StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
     String bucketName = IntegrationUtils.randomName();
+    assertNull(storageCow.get(bucketName));
+
     BucketCow bucketCow = storageCow.create(BucketInfo.of(bucketName));
     assertEquals(storageCow.get(bucketName).getBucketInfo().getName(), bucketName);
 
