@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.storage;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.CopyWriter;
@@ -17,7 +18,7 @@ public class BlobCow {
   private final OperationAnnotator operationAnnotator;
   private final Blob blob;
 
-  BlobCow(ClientConfig clientConfig, Blob blob) {
+  public BlobCow(ClientConfig clientConfig, Blob blob) {
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.blob = blob;
   }
@@ -41,6 +42,14 @@ public class BlobCow {
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_DELETE_BLOB,
         () -> blob.delete(),
+        () -> SerializeUtils.convert(blob.getBlobId()));
+  }
+
+  /** See {@link Blob#reader(Blob.BlobSourceOption...)}. */
+  public ReadChannel reader() {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_READ_BLOB,
+        () -> blob.reader(),
         () -> SerializeUtils.convert(blob.getBlobId()));
   }
 }
