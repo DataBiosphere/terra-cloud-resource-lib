@@ -1,8 +1,8 @@
 package bio.terra.cloudres.util;
 
-import static bio.terra.cloudres.common.OperationAnnotator.GENERIC_UNKNOWN_ERROR_CODE;
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
+import static bio.terra.cloudres.util.MetricsHelper.GENERIC_UNKNOWN_ERROR_CODE;
 import static org.junit.Assert.assertEquals;
 
 import bio.terra.cloudres.common.CloudOperation;

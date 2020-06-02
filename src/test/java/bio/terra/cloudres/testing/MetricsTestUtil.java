@@ -18,7 +18,7 @@ public class MetricsTestUtil {
   public static final List<TagValue> API_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT), TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()));
-  public static final List<TagValue> ERROR_COUNT =
+  public static final List<TagValue> ERROR_COUNT_404 =
       Arrays.asList(
           TagValue.create(CLIENT),
           TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),

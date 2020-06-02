@@ -2,13 +2,13 @@ package bio.terra.cloudres.google.crm;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
-import bio.terra.cloudres.common.CowOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.resourcemanager.Project;
 import com.google.cloud.resourcemanager.ProjectInfo;
 import com.google.cloud.resourcemanager.ResourceManager;
 import com.google.cloud.resourcemanager.ResourceManagerOptions;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,32 +41,19 @@ public class ResourceManagerCow {
    */
   public Project createProject(ProjectInfo projectInfo) {
     return operationAnnotator.executeCowOperation(
-        new CowOperation<Project>() {
-          @Override
-          public CloudOperation getCloudOperation() {
-            return CloudOperation.GOOGLE_CREATE_PROJECT;
-          }
-
-          @Override
-          public Project execute() {
-            return resourceManager.create(projectInfo);
-          }
-
-          @Override
-          public String serializeRequest() {
-            return convert(projectInfo);
-          }
-        });
+        CloudOperation.GOOGLE_CREATE_PROJECT,
+        () -> resourceManager.create(projectInfo),
+        () -> convert(projectInfo));
   }
 
   /**
-   * Converts {@link ProjectInfo} to Json formatted String
+   * Converts {@link ProjectInfo} to {@link JsonObject}
    *
    * @param projectInfo: the projectInfo to convert
-   * @return the formatted Json in String
+   * @return the formatted JsonObject
    */
-  private static String convert(ProjectInfo projectInfo) {
+  private static JsonObject convert(ProjectInfo projectInfo) {
     Gson gson = new Gson();
-    return gson.toJson(projectInfo, ProjectInfo.class);
+    return gson.toJsonTree(projectInfo, ProjectInfo.class).getAsJsonObject();
   }
 }
