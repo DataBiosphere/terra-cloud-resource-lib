@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.storage;
 import static org.junit.Assert.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -62,9 +61,9 @@ public class StorageCowTest {
     assertNull(storageCow.get(blobId));
 
     BlobCow createdBlob = storageCow.create(BlobInfo.newBuilder(blobId).build());
-    assertEquals(createdBlob.getBlobInfo().getBlobId(), blobId);
+    assertEquals(createdBlob.getBlobInfo().getName(), blobId.getName());
 
-    assertEquals(storageCow.get(blobId).getBlobInfo().getBlobId(), blobId);
+    assertEquals(storageCow.get(blobId).getBlobInfo().getName(), blobId.getName());
 
     assertTrue(storageCow.delete(blobId));
     assertNull(storageCow.get(blobId));
@@ -82,11 +81,7 @@ public class StorageCowTest {
       writeChannel.write(ByteBuffer.wrap(contents.getBytes(StandardCharsets.UTF_8)));
     }
     BlobCow blob = storageCow.get(blobId);
-    try (ReadChannel readChannel = blob.reader()) {
-      ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-      readChannel.read(byteBuffer);
-      assertEquals(contents, byteBuffer.toString());
-    }
+    assertEquals(BlobCowTest.readContents(blob), contents);
     assertTrue(storageCow.delete(blobId));
   }
 }

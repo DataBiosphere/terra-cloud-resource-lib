@@ -5,14 +5,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.CopyWriter;
+import com.google.common.io.CharStreams;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,7 +52,7 @@ public class BlobCowTest {
     assertNull(storageCow.get(blobId));
 
     BlobCow blob = storageCow.create(BlobInfo.newBuilder(blobId).build());
-    assertEquals(storageCow.get(blobId).getBlobInfo().getBlobId(), blobId);
+    assertEquals(storageCow.get(blobId).getBlobInfo().getName(), blobId.getName());
 
     assertTrue(blob.delete());
     assertNull(storageCow.get(blobId));
@@ -96,11 +98,9 @@ public class BlobCowTest {
     return storageCow.get(blobId);
   }
 
-  private String readContents(BlobCow blob) throws IOException {
-    try (ReadChannel readChannel = blob.reader()) {
-      ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-      readChannel.read(byteBuffer);
-      return byteBuffer.toString();
+  static String readContents(BlobCow blob) throws IOException {
+    try (InputStreamReader reader = new InputStreamReader(Channels.newInputStream(blob.reader()))) {
+      return CharStreams.toString(reader);
     }
   }
 }
