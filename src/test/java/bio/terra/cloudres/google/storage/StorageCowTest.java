@@ -8,14 +8,13 @@ import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 @Tag("integration")
 public class StorageCowTest {
@@ -35,7 +34,8 @@ public class StorageCowTest {
 
   @AfterAll
   public static void deleteReusableBucket() {
-    // This only succeeds if the reusableBucket is empty. If it's not empty, something about the tests has failed.
+    // This only succeeds if the reusableBucket is empty. If it's not empty, something about the
+    // tests has failed.
     reusableBucket.delete();
   }
 

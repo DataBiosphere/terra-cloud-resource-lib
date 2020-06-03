@@ -1,5 +1,9 @@
 package bio.terra.cloudres.google.storage;
 
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.WriteChannel;
@@ -7,18 +11,13 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.CopyWriter;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("integration")
 public class BlobCowTest {
