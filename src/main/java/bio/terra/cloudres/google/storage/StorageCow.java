@@ -9,7 +9,6 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +43,7 @@ public class StorageCow {
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_CREATE_BUCKET,
             () -> storage.create(bucketInfo),
-            () -> new Gson().toJsonTree(bucketInfo, BucketInfo.class).getAsJsonObject());
+            () -> SerializeUtils.convert(bucketInfo));
     return new BucketCow(clientConfig, bucket);
   }
 
@@ -93,17 +92,17 @@ public class StorageCow {
         () -> serializeBucketName(bucket));
   }
 
-  private static JsonObject serializeBucketName(String bucketName) {
-    JsonObject result = new JsonObject();
-    result.addProperty("bucket_name", bucketName);
-    return result;
-  }
-
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */
   public WriteChannel writer(BlobInfo blobInfo) {
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_CREATE_BLOB_AND_WRITER,
         () -> storage.writer(blobInfo),
         () -> SerializeUtils.convert(blobInfo));
+  }
+
+  private static JsonObject serializeBucketName(String bucketName) {
+    JsonObject result = new JsonObject();
+    result.addProperty("bucket_name", bucketName);
+    return result;
   }
 }

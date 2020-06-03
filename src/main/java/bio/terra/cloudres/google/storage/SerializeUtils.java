@@ -11,16 +11,16 @@ import java.lang.reflect.Type;
 class SerializeUtils {
   private SerializeUtils() {}
 
-  static JsonObject convert(BucketInfo bucketInfo) {
-    return convertWithGson(bucketInfo, BucketInfo.class);
+  static JsonObject convert(BlobId blobId) {
+    return convertWithGson(blobId, BlobId.class);
   }
 
   static JsonObject convert(BlobInfo blobInfo) {
     return convertWithGson(blobInfo, BlobInfo.class);
   }
 
-  static JsonObject convert(BlobId blobId) {
-    return convertWithGson(blobId, BlobId.class);
+  static JsonObject convert(BucketInfo bucketInfo) {
+    return convertWithGson(bucketInfo, BucketInfo.class);
   }
 
   /**
