@@ -45,6 +45,7 @@ dependencies {
     runtime 'io.opencensus:opencensus-impl:0.26.0' //
 
     compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha' // Google Resource Manager API Client
+    compile 'com.google.cloud:google-cloud-bigquery:1.116.0' // Google BigQuery API Client
 
     implementation 'com.google.code.gson:gson:2.8.6'
     dependencies { testCompile "org.mockito:mockito-core:2.+" } // mockito
