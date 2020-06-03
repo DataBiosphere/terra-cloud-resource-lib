@@ -18,11 +18,11 @@ public class MetricsTestUtil {
   public static final List<TagValue> API_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT), TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()));
-  public static final List<TagValue> ERROR_COUNT =
+  public static final List<TagValue> ERROR_COUNT_404 =
       Arrays.asList(
           TagValue.create(CLIENT),
           TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
-          TagValue.create("0"));
+          TagValue.create("404"));
 
   public static final View.Name API_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");

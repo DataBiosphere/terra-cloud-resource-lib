@@ -15,12 +15,6 @@ public class MetricsHelper {
   public static final String CLOUD_RESOURCE_PREFIX = "terra/cloudresourcelibrary";
   public static final ViewManager viewManager = Stats.getViewManager();
 
-  /**
-   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
-   * non-HTTP status errors in a single metric.
-   */
-  @VisibleForTesting static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
-
   private static final Tagger tagger = Tags.getTagger();
   private static final TagMetadata tagMetadata =
       TagMetadata.create(TagMetadata.TagTtl.UNLIMITED_PROPAGATION);
@@ -88,6 +82,12 @@ public class MetricsHelper {
           countAggregation,
           Collections.unmodifiableList(Arrays.asList(KEY_ERROR, KEY_CLOUD_API, KEY_CLIENT)));
   private static final View[] views = new View[] {LATENCY_VIEW, CLOUD_API_VIEW, ERROR_VIEW};
+
+  /**
+   * Fake HTTP status code value for errors that are not HTTP status errors. Useful for including
+   * non-HTTP status errors in a single metric.
+   */
+  @VisibleForTesting static final int GENERIC_UNKNOWN_ERROR_CODE = 1;
 
   // Register all views
   static {

@@ -1,62 +1,68 @@
 package bio.terra.cloudres.common;
 
-import static bio.terra.cloudres.util.LoggerHelper.logEvent;
-
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.http.BaseHttpServiceException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.opencensus.common.Scope;
+import io.opencensus.trace.TraceId;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Supplier;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
-  private final Logger logger = LoggerFactory.getLogger(OperationAnnotator.class);
+
   private final ClientConfig clientConfig;
 
-  public OperationAnnotator(ClientConfig clientConfig) {
+  /** We inject a Logger to allow how logs are made to be controlled by the COWs. */
+  private final Logger logger;
+
+  public OperationAnnotator(ClientConfig clientConfig, Logger logger) {
     this.clientConfig = clientConfig;
+    this.logger = logger;
   }
 
   /**
-   * Executes the Google call.
+   * Executes the CowOperation.
    *
-   * @param googleCall: the google call to make
-   * @param operation: the {@link CloudOperation}
-   * @param request: the request of this execute
+   * @param cloudOperation: the {@link CloudOperation} to operate.
+   * @param cowExecute: how to execute this cloud operation
+   * @param cowSerialize: how to serialize request
+   * @return the result of executing the {@code cowOperation}
    */
-  public <R, T> R executeGoogleCall(Supplier<R> googleCall, CloudOperation operation, T request) {
-    OptionalInt errorCode = OptionalInt.empty();
-    R response = null;
+  public <R> R executeCowOperation(
+      CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
+    Optional<Exception> executionException = Optional.empty();
 
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    try (Scope ss = tracer.spanBuilder(operation.name()).startScopedSpan()) {
+    try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
       // Record the Cloud API usage.
-      recordApiCount(operation);
+      recordApiCount(cloudOperation);
+
+      Stopwatch stopwatch = Stopwatch.createStarted();
       try {
-        response = googleCall.get();
-        recordLatency(stopwatch.stop().elapsed(), operation);
+        R response = cowExecute.execute();
+        recordLatency(stopwatch.stop().elapsed(), cloudOperation);
         return response;
       } catch (Exception e) {
-        recordLatency(stopwatch.stop().elapsed(), operation);
-        errorCode = getHttpErrorCode(e);
-        recordErrors(errorCode, operation);
+        // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
+        // different scenarios.
+        recordLatency(stopwatch.stop().elapsed(), cloudOperation);
+        recordErrors(getHttpErrorCode(e), cloudOperation);
+        executionException = Optional.of(e);
         throw e;
       } finally {
         logEvent(
-            /*logger=*/ logger,
-            /*traceId=*/ tracer.getCurrentSpan().getContext().getTraceId(),
-            /* operation=*/ CloudOperation.GOOGLE_CREATE_PROJECT,
-            /* clientName=*/ clientConfig.getClientName(),
-            /* requestFormatter=*/ request,
-            response,
-            /* response=*/ errorCode);
+            tracer.getCurrentSpan().getContext().getTraceId(),
+            cloudOperation,
+            cowSerialize.serializeRequest(),
+            executionException);
       }
     }
   }
@@ -73,9 +79,63 @@ public class OperationAnnotator {
     MetricsHelper.recordLatency(clientConfig.getClientName(), operation, duration);
   }
 
+  /**
+   * Logs cloud calls.
+   *
+   * <p>This log is for debug purpose when using CRL, so should be in debug level.
+   *
+   * @param traceId the traceId where log happens
+   * @param operation the operation to log.
+   * @param request the request of the log
+   * @param executionException the exception to log. Optional, only presents when exception happens.
+   */
+  @VisibleForTesting
+  void logEvent(
+      TraceId traceId,
+      CloudOperation operation,
+      JsonObject request,
+      Optional<Exception> executionException) {
+    if (!logger.isDebugEnabled()) {
+      return;
+    }
+
+    JsonObject logEntry = new JsonObject();
+    logEntry.addProperty("traceId", traceId.toString());
+    logEntry.addProperty("operation", operation.name());
+    logEntry.addProperty("clientName", clientConfig.getClientName());
+
+    executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));
+
+    logEntry.add("request", request);
+
+    logger.debug(logEntry.toString());
+  }
+
   private OptionalInt getHttpErrorCode(Exception e) {
     return e instanceof BaseHttpServiceException
         ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
         : OptionalInt.empty();
+  }
+
+  private JsonObject createExceptionEntry(Exception executionException) {
+    Gson gson = new Gson();
+    JsonObject exceptionEntry = new JsonObject();
+    exceptionEntry.addProperty("message", executionException.getMessage());
+    getHttpErrorCode(executionException)
+        .ifPresent(i -> exceptionEntry.addProperty("errorCode", String.valueOf(i)));
+
+    return exceptionEntry;
+  }
+
+  /** How to execute this operation */
+  @FunctionalInterface
+  public interface CowExecute<R> {
+    R execute();
+  }
+
+  /** How to serialize Request */
+  @FunctionalInterface
+  public interface CowSerialize {
+    JsonObject serializeRequest();
   }
 }
