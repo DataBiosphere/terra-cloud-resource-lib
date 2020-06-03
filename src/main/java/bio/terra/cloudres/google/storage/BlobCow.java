@@ -6,6 +6,7 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.CopyWriter;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
@@ -18,9 +19,13 @@ public class BlobCow {
   private final OperationAnnotator operationAnnotator;
   private final Blob blob;
 
-  public BlobCow(ClientConfig clientConfig, Blob blob) {
+  BlobCow(ClientConfig clientConfig, Blob blob) {
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.blob = blob;
+  }
+
+  public BlobInfo getBlobInfo() {
+    return blob;
   }
 
   /** See {@link Blob#copyTo(BlobId, Blob.BlobSourceOption...)} */
