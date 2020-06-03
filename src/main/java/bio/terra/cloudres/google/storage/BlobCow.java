@@ -34,7 +34,6 @@ public class BlobCow {
         CloudOperation.GOOGLE_COPY_BLOB,
         () -> blob.copyTo(targetblob),
         () -> {
-          // TODO probably need to adjust for serialization.
           JsonObject request = new JsonObject();
           request.add("source", SerializeUtils.convert(blob.getBlobId()));
           request.add("target", SerializeUtils.convert(targetblob));
