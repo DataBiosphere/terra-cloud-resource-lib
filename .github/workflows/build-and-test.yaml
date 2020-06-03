@@ -53,7 +53,7 @@ jobs:
         id: unit-test
         run: ./gradlew test -x minniekenny
       - name: Integration Test
-        id: integrationn-test
+        id: integration-test
         run: ./gradlew integrationTest
       - name: Upload Test Reports
         if: steps.unit-test.outputs.status == 'failure' || steps.integration-test.outputs.status == 'failure'
