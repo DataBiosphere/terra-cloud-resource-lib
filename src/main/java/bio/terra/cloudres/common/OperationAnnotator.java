@@ -128,11 +128,13 @@ public class OperationAnnotator {
   }
 
   /** How to execute this operation */
+  @FunctionalInterface
   public interface CowExecute<R> {
     R execute();
   }
 
   /** How to serialize Request */
+  @FunctionalInterface
   public interface CowSerialize {
     JsonObject serializeRequest();
   }
