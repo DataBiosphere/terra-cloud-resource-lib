@@ -2,12 +2,15 @@ package bio.terra.cloudres.common;
 
 /** The supported Cloud API methods in Enum */
 public enum CloudOperation {
-  // Create Google Project
+  // Google Resource Manager Operations
   GOOGLE_CREATE_PROJECT,
-
-  // Delete Google project
   GOOGLE_DELETE_PROJECT,
 
-  // Get Dataset
+  // Google Storage Operations
+  GOOGLE_CREATE_BUCKET,
+  GOOGLE_GET_BUCKET,
+  GOOGLE_DELETE_BUCKET,
+
+  // Google BigQuery Operations
   GOOGLE_GET_DATASET;
 }
