@@ -42,7 +42,7 @@ dependencies {
     compile 'org.slf4j:slf4j-nop:1.7.25' // Logging
 
     compile 'io.opencensus:opencensus-api:0.26.0' // Metrics
-    runtime 'io.opencensus:opencensus-impl:0.26.0' // 
+    runtime 'io.opencensus:opencensus-impl:0.26.0' //
 
     compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha' // Google Resource Manager API Client
 
@@ -50,6 +50,7 @@ dependencies {
     dependencies { testCompile "org.mockito:mockito-core:2.+" } // mockito
 
     implementation("com.google.guava:guava:29.0-jre") // Guava
+    testImplementation 'junit:junit:4.13'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testCompile 'org.apache.httpcomponents.client5:httpclient5:5.0'
@@ -63,6 +64,13 @@ test {
     useJUnitPlatform {
         includeTags 'unit'
     }
+}
+
+def integrationTest = tasks.register("integrationTest", Test) {
+    useJUnitPlatform {
+        includeTags "integration"
+    }
+    shouldRunAfter test
 }
 
 java {
@@ -111,7 +119,3 @@ task minniekenny(type: Exec) {
 }
 
 test.dependsOn minniekenny
-
-dependencies {
-    testImplementation('junit:junit:4.13')
-}
