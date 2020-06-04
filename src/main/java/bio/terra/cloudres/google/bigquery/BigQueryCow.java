@@ -44,7 +44,7 @@ public class BigQueryCow {
   }
 
   /** See {@link BigQuery#delete(String, DatasetDeleteOption...)}. */
-  public Boolean deleteDataset(String datasetId, DatasetDeleteOption... deleteOptions) {
+  public boolean deleteDataset(String datasetId, DatasetDeleteOption... deleteOptions) {
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_DELETE_DATASET,
         () -> bigQuery.delete(datasetId, deleteOptions),

@@ -23,13 +23,6 @@ public class BigQueryCowTest {
   private static final String DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
 
-  private static final DatasetOption DATASET_OPTION_ACCESS =
-      DatasetOption.fields(BigQuery.DatasetField.ACCESS);
-  private static final DatasetOption DATASET_OPTION_CREATION_TIME =
-      DatasetOption.fields(BigQuery.DatasetField.CREATION_TIME);
-  private static final DatasetDeleteOption DATASET_OPTION_DELETE_CREATION_TIME =
-      DatasetDeleteOption.deleteContents();
-
   private static BigQueryOptions defaultBigQueryOption() {
     return BigQueryOptions.newBuilder()
         .setCredentials(GOOGLE_CREDENTIALS)
@@ -56,10 +49,23 @@ public class BigQueryCowTest {
   }
 
   @Test
+  public void createDataset() {
+    String datasetId = IntegrationUtils.randomNameWithUnderscore();
+    Dataset createdDataSet = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+
+    assertEquals(createdDataSet, bigQueryCow.getDataSet(datasetId));
+    assertEquals(datasetId, createdDataSet.getDatasetId().getDataset());
+    bigQueryCow.deleteDataset(datasetId);
+  }
+
+  @Test
   public void getDataset() {
-    assertEquals(
-        REUSABLE_DATASET_ID,
-        bigQueryCow.getDataSet(REUSABLE_DATASET_ID).getDatasetId().getDataset());
+    String datasetId = IntegrationUtils.randomNameWithUnderscore();
+    bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+
+    assertEquals(datasetId, bigQueryCow.getDataSet(datasetId).getDatasetId().getDataset());
+
+    bigQueryCow.deleteDataset(datasetId);
   }
 
   @Test
@@ -92,7 +98,11 @@ public class BigQueryCowTest {
   public void convertDatasetIdWithOptions() {
     assertEquals(
         "{\"datasetId\":\"123\",\"datasetOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,access\"},{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,creationTime\"}]}",
-        BigQueryCow.convert("123", DATASET_OPTION_ACCESS, DATASET_OPTION_CREATION_TIME).toString());
+        BigQueryCow.convert(
+                "123",
+                DatasetOption.fields(BigQuery.DatasetField.ACCESS),
+                DatasetOption.fields(BigQuery.DatasetField.CREATION_TIME))
+            .toString());
   }
 
   @Test
@@ -103,8 +113,8 @@ public class BigQueryCowTest {
             + "\"},\"labels\":{\"userMap\":{}}},\"datasetOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,access\"},{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,creationTime\"}]}",
         BigQueryCow.convert(
                 DatasetInfo.newBuilder(DATASET_ID).build(),
-                DATASET_OPTION_ACCESS,
-                DATASET_OPTION_CREATION_TIME)
+                DatasetOption.fields(BigQuery.DatasetField.ACCESS),
+                DatasetOption.fields(BigQuery.DatasetField.CREATION_TIME))
             .toString());
   }
 
@@ -114,14 +124,6 @@ public class BigQueryCowTest {
         "{\"datasetId\":\""
             + DATASET_ID
             + "\",\"datasetDeleteOptions\":\"[{\\\"rpcOption\\\":\\\"DELETE_CONTENTS\\\",\\\"value\\\":true}]\"}",
-        BigQueryCow.convert(DATASET_ID, DATASET_OPTION_DELETE_CREATION_TIME).toString());
-  }
-
-  @Test
-  public void createDataset() {
-    Dataset createdDataSet = bigQueryCow.createDataset(DatasetInfo.newBuilder(DATASET_ID).build());
-
-    assertEquals(createdDataSet, bigQueryCow.getDataSet(DATASET_ID));
-    assertEquals(DATASET_ID, createdDataSet.getDatasetId().getDataset());
+        BigQueryCow.convert(DATASET_ID, DatasetDeleteOption.deleteContents()).toString());
   }
 }
