@@ -12,5 +12,8 @@ public enum CloudOperation {
   GOOGLE_DELETE_BUCKET,
 
   // Google BigQuery Operations
+  GOOGLE_CREATE_DATASET,
+  GOOGLE_UPDATE_DATASET,
+  GOOGLE_DELETE_DATASET,
   GOOGLE_GET_DATASET;
 }
