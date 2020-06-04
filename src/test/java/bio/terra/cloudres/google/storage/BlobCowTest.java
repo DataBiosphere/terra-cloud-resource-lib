@@ -52,14 +52,14 @@ public class BlobCowTest {
     assertNull(storageCow.get(blobId));
 
     BlobCow blob = storageCow.create(BlobInfo.newBuilder(blobId).build());
-    assertEquals(storageCow.get(blobId).getBlobInfo().getName(), blobId.getName());
+    assertEquals(blobId.getName(), storageCow.get(blobId).getBlobInfo().getName());
 
     assertTrue(blob.delete());
     assertNull(storageCow.get(blobId));
   }
 
   @Test
-  public void copyTo() throws IOException {
+  public void copyTo() throws Exception {
     BlobId sourceBlobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     BlobId targetBlobId =
@@ -67,26 +67,27 @@ public class BlobCowTest {
 
     final String contents = "hello my blob";
     BlobCow source = createBlobWithContents(sourceBlobId, contents);
-    assertEquals(readContents(source), contents);
+    assertEquals(contents, readContents(source));
 
     assertNull(storageCow.get(targetBlobId));
     CopyWriter copyWriter = source.copyTo(targetBlobId);
     copyWriter.getResult();
     BlobCow target = storageCow.get(targetBlobId);
-    assertEquals(readContents(target), contents);
+    assertEquals(contents, readContents(target));
 
     assertTrue(source.delete());
     assertTrue(target.delete());
   }
 
   @Test
-  public void reader() throws IOException {
+  public void reader() throws Exception {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
 
     final String contents = "hello my blob";
     BlobCow blob = createBlobWithContents(blobId, contents);
-    assertEquals(readContents(blob), contents);
+
+    assertEquals(contents, readContents(blob));
 
     assertTrue(blob.delete());
   }
