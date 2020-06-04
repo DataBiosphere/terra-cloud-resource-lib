@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.WriteChannel;
+import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
@@ -67,6 +68,24 @@ public class StorageCowTest {
   }
 
   @Test
+  public void createGetDeleteBlobAcl() {
+    BlobId blobId =
+            BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+    storageCow.create(BlobInfo.newBuilder(blobId).build());
+    Acl.User entity = Acl.User.ofAllAuthenticatedUsers();
+    assertNull(storageCow.getAcl(blobId, entity));
+
+    Acl acl = Acl.newBuilder(entity, Acl.Role.READER).build();
+    Acl createdAcl = storageCow.createAcl(blobId, acl);
+    assertEquivalentAcls(acl, createdAcl);
+    assertEquivalentAcls(acl, storageCow.getAcl(blobId, entity));
+
+    assertTrue(storageCow.deleteAcl(blobId, entity));
+    assertNull(storageCow.getAcl(blobId, entity));
+    assertTrue(storageCow.delete(blobId));
+  }
+
+  @Test
   public void blobWriter() throws Exception {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
@@ -79,5 +98,11 @@ public class StorageCowTest {
     BlobCow blob = storageCow.get(blobId);
     assertEquals(contents, StorageIntegrationUtils.readContents(blob));
     assertTrue(storageCow.delete(blobId));
+  }
+
+  /** Helper assert that compares an {@link Acl}'s entity and role. */
+  private static void assertEquivalentAcls(Acl expected, Acl actual) {
+    assertEquals(expected.getEntity(), actual.getEntity());
+    assertEquals(expected.getRole(), actual.getRole());
   }
 }
