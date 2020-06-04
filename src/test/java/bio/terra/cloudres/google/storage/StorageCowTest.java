@@ -70,7 +70,7 @@ public class StorageCowTest {
   @Test
   public void createGetDeleteBlobAcl() {
     BlobId blobId =
-            BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     storageCow.create(BlobInfo.newBuilder(blobId).build());
     Acl.User entity = Acl.User.ofAllAuthenticatedUsers();
     assertNull(storageCow.getAcl(blobId, entity));
