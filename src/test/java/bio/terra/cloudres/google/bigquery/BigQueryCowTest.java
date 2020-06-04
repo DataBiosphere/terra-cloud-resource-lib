@@ -20,8 +20,8 @@ public class BigQueryCowTest {
       IntegrationCredentials.getGoogleCredentialsOrDie();
 
   // Dataset id only allows underscore
-  private static final String DATASET_ID = IntegrationUtils.randomName().replace('-', '_');
-  private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomName().replace('-', '_');
+  private static final String DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
+  private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
 
   private static final DatasetOption DATASET_OPTION_ACCESS =
       DatasetOption.fields(BigQuery.DatasetField.ACCESS);
@@ -64,7 +64,7 @@ public class BigQueryCowTest {
 
   @Test
   public void updateDataset() {
-    String datasetId = IntegrationUtils.randomName().replace('-', '_');
+    String datasetId = IntegrationUtils.randomNameWithUnderscore();
     bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
     assertNull(bigQueryCow.getDataSet(datasetId).getDescription());
 
@@ -80,7 +80,7 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteDataset() {
-    String datasetId = IntegrationUtils.randomName().replace('-', '_');
+    String datasetId = IntegrationUtils.randomNameWithUnderscore();
     bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
