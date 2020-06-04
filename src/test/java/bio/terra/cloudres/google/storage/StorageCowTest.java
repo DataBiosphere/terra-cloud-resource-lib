@@ -77,7 +77,7 @@ public class StorageCowTest {
       writeChannel.write(ByteBuffer.wrap(contents.getBytes(StandardCharsets.UTF_8)));
     }
     BlobCow blob = storageCow.get(blobId);
-    assertEquals(contents, BlobCowTest.readContents(blob));
+    assertEquals(contents, StorageIntegrationUtils.readContents(blob));
     assertTrue(storageCow.delete(blobId));
   }
 }

@@ -10,11 +10,8 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.CopyWriter;
-import com.google.common.io.CharStreams;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -67,13 +64,13 @@ public class BlobCowTest {
 
     final String contents = "hello my blob";
     BlobCow source = createBlobWithContents(sourceBlobId, contents);
-    assertEquals(contents, readContents(source));
+    assertEquals(contents, StorageIntegrationUtils.readContents(source));
 
     assertNull(storageCow.get(targetBlobId));
     CopyWriter copyWriter = source.copyTo(targetBlobId);
     copyWriter.getResult();
     BlobCow target = storageCow.get(targetBlobId);
-    assertEquals(contents, readContents(target));
+    assertEquals(contents, StorageIntegrationUtils.readContents(target));
 
     assertTrue(source.delete());
     assertTrue(target.delete());
@@ -87,7 +84,7 @@ public class BlobCowTest {
     final String contents = "hello my blob";
     BlobCow blob = createBlobWithContents(blobId, contents);
 
-    assertEquals(contents, readContents(blob));
+    assertEquals(contents, StorageIntegrationUtils.readContents(blob));
 
     assertTrue(blob.delete());
   }
@@ -97,11 +94,5 @@ public class BlobCowTest {
       writeChannel.write(ByteBuffer.wrap(contents.getBytes(StandardCharsets.UTF_8)));
     }
     return storageCow.get(blobId);
-  }
-
-  static String readContents(BlobCow blob) throws IOException {
-    try (InputStreamReader reader = new InputStreamReader(Channels.newInputStream(blob.reader()))) {
-      return CharStreams.toString(reader);
-    }
   }
 }

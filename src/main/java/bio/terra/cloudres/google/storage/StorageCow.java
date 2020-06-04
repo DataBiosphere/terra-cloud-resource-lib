@@ -54,10 +54,7 @@ public class StorageCow {
             CloudOperation.GOOGLE_GET_BLOB,
             () -> storage.get(blob),
             () -> SerializeUtils.convert(blob));
-    if (rawBlob == null) {
-      return null;
-    }
-    return new BlobCow(clientConfig, rawBlob);
+    return (rawBlob == null) ? null : new BlobCow(clientConfig, rawBlob);
   }
 
   /**
@@ -70,10 +67,7 @@ public class StorageCow {
             CloudOperation.GOOGLE_GET_BUCKET,
             () -> storage.get(bucket),
             () -> serializeBucketName(bucket));
-    if (rawBucket == null) {
-      return null;
-    }
-    return new BucketCow(clientConfig, rawBucket);
+    return (rawBucket == null) ? null : new BucketCow(clientConfig, rawBucket);
   }
 
   /** See {@link Storage#delete(BlobId)}. */
