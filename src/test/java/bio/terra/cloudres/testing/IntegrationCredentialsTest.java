@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 @Tag("integration")
 public class IntegrationCredentialsTest {
   @Test
-  public void googleCredentialsAreAccessible_adminUser() {
+  public void googleCredentialsAreAccessible_admin() {
     try {
       IntegrationCredentials.getAdminGoogleCredentialsOrDie();
     } catch (Exception e) {
@@ -17,9 +17,9 @@ public class IntegrationCredentialsTest {
   }
 
   @Test
-  public void googleCredentialsAreAccessible_regularUser() {
+  public void googleCredentialsAreAccessible_user() {
     try {
-      IntegrationCredentials.getRegularUserGoogleCredentialsOrDie();
+      IntegrationCredentials.getUserGoogleCredentialsOrDie();
     } catch (Exception e) {
       fail("Should not have thrown any exception getting credentials, but threw " + e);
     }
