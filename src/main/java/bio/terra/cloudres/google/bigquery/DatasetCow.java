@@ -39,7 +39,7 @@ public class DatasetCow {
             () -> convert(dataset.getDatasetId().getDataset(), datasetOptions)));
   }
 
-  /** See {@link BigQuery#update(DatasetInfo, BigQuery.DatasetOption...)}. */
+  /** See {@link Dataset#update(BigQuery.DatasetOption...)}. */
   public DatasetCow update(BigQuery.DatasetOption... datasetOptions) {
     return new DatasetCow(
         clientConfig,
