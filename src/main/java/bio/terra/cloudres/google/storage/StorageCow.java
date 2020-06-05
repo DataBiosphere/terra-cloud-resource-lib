@@ -47,6 +47,19 @@ public class StorageCow {
     return new BucketCow(clientConfig, bucket);
   }
 
+  /** See {@link Storage#createAcl(BlobId, Acl)} */
+  public Acl createAcl(BlobId blob, Acl acl) {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_CREATE_ACL_BLOB,
+        () -> storage.createAcl(blob, acl),
+        () -> {
+          JsonObject request = new JsonObject();
+          request.add("blob", SerializeUtils.convert(blob));
+          request.add("acl", SerializeUtils.convert(acl));
+          return request;
+        });
+  }
+
   /** See {@link Storage#get(BlobId)}. Returns null if blob is not found. */
   public BlobCow get(BlobId blob) {
     Blob rawBlob =
@@ -70,6 +83,19 @@ public class StorageCow {
     return (rawBucket == null) ? null : new BucketCow(clientConfig, rawBucket);
   }
 
+  /** See {@link Storage#getAcl(BlobId, Acl.Entity)}. */
+  public Acl getAcl(BlobId blob, Acl.Entity entity) {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_GET_ACL_BLOB,
+        () -> storage.getAcl(blob, entity),
+        () -> {
+          JsonObject request = new JsonObject();
+          request.add("blob", SerializeUtils.convert(blob));
+          request.add("entity", SerializeUtils.convert(entity));
+          return request;
+        });
+  }
+
   /** See {@link Storage#delete(BlobId)}. */
   public boolean delete(BlobId blob) {
     return operationAnnotator.executeCowOperation(
@@ -84,6 +110,19 @@ public class StorageCow {
         CloudOperation.GOOGLE_DELETE_BUCKET,
         () -> storage.delete(bucket),
         () -> serializeBucketName(bucket));
+  }
+
+  /** See {@link Storage#deleteAcl(BlobId, Acl.Entity)}. */
+  public boolean deleteAcl(BlobId blob, Acl.Entity entity) {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_DELETE_ACL_BLOB,
+        () -> storage.deleteAcl(blob, entity),
+        () -> {
+          JsonObject request = new JsonObject();
+          request.add("blob", SerializeUtils.convert(blob));
+          request.add("entity", SerializeUtils.convert(entity));
+          return request;
+        });
   }
 
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */

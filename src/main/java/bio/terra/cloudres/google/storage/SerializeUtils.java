@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.storage;
 
+import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
@@ -10,6 +11,14 @@ import java.lang.reflect.Type;
 /** Utils for serializing {@link com.google.cloud.storage} objects. */
 class SerializeUtils {
   private SerializeUtils() {}
+
+  static JsonObject convert(Acl acl) {
+    return convertWithGson(acl, Acl.class);
+  }
+
+  static JsonObject convert(Acl.Entity entity) {
+    return convertWithGson(entity, Acl.Entity.class);
+  }
 
   static JsonObject convert(BlobId blobId) {
     return convertWithGson(blobId, BlobId.class);
