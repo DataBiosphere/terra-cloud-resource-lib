@@ -15,7 +15,8 @@ import org.junit.jupiter.api.*;
  * Note that Dataset has quota about "5 operations every 10 seconds per dataset". So in some update,
  * delete test, need to create a new dataset every time.
  *
- * @see <a href="https://cloud.google.com/bigquery/quotas#dataset_limits">cloud.google.com/bigquery/quotas</a>
+ * @see <a
+ *     href="https://cloud.google.com/bigquery/quotas#dataset_limits">cloud.google.com/bigquery/quotas</a>
  */
 public class BigQueryCowTest {
   private static final ServiceAccountCredentials GOOGLE_CREDENTIALS =
