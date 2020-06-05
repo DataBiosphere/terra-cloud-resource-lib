@@ -45,6 +45,7 @@ dependencies {
     runtime 'io.opencensus:opencensus-impl:0.26.0'
 
     compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+    compile 'com.google.cloud:google-cloud-bigquery:1.116.0'
     compile 'com.google.cloud:google-cloud-storage:1.108.0'
 
     implementation 'com.google.code.gson:gson:2.8.6'

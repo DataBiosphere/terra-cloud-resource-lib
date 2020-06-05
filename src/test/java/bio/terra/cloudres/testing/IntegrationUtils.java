@@ -16,4 +16,9 @@ public class IntegrationUtils {
   public static String randomName() {
     return UUID.randomUUID().toString();
   }
+
+  /** Generates a random name to and replace '-' with '_'. */
+  public static String randomNameWithUnderscore() {
+    return UUID.randomUUID().toString().replace('-', '_');
+  }
 }
