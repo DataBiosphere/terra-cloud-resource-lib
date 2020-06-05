@@ -3,11 +3,12 @@ package bio.terra.cloudres.google.storage;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import com.google.cloud.WriteChannel;
+import com.google.cloud.storage.*;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +27,34 @@ public class StorageCow {
     this.storage = storageOptions.getService();
   }
 
+  /** See {@link Storage#create(BlobInfo, Storage.BlobTargetOption...)}. */
+  public BlobCow create(BlobInfo blobInfo) {
+    Blob blob =
+        operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_CREATE_BLOB,
+            () -> storage.create(blobInfo),
+            () -> SerializeUtils.convert(blobInfo));
+    return new BlobCow(clientConfig, blob);
+  }
+
   /** See {@link Storage#create(BucketInfo, Storage.BucketTargetOption...)}. */
   public BucketCow create(BucketInfo bucketInfo) {
     Bucket bucket =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_CREATE_BUCKET,
             () -> storage.create(bucketInfo),
-            () -> new Gson().toJsonTree(bucketInfo, BucketInfo.class).getAsJsonObject());
+            () -> SerializeUtils.convert(bucketInfo));
     return new BucketCow(clientConfig, bucket);
+  }
+
+  /** See {@link Storage#get(BlobId)}. Returns null if blob is not found. */
+  public BlobCow get(BlobId blob) {
+    Blob rawBlob =
+        operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_GET_BLOB,
+            () -> storage.get(blob),
+            () -> SerializeUtils.convert(blob));
+    return (rawBlob == null) ? null : new BlobCow(clientConfig, rawBlob);
   }
 
   /**
@@ -46,10 +67,15 @@ public class StorageCow {
             CloudOperation.GOOGLE_GET_BUCKET,
             () -> storage.get(bucket),
             () -> serializeBucketName(bucket));
-    if (rawBucket == null) {
-      return null;
-    }
-    return new BucketCow(clientConfig, rawBucket);
+    return (rawBucket == null) ? null : new BucketCow(clientConfig, rawBucket);
+  }
+
+  /** See {@link Storage#delete(BlobId)}. */
+  public boolean delete(BlobId blob) {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_DELETE_BLOB,
+        () -> storage.delete(blob),
+        () -> SerializeUtils.convert(blob));
   }
 
   /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
@@ -58,6 +84,14 @@ public class StorageCow {
         CloudOperation.GOOGLE_DELETE_BUCKET,
         () -> storage.delete(bucket),
         () -> serializeBucketName(bucket));
+  }
+
+  /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */
+  public WriteChannel writer(BlobInfo blobInfo) {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_CREATE_BLOB_AND_WRITER,
+        () -> storage.writer(blobInfo),
+        () -> SerializeUtils.convert(blobInfo));
   }
 
   private static JsonObject serializeBucketName(String bucketName) {
