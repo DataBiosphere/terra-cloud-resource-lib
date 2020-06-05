@@ -62,6 +62,6 @@ public class BigQueryCowTest {
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     bigQueryCow.deleteDataset(datasetId);
-    assertNull(bigQueryCow.getDataSet(datasetId));
+    assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo());
   }
 }
