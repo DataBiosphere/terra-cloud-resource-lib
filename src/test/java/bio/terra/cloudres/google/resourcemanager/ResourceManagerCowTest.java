@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.crm;
+package bio.terra.cloudres.google.resourcemanager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
