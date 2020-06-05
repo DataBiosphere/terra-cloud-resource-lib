@@ -86,7 +86,7 @@ public class StorageCow {
   /** See {@link Storage#getAcl(BlobId, Acl.Entity)}. */
   public Acl getAcl(BlobId blob, Acl.Entity entity) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_CREATE_ACL_BLOB,
+        CloudOperation.GOOGLE_GET_ACL_BLOB,
         () -> storage.getAcl(blob, entity),
         () -> {
           JsonObject request = new JsonObject();
