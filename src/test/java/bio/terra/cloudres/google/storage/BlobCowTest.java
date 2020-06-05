@@ -1,12 +1,16 @@
 package bio.terra.cloudres.google.storage;
 
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
+import com.google.cloud.storage.CopyWriter;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
@@ -15,7 +19,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("integration")
-public class StorageCowTest {
+public class BlobCowTest {
+
   private final StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
   /**
    * A bucket to be re-used between tests that need a bucket but do not care about the bucket
@@ -38,46 +43,56 @@ public class StorageCowTest {
   }
 
   @Test
-  public void createGetDeleteBucket() {
-    String bucketName = IntegrationUtils.randomName();
-    assertNull(storageCow.get(bucketName));
-
-    BucketCow createdBucket = storageCow.create(BucketInfo.of(bucketName));
-    assertEquals(bucketName, createdBucket.getBucketInfo().getName());
-
-    assertEquals(bucketName, storageCow.get(bucketName).getBucketInfo().getName());
-
-    assertTrue(storageCow.delete(bucketName));
-    assertNull(storageCow.get(bucketName));
-  }
-
-  @Test
-  public void createGetDeleteBlob() {
+  public void deleteCreatedBlob() {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     assertNull(storageCow.get(blobId));
 
-    BlobCow createdBlob = storageCow.create(BlobInfo.newBuilder(blobId).build());
-    assertEquals(blobId.getName(), createdBlob.getBlobInfo().getName());
-
+    BlobCow blob = storageCow.create(BlobInfo.newBuilder(blobId).build());
     assertEquals(blobId.getName(), storageCow.get(blobId).getBlobInfo().getName());
 
-    assertTrue(storageCow.delete(blobId));
+    assertTrue(blob.delete());
     assertNull(storageCow.get(blobId));
   }
 
   @Test
-  public void blobWriter() throws Exception {
+  public void copyTo() throws Exception {
+    BlobId sourceBlobId =
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+    BlobId targetBlobId =
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+
+    final String contents = "hello my blob";
+    BlobCow source = createBlobWithContents(sourceBlobId, contents);
+    assertEquals(contents, StorageIntegrationUtils.readContents(source));
+
+    assertNull(storageCow.get(targetBlobId));
+    CopyWriter copyWriter = source.copyTo(targetBlobId);
+    copyWriter.getResult();
+    BlobCow target = storageCow.get(targetBlobId);
+    assertEquals(contents, StorageIntegrationUtils.readContents(target));
+
+    assertTrue(source.delete());
+    assertTrue(target.delete());
+  }
+
+  @Test
+  public void reader() throws Exception {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
-    assertNull(storageCow.get(blobId));
 
-    String contents = "hello blob";
+    final String contents = "hello my blob";
+    BlobCow blob = createBlobWithContents(blobId, contents);
+
+    assertEquals(contents, StorageIntegrationUtils.readContents(blob));
+
+    assertTrue(blob.delete());
+  }
+
+  private BlobCow createBlobWithContents(BlobId blobId, String contents) throws IOException {
     try (WriteChannel writeChannel = storageCow.writer(BlobInfo.newBuilder(blobId).build())) {
       writeChannel.write(ByteBuffer.wrap(contents.getBytes(StandardCharsets.UTF_8)));
     }
-    BlobCow blob = storageCow.get(blobId);
-    assertEquals(contents, StorageIntegrationUtils.readContents(blob));
-    assertTrue(storageCow.delete(blobId));
+    return storageCow.get(blobId);
   }
 }

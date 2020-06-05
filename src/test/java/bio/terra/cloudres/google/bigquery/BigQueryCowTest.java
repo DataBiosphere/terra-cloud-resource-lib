@@ -19,7 +19,7 @@ import org.junit.jupiter.api.*;
  */
 public class BigQueryCowTest {
   private static final ServiceAccountCredentials GOOGLE_CREDENTIALS =
-      IntegrationCredentials.getGoogleCredentialsOrDie();
+      IntegrationCredentials.getAdminGoogleCredentialsOrDie();
 
   private static BigQueryOptions defaultBigQueryOption() {
     return BigQueryOptions.newBuilder()
