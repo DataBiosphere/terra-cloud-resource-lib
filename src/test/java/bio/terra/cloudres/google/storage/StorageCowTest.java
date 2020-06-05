@@ -100,7 +100,7 @@ public class StorageCowTest {
     assertTrue(storageCow.delete(blobId));
   }
 
-  /** Helper assert that compares an {@link Acl}'s entity and role. */
+  /** Helper assert that compares an {@link Acl}'s entity and role, but ignores the etag and id. */
   private static void assertEquivalentAcls(Acl expected, Acl actual) {
     assertEquals(expected.getEntity(), actual.getEntity());
     assertEquals(expected.getRole(), actual.getRole());
