@@ -2,11 +2,11 @@ package bio.terra.cloudres.common;
 
 /** The supported Cloud API methods in Enum */
 public enum CloudOperation {
-  // Resource Manager Operations
+  // Google Resource Manager Operations
   GOOGLE_CREATE_PROJECT,
   GOOGLE_DELETE_PROJECT,
 
-  // Storage Operations
+  // Google Storage Operations
   GOOGLE_COPY_BLOB,
   GOOGLE_CREATE_ACL_BLOB,
   GOOGLE_CREATE_BLOB,
@@ -18,5 +18,11 @@ public enum CloudOperation {
   GOOGLE_DELETE_ACL_BLOB,
   GOOGLE_DELETE_BLOB,
   GOOGLE_DELETE_BUCKET,
-  GOOGLE_READ_BLOB;
+  GOOGLE_READ_BLOB,
+
+  // Google BigQuery Operations
+  GOOGLE_CREATE_DATASET,
+  GOOGLE_UPDATE_DATASET,
+  GOOGLE_DELETE_DATASET,
+  GOOGLE_GET_DATASET;
 }

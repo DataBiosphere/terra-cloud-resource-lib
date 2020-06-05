@@ -19,7 +19,7 @@ class StorageIntegrationUtils {
 
   static StorageOptions defaultStorageOptions() {
     ServiceAccountCredentials googleCredentials =
-        IntegrationCredentials.getGoogleCredentialsOrDie();
+        IntegrationCredentials.getAdminGoogleCredentialsOrDie();
     return StorageOptions.newBuilder()
         .setCredentials(googleCredentials)
         .setProjectId(googleCredentials.getProjectId())
