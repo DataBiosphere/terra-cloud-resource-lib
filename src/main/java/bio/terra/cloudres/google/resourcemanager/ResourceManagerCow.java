@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.crm;
+package bio.terra.cloudres.google.resourcemanager;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
