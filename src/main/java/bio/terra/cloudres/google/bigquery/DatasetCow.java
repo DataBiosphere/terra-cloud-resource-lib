@@ -8,6 +8,7 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.Dataset;
 import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.TableId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,5 +56,13 @@ public class DatasetCow {
         CloudOperation.GOOGLE_DELETE_DATASET,
         () -> dataset.delete(deleteOptions),
         () -> convert(dataset.getDatasetId().getDataset(), deleteOptions));
+  }
+
+  /** See {@link Dataset#get(String, BigQuery.TableOption...)}. */
+  public TableCow getTable(String tableId, BigQuery.TableOption... tableOptions) {
+    return new TableCow(clientConfig, operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_GET_BIGQUERY_TABLE,
+            () -> dataset.get(tableId, tableOptions),
+            () -> convert(TableId.of(dataset.getDatasetId().getDataset(), tableId), tableOptions)));
   }
 }

@@ -15,17 +15,17 @@ public class DatasetCowTest {
   @Test
   public void reload() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetCow datasetCow = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    DatasetCow datasetCow = bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
 
     assertEquals(datasetCow.getDatasetInfo(), datasetCow.reload().getDatasetInfo());
 
-    bigQueryCow.deleteDataset(datasetId);
+    bigQueryCow.delete(datasetId);
   }
 
   @Test
   public void update() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetCow datasetCow = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    DatasetCow datasetCow = bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
     assertNull(datasetCow.getDatasetInfo().getDescription());
 
     String description = "new description";
@@ -39,13 +39,13 @@ public class DatasetCowTest {
     assertEquals(description, datasetCow.reload().getDatasetInfo().getDescription());
 
     // cleanup
-    bigQueryCow.deleteDataset(datasetId);
+    bigQueryCow.delete(datasetId);
   }
 
   @Test
   public void delete() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetCow datasetCow = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    DatasetCow datasetCow = bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     datasetCow.delete();

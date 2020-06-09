@@ -21,47 +21,47 @@ public class BigQueryCowTest {
   public void createDataset() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
     DatasetInfo createdDataSet =
-        bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build()).getDatasetInfo();
+        bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build()).getDatasetInfo();
 
     assertEquals(createdDataSet, bigQueryCow.getDataSet(datasetId).getDatasetInfo());
     assertEquals(datasetId, createdDataSet.getDatasetId().getDataset());
-    bigQueryCow.deleteDataset(datasetId);
+    bigQueryCow.delete(datasetId);
   }
 
   @Test
   public void getDataset() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
 
     assertEquals(
         datasetId, bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDatasetId().getDataset());
 
-    bigQueryCow.deleteDataset(datasetId);
+    bigQueryCow.delete(datasetId);
   }
 
   @Test
   public void updateDataset() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
     assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDescription());
 
     String description = "new description";
-    bigQueryCow.updateDataset(
+    bigQueryCow.update(
         DatasetInfo.newBuilder(datasetId).setDescription("new description").build());
 
     assertEquals(description, bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDescription());
 
     // cleanup
-    bigQueryCow.deleteDataset(datasetId);
+    bigQueryCow.delete(datasetId);
   }
 
   @Test
   public void deleteDataset() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
-    bigQueryCow.deleteDataset(datasetId);
+    bigQueryCow.delete(datasetId);
     assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo());
   }
 }
