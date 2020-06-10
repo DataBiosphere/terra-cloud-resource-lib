@@ -13,55 +13,55 @@ import org.slf4j.LoggerFactory;
 
 /** A Cloud Object Wrapper(COW) for {@link Table}. */
 public class TableCow {
-    private final Logger logger = LoggerFactory.getLogger(TableCow.class);
+  private final Logger logger = LoggerFactory.getLogger(TableCow.class);
 
-    private final OperationAnnotator operationAnnotator;
-    private final Table table;
-    private final ClientConfig clientConfig;
+  private final OperationAnnotator operationAnnotator;
+  private final Table table;
+  private final ClientConfig clientConfig;
 
-    TableCow(ClientConfig clientConfig, Table table) {
-        this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
-        this.table = table;
-        this.clientConfig = clientConfig;
-    }
+  TableCow(ClientConfig clientConfig, Table table) {
+    this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
+    this.table = table;
+    this.clientConfig = clientConfig;
+  }
 
-    public TableInfo getTableInfo() {
-        return table;
-    }
+  public TableInfo getTableInfo() {
+    return table;
+  }
 
-    /** See {@link Table#reload(BigQuery.TableOption...)} */
-    public TableCow reload(BigQuery.TableOption... tableOptions) {
-        return new TableCow(
-                clientConfig,
-                operationAnnotator.executeCowOperation(
-                        CloudOperation.GOOGLE_RELOAD_BIGQUERY_TABLE,
-                        () -> table.reload(tableOptions),
-                        () -> convert(table.getTableId(), tableOptions)));
-    }
+  /** See {@link Table#reload(BigQuery.TableOption...)} */
+  public TableCow reload(BigQuery.TableOption... tableOptions) {
+    return new TableCow(
+        clientConfig,
+        operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_RELOAD_BIGQUERY_TABLE,
+            () -> table.reload(tableOptions),
+            () -> convert(table.getTableId(), tableOptions)));
+  }
 
-    /** See {@link Table#update(BigQuery.TableOption...)}. */
-    public TableCow update(BigQuery.TableOption... TableOptions) {
-        return new TableCow(
-                clientConfig,
-                operationAnnotator.executeCowOperation(
-                        CloudOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
-                        () -> table.update(TableOptions),
-                        () -> convert(table, TableOptions)));
-    }
+  /** See {@link Table#update(BigQuery.TableOption...)}. */
+  public TableCow update(BigQuery.TableOption... TableOptions) {
+    return new TableCow(
+        clientConfig,
+        operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
+            () -> table.update(TableOptions),
+            () -> convert(table, TableOptions)));
+  }
 
-    /** See {@link Table#exists()} */
-    public boolean exists() {
-        return operationAnnotator.executeCowOperation(
-                CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
-                table::exists,
-                () -> convert(table.getTableId()));
-    }
+  /** See {@link Table#exists()} */
+  public boolean exists() {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
+        table::exists,
+        () -> convert(table.getTableId()));
+  }
 
-    /** See {@link Table#delete()} */
-    public boolean delete() {
-        return operationAnnotator.executeCowOperation(
-                CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
-                table::delete,
-                () -> convert(table.getTableId()));
-    }
+  /** See {@link Table#delete()} */
+  public boolean delete() {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
+        table::delete,
+        () -> convert(table.getTableId()));
+  }
 }

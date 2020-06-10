@@ -14,74 +14,78 @@ public class SerializeUtils {
     return jsonObject;
   }
 
-  static JsonObject convert(String datasetId, BigQuery.DatasetOption... options) {
+  static JsonObject convert(DatasetId datasetId, BigQuery.DatasetOption... options) {
+    Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("datasetId", datasetId);
-    jsonObject.add("datasetOptions", new Gson().toJsonTree(options));
+    jsonObject.add("datasetId", gson.toJsonTree(datasetId));
+    jsonObject.add("datasetOptions", gson.toJsonTree(options));
     return jsonObject;
   }
 
-  static JsonObject convert(String datasetId, BigQuery.DatasetDeleteOption... options) {
+  static JsonObject convert(DatasetId datasetId, BigQuery.DatasetDeleteOption... options) {
+    Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("datasetId", datasetId);
-    jsonObject.addProperty("datasetDeleteOptions", new Gson().toJson(options));
+    jsonObject.add("datasetId", gson.toJsonTree(datasetId));
+    jsonObject.add("datasetDeleteOptions", gson.toJsonTree(options));
     return jsonObject;
   }
 
   static JsonObject convert(TableInfo tableInfo, BigQuery.TableOption... options) {
     JsonObject jsonObject = new JsonObject();
     Gson gson = new Gson();
-    jsonObject.add("tableInfo",  gson.toJsonTree(tableInfo));
-    jsonObject.add("TableDeleteOptions", gson.toJsonTree(options));
+    jsonObject.add("tableInfo", gson.toJsonTree(tableInfo));
+    jsonObject.add("tableOptions", gson.toJsonTree(options));
     return jsonObject;
   }
 
-  static JsonObject convert(TableId tablaId) {
+  static JsonObject convert(TableId tableId) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("tablaId",  gson.toJsonTree(tablaId));
+    jsonObject.add("tableId", gson.toJsonTree(tableId));
     return jsonObject;
   }
 
-  static JsonObject convert(TableId tablaId, BigQuery.TableOption... options) {
+  static JsonObject convert(TableId tableId, BigQuery.TableOption... tableOptions) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("tablaId",  gson.toJsonTree(tablaId));
-    jsonObject.addProperty("tableOptions", gson.toJson(options));
-    return jsonObject;
-  }
-
-
-  static JsonObject convert(String datasetId, BigQuery.TableListOption... tableListOptions) {
-    Gson gson = new Gson();
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty("datasetId",  datasetId);
-    jsonObject.addProperty("tableListOptions", gson.toJson(tableListOptions));
+    jsonObject.add("tableId", gson.toJsonTree(tableId));
+    jsonObject.add("tableOptions", gson.toJsonTree(tableOptions));
     return jsonObject;
   }
 
   static JsonObject convert(DatasetId datasetId, BigQuery.TableListOption... tableListOptions) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("datasetId",  gson.toJsonTree(datasetId));
-    jsonObject.addProperty("tableListOptions", gson.toJson(tableListOptions));
+    jsonObject.add("datasetId", gson.toJsonTree(datasetId));
+    jsonObject.add("tableListOptions", gson.toJsonTree(tableListOptions));
     return jsonObject;
   }
 
   static JsonObject convert(TableId tableId, BigQuery.TableDataListOption... tableDataListOption) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("tableId",  gson.toJsonTree(tableId));
-    jsonObject.addProperty("tableDataListOption", gson.toJson(tableDataListOption));
+    jsonObject.add("tableId", gson.toJsonTree(tableId));
+    jsonObject.add("tableDataListOption", gson.toJsonTree(tableDataListOption));
     return jsonObject;
   }
 
-  static JsonObject convert(TableId tableId, Schema schema, BigQuery.TableDataListOption... tableDataListOption) {
+  static JsonObject convert(
+      TableId tableId, Schema schema, BigQuery.TableDataListOption... tableDataListOption) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("tableId",  gson.toJsonTree(tableId));
-    jsonObject.addProperty("schema", gson.toJson(schema));
-    jsonObject.addProperty("tableDataListOption", gson.toJson(tableDataListOption));
+    jsonObject.add("tableId", gson.toJsonTree(tableId));
+    jsonObject.add("schema", gson.toJsonTree(schema));
+    jsonObject.add("tableDataListOption", gson.toJsonTree(tableDataListOption));
+    return jsonObject;
+  }
+
+  static JsonObject convert(
+      TableId tableId, TableDefinition tableDefinition, BigQuery.TableOption... tableOptions) {
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("tableId", gson.toJsonTree(tableId));
+    jsonObject.add("tableDefinition", gson.toJsonTree(tableDefinition));
+    jsonObject.add("tableOptions", gson.toJsonTree(tableOptions));
     return jsonObject;
   }
 }
