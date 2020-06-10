@@ -61,24 +61,6 @@ public class SerializeUtils {
     return jsonObject;
   }
 
-  static JsonObject convert(TableId tableId, BigQuery.TableDataListOption... tableDataListOption) {
-    Gson gson = new Gson();
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.add("tableId", gson.toJsonTree(tableId));
-    jsonObject.add("tableDataListOption", gson.toJsonTree(tableDataListOption));
-    return jsonObject;
-  }
-
-  static JsonObject convert(
-      TableId tableId, Schema schema, BigQuery.TableDataListOption... tableDataListOption) {
-    Gson gson = new Gson();
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.add("tableId", gson.toJsonTree(tableId));
-    jsonObject.add("schema", gson.toJsonTree(schema));
-    jsonObject.add("tableDataListOption", gson.toJsonTree(tableDataListOption));
-    return jsonObject;
-  }
-
   static JsonObject convert(
       TableId tableId, TableDefinition tableDefinition, BigQuery.TableOption... tableOptions) {
     Gson gson = new Gson();

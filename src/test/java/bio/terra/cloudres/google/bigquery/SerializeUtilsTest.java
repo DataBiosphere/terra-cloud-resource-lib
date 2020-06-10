@@ -87,22 +87,6 @@ public class SerializeUtilsTest {
   }
 
   @Test
-  public void convertTableIdWithTableDataListOptions() {
-    assertEquals(
-        jsonTableId + ",\"tableDataListOption\":[{\"rpcOption\":\"MAX_RESULTS\",\"value\":1}]}",
-        SerializeUtils.convert(tableId, BigQuery.TableDataListOption.pageSize(1)).toString());
-  }
-
-  @Test
-  public void convertTableIdWithSchemaWithTableDataListOptions() {
-    assertEquals(
-        jsonTableId
-            + ",\"schema\":{\"fields\":[]},\"tableDataListOption\":[{\"rpcOption\":\"MAX_RESULTS\",\"value\":1}]}",
-        SerializeUtils.convert(tableId, Schema.of(), BigQuery.TableDataListOption.pageSize(1))
-            .toString());
-  }
-
-  @Test
   public void convertTableIdWithTableDefinitionWithTableOption() {
     assertEquals(
         jsonTableId
