@@ -1,0 +1,17 @@
+dependencies {
+    testCompileOnly 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+}
+
+//
+//configurations {
+//    testFixturesResources
+//}
+//
+//task testFixturesResourcesJar(type: Jar) {
+//    classifier 'resources'
+//    from sourceSets.testFixtures.resources
+//}
+//
+//artifacts {
+//    testFixturesResources testFixturesResourcesJar
+//}

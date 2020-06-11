@@ -1,0 +1,8 @@
+dependencies {
+    implementation project(':common')
+    testImplementation(testFixtures(project(':common')))
+    testImplementation(project(path: ':common', configuration: 'testFixturesResources'))
+    api 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+    api 'com.google.cloud:google-cloud-bigquery:1.116.0'
+    api 'com.google.cloud:google-cloud-storage:1.108.0'
+}

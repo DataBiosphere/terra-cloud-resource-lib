@@ -10,6 +10,7 @@ buildscript {
 
 plugins {
     id 'java-library'
+    id 'java-test-fixtures'
     id 'maven-publish'
     id 'com.jfrog.artifactory' version '4.13.0'
     id 'com.diffplug.gradle.spotless' version '3.27.2'
@@ -18,7 +19,6 @@ plugins {
 group 'bio.terra'
 version '0.0.1-SNAPSHOT'
 
-sourceCompatibility = 1.8
 
 def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
 def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
@@ -30,53 +30,68 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
 }
 
-repositories {
-    mavenCentral()
-    google()
-}
-
-dependencies {
-    compile 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
-
-    compile 'org.slf4j:slf4j-api:1.7.28'
-    compile 'org.slf4j:slf4j-nop:1.7.25'
-
-    compile 'io.opencensus:opencensus-api:0.26.0'
-    runtime 'io.opencensus:opencensus-impl:0.26.0'
-
-    compile 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
-    compile 'com.google.cloud:google-cloud-bigquery:1.116.0'
-    compile 'com.google.cloud:google-cloud-storage:1.108.0'
-
-    implementation 'com.google.code.gson:gson:2.8.6'
-    dependencies { testCompile "org.mockito:mockito-core:2.+" }
-
-    implementation("com.google.guava:guava:29.0-jre")
-    testImplementation 'junit:junit:4.13'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    testImplementation 'org.hamcrest:hamcrest:2.2'
-    testCompile 'org.apache.httpcomponents.client5:httpclient5:5.0'
-    testCompile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
-    testCompile group: 'com.typesafe', name: 'config', version: '1.4.0'
-
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
-}
-
-test {
-    useJUnitPlatform {
-        includeTags 'unit'
+subprojects {
+    repositories {
+        mavenCentral()
+        google()
     }
-}
 
-def integrationTest = tasks.register("integrationTest", Test) {
-    useJUnitPlatform {
-        includeTags "integration"
+    apply plugin: 'java-library'
+    apply plugin: 'java-test-fixtures'
+    apply plugin: 'com.diffplug.gradle.spotless'
+
+    dependencies {
+        api 'com.google.auth:google-auth-library-oauth2-http:0.20.0'
+        api 'com.google.cloud:google-cloud-core-http:1.93.5'
+
+        implementation 'org.slf4j:slf4j-api:1.7.28'
+
+        implementation 'io.opencensus:opencensus-api:0.26.0'
+        implementation 'io.opencensus:opencensus-impl:0.26.0'
+
+        implementation 'com.google.code.gson:gson:2.8.6'
+        testImplementation "org.mockito:mockito-core:2.+"
+
+        implementation("com.google.guava:guava:29.0-jre")
+        testImplementation 'junit:junit:4.13'
+        testFixturesApi 'junit:junit:4.13'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+        testFixturesApi 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+        testImplementation 'org.hamcrest:hamcrest:2.2'
+
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
     }
-    shouldRunAfter test
-}
 
-java {
-    withJavadocJar()
+    // Linter
+    spotless {
+        java {
+            googleJavaFormat()
+        }
+    }
+
+    test {
+        useJUnitPlatform {
+            includeTags 'unit'
+        }
+    }
+
+    def integrationTest = tasks.register("integrationTest", Test) {
+        useJUnitPlatform {
+            includeTags "integration"
+        }
+        shouldRunAfter test
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        withJavadocJar()
+    }
+
+    task minniekenny(type: Exec) {
+        commandLine 'sh', '../minnie-kenny.sh'
+    }
+
+    test.dependsOn minniekenny
 }
 
 publishing {
@@ -108,16 +123,3 @@ artifactory {
         }
     }
 }
-
-// Linter
-spotless {
-    java {
-        googleJavaFormat()
-    }
-}
-
-task minniekenny(type: Exec) {
-    commandLine 'sh', './minnie-kenny.sh'
-}
-
-test.dependsOn minniekenny
