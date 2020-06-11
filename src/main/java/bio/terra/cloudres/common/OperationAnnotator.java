@@ -165,18 +165,4 @@ public class OperationAnnotator {
    * CowExecuteCheckedException}.
    */
   private static class BogusException extends Exception {}
-
-  private static class UncheckedExecution<R>
-      implements CowExecuteCheckedException<R, BogusException> {
-    private final CowExecute<R> cowExecute;
-
-    private UncheckedExecution(CowExecute<R> cowExecute) {
-      this.cowExecute = cowExecute;
-    }
-
-    @Override
-    public R execute() throws BogusException {
-      return cowExecute.execute();
-    }
-  }
 }
