@@ -39,6 +39,21 @@ public class OperationAnnotator {
    */
   public <R> R executeCowOperation(
       CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
+    try {
+      return executeCowOperation(
+          cloudOperation,
+          (CowExecuteCheckedException<R, BogusException>) cowExecute::execute,
+          cowSerialize);
+    } catch (BogusException e) {
+      throw new AssertionError("Our BogusException should never be thrown by cowExecute.", e);
+    }
+  }
+
+  public <R, E extends Exception> R executeCowOperation(
+      CloudOperation cloudOperation,
+      CowExecuteCheckedException<R, E> cowExecute,
+      CowSerialize cowSerialize)
+      throws E {
     Optional<Exception> executionException = Optional.empty();
 
     try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
@@ -133,9 +148,35 @@ public class OperationAnnotator {
     R execute();
   }
 
+  /** How to execute this operation. Like {@link CowExecute}, but allows for checked exceptions. */
+  @FunctionalInterface
+  public interface CowExecuteCheckedException<R, E extends Exception> {
+    R execute() throws E;
+  }
+
   /** How to serialize Request */
   @FunctionalInterface
   public interface CowSerialize {
     JsonObject serializeRequest();
+  }
+
+  /**
+   * A bogus exception type used to make a {@link CowExecute} into a {@link
+   * CowExecuteCheckedException}.
+   */
+  private static class BogusException extends Exception {}
+
+  private static class UncheckedExecution<R>
+      implements CowExecuteCheckedException<R, BogusException> {
+    private final CowExecute<R> cowExecute;
+
+    private UncheckedExecution(CowExecute<R> cowExecute) {
+      this.cowExecute = cowExecute;
+    }
+
+    @Override
+    public R execute() throws BogusException {
+      return cowExecute.execute();
+    }
   }
 }
