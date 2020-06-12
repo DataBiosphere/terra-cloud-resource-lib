@@ -8,15 +8,17 @@ import org.junit.jupiter.api.Test;
 
 @Tag("unit")
 public class SerializeUtilsTest {
-  private final DatasetId datasetId = DatasetId.of("datasetId1");
-  private final TableId tableId = TableId.of(datasetId.getDataset(), "tableId1");
+  private static final DatasetId DATASET_ID = DatasetId.of("datasetId1");
+  private static final TableId TABLE_ID = TableId.of(DATASET_ID.getDataset(), "tableId1");
 
   @Test
   public void convertDatasetIdWithOptions() {
     assertEquals(
-        "{\"datasetId\":{\"dataset\":\"datasetId1\"},\"datasetOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,access\"},{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,creationTime\"}]}",
+        "{\"datasetId\":{\"dataset\":\"datasetId1\"},"
+            + "\"datasetOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,access\"},"
+            + "{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,creationTime\"}]}",
         SerializeUtils.convert(
-                datasetId,
+                DATASET_ID,
                 BigQuery.DatasetOption.fields(BigQuery.DatasetField.ACCESS),
                 BigQuery.DatasetOption.fields(BigQuery.DatasetField.CREATION_TIME))
             .toString());
@@ -25,9 +27,12 @@ public class SerializeUtilsTest {
   @Test
   public void convertDatasetInfoWithOptions() {
     assertEquals(
-        "{\"datasetInfo\":{\"datasetId\":{\"dataset\":\"datasetId1\"},\"labels\":{\"userMap\":{}}},\"datasetOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,access\"},{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,creationTime\"}]}",
+        "{\"datasetInfo\":{\"datasetId\":{\"dataset\":\"datasetId1\"},"
+            + "\"labels\":{\"userMap\":{}}},"
+            + "\"datasetOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,access\"},"
+            + "{\"rpcOption\":\"FIELDS\",\"value\":\"datasetReference,creationTime\"}]}",
         SerializeUtils.convert(
-                DatasetInfo.newBuilder(datasetId).build(),
+                DatasetInfo.newBuilder(DATASET_ID).build(),
                 BigQuery.DatasetOption.fields(BigQuery.DatasetField.ACCESS),
                 BigQuery.DatasetOption.fields(BigQuery.DatasetField.CREATION_TIME))
             .toString());
@@ -36,18 +41,22 @@ public class SerializeUtilsTest {
   @Test
   public void convertDatasetInfoWithDeleteOptions() {
     assertEquals(
-        "{\"datasetId\":{\"dataset\":\"datasetId1\"},\"datasetDeleteOptions\":[{\"rpcOption\":\"DELETE_CONTENTS\",\"value\":true}]}",
-        SerializeUtils.convert(datasetId, BigQuery.DatasetDeleteOption.deleteContents())
+        "{\"datasetId\":{\"dataset\":\"datasetId1\"},"
+            + "\"datasetDeleteOptions\":[{\"rpcOption\":\"DELETE_CONTENTS\",\"value\":true}]}",
+        SerializeUtils.convert(DATASET_ID, BigQuery.DatasetDeleteOption.deleteContents())
             .toString());
   }
 
   @Test
   public void convertTableInfoWithTableOptions() {
     assertEquals(
-        "{\"tableInfo\":{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},\"definition\":{\"type\":{\"constant\":\"TABLE\"},\"location\":\"location\"},\"labels\":{\"userMap\":{}}},\"tableOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"type,tableReference\"}]}",
+        "{\"tableInfo\":{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},"
+            + "\"definition\":{\"type\":{\"constant\":\"TABLE\"},\"location\":\"location\"},"
+            + "\"labels\":{\"userMap\":{}}},"
+            + "\"tableOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"type,tableReference\"}]}",
         SerializeUtils.convert(
                 TableInfo.newBuilder(
-                        tableId,
+                        TABLE_ID,
                         StandardTableDefinition.newBuilder().setLocation("location").build())
                     .build(),
                 BigQuery.TableOption.fields())
@@ -58,29 +67,33 @@ public class SerializeUtilsTest {
   public void convertTableId() {
     assertEquals(
         "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"}}",
-        SerializeUtils.convert(tableId).toString());
+        SerializeUtils.convert(TABLE_ID).toString());
   }
 
   @Test
   public void convertTableIdWithTableOptions() {
     assertEquals(
-        "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},\"tableOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"type,tableReference\"}]}",
-        SerializeUtils.convert(tableId, BigQuery.TableOption.fields()).toString());
+        "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},"
+            + "\"tableOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"type,tableReference\"}]}",
+        SerializeUtils.convert(TABLE_ID, BigQuery.TableOption.fields()).toString());
   }
 
   @Test
   public void convertDatasetIdWithTableOptions() {
     assertEquals(
-        "{\"datasetId\":{\"dataset\":\"datasetId1\"},\"tableListOptions\":[{\"rpcOption\":\"MAX_RESULTS\",\"value\":1}]}",
-        SerializeUtils.convert(datasetId, BigQuery.TableListOption.pageSize(1)).toString());
+        "{\"datasetId\":{\"dataset\":\"datasetId1\"},"
+            + "\"tableListOptions\":[{\"rpcOption\":\"MAX_RESULTS\",\"value\":1}]}",
+        SerializeUtils.convert(DATASET_ID, BigQuery.TableListOption.pageSize(1)).toString());
   }
 
   @Test
   public void convertTableIdWithTableDefinitionWithTableOption() {
     assertEquals(
-        "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},\"tableDefinition\":{\"type\":{\"constant\":\"TABLE\"},\"location\":\"location\"},\"tableOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"type,tableReference\"}]}",
+        "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},"
+            + "\"tableDefinition\":{\"type\":{\"constant\":\"TABLE\"},\"location\":\"location\"},"
+            + "\"tableOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"type,tableReference\"}]}",
         SerializeUtils.convert(
-                tableId,
+                TABLE_ID,
                 StandardTableDefinition.newBuilder().setLocation("location").build(),
                 BigQuery.TableOption.fields())
             .toString());

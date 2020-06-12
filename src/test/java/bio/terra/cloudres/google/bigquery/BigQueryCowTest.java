@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
@@ -20,16 +18,10 @@ import org.junit.jupiter.api.*;
  */
 public class BigQueryCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
-
   private static BigQueryCow bigQueryCow = defaultBigQueryCow();
-
   private static DatasetInfo reusableDataset;
-
-  // Cleanup the tableId and datesetId list and use them to track resources created in one test
-  // method.
-  // In this way to can make sure tables/datasets can be cleaned up with best effort.
-  private List<String> createdDatasetIds = new ArrayList<>();
-  private List<TableId> createdTableIds = new ArrayList<>();
+  private final BigQueryResourceTracker bigQueryResourceTracker =
+      new BigQueryResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
 
   @BeforeAll
   public static void createReusableDataset() {
@@ -44,21 +36,23 @@ public class BigQueryCowTest {
 
   @AfterEach
   public void tearDown() {
-    createdTableIds.forEach(bigQueryCow::delete);
-    createdDatasetIds.forEach(bigQueryCow::delete);
+    bigQueryResourceTracker.tearDown();
   }
 
   @Test
   public void createDataset() {
-    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
-    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
+    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
 
-    assertEquals(datasetCow.getDatasetInfo(), bigQueryCow.getDataSet(datasetId).getDatasetInfo());
+    assertEquals(
+        datasetCow.getDatasetInfo(),
+        bigQueryCow
+            .getDataSet(datasetCow.getDatasetInfo().getDatasetId().getDataset())
+            .getDatasetInfo());
   }
 
   @Test
   public void getDataset() {
-    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertEquals(
@@ -67,7 +61,7 @@ public class BigQueryCowTest {
 
   @Test
   public void updateDataset() {
-    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDescription());
@@ -80,7 +74,7 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteDataset() {
-    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
@@ -90,8 +84,7 @@ public class BigQueryCowTest {
 
   @Test
   public void createTable() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
 
     assertTableIdEqual(
         tableCow.getTableInfo().getTableId(),
@@ -101,8 +94,7 @@ public class BigQueryCowTest {
   @Test
   public void updateTable() {
     String description = "des";
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
     bigQueryCow.update(tableCow.getTableInfo().toBuilder().setDescription(description).build());
 
     assertEquals(
@@ -115,8 +107,7 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteTable() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
     assertNotNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());
 
@@ -126,8 +117,7 @@ public class BigQueryCowTest {
 
   @Test
   public void getTable() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
 
     assertTableIdEqual(tableId, bigQueryCow.getTable(tableId).getTableInfo().getTableId());
@@ -135,8 +125,7 @@ public class BigQueryCowTest {
 
   @Test
   public void getTableWithDatasetId() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
 
     assertTableIdEqual(
@@ -149,11 +138,9 @@ public class BigQueryCowTest {
 
   @Test
   public void listTables() {
-    TableCow tableCow1 =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow1 = bigQueryResourceTracker.createTableCow();
     TableId tableId1 = tableCow1.getTableInfo().getTableId();
-    TableCow tableCow2 =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow2 = bigQueryResourceTracker.createTableCow();
     TableId tableId2 = tableCow2.getTableInfo().getTableId();
 
     assertTableIdContainsExactlyInCowPage(

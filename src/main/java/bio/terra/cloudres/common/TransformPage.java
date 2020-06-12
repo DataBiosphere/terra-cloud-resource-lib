@@ -5,7 +5,7 @@ import static com.google.common.collect.Iterables.transform;
 import com.google.api.gax.paging.Page;
 import com.google.common.base.Function;
 
-/** Implementation for {@link Page} interface for Cow */
+/** Implementation for {@link Page} interface which supports transform Page<F> to Page<T> */
 public class TransformPage<F, T> implements Page<T> {
   private final Function<? super F, ? extends T> transformFn;
   private final Page<F> originalPage;

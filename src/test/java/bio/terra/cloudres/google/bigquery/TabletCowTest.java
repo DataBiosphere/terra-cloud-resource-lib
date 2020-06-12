@@ -5,21 +5,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.*;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
 public class TabletCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
-
   private static BigQueryCow bigQueryCow = defaultBigQueryCow();
-
   private static DatasetInfo reusableDataset;
-
-  // Cleanup the createdTableIds list and use this to track tables created in one test method.
-  // In this way to can make sure tables/datasets can be cleaned up with best effort.
-  private List<TableId> createdTableIds = new ArrayList<>();
+  private final BigQueryResourceTracker bigQueryResourceTracker =
+      new BigQueryResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
 
   @BeforeAll
   public static void createReusableDataset() {
@@ -34,13 +28,12 @@ public class TabletCowTest {
 
   @AfterEach
   public void tearDown() {
-    createdTableIds.forEach(bigQueryCow::delete);
+    bigQueryResourceTracker.tearDown();
   }
 
   @Test
   public void reload() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
     TableCow reloadedTableCow = tableCow.reload();
 
     assertTableIdEqual(
@@ -50,8 +43,7 @@ public class TabletCowTest {
   @Test
   public void update() {
     String description = "des";
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
 
     TableCow updatedTableCow =
         new TableCow(
@@ -63,16 +55,14 @@ public class TabletCowTest {
 
   @Test
   public void exists() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
 
     assertTrue(tableCow.exists());
   }
 
   @Test
   public void delete() {
-    TableCow tableCow =
-        createTableCow(bigQueryCow, reusableDataset.getDatasetId().getDataset(), createdTableIds);
+    TableCow tableCow = bigQueryResourceTracker.createTableCow();
     tableCow.delete();
 
     assertNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());

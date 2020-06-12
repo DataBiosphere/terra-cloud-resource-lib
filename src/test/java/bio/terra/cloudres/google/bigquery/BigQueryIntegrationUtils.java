@@ -50,16 +50,6 @@ public class BigQueryIntegrationUtils {
                 actualTableIds.stream().map(TableId::getDataset).collect(Collectors.toList())));
   }
 
-  static TableCow createTableCow(
-      BigQueryCow bigQueryCow, String datasetId, List<TableId> createdTableIds) {
-    String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
-    TableId tableId = TableId.of(datasetId, generatedTableId);
-    createdTableIds.add(tableId);
-
-    return bigQueryCow.create(
-        TableInfo.newBuilder(tableId, StandardTableDefinition.newBuilder().build()).build());
-  }
-
   static DatasetCow createDatasetCow(BigQueryCow bigQueryCow, List<String> createdDatasetIds) {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
     createdDatasetIds.add(datasetId);
