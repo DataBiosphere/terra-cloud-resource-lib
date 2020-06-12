@@ -51,20 +51,16 @@ public class BigQueryCowTest {
 
   @Test
   public void createDataset() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetInfo createdDataSet =
-        bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build()).getDatasetInfo();
-    createdDatasetIds.add(datasetId);
+    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
-    assertEquals(createdDataSet, bigQueryCow.getDataSet(datasetId).getDatasetInfo());
-    assertEquals(datasetId, createdDataSet.getDatasetId().getDataset());
+    assertEquals(datasetCow.getDatasetInfo(), bigQueryCow.getDataSet(datasetId).getDatasetInfo());
   }
 
   @Test
   public void getDataset() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
-    createdDatasetIds.add(datasetId);
+    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertEquals(
         datasetId, bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDatasetId().getDataset());
@@ -72,9 +68,9 @@ public class BigQueryCowTest {
 
   @Test
   public void updateDataset() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
-    createdDatasetIds.add(datasetId);
+    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
+
     assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDescription());
 
     String description = "new description";
@@ -85,9 +81,8 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteDataset() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
-    createdDatasetIds.add(datasetId);
+    DatasetCow datasetCow = createDatasetCow(bigQueryCow, createdDatasetIds);
+    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     bigQueryCow.delete(datasetId);

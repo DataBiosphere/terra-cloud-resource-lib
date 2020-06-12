@@ -4,15 +4,14 @@ import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
-import bio.terra.cloudres.common.TransformPage;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.TransformPage;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.bigquery.BigQuery.DatasetDeleteOption;
 import com.google.cloud.bigquery.BigQuery.DatasetOption;
 import com.google.cloud.bigquery.BigQuery.TableListOption;
 import com.google.cloud.bigquery.BigQuery.TableOption;
-import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,10 +112,11 @@ public class BigQueryCow {
   /** See {@link BigQuery#listTables(DatasetId, TableListOption...)}. */
   public Page<TableCow> listTables(DatasetId datasetId, TableListOption... tableListOptions) {
     return new TransformPage<>(
-            operationAnnotator.executeCowOperation(
-                    CloudOperation.GOOGLE_LIST_BIGQUERY_TABLE,
-                    () -> bigQuery.listTables(datasetId, tableListOptions),
-                    () -> convert(datasetId, tableListOptions)), (Table t) -> new TableCow(clientConfig, t));
+        operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_LIST_BIGQUERY_TABLE,
+            () -> bigQuery.listTables(datasetId, tableListOptions),
+            () -> convert(datasetId, tableListOptions)),
+        (Table t) -> new TableCow(clientConfig, t));
   }
 
   /** See {@link BigQuery#listTables(String, TableListOption...)}. */
