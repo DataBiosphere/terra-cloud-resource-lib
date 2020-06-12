@@ -78,7 +78,7 @@ public class MetricsHelperTest {
   public void testRecordLatency() throws Exception {
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
-    MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(0));
+    MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(2));
 
     sleepForSpansExport();
 
@@ -87,10 +87,10 @@ public class MetricsHelperTest {
             MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
 
     // this is mapped to the Distribution defined in MetricsHelper, i.e.
-    // 0ms being within the first bucket & 1 ms in the second.
+    // 1ms being within the 2nd bucket & 2 ms in the third.
 
-    // 0 ms,
-    assertEquals(data.getBucketCounts().get(0).longValue(), 1);
+    // 2 ms,
+    assertEquals(data.getBucketCounts().get(2).longValue(), 1);
     // 1ms
     assertEquals(data.getBucketCounts().get(1).longValue(), 2);
   }
