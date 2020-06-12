@@ -62,6 +62,37 @@ public class MetricsTestUtil {
   }
 
   /**
+   * Helper method to get current DistributionData stats before test.
+   *
+   * <p>The clear stats in opencensus is not public, so we have to keep track of each stats and
+   * verify the increment.
+   */
+  public static long getCurrentDistributionDataCount(
+      View.Name viewName, List<TagValue> tags, int bucketIndex) {
+    AggregationData.DistributionData data =
+        (AggregationData.DistributionData)
+            MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags);
+    return data == null ? 0 : data.getBucketCounts().get(bucketIndex).longValue();
+  }
+
+  /**
+   * Assert the DistributionData count is a value. 0 is equivalent to no count being present'
+   *
+   * <p>The clear stats in opencensus is not public, so we have to keep track of each stats and
+   * verify the increment.
+   */
+  public static void assertLatencyCountIncremented(
+      View.Name viewName, List<TagValue> tags, long previous, long increment, int bucketIndex) {
+    if (previous == 0 && increment == 0) {
+      assertNull(MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
+    } else {
+      long currentCount = getCurrentDistributionDataCount(viewName, tags, bucketIndex);
+
+      assertEquals(increment, currentCount - previous);
+    }
+  }
+
+  /**
    * Wait for a duration longer than reporting duration (5s) to ensure spans are exported.
    *
    * <p>Values from
