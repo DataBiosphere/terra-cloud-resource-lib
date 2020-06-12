@@ -97,6 +97,7 @@ subprojects {
     test.dependsOn minniekenny
 }
 
+// TODO(CA-825) Publish packages from subprojects separately.
 publishing {
     publications {
         terraCloudResourceLibrary(MavenPublication) {

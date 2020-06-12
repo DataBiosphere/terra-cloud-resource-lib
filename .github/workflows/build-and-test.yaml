@@ -57,6 +57,7 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build -x minniekenny # skip minniekenny
+      # TODO(CA-825): Determine how to run tests based on modified packages.
       - name: Test
         id: unit-test
         run: ./gradlew test -x minniekenny
