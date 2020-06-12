@@ -75,9 +75,9 @@ public class MetricsHelperTest {
   @Test
   public void testRecordLatency() throws Exception {
     // this is mapped to the Distribution defined in MetricsHelper, i.e.
-    // 1ms being within the 2nd bucket & 2 ms in the third.
-    long current1MsCount = getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, 0);
-    long current2MsCount = getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, 1);
+    // 0ms being within the first bucket & 1 ms in the 2nd.
+    long current0MsCount = getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, 0);
+    long current1MsCount = getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, 1);
 
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
@@ -87,9 +87,9 @@ public class MetricsHelperTest {
 
     // 1 ms,
     assertLatencyCountIncremented(
-        LATENCY_VIEW_NAME, API_COUNT, current1MsCount, /*increment=*/ 1, /*bucketIndex=*/ 0);
+        LATENCY_VIEW_NAME, API_COUNT, current0MsCount, /*increment=*/ 1, /*bucketIndex=*/ 0);
     // 2ms
     assertLatencyCountIncremented(
-        LATENCY_VIEW_NAME, API_COUNT, current2MsCount, /*increment=*/ 2, /*bucketIndex=*/ 1);
+        LATENCY_VIEW_NAME, API_COUNT, current1MsCount, /*increment=*/ 2, /*bucketIndex=*/ 1);
   }
 }
