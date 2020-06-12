@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 public class SerializeUtilsTest {
   private final DatasetId datasetId = DatasetId.of("datasetId1");
   private final TableId tableId = TableId.of(datasetId.getDataset(), "tableId1");
-  private final String jsonTableId =
-      "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"}";
 
   @Test
   public void convertDatasetIdWithOptions() {
