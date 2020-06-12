@@ -53,7 +53,7 @@ public class TableCow {
   public boolean exists() {
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
-        table::exists,
+            table::exists,
         () -> convert(table.getTableId()));
   }
 

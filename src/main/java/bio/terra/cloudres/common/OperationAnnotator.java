@@ -38,7 +38,30 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R> R executeCowOperation(
-      CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
+          CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
+    try {
+      return executeCowOperationCheckedException(
+              cloudOperation,
+              (CowExecuteCheckedException<R, BogusException>) cowExecute::execute,
+              cowSerialize);
+    } catch (BogusException e) {
+      throw new AssertionError("Our BogusException should never be thrown by cowExecute.", e);
+    }
+  }
+
+  /**
+   * Executes the CowOperation and allows for checked exceptions..
+   *
+   * @param cloudOperation: the {@link CloudOperation} to operate.
+   * @param cowExecute: how to execute this cloud operation
+   * @param cowSerialize: how to serialize request
+   * @return the result of executing the {@code cowOperation}
+   */
+  public <R, E extends Exception> R executeCowOperationCheckedException(
+          CloudOperation cloudOperation,
+          CowExecuteCheckedException<R, E> cowExecute,
+          CowSerialize cowSerialize)
+          throws E {
     Optional<Exception> executionException = Optional.empty();
 
     try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
@@ -59,10 +82,10 @@ public class OperationAnnotator {
         throw e;
       } finally {
         logEvent(
-            tracer.getCurrentSpan().getContext().getTraceId(),
-            cloudOperation,
-            cowSerialize.serializeRequest(),
-            executionException);
+                tracer.getCurrentSpan().getContext().getTraceId(),
+                cloudOperation,
+                cowSerialize.serializeRequest(),
+                executionException);
       }
     }
   }
@@ -91,10 +114,10 @@ public class OperationAnnotator {
    */
   @VisibleForTesting
   void logEvent(
-      TraceId traceId,
-      CloudOperation operation,
-      JsonObject request,
-      Optional<Exception> executionException) {
+          TraceId traceId,
+          CloudOperation operation,
+          JsonObject request,
+          Optional<Exception> executionException) {
     if (!logger.isDebugEnabled()) {
       return;
     }
@@ -113,8 +136,8 @@ public class OperationAnnotator {
 
   private OptionalInt getHttpErrorCode(Exception e) {
     return e instanceof BaseHttpServiceException
-        ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
-        : OptionalInt.empty();
+            ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
+            : OptionalInt.empty();
   }
 
   private JsonObject createExceptionEntry(Exception executionException) {
@@ -122,7 +145,7 @@ public class OperationAnnotator {
     JsonObject exceptionEntry = new JsonObject();
     exceptionEntry.addProperty("message", executionException.getMessage());
     getHttpErrorCode(executionException)
-        .ifPresent(i -> exceptionEntry.addProperty("errorCode", String.valueOf(i)));
+            .ifPresent(i -> exceptionEntry.addProperty("errorCode", String.valueOf(i)));
 
     return exceptionEntry;
   }
@@ -133,9 +156,21 @@ public class OperationAnnotator {
     R execute();
   }
 
+  /** How to execute this operation. Like {@link CowExecute}, but allows for checked exceptions. */
+  @FunctionalInterface
+  public interface CowExecuteCheckedException<R, E extends Exception> {
+    R execute() throws E;
+  }
+
   /** How to serialize Request */
   @FunctionalInterface
   public interface CowSerialize {
     JsonObject serializeRequest();
   }
+
+  /**
+   * A bogus exception type used to make a {@link CowExecute} into a {@link
+   * CowExecuteCheckedException}.
+   */
+  private static class BogusException extends Exception {}
 }

@@ -121,6 +121,14 @@ public class BigQueryCow {
             () -> convert(datasetId, tableListOptions)));
   }
 
+  /** See {@link BigQuery#query(QueryJobConfiguration, BigQuery.JobOption...)}. */
+  public TableResult query(QueryJobConfiguration configuration, BigQuery.JobOption... jobOptions) throws InterruptedException {
+    return operationAnnotator.executeCowOperationCheckedException(
+            CloudOperation.GOOGLE_LIST_BIGQUERY_TABLE,
+            (OperationAnnotator.CowExecuteCheckedException<TableResult, InterruptedException>) () -> bigQuery.query(configuration, jobOptions),
+            () -> convert(configuration, jobOptions));
+  }
+
   /** See {@link BigQuery#listTables(String, TableListOption...)}. */
   public Page<TableCow> listTables(String datasetId, TableListOption... tableListOptions) {
     return listTables(DatasetId.of(datasetId), tableListOptions);
