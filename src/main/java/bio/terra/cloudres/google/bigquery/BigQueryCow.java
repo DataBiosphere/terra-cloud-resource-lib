@@ -4,7 +4,7 @@ import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
-import bio.terra.cloudres.common.CowPageImpl;
+import bio.terra.cloudres.common.TransformPage;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.*;
@@ -110,36 +110,17 @@ public class BigQueryCow {
   public TableCow getTable(String datasetId, String tableId, TableOption... tableOptions) {
     return getTable(TableId.of(datasetId, tableId), tableOptions);
   }
-
   /** See {@link BigQuery#listTables(DatasetId, TableListOption...)}. */
   public Page<TableCow> listTables(DatasetId datasetId, TableListOption... tableListOptions) {
-    return new TableCowPageImpl(
-        clientConfig,
-        operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_LIST_BIGQUERY_TABLE,
-            () -> bigQuery.listTables(datasetId, tableListOptions),
-            () -> convert(datasetId, tableListOptions)));
+    return new TransformPage<>(
+            operationAnnotator.executeCowOperation(
+                    CloudOperation.GOOGLE_LIST_BIGQUERY_TABLE,
+                    () -> bigQuery.listTables(datasetId, tableListOptions),
+                    () -> convert(datasetId, tableListOptions)), (Table t) -> new TableCow(clientConfig, t));
   }
 
   /** See {@link BigQuery#listTables(String, TableListOption...)}. */
   public Page<TableCow> listTables(String datasetId, TableListOption... tableListOptions) {
     return listTables(DatasetId.of(datasetId), tableListOptions);
-  }
-
-  public static class TableCowPageImpl extends CowPageImpl<Table, TableCow> {
-
-    public TableCowPageImpl(ClientConfig clientConfig, Page<Table> originalPage) {
-      super(clientConfig, originalPage);
-    }
-
-    @Override
-    protected Function<Table, TableCow> getTransformFunction() {
-      return table -> new TableCow(getClientConfig(), table);
-    }
-
-    @Override
-    public Page<TableCow> getNextPage() {
-      return new TableCowPageImpl(getClientConfig(), getOriginalPage());
-    }
   }
 }

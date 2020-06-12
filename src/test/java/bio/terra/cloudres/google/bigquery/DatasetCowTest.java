@@ -15,16 +15,12 @@ public class DatasetCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private BigQueryCow bigQueryCow = defaultBigQueryCow();
 
-  private List<String> createdDatasetIds;
-  private List<TableId> createdTableIds;
-
-  @BeforeEach
-  public void setUp() {
-    // Cleanup the createdTableIds list and use this to track tables created in one test method.
-    // In this way to can make sure tables can always be cleaned up even test failed in the middle.
-    createdTableIds = new ArrayList<>();
-    createdDatasetIds = new ArrayList<>();
-  }
+  // Cleanup the tableId and datesetId list and use them to track resources created in one test
+  // method.
+  // In this way to can make sure tables/datasets can always be cleaned up even test failed in the
+  // middle.
+  private List<String> createdDatasetIds = new ArrayList<>();
+  private List<TableId> createdTableIds = new ArrayList<>();
 
   @AfterEach
   public void tearDown() {

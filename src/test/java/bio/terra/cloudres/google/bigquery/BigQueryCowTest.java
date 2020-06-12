@@ -25,8 +25,12 @@ public class BigQueryCowTest {
 
   private static DatasetInfo reusableDataset;
 
-  private List<String> createdDatasetIds;
-  private List<TableId> createdTableIds;
+  // Cleanup the tableId and datesetId list and use them to track resources created in one test
+  // method.
+  // In this way to can make sure tables/datasets can always be cleaned up even test failed in the
+  // middle.
+  private List<String> createdDatasetIds = new ArrayList<>();
+  private List<TableId> createdTableIds = new ArrayList<>();
 
   @BeforeAll
   public static void createReusableDataset() {
@@ -37,16 +41,6 @@ public class BigQueryCowTest {
   @AfterAll
   public static void deleteReusableDataset() {
     bigQueryCow.delete(REUSABLE_DATASET_ID);
-  }
-
-  @BeforeEach
-  public void setUp() {
-    // Cleanup the tableId and datesetId list and use them to track resources created in one test
-    // method.
-    // In this way to can make sure tables/datasets can always be cleaned up even test failed in the
-    // middle.
-    createdTableIds = new ArrayList<>();
-    createdDatasetIds = new ArrayList<>();
   }
 
   @AfterEach
