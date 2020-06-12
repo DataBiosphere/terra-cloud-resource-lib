@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':common')
+
+    api 'com.google.cloud:google-cloud-storage:1.108.0'
+}

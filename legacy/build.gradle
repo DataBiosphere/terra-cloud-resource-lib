@@ -1,14 +1,7 @@
 dependencies {
     implementation project(':common')
-    testImplementation(testFixtures(project(':common')))
 
     api 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
     api 'com.google.cloud:google-cloud-bigquery:1.116.0'
     api 'com.google.cloud:google-cloud-storage:1.108.0'
-}
-
-//sourceSets.test.resources.srcDir "$rootDir/common/src/testFixtures/resources"
-
-processTestResources {
-    from("${project(':common:').projectDir}/testFixtures/resources")
 }

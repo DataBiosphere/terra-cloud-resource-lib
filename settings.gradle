@@ -1,2 +1,2 @@
 rootProject.name = 'terra-cloud-resource-lib'
-include 'legacy', 'common'
+include 'common', 'google_bigquery', 'google_storage', 'legacy'

@@ -46,9 +46,6 @@ subprojects {
 
         implementation 'org.slf4j:slf4j-api:1.7.28'
 
-        implementation 'io.opencensus:opencensus-api:0.26.0'
-        implementation 'io.opencensus:opencensus-impl:0.26.0'
-
         implementation 'com.google.code.gson:gson:2.8.6'
         testImplementation "org.mockito:mockito-core:2.+"
 
@@ -58,8 +55,14 @@ subprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
         testFixturesApi 'org.junit.jupiter:junit-jupiter-api:5.6.2'
         testImplementation 'org.hamcrest:hamcrest:2.2'
-
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+
+        testImplementation(testFixtures(project(':common')))
+    }
+
+    processTestResources {
+        // Include common/testFixtures/resources for integration test credentials.
+        from("${project(':common:').projectDir}/testFixtures/resources")
     }
 
     // Linter
