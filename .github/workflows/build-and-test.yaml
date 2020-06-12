@@ -13,6 +13,7 @@ env:
   VAULT_SERVICE_ACCOUNT_ADMIN_PATH: secret/dsde/terra/crl-test/default/service-account-admin.json
   VAULT_SERVICE_ACCOUNT_USER_PATH: secret/dsde/terra/crl-test/default/service-account-user.json
   # Where to store the retrieved service accounts credentials for Google integration tests.
+  # DO NOT SUBMIT FIX ME
   SERVICE_ACCOUNT_ADMIN_FILE: src/test/resources/integration_service_account_admin.json
   SERVICE_ACCOUNT_USER_FILE: src/test/resources/integration_service_account_user.json
 jobs:
