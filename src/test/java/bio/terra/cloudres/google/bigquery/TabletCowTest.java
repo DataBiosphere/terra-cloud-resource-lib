@@ -18,7 +18,7 @@ public class TabletCowTest {
   private static DatasetInfo reusableDataset;
 
   // Cleanup the createdTableIds list and use this to track tables created in one test method.
-  // In this way to can make sure tables can always be cleaned up even test failed in the middle.
+  // In this way to can make sure tables/datasets can be cleaned up with best effort.
   private List<TableId> createdTableIds = new ArrayList<>();
 
   @BeforeAll

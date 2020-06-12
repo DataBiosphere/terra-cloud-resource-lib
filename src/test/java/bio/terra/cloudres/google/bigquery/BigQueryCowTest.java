@@ -27,8 +27,7 @@ public class BigQueryCowTest {
 
   // Cleanup the tableId and datesetId list and use them to track resources created in one test
   // method.
-  // In this way to can make sure tables/datasets can always be cleaned up even test failed in the
-  // middle.
+  // In this way to can make sure tables/datasets can be cleaned up with best effort.
   private List<String> createdDatasetIds = new ArrayList<>();
   private List<TableId> createdTableIds = new ArrayList<>();
 
