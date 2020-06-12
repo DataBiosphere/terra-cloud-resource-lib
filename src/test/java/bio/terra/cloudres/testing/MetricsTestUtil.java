@@ -76,20 +76,16 @@ public class MetricsTestUtil {
   }
 
   /**
-   * Assert the DistributionData count is a value. 0 is equivalent to no count being present'
+   * Assert the DistributionData count is a value. 0 is equivalent to no count being present.
    *
    * <p>The clear stats in opencensus is not public, so we have to keep track of each stats and
    * verify the increment.
    */
   public static void assertLatencyCountIncremented(
       View.Name viewName, List<TagValue> tags, long previous, long increment, int bucketIndex) {
-    if (previous == 0 && increment == 0) {
-      assertNull(MetricsHelper.viewManager.getView(viewName).getAggregationMap().get(tags));
-    } else {
-      long currentCount = getCurrentDistributionDataCount(viewName, tags, bucketIndex);
+    long currentCount = getCurrentDistributionDataCount(viewName, tags, bucketIndex);
 
-      assertEquals(increment, currentCount - previous);
-    }
+    assertEquals(increment, currentCount - previous);
   }
 
   /**
