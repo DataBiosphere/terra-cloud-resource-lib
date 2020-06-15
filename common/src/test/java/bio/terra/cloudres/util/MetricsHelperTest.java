@@ -3,10 +3,8 @@ package bio.terra.cloudres.util;
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
 import static bio.terra.cloudres.util.MetricsHelper.GENERIC_UNKNOWN_ERROR_CODE;
-import static org.junit.Assert.assertEquals;
 
 import bio.terra.cloudres.common.CloudOperation;
-import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
 import io.opencensus.tags.TagValue;
 import java.time.Duration;
@@ -76,22 +74,27 @@ public class MetricsHelperTest {
 
   @Test
   public void testRecordLatency() throws Exception {
+    // this is mapped to the Distribution defined in MetricsHelper, i.e.
+    // 0ms being within the first bucket & 1 ms in the 2nd.
+    final int zeroMsBucketIndex = 0;
+    final int oneMsBucketIndex = 1;
+
+    long current0MsCount =
+        getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, zeroMsBucketIndex);
+    long current1MsCount =
+        getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, oneMsBucketIndex);
+
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
     MetricsHelper.recordLatency(CLIENT, CloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(0));
 
     sleepForSpansExport();
 
-    AggregationData.DistributionData data =
-        (AggregationData.DistributionData)
-            MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
-
-    // this is mapped to the Distribution defined in MetricsHelper, i.e.
-    // 0ms being within the first bucket & 1 ms in the second.
-
-    // 0 ms,
-    assertEquals(data.getBucketCounts().get(0).longValue(), 1);
-    // 1ms
-    assertEquals(data.getBucketCounts().get(1).longValue(), 2);
+    // 1 ms,
+    assertLatencyCountIncremented(
+        LATENCY_VIEW_NAME, API_COUNT, current0MsCount, 1, zeroMsBucketIndex);
+    // 2ms
+    assertLatencyCountIncremented(
+        LATENCY_VIEW_NAME, API_COUNT, current1MsCount, 2, oneMsBucketIndex);
   }
 }
