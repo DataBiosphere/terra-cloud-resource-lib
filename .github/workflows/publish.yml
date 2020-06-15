@@ -1,0 +1,54 @@
+name: Publish package to Artifactory
+on:
+  release:
+    types: [created]
+env:
+  VAULT_ADDR: https://clotho.broadinstitute.org:8200
+  ARTIFACTORY_ACCOUNT_PATH: secret/dsp/accts/artifactory/dsdejenkins
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Pull Vault image
+        run: docker pull vault:1.1.0
+      # Currently, there's no way to add capabilities to Docker actions on Git, and Vault needs IPC_LOCK to run.
+      - name: Get Vault token
+        id: vault-token-step
+        run: |
+          VAULT_TOKEN=$(docker run --rm --cap-add IPC_LOCK \
+            -e "VAULT_ADDR=${VAULT_ADDR}" \
+            vault:1.1.0 \
+            vault write -field token \
+              auth/approle/login role_id=${{ secrets.VAULT_APPROLE_ROLE_ID }} \
+              secret_id=${{ secrets.VAULT_APPROLE_SECRET_ID }})
+          echo ::set-output name=vault-token::$VAULT_TOKEN
+          echo ::add-mask::$VAULT_TOKEN
+      - name: Get artifactory credentials from Vault
+        id: vault-secret-step
+        run: |
+          ARTIFACTORY_USERNAME=$(docker run --rm --cap-add IPC_LOCK \
+            -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
+            -e "VAULT_ADDR=${VAULT_ADDR}" \
+            vault:1.1.0 \
+            vault read -field username $VAULT_SERVICE_ACCOUNT_USER_PATH)
+          ARTIFACTORY_PASSWORDE=$(docker run --rm --cap-add IPC_LOCK \
+            -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
+            -e "VAULT_ADDR=${VAULT_ADDR}" \
+            vault:1.1.0 \
+            vault read -field password $VAULT_SERVICE_ACCOUNT_USER_PATH)
+          echo ::set-output name=artifactory-username::$ARTIFACTORY_USERNAME
+          echo ::add-mask::$ARTIFACTORY_USERNAME
+          echo ::set-output name=artifactory-password::$ARTIFACTORY_PASSWORD
+          echo ::add-mask::$ARTIFACTORY_PASSWORD
+      - name: Grant execute permission for gradlew
+          run: chmod +x gradlew
+      - name: Publish packages
+        run: ./gradlew artifactoryPublish
+          env:
+            ARTIFACTORY_USERNAME: ${{ steps.vault-secret-step.outputs.artifactory-username }}
+            ARTIFACTORY_PASSWORD: ${{ steps.vault-secret-step.outputs.artifactory-password }}
