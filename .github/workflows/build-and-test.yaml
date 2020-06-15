@@ -13,8 +13,8 @@ env:
   VAULT_SERVICE_ACCOUNT_ADMIN_PATH: secret/dsde/terra/crl-test/default/service-account-admin.json
   VAULT_SERVICE_ACCOUNT_USER_PATH: secret/dsde/terra/crl-test/default/service-account-user.json
   # Where to store the retrieved service accounts credentials for Google integration tests.
-  SERVICE_ACCOUNT_ADMIN_FILE: src/test/resources/integration_service_account_admin.json
-  SERVICE_ACCOUNT_USER_FILE: src/test/resources/integration_service_account_user.json
+  SERVICE_ACCOUNT_ADMIN_FILE: common/src/testFixtures/resources/integration_service_account_admin.json
+  SERVICE_ACCOUNT_USER_FILE: common/src/testFixtures/resources/integration_service_account_user.json
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -57,6 +57,7 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build -x minniekenny # skip minniekenny
+      # TODO(CA-825): Determine how to run tests based on modified packages.
       - name: Test
         id: unit-test
         run: ./gradlew test -x minniekenny
