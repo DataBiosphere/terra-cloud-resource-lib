@@ -1,5 +1,7 @@
 package bio.terra.cloudres.google.bigquery;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.DatasetInfo;
 import com.google.cloud.bigquery.StandardTableDefinition;
@@ -9,24 +11,21 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 
-/**
- * Helper class to track BigQuery resources created in tests, this used to clean up resources with
- * best effort.
- */
-public class BigQueryResourceTracker {
+/** Helper class to track BigQuery resources created in tests and do best effort clean up. */
+public class ResourceTracker {
   private final BigQueryCow bigQueryCow;
-  private final String datasetId; // must be a created dataset comment assumption.
-  private final List<TableId> createdTableIds;
-  private final List<String> createdDatasetIds;
+  /* The dataset id used to create tables. */
+  private final String datasetId;
+  private final List<TableId> createdTableIds = new ArrayList<>();
+  private final List<String> createdDatasetIds = new ArrayList<>();
 
-  public BigQueryResourceTracker(BigQueryCow bigQueryCow, @Nullable String datasetId) {
+  public ResourceTracker(BigQueryCow bigQueryCow, @Nullable String datasetId) {
     this.bigQueryCow = bigQueryCow;
     this.datasetId = datasetId;
-    createdTableIds = new ArrayList<>();
-    createdDatasetIds = new ArrayList<>();
   }
 
   public TableCow createTableCow() {
+    checkNotNull(datasetId);
     String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
     TableId tableId = TableId.of(datasetId, generatedTableId);
     createdTableIds.add(tableId);

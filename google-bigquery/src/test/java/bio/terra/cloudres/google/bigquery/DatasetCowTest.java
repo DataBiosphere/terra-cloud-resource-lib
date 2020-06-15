@@ -11,24 +11,24 @@ import org.junit.jupiter.api.*;
 public class DatasetCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private BigQueryCow bigQueryCow = defaultBigQueryCow();
-  private final BigQueryResourceTracker bigQueryResourceTracker =
-      new BigQueryResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+  private final ResourceTracker resourceTracker =
+      new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
 
   @AfterEach
   public void tearDown() {
-    bigQueryResourceTracker.tearDown();
+    resourceTracker.tearDown();
   }
 
   @Test
   public void reload() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertEquals(datasetCow.getDatasetInfo(), datasetCow.reload().getDatasetInfo());
   }
 
   @Test
   public void update() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertNull(datasetCow.getDatasetInfo().getDescription());
 
@@ -45,7 +45,7 @@ public class DatasetCowTest {
 
   @Test
   public void delete() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
@@ -55,7 +55,7 @@ public class DatasetCowTest {
 
   @Test
   public void createThenGetTable() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
     String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
     TableId tableId = TableId.of(datasetId, generatedTableId);

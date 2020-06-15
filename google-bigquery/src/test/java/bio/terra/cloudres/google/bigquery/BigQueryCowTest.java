@@ -20,8 +20,8 @@ public class BigQueryCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private static BigQueryCow bigQueryCow = defaultBigQueryCow();
   private static DatasetInfo reusableDataset;
-  private final BigQueryResourceTracker bigQueryResourceTracker =
-      new BigQueryResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+  private final ResourceTracker resourceTracker =
+      new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
 
   @BeforeAll
   public static void createReusableDataset() {
@@ -36,12 +36,12 @@ public class BigQueryCowTest {
 
   @AfterEach
   public void tearDown() {
-    bigQueryResourceTracker.tearDown();
+    resourceTracker.tearDown();
   }
 
   @Test
   public void createDataset() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertEquals(
         datasetCow.getDatasetInfo(),
@@ -52,7 +52,7 @@ public class BigQueryCowTest {
 
   @Test
   public void getDataset() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertEquals(
@@ -61,7 +61,7 @@ public class BigQueryCowTest {
 
   @Test
   public void updateDataset() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo().getDescription());
@@ -74,7 +74,7 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteDataset() {
-    DatasetCow datasetCow = bigQueryResourceTracker.createDatasetCow();
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
@@ -84,7 +84,7 @@ public class BigQueryCowTest {
 
   @Test
   public void createTable() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
 
     assertTableIdEqual(
         tableCow.getTableInfo().getTableId(),
@@ -94,7 +94,7 @@ public class BigQueryCowTest {
   @Test
   public void updateTable() {
     String description = "des";
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
     bigQueryCow.update(tableCow.getTableInfo().toBuilder().setDescription(description).build());
 
     assertEquals(
@@ -107,7 +107,7 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteTable() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
     assertNotNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());
 
@@ -117,7 +117,7 @@ public class BigQueryCowTest {
 
   @Test
   public void getTable() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
 
     assertTableIdEqual(tableId, bigQueryCow.getTable(tableId).getTableInfo().getTableId());
@@ -125,7 +125,7 @@ public class BigQueryCowTest {
 
   @Test
   public void getTableWithDatasetId() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
 
     assertTableIdEqual(
@@ -138,9 +138,9 @@ public class BigQueryCowTest {
 
   @Test
   public void listTables() {
-    TableCow tableCow1 = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow1 = resourceTracker.createTableCow();
     TableId tableId1 = tableCow1.getTableInfo().getTableId();
-    TableCow tableCow2 = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow2 = resourceTracker.createTableCow();
     TableId tableId2 = tableCow2.getTableInfo().getTableId();
 
     assertTableIdContainsExactlyInCowPage(

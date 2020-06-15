@@ -12,8 +12,8 @@ public class TabletCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private static BigQueryCow bigQueryCow = defaultBigQueryCow();
   private static DatasetInfo reusableDataset;
-  private final BigQueryResourceTracker bigQueryResourceTracker =
-      new BigQueryResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+  private final ResourceTracker resourceTracker =
+      new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
 
   @BeforeAll
   public static void createReusableDataset() {
@@ -28,12 +28,12 @@ public class TabletCowTest {
 
   @AfterEach
   public void tearDown() {
-    bigQueryResourceTracker.tearDown();
+    resourceTracker.tearDown();
   }
 
   @Test
   public void reload() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
     TableCow reloadedTableCow = tableCow.reload();
 
     assertTableIdEqual(
@@ -43,7 +43,7 @@ public class TabletCowTest {
   @Test
   public void update() {
     String description = "des";
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
 
     TableCow updatedTableCow =
         new TableCow(
@@ -55,14 +55,14 @@ public class TabletCowTest {
 
   @Test
   public void exists() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
 
     assertTrue(tableCow.exists());
   }
 
   @Test
   public void delete() {
-    TableCow tableCow = bigQueryResourceTracker.createTableCow();
+    TableCow tableCow = resourceTracker.createTableCow();
     tableCow.delete();
 
     assertNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());
