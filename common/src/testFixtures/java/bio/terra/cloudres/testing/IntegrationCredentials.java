@@ -1,7 +1,6 @@
 package bio.terra.cloudres.testing;
 
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import java.io.FileInputStream;
 
 /** Provides cloud credentials to use in integration tests. */
 public class IntegrationCredentials {
@@ -12,7 +11,7 @@ public class IntegrationCredentials {
    * test project, e.g. create and delete resources
    */
   private static final String GOOGLE_SERVICE_ACCOUNT_ADMIN_PATH =
-      "src/test/resources/integration_service_account_admin.json";
+      "integration_service_account_admin.json";
 
   /**
    * Path to the regular user service account credentials file.
@@ -21,7 +20,7 @@ public class IntegrationCredentials {
    * non-admin user to reference
    */
   private static final String GOOGLE_SERVICE_ACCOUNT_USER_PATH =
-      "src/test/resources/integration_service_account_user.json";
+      "integration_service_account_user.json";
 
   public static ServiceAccountCredentials getAdminGoogleCredentialsOrDie() {
     return getGoogleCredentialsOrDie(GOOGLE_SERVICE_ACCOUNT_ADMIN_PATH);
@@ -33,7 +32,8 @@ public class IntegrationCredentials {
 
   private static ServiceAccountCredentials getGoogleCredentialsOrDie(String serviceAccountPath) {
     try {
-      return ServiceAccountCredentials.fromStream(new FileInputStream(serviceAccountPath));
+      return ServiceAccountCredentials.fromStream(
+          Thread.currentThread().getContextClassLoader().getResourceAsStream(serviceAccountPath));
     } catch (Exception e) {
       throw new RuntimeException(
           "Unable to load GoogleCredentials from " + serviceAccountPath + "\n", e);
