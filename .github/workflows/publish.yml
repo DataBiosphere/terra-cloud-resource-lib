@@ -49,6 +49,6 @@ jobs:
         run: chmod +x gradlew
       - name: Publish packages
         run: ./gradlew artifactoryPublish
-          env:
-            ARTIFACTORY_USERNAME: ${{ steps.vault-secret-step.outputs.artifactory-username }}
-            ARTIFACTORY_PASSWORD: ${{ steps.vault-secret-step.outputs.artifactory-password }}
+        env:
+          ARTIFACTORY_USERNAME: ${{ steps.vault-secret-step.outputs.artifactory-username }}
+          ARTIFACTORY_PASSWORD: ${{ steps.vault-secret-step.outputs.artifactory-password }}
