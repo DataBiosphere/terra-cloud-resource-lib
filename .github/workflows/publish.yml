@@ -46,7 +46,7 @@ jobs:
           echo ::set-output name=artifactory-password::$ARTIFACTORY_PASSWORD
           echo ::add-mask::$ARTIFACTORY_PASSWORD
       - name: Grant execute permission for gradlew
-          run: chmod +x gradlew
+        run: chmod +x gradlew
       - name: Publish packages
         run: ./gradlew artifactoryPublish
           env:
