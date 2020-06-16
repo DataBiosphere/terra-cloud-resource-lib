@@ -1,5 +1,9 @@
 name: Publish package to Artifactory
 on:
+  # DO NOT SUBMIT for testing action
+  push:
+    branches:
+      - wc-CA-825-publishing
   release:
     types: [created]
 env:
