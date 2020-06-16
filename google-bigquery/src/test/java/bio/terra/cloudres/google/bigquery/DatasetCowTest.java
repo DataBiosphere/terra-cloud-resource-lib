@@ -1,31 +1,35 @@
 package bio.terra.cloudres.google.bigquery;
 
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.bigquery.Dataset;
-import com.google.cloud.bigquery.DatasetInfo;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import com.google.cloud.bigquery.*;
+import org.junit.jupiter.api.*;
 
 @Tag("integration")
 public class DatasetCowTest {
-  private BigQueryCow bigQueryCow = BigQueryIntegrationUtils.defaultBigQueryCow();
+  private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
+  private BigQueryCow bigQueryCow = defaultBigQueryCow();
+  private final ResourceTracker resourceTracker =
+      new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+
+  @AfterEach
+  public void tearDown() {
+    resourceTracker.tearDown();
+  }
 
   @Test
   public void reload() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetCow datasetCow = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertEquals(datasetCow.getDatasetInfo(), datasetCow.reload().getDatasetInfo());
-
-    bigQueryCow.deleteDataset(datasetId);
   }
 
   @Test
   public void update() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetCow datasetCow = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
+
     assertNull(datasetCow.getDatasetInfo().getDescription());
 
     String description = "new description";
@@ -37,18 +41,28 @@ public class DatasetCowTest {
     updatedDatasetCow.update();
 
     assertEquals(description, datasetCow.reload().getDatasetInfo().getDescription());
-
-    // cleanup
-    bigQueryCow.deleteDataset(datasetId);
   }
 
   @Test
   public void delete() {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    DatasetCow datasetCow = bigQueryCow.createDataset(DatasetInfo.newBuilder(datasetId).build());
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
+    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     datasetCow.delete();
     assertNull(datasetCow.reload().getDatasetInfo());
+  }
+
+  @Test
+  public void createThenGetTable() {
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
+    String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
+    String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
+    TableId tableId = TableId.of(datasetId, generatedTableId);
+    datasetCow.create(generatedTableId, StandardTableDefinition.newBuilder().build());
+
+    assertTableIdEqual(tableId, datasetCow.getTable(generatedTableId).getTableInfo().getTableId());
+
+    bigQueryCow.delete(tableId);
   }
 }
