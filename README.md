@@ -1,6 +1,6 @@
 # terra-cloud-resource-lib
 
-Cloud Resource Library (CRL) wraps cloud API client libraries for Terra services. It  enforces unified logging and
+Cloud Resource Library (CRL) wraps cloud API client libraries for Terra services. It enforces unified logging and
 allows central changes to how Terra services use Cloud APIs.
 
 TODO add more about library principles and Cloud Object Wrappers.
