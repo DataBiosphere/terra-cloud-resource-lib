@@ -39,12 +39,12 @@ jobs:
             -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
             -e "VAULT_ADDR=${VAULT_ADDR}" \
             vault:1.1.0 \
-            vault read -field username $VAULT_SERVICE_ACCOUNT_USER_PATH)
-          ARTIFACTORY_PASSWORDE=$(docker run --rm --cap-add IPC_LOCK \
+            vault read -field username ${ARTIFACTORY_ACCOUNT_PATH})
+          ARTIFACTORY_PASSWORD=$(docker run --rm --cap-add IPC_LOCK \
             -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
             -e "VAULT_ADDR=${VAULT_ADDR}" \
             vault:1.1.0 \
-            vault read -field password $VAULT_SERVICE_ACCOUNT_USER_PATH)
+            vault read -field password ${ARTIFACTORY_ACCOUNT_PATH})
           echo ::set-output name=artifactory-username::$ARTIFACTORY_USERNAME
           echo ::add-mask::$ARTIFACTORY_USERNAME
           echo ::set-output name=artifactory-password::$ARTIFACTORY_PASSWORD
