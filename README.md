@@ -1,5 +1,12 @@
 # terra-cloud-resource-lib
 
+Cloud Resource Library (CRL) wraps cloud API client libraries for Terra services. It  enforces unified logging and
+allows central changes to how Terra services use Cloud APIs.
+
+TODO add more about library principles and Cloud Object Wrappers.
+
+# Development
+
 ## Using the Gradle wrapper
 Set executable permissions:
 ```
@@ -43,3 +50,14 @@ Automatically fix linting issues:
 ```
 ./gradlew spotlessApply
 ```
+
+## Adding a new package
+Cloud API client libraries are wrapped in separate CRL packages to allow clients to only include the libraries that they
+use. To add a new CRL package to support a new client library:
+
+1. Create a new top level directory for the package.
+2. Within the new directory, following standard Java directory structure, add the desired code under `src`.
+3. Within the new directory, add `build.gradle` and `gradle.properties`.
+4. Add the gradle project for the new package to the top [`settings.gradle`](settings.gradle).
+5. Add the gradle project for the new package to the list of `artifactory` `publications` in the top
+[`build.gradle`](build.gradle)
