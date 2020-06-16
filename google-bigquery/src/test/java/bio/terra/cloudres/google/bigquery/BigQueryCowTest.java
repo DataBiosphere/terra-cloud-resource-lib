@@ -154,7 +154,7 @@ public class BigQueryCowTest {
   }
 
   @Test
-  public void insertAndQuery() throws Exception {
+  public void insertThenQuery() throws Exception {
     String fieldName = "field1";
     String fieldValue = "value1";
 
@@ -169,6 +169,7 @@ public class BigQueryCowTest {
         StandardTableDefinition.of(Schema.of(Field.of(fieldName, LegacySQLTypeName.STRING)));
     bigQueryCow.update(tableCow.getTableInfo().toBuilder().setDefinition(tableDefinition).build());
 
+    // Insert
     assertTrue(
         bigQueryCow
             .insertAll(
@@ -178,6 +179,7 @@ public class BigQueryCowTest {
             .getInsertErrors()
             .isEmpty());
 
+    // Query
     Iterator<FieldValueList> fieldValueLists =
         bigQueryCow
             .query(
