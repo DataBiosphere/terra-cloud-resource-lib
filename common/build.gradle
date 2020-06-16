@@ -2,5 +2,5 @@ dependencies {
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
 
-    testCompileOnly 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+    implementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
 }
