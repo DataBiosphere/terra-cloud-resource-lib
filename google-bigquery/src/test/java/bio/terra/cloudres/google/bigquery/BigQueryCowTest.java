@@ -184,7 +184,8 @@ public class BigQueryCowTest {
         bigQueryCow
             .query(
                 QueryJobConfiguration.newBuilder(
-                        "SELECT " + fieldName + " FROM " + datasetId + "." + tableId.getTable())
+                        "SELECT " + fieldName + " FROM " + tableId.getTable())
+                    .setDefaultDataset(datasetId)
                     .build())
             .getValues()
             .iterator();
