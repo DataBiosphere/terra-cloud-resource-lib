@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 /** Helper class to track BigQuery resources created in tests and do best effort clean up. */
 public class ResourceTracker {
   private final BigQueryCow bigQueryCow;
-  /* The dataset id used to create tables. */
+  /* The dataset id used to create tables, Must be non-null if {@link ResourceTracker#createTableCow} is used. */
   private final String datasetId;
   private final List<TableId> createdTableIds = new ArrayList<>();
   private final List<String> createdDatasetIds = new ArrayList<>();
