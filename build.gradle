@@ -16,21 +16,7 @@ plugins {
     id 'com.diffplug.gradle.spotless' version '3.27.2'
 }
 
-group 'bio.terra'
-version '0.0.1-SNAPSHOT'
-
-
-def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
-def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(artifactoryPublish) &&
-            (artifactory_username == null || artifactory_password == null)) {
-        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
-    }
-}
-
-subprojects {
+subprojects { subproject ->
     repositories {
         mavenCentral()
         google()
@@ -51,9 +37,9 @@ subprojects {
 
         implementation("com.google.guava:guava:29.0-jre")
         testImplementation 'junit:junit:4.13'
-        testFixturesApi 'junit:junit:4.13'
+        testFixturesImplementation 'junit:junit:4.13'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-        testFixturesApi 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+        testFixturesImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
         testImplementation 'org.hamcrest:hamcrest:2.2'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
@@ -95,14 +81,28 @@ subprojects {
     }
 
     test.dependsOn minniekenny
+
+    publishing {
+        publications {
+            "$subproject.name"(MavenPublication) {
+                groupId subproject.group
+                artifactId subproject.name
+                version subproject.version
+                from components.java
+                suppressPomMetadataWarningsFor('testFixturesApiElements')
+                suppressPomMetadataWarningsFor('testFixturesApiRuntimeElements')
+            }
+        }
+    }
 }
 
-// TODO(CA-825) Publish packages from subprojects separately.
-publishing {
-    publications {
-        terraCloudResourceLibrary(MavenPublication) {
-            from components.java
-        }
+def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
+def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(artifactoryPublish) &&
+            (artifactory_username == null || artifactory_password == null)) {
+        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
     }
 }
 
@@ -110,20 +110,12 @@ artifactory {
     publish {
         contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
         repository {
-            repoKey = 'libs-snapshot-local' // The Artifactory repository key to publish to
-            username = "${artifactory_username}" // The publisher user name
-            password = "${artifactory_password}" // The publisher password
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_username}"
+            password = "${artifactory_password}"
         }
         defaults {
-            // Reference to Gradle publications defined in the build script.
-            // This is how we tell the Artifactory Plugin which artifacts should be
-            // published to Artifactory.
-            publications('terraCloudResourceLibrary')
-            publishArtifacts = true
-            // Properties to be attached to the published artifacts.
-            // properties = ['qa.level': 'basic', 'dev.team' : 'core']
-            // Publish generated POM files to Artifactory (true by default)
-            publishPom = true
+            publications('google-bigquery', 'google-storage')
         }
     }
 }
