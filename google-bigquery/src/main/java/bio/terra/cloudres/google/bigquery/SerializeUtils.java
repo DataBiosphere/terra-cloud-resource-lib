@@ -70,4 +70,29 @@ public class SerializeUtils {
     jsonObject.add("tableOptions", gson.toJsonTree(tableOptions));
     return jsonObject;
   }
+
+  static JsonObject convert(
+      QueryJobConfiguration queryJobConfiguration, BigQuery.JobOption... jobOptions) {
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("queryJobConfiguration", gson.toJsonTree(queryJobConfiguration));
+    jsonObject.add("jobOptions", gson.toJsonTree(jobOptions));
+    return jsonObject;
+  }
+
+  static JsonObject convert(
+      QueryJobConfiguration queryJobConfiguration, JobId jobId, BigQuery.JobOption... jobOptions) {
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("queryJobConfiguration", gson.toJsonTree(queryJobConfiguration));
+    jsonObject.add("jobId", gson.toJsonTree(jobId));
+    jsonObject.add("jobOptions", gson.toJsonTree(jobOptions));
+    return jsonObject;
+  }
+
+  static JsonObject convert(InsertAllRequest insertAllRequest) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("insertAllRequest", new Gson().toJsonTree(insertAllRequest));
+    return jsonObject;
+  }
 }

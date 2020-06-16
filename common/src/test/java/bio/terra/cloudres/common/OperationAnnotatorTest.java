@@ -1,5 +1,8 @@
 package bio.terra.cloudres.common;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import static bio.terra.cloudres.common.CloudOperation.GOOGLE_CREATE_PROJECT;
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.junit.Assert.assertEquals;
@@ -14,8 +17,6 @@ import io.opencensus.stats.AggregationData;
 import io.opencensus.trace.TraceId;
 import java.util.Optional;
 import org.junit.Assert;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.slf4j.Logger;
@@ -105,6 +106,30 @@ public class OperationAnnotatorTest {
         () ->
             operationAnnotator.executeCowOperation(
                 GOOGLE_CREATE_PROJECT, FAILED_COW_EXECUTE, SERIALIZE));
+
+    sleepForSpansExport();
+
+    // Assert cloud api count increase by 1
+    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
+
+    // Assert error count increase by 1
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
+  }
+
+  @Test
+  public void testExecuteGoogleCloudCall_withCheckedException() throws Exception {
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+
+    Assert.assertThrows(
+        InterruptedException.class,
+        () ->
+            operationAnnotator.executeCowOperationCheckedException(
+                GOOGLE_CREATE_PROJECT,
+                () -> {
+                  throw new InterruptedException(ERROR_MESSAGE);
+                },
+                SERIALIZE));
 
     sleepForSpansExport();
 

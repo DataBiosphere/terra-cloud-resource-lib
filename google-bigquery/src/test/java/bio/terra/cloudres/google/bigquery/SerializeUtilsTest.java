@@ -98,4 +98,37 @@ public class SerializeUtilsTest {
                 BigQuery.TableOption.fields())
             .toString());
   }
+
+  @Test
+  public void convertQueryConfigWithJobOption() {
+    assertEquals(
+        "{\"queryJobConfiguration\":{\"query\":\"query\",\"positionalParameters\":[],\"namedParameters\":{},"
+            + "\"defaultDataset\":{\"dataset\":\"datasetId1\"},\"useLegacySql\":false,\"type\":\"QUERY\"},"
+            + "\"jobOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"jobReference,configuration\"}]}",
+        SerializeUtils.convert(
+                QueryJobConfiguration.newBuilder("query").setDefaultDataset(DATASET_ID).build(),
+                BigQuery.JobOption.fields())
+            .toString());
+  }
+
+  @Test
+  public void convertQueryConfigWithJobOptionWithJobId() {
+    assertEquals(
+        "{\"queryJobConfiguration\":{\"query\":\"query\",\"positionalParameters\":[],\"namedParameters\":{},"
+            + "\"defaultDataset\":{\"dataset\":\"datasetId1\"},\"useLegacySql\":false,\"type\":\"QUERY\"},"
+            + "\"jobId\":{\"job\":\"jobId1\"},"
+            + "\"jobOptions\":[{\"rpcOption\":\"FIELDS\",\"value\":\"jobReference,configuration\"}]}",
+        SerializeUtils.convert(
+                QueryJobConfiguration.newBuilder("query").setDefaultDataset(DATASET_ID).build(),
+                JobId.of("jobId1"),
+                BigQuery.JobOption.fields())
+            .toString());
+  }
+
+  @Test
+  public void convertInsertAllRequest() {
+    assertEquals(
+        "{\"insertAllRequest\":{\"table\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},\"rows\":[]}}",
+        SerializeUtils.convert(InsertAllRequest.of(TABLE_ID)).toString());
+  }
 }

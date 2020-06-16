@@ -34,6 +34,13 @@ public class ResourceTracker {
         TableInfo.newBuilder(tableId, StandardTableDefinition.newBuilder().build()).build());
   }
 
+  public TableCow createTableCow(TableId tableId) {
+    createdTableIds.add(tableId);
+
+    return bigQueryCow.create(
+        TableInfo.newBuilder(tableId, StandardTableDefinition.newBuilder().build()).build());
+  }
+
   /** Create a DatasetCow also register that for cleanup. */
   public DatasetCow createDatasetCow() {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();

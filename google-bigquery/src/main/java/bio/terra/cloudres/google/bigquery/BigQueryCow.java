@@ -123,4 +123,31 @@ public class BigQueryCow {
   public Page<TableCow> listTables(String datasetId, TableListOption... tableListOptions) {
     return listTables(DatasetId.of(datasetId), tableListOptions);
   }
+
+  /** See {@link BigQuery#query(QueryJobConfiguration, BigQuery.JobOption...)}. */
+  public TableResult query(QueryJobConfiguration configuration, BigQuery.JobOption... jobOptions)
+      throws InterruptedException {
+    return operationAnnotator.executeCowOperationCheckedException(
+        CloudOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
+        () -> bigQuery.query(configuration, jobOptions),
+        () -> convert(configuration, jobOptions));
+  }
+
+  /** See {@link BigQuery#query(QueryJobConfiguration, BigQuery.JobOption...)}. */
+  public TableResult query(
+      QueryJobConfiguration configuration, JobId jobId, BigQuery.JobOption... jobOptions)
+      throws InterruptedException {
+    return operationAnnotator.executeCowOperationCheckedException(
+        CloudOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
+        () -> bigQuery.query(configuration, jobId, jobOptions),
+        () -> convert(configuration, jobOptions));
+  }
+
+  /** See {@link BigQuery#insertAll(InsertAllRequest)}. */
+  public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
+    return operationAnnotator.executeCowOperationCheckedException(
+        CloudOperation.GOOGLE_INSERT_BIGQUERY,
+        () -> bigQuery.insertAll(insertAllRequest),
+        () -> convert(insertAllRequest));
+  }
 }

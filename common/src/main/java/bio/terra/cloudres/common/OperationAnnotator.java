@@ -39,6 +39,29 @@ public class OperationAnnotator {
    */
   public <R> R executeCowOperation(
       CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
+    try {
+      return executeCowOperationCheckedException(
+          cloudOperation,
+          (CowExecuteCheckedException<R, BogusException>) cowExecute::execute,
+          cowSerialize);
+    } catch (BogusException e) {
+      throw new AssertionError("Our BogusException should never be thrown by cowExecute.", e);
+    }
+  }
+
+  /**
+   * Executes the CowOperation and allows for checked exceptions..
+   *
+   * @param cloudOperation: the {@link CloudOperation} to operate.
+   * @param cowExecute: how to execute this cloud operation
+   * @param cowSerialize: how to serialize request
+   * @return the result of executing the {@code cowOperation}
+   */
+  public <R, E extends Exception> R executeCowOperationCheckedException(
+      CloudOperation cloudOperation,
+      CowExecuteCheckedException<R, E> cowExecute,
+      CowSerialize cowSerialize)
+      throws E {
     Optional<Exception> executionException = Optional.empty();
 
     try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
@@ -133,9 +156,21 @@ public class OperationAnnotator {
     R execute();
   }
 
+  /** How to execute this operation. Like {@link CowExecute}, but allows for checked exceptions. */
+  @FunctionalInterface
+  public interface CowExecuteCheckedException<R, E extends Exception> {
+    R execute() throws E;
+  }
+
   /** How to serialize Request */
   @FunctionalInterface
   public interface CowSerialize {
     JsonObject serializeRequest();
   }
+
+  /**
+   * A bogus exception type used to make a {@link CowExecute} into a {@link
+   * CowExecuteCheckedException}.
+   */
+  private static class BogusException extends Exception {}
 }

@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.util.Iterator;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
@@ -149,5 +151,42 @@ public class BigQueryCowTest {
     assertTableIdContainsExactlyInCowPage(
         ImmutableList.of(tableId1, tableId2),
         bigQueryCow.listTables(reusableDataset.getDatasetId().getDataset()));
+  }
+
+  @Test
+  public void insertAndQuery() throws Exception {
+    String fieldName = "field1";
+    String fieldValue = "value1";
+
+    String datasetId =
+        resourceTracker.createDatasetCow().getDatasetInfo().getDatasetId().getDataset();
+    TableId tableId = TableId.of(datasetId, "table1");
+    // The random UUID tableId is not the standard table id format, to make query work, manually
+    // creates shorter name.
+    TableCow tableCow = resourceTracker.createTableCow(tableId);
+
+    TableDefinition tableDefinition =
+        StandardTableDefinition.of(Schema.of(Field.of(fieldName, LegacySQLTypeName.STRING)));
+    bigQueryCow.update(tableCow.getTableInfo().toBuilder().setDefinition(tableDefinition).build());
+
+    assertTrue(
+        bigQueryCow
+            .insertAll(
+                InsertAllRequest.of(
+                    tableId,
+                    InsertAllRequest.RowToInsert.of(ImmutableMap.of(fieldName, fieldValue))))
+            .getInsertErrors()
+            .isEmpty());
+
+    Iterator<FieldValueList> fieldValueLists =
+        bigQueryCow
+            .query(
+                QueryJobConfiguration.newBuilder(
+                        "SELECT " + fieldName + " FROM " + datasetId + "." + tableId.getTable())
+                    .build())
+            .getValues()
+            .iterator();
+    assertEquals(fieldValue, fieldValueLists.next().get(fieldName).getStringValue());
+    assertFalse(fieldValueLists.hasNext());
   }
 }
