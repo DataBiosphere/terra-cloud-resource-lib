@@ -146,7 +146,7 @@ public class BigQueryCow {
   /** See {@link BigQuery#insertAll(InsertAllRequest)}. */
   public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
     return operationAnnotator.executeCowOperationCheckedException(
-        CloudOperation.GOOGLE_INSERT_BIGQUERY,
+        CloudOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
         () -> bigQuery.insertAll(insertAllRequest),
         () -> convert(insertAllRequest));
   }
