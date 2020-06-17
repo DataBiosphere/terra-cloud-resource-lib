@@ -120,7 +120,7 @@ public class OperationAnnotatorTest {
     Assert.assertThrows(
         InterruptedException.class,
         () ->
-            operationAnnotator.executeCowOperationCheckedException(
+            operationAnnotator.executeCheckedCowOperation(
                 GOOGLE_CREATE_PROJECT,
                 () -> {
                   throw new InterruptedException(ERROR_MESSAGE);

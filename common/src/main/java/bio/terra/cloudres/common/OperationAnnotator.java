@@ -40,7 +40,7 @@ public class OperationAnnotator {
   public <R> R executeCowOperation(
       CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
     try {
-      return executeCowOperationCheckedException(
+      return executeCheckedCowOperation(
           cloudOperation,
           (CowExecuteCheckedException<R, BogusException>) cowExecute::execute,
           cowSerialize);
@@ -57,7 +57,7 @@ public class OperationAnnotator {
    * @param cowSerialize: how to serialize request
    * @return the result of executing the {@code cowOperation}
    */
-  public <R, E extends Exception> R executeCowOperationCheckedException(
+  public <R, E extends Exception> R executeCheckedCowOperation(
       CloudOperation cloudOperation,
       CowExecuteCheckedException<R, E> cowExecute,
       CowSerialize cowSerialize)

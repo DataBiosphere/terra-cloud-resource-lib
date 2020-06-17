@@ -127,7 +127,7 @@ public class BigQueryCow {
   /** See {@link BigQuery#query(QueryJobConfiguration, BigQuery.JobOption...)}. */
   public TableResult query(QueryJobConfiguration configuration, BigQuery.JobOption... jobOptions)
       throws InterruptedException {
-    return operationAnnotator.executeCowOperationCheckedException(
+    return operationAnnotator.executeCheckedCowOperation(
         CloudOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
         () -> bigQuery.query(configuration, jobOptions),
         () -> convert(configuration, jobOptions));
@@ -137,7 +137,7 @@ public class BigQueryCow {
   public TableResult query(
       QueryJobConfiguration configuration, JobId jobId, BigQuery.JobOption... jobOptions)
       throws InterruptedException {
-    return operationAnnotator.executeCowOperationCheckedException(
+    return operationAnnotator.executeCheckedCowOperation(
         CloudOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
         () -> bigQuery.query(configuration, jobId, jobOptions),
         () -> convert(configuration, jobOptions));
@@ -145,7 +145,7 @@ public class BigQueryCow {
 
   /** See {@link BigQuery#insertAll(InsertAllRequest)}. */
   public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
-    return operationAnnotator.executeCowOperationCheckedException(
+    return operationAnnotator.executeCheckedCowOperation(
         CloudOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
         () -> bigQuery.insertAll(insertAllRequest),
         () -> convert(insertAllRequest));
