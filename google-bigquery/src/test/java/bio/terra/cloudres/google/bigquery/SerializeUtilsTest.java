@@ -128,7 +128,7 @@ public class SerializeUtilsTest {
   @Test
   public void convertInsertAllRequest() {
     assertEquals(
-        "{\"insertAllRequest\":{\"table\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},\"rows\":[]}}",
+        "{\"tableId\":{\"dataset\":\"datasetId1\",\"table\":\"tableId1\"},\"numOfRowsToInsert\":0}",
         SerializeUtils.convert(InsertAllRequest.of(TABLE_ID)).toString());
   }
 }

@@ -92,7 +92,9 @@ public class SerializeUtils {
 
   static JsonObject convert(InsertAllRequest insertAllRequest) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("insertAllRequest", new Gson().toJsonTree(insertAllRequest));
+    Gson gson = new Gson();
+    jsonObject.add("tableId", gson.toJsonTree(insertAllRequest.getTable()));
+    jsonObject.add("numOfRowsToInsert", new Gson().toJsonTree(insertAllRequest.getRows().size()));
     return jsonObject;
   }
 }
