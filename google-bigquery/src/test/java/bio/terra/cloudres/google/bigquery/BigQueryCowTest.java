@@ -160,7 +160,7 @@ public class BigQueryCowTest {
 
     // The random UUID tableId is not the standard table id format, to make query work, manually
     // creates shorter name.
-    TableCow tableCow = resourceTracker.createTableCow("table1");
+    TableCow tableCow = resourceTracker.createTableCow();
     TableId tableId = tableCow.getTableInfo().getTableId();
 
     TableDefinition tableDefinition =
@@ -178,13 +178,14 @@ public class BigQueryCowTest {
             .isEmpty());
 
     // Query
+
+    QueryJobConfiguration query = QueryJobConfiguration.newBuilder(
+            "SELECT " + fieldName + " FROM `" + tableId.getDataset() + "`.`" + tableId.getTable() + "`")
+            .build();
+    System.out.println(query.getQuery());
     Iterator<FieldValueList> fieldValueLists =
         bigQueryCow
-            .query(
-                QueryJobConfiguration.newBuilder(
-                        "SELECT " + fieldName + " FROM " + tableId.getTable())
-                    .setDefaultDataset(tableId.getDataset())
-                    .build())
+            .query(query)
             .getValues()
             .iterator();
     assertEquals(fieldValue, fieldValueLists.next().get(fieldName).getStringValue());

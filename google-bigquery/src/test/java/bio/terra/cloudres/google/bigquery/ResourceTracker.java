@@ -26,11 +26,8 @@ public class ResourceTracker {
 
   public TableCow createTableCow() {
     checkNotNull(datasetId);
-    return createTableCow(IntegrationUtils.randomNameWithUnderscore());
-  }
-
-  public TableCow createTableCow(String tableId) {
-    TableId tableIdToCreate = TableId.of(datasetId, tableId);
+    String tableName = IntegrationUtils.randomNameWithUnderscore();
+    TableId tableIdToCreate = TableId.of(datasetId, tableName);
     createdTableIds.add(tableIdToCreate);
 
     return bigQueryCow.create(
