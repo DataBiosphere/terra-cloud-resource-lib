@@ -1,37 +1,38 @@
 package bio.terra.cloudres.common;
 
 import com.google.auto.value.AutoValue;
-
 import java.time.Duration;
 
 /**
- * Configuration for CRL running in cleanup mode, where it tracks cloud resources being created and cleans them up later.
- * <p> TODO(CA-867): Write a README and link it here explaining cleanup mode.
+ * Configuration for CRL running in cleanup mode, where it tracks cloud resources being created and
+ * cleans them up later.
+ *
+ * <p>TODO(CA-867): Write a README and link it here explaining cleanup mode.
  */
 @AutoValue
 public abstract class CleanupConfig {
 
-    /**
-     * An id to differentiate this run of CRL in cleanup mode from other runs. Any format allowed.
-     */
-    public abstract String cleanupId();
+  /** An id to differentiate this run of CRL in cleanup mode from other runs. Any format allowed. */
+  public abstract String cleanupId();
 
-    /**
-     * How long created resources should live (at least) before being cleaned up.
-     */
-    public abstract Duration timeToLive();
+  /** How long created resources should live (at least) before being cleaned up. */
+  public abstract Duration timeToLive();
 
-    public static Builder builder() {
-        return new AutoValue_CleanupConfig.Builder();
-    }
+  public abstract CleanupRecorder cleanupRecorder();
 
-    /** Builder for {@link CleanupConfig}. */
-    @AutoValue.Builder
-    public abstract static class Builder {
-        public abstract Builder setCleanupId(String value);
+  public static Builder builder() {
+    return new AutoValue_CleanupConfig.Builder();
+  }
 
-        public abstract Builder setTimeToLive(Duration value);
+  /** Builder for {@link CleanupConfig}. */
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setCleanupId(String value);
 
-        public abstract CleanupConfig build();
-    }
+    public abstract Builder setTimeToLive(Duration value);
+
+    public abstract Builder setCleanupRecorder(CleanupRecorder recorder);
+
+    public abstract CleanupConfig build();
+  }
 }

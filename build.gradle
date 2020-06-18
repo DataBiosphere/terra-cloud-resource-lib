@@ -23,6 +23,7 @@ subprojects { subproject ->
         google()
     }
 
+    apply plugin: 'idea'
     apply plugin: 'java-library'
     apply plugin: 'java-test-fixtures'
     apply plugin: 'com.diffplug.gradle.spotless'

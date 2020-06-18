@@ -1,67 +1,58 @@
 package bio.terra.cloudres.common;
 
-import javax.swing.text.html.Option;
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * Configuration class to manage CRL behavior.
- */
+import java.util.Optional;
+
+/** Configuration class to manage CRL behavior. */
 public class ClientConfig {
-    private final String clientName;
-    private final Optional<CleanupConfig> cleanupConfig;
+  private final String clientName;
+  private final Optional<CleanupConfig> cleanupConfig;
 
-    private ClientConfig(String clientName, Optional<CleanupConfig> cleanupConfig) {
-        checkNotNull(clientName, "client name must be set");
+  private ClientConfig(String clientName, Optional<CleanupConfig> cleanupConfig) {
+    checkNotNull(clientName, "client name must be set");
 
-        this.clientName = clientName;
-        this.cleanupConfig = cleanupConfig;
+    this.clientName = clientName;
+    this.cleanupConfig = cleanupConfig;
+  }
+
+  /** The name of the client running CRL, e.g. the name of the service. */
+  public String getClientName() {
+    return clientName;
+  }
+
+  /**
+   * The {@link CleanupConfig} of how created resources should be cleaned up, or none if not running
+   * in cleanup mode.
+   */
+  public Optional<CleanupConfig> getCleanupConfig() {
+    return cleanupConfig;
+  }
+
+  public static class Builder {
+    private String client;
+    private Optional<CleanupConfig> cleanupConfig = Optional.empty();
+
+    private Builder() {}
+
+    /** Builder for {@link ClientConfig}. */
+    public static Builder newBuilder() {
+      return new Builder();
     }
 
-    /**
-     * The name of the client running CRL, e.g. the name of the service.
-     */
-    public String getClientName() {
-        return clientName;
+    /** required, sets the client which is using CRL */
+    public Builder setClient(String client) {
+      this.client = client;
+      return this;
     }
 
-    /**
-     * The {@link CleanupConfig} of how created resources should be cleaned up, or none if not running in cleanup mode.
-     */
-    public Optional<CleanupConfig> getCleanupConfig() {
-        return cleanupConfig;
+    public Builder setCleanupConfig(CleanupConfig cleanupConfig) {
+      this.cleanupConfig = Optional.of(cleanupConfig);
+      return this;
     }
 
-    public static class Builder {
-        private String client;
-        private Optional<CleanupConfig> cleanupConfig = Optional.empty();
-
-        private Builder() {
-        }
-
-        /**
-         * Builder for {@link ClientConfig}.
-         */
-        public static Builder newBuilder() {
-            return new Builder();
-        }
-
-        /**
-         * required, sets the client which is using CRL
-         */
-        public Builder setClient(String client) {
-            this.client = client;
-            return this;
-        }
-
-        public Builder setCleanupConfig(CleanupConfig cleanupConfig) {
-            this.cleanupConfig = Optional.of(cleanupConfig);
-            return this;
-        }
-
-        public ClientConfig build() {
-            return new ClientConfig(this.client, cleanupConfig);
-        }
+    public ClientConfig build() {
+      return new ClientConfig(this.client, cleanupConfig);
     }
+  }
 }

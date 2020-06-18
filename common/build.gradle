@@ -1,14 +1,7 @@
 apply plugin: 'org.openapi.generator'
 
-
-configurations {
-    generatedCompile
-}
-
 dependencies {
-    api 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
-    api 'com.fasterxml.jackson.core:jackson-annotations:2.11.0'
-    api "com.google.auto.value:auto-value-annotations:1.7.3"
+    implementation "com.google.auto.value:auto-value-annotations:1.7.3"
     annotationProcessor "com.google.auto.value:auto-value:1.7.3"
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
@@ -17,58 +10,34 @@ dependencies {
 
 
     // -- OpenAPI CodeGen dependencies --
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.0'
     // TODO: this version of swagger-annotations is old, but the code gen is still relying on it
     //  There is an open bug tracking the fix: https://github.com/OpenAPITools/openapi-generator/issues/4245
-    implementation group: 'io.swagger', name: 'swagger-annotations', version: '1.6.0'
+    implementation 'io.swagger:swagger-annotations:1.6.0'
 }
-
-// -- OpenAPI Model Generation --
-import org.openapitools.codegen.config.CodegenConfigurator
-import org.openapitools.codegen.DefaultGenerator
 
 def openapiSourceFile = "$projectDir/src/main/resources/cloud_resources_uid.yaml"
-def openapiTargetFolder = 'src/generated/java'
+def openapiTargetFolder = "$buildDir/generated/openapi".toString()
 
-task generateApi {
-    // Get the openapi file from the parent source directory
-    inputs.file("$openapiSourceFile")
-    outputs.dir("$projectDir/$openapiTargetFolder")
-    doLast {
-        def config = new CodegenConfigurator()
-        config.setInputSpec("file:///$openapiSourceFile")
-        config.setOutputDir("$projectDir")
-        config.setGeneratorName("java")
-        config.setSystemProperties([
-                // Only generate model java classes and not API classes.
-                models   : '',
-                modelDocs: 'false',
-                modelTests: 'false',
-        ])
-        // These properties are not well documented: https://github.com/swagger-api/swagger-codegen/issues/7795
-        config.setAdditionalProperties([
-                'library'     : 'jersey2',               // do jersey code generation so we use Jackson JSON
-                'dateLibrary' : 'java8',                 // do java8 code generation
-                'modelPackage': 'bio.terra.cloudres.resources',
-                'sourceFolder': openapiTargetFolder
-        ])
-        new DefaultGenerator().opts(config.toClientOptInput()).generate()
-    }
+openApiGenerate {
+    generatorName = 'java'
+    inputSpec = openapiSourceFile
+    outputDir = openapiTargetFolder
+    library = 'jersey2'
+    modelPackage = 'bio.terra.cloudres.resources'
+    configOptions = [
+            'dateLibrary': 'java8'
+    ]
+    systemProperties = [
+            // Only generate model java classes and not API classes.
+            models   : '',
+            modelDocs : 'false',
+            modelTests: 'false',
+    ]
 }
 
+compileJava.dependsOn tasks.openApiGenerate
+ideaModule.dependsOn tasks.openApiGenerate
 
-sourceSets {
-    generated {
-        compileClasspath = configurations.generatedCompile
-    }
-    main {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
-    }
-}
-jar {
-    from sourceSets.generated.output
-}
-
-compileGeneratedJava.dependsOn generateApi
-classes.dependsOn generatedClasses
-compileJava.dependsOn compileGeneratedJava
+sourceSets.main.java.srcDir("$openapiTargetFolder/src/main/java")
