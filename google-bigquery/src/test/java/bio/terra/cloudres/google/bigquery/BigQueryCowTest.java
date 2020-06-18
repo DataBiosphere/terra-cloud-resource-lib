@@ -158,12 +158,10 @@ public class BigQueryCowTest {
     String fieldName = "field1";
     String fieldValue = "value1";
 
-    String datasetId =
-        resourceTracker.createDatasetCow().getDatasetInfo().getDatasetId().getDataset();
-    TableId tableId = TableId.of(datasetId, "table1");
     // The random UUID tableId is not the standard table id format, to make query work, manually
     // creates shorter name.
-    TableCow tableCow = resourceTracker.createTableCow(tableId);
+    TableCow tableCow = resourceTracker.createTableCow("table1");
+    TableId tableId = tableCow.getTableInfo().getTableId();
 
     TableDefinition tableDefinition =
         StandardTableDefinition.of(Schema.of(Field.of(fieldName, LegacySQLTypeName.STRING)));
@@ -185,7 +183,7 @@ public class BigQueryCowTest {
             .query(
                 QueryJobConfiguration.newBuilder(
                         "SELECT " + fieldName + " FROM " + tableId.getTable())
-                    .setDefaultDataset(datasetId)
+                    .setDefaultDataset(tableId.getDataset())
                     .build())
             .getValues()
             .iterator();
