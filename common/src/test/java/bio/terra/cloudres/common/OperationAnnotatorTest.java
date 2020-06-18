@@ -115,6 +115,19 @@ public class OperationAnnotatorTest {
     assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
   }
 
+  @Test
+  public void testExecuteGoogleCloudCall_withCheckedException() throws Exception {
+    Assert.assertThrows(
+        InterruptedException.class,
+        () ->
+            operationAnnotator.executeCheckedCowOperation(
+                GOOGLE_CREATE_PROJECT,
+                () -> {
+                  throw new InterruptedException(ERROR_MESSAGE);
+                },
+                SERIALIZE));
+  }
+
   /**
    * Expected log in JSON format with no error code
    *
