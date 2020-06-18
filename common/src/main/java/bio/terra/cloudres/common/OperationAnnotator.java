@@ -42,7 +42,9 @@ public class OperationAnnotator {
     try {
       return executeCheckedCowOperation(
           cloudOperation,
-          (CowExecuteCheckedException<R, BogusException>) cowExecute::execute,
+              // Wrap cowExecute in a CowExecuteCheckedException so we can use the same code even though it will never
+              // throw a checked exception.
+          (CowCheckedExecute<R, BogusException>) cowExecute::execute,
           cowSerialize);
     } catch (BogusException e) {
       throw new AssertionError("Our BogusException should never be thrown by cowExecute.", e);
@@ -59,7 +61,7 @@ public class OperationAnnotator {
    */
   public <R, E extends Exception> R executeCheckedCowOperation(
       CloudOperation cloudOperation,
-      CowExecuteCheckedException<R, E> cowExecute,
+      CowCheckedExecute<R, E> cowExecute,
       CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
@@ -158,7 +160,7 @@ public class OperationAnnotator {
 
   /** How to execute this operation. Like {@link CowExecute}, but allows for checked exceptions. */
   @FunctionalInterface
-  public interface CowExecuteCheckedException<R, E extends Exception> {
+  public interface CowCheckedExecute<R, E extends Exception> {
     R execute() throws E;
   }
 
@@ -170,7 +172,7 @@ public class OperationAnnotator {
 
   /**
    * A bogus exception type used to make a {@link CowExecute} into a {@link
-   * CowExecuteCheckedException}.
+   * CowCheckedExecute}.
    */
   private static class BogusException extends Exception {}
 }
