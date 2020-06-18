@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Terra Cloud Resource UIDs
+  description: |
+    Terra Cloud Resources Library definitions of unique identifiers for cloud resources.
+  version: 0.0.1
+
+# This file defines components modles to be reused, not a service path.
+paths: {}
+
+components:
+  schemas:
+    CloudResourceUid:
+      type: object
+      required:
+        - resourceType
+      properties:
+        resourceType:
+          type: string
+      discriminator:
+        propertyName: resourceType
+    GoogleBucketUid:
+      allOf:
+        - $ref: '#/components/schemas/CloudResourceUid'
+        - type: object
+          required:
+            - bucketId
+          properties:
+            bucketId:
+              type: string
+    GoogleProjectUid:
+      allOf:
+        - $ref: '#/components/schemas/CloudResourceUid'
+        - type: object
+          required:
+            - projectId
+          properties:
+            projectId:
+              type: string
+#    cloudResourceUid:
+#      oneOf:
+#        - $ref: '#/components/schemas/googleBucketUid'
+#        - $ref: '#/components/schemas/googleProjectUid'
+#        discriminator:
+#          propertyName: objectType
