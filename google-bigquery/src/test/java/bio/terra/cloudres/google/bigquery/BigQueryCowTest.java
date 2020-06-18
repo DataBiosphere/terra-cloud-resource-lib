@@ -179,15 +179,18 @@ public class BigQueryCowTest {
 
     // Query
 
-    QueryJobConfiguration query = QueryJobConfiguration.newBuilder(
-            "SELECT " + fieldName + " FROM `" + tableId.getDataset() + "`.`" + tableId.getTable() + "`")
+    QueryJobConfiguration query =
+        QueryJobConfiguration.newBuilder(
+                "SELECT "
+                    + fieldName
+                    + " FROM `"
+                    + tableId.getDataset()
+                    + "`.`"
+                    + tableId.getTable()
+                    + "`")
             .build();
     System.out.println(query.getQuery());
-    Iterator<FieldValueList> fieldValueLists =
-        bigQueryCow
-            .query(query)
-            .getValues()
-            .iterator();
+    Iterator<FieldValueList> fieldValueLists = bigQueryCow.query(query).getValues().iterator();
     assertEquals(fieldValue, fieldValueLists.next().get(fieldName).getStringValue());
     assertFalse(fieldValueLists.hasNext());
   }
