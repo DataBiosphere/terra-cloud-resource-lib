@@ -42,8 +42,9 @@ public class OperationAnnotator {
     try {
       return executeCheckedCowOperation(
           cloudOperation,
-              // Wrap cowExecute in a CowExecuteCheckedException so we can use the same code even though it will never
-              // throw a checked exception.
+          // Wrap cowExecute in a CowExecuteCheckedException so we can use the same code even though
+          // it will never
+          // throw a checked exception.
           (CowCheckedExecute<R, BogusException>) cowExecute::execute,
           cowSerialize);
     } catch (BogusException e) {
@@ -60,9 +61,7 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R, E extends Exception> R executeCheckedCowOperation(
-      CloudOperation cloudOperation,
-      CowCheckedExecute<R, E> cowExecute,
-      CowSerialize cowSerialize)
+      CloudOperation cloudOperation, CowCheckedExecute<R, E> cowExecute, CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
 
@@ -170,9 +169,6 @@ public class OperationAnnotator {
     JsonObject serializeRequest();
   }
 
-  /**
-   * A bogus exception type used to make a {@link CowExecute} into a {@link
-   * CowCheckedExecute}.
-   */
+  /** A bogus exception type used to make a {@link CowExecute} into a {@link CowCheckedExecute}. */
   private static class BogusException extends Exception {}
 }
