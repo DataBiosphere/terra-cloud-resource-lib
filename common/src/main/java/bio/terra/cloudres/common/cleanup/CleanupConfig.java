@@ -1,4 +1,4 @@
-package bio.terra.cloudres.common;
+package bio.terra.cloudres.common.cleanup;
 
 import com.google.auto.value.AutoValue;
 import java.time.Duration;
@@ -18,8 +18,6 @@ public abstract class CleanupConfig {
   /** How long created resources should live (at least) before being cleaned up. */
   public abstract Duration timeToLive();
 
-  public abstract CleanupRecorder cleanupRecorder();
-
   public static Builder builder() {
     return new AutoValue_CleanupConfig.Builder();
   }
@@ -30,8 +28,6 @@ public abstract class CleanupConfig {
     public abstract Builder setCleanupId(String value);
 
     public abstract Builder setTimeToLive(Duration value);
-
-    public abstract Builder setCleanupRecorder(CleanupRecorder recorder);
 
     public abstract CleanupConfig build();
   }

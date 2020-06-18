@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.storage;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.resources.GoogleBucketUid;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import com.google.cloud.storage.Bucket;
@@ -39,6 +40,7 @@ public class StorageCow {
 
   /** See {@link Storage#create(BucketInfo, Storage.BucketTargetOption...)}. */
   public BucketCow create(BucketInfo bucketInfo) {
+    clientConfig.recordForCleanup(new GoogleBucketUid().bucketName(bucketInfo.getName()));
     Bucket bucket =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_CREATE_BUCKET,

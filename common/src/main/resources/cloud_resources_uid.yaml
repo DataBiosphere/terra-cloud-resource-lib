@@ -24,9 +24,9 @@ components:
         - $ref: '#/components/schemas/CloudResourceUid'
         - type: object
           required:
-            - bucketId
+            - bucketName
           properties:
-            bucketId:
+            bucketName:
               type: string
     GoogleProjectUid:
       allOf:
@@ -37,9 +37,3 @@ components:
           properties:
             projectId:
               type: string
-#    cloudResourceUid:
-#      oneOf:
-#        - $ref: '#/components/schemas/googleBucketUid'
-#        - $ref: '#/components/schemas/googleProjectUid'
-#        discriminator:
-#          propertyName: objectType
