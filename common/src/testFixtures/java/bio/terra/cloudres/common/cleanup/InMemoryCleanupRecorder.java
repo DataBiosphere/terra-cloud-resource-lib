@@ -17,4 +17,8 @@ public class InMemoryCleanupRecorder implements CleanupRecorder {
   public Collection<CleanupConfig> getRecords(CloudResourceUid resource) {
     return resources.get(resource);
   }
+
+  public boolean hasRecord(CloudResourceUid resource) {
+    return resources.containsKey(resource);
+  }
 }

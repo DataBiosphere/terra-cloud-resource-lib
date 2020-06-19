@@ -47,7 +47,7 @@ public class TabletCowTest {
 
     TableCow updatedTableCow =
         new TableCow(
-            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+            IntegrationUtils.createDefaultClientConfig(),
             (Table) tableCow.getTableInfo().toBuilder().setDescription(description).build());
     updatedTableCow.update();
     assertEquals(description, updatedTableCow.reload().getTableInfo().getDescription());

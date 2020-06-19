@@ -14,7 +14,7 @@ class StorageIntegrationUtils {
   private StorageIntegrationUtils() {}
 
   static StorageCow defaultStorageCow() {
-    return new StorageCow(IntegrationUtils.DEFAULT_CLIENT_CONFIG, defaultStorageOptions());
+    return new StorageCow(IntegrationUtils.createDefaultClientConfig(), defaultStorageOptions());
   }
 
   static StorageOptions defaultStorageOptions() {

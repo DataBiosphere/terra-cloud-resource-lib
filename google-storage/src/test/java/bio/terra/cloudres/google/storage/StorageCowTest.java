@@ -2,6 +2,8 @@ package bio.terra.cloudres.google.storage;
 
 import static org.junit.Assert.*;
 
+import bio.terra.cloudres.common.cleanup.InMemoryCleanupRecorder;
+import bio.terra.cloudres.resources.GoogleBucketUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.Acl;
@@ -50,6 +52,23 @@ public class StorageCowTest {
 
     assertTrue(storageCow.delete(bucketName));
     assertNull(storageCow.get(bucketName));
+  }
+
+  @Test
+  public void createBucketRecorded() {
+    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder();
+    StorageCow recordingCow =
+        new StorageCow(
+            IntegrationUtils.createDefaultClientConfigBuilder()
+                .setCleanupRecorder(recorder)
+                .build(),
+            StorageIntegrationUtils.defaultStorageOptions());
+    String bucketName = IntegrationUtils.randomName();
+    recordingCow.create(BucketInfo.of(bucketName));
+
+    assertTrue(recorder.hasRecord(new GoogleBucketUid().bucketName(bucketName)));
+
+    recordingCow.delete(bucketName);
   }
 
   @Test
