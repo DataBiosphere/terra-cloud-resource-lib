@@ -10,30 +10,91 @@ paths: {}
 
 components:
   schemas:
-    CloudResourceUid:
+#    CloudResourceUid:
+#      type: object
+#      required:
+#        - resourceType
+#      properties:
+#        resourceType:
+#          type: string
+#      discriminator:
+#        propertyName: resourceType
+#        mapping:
+#          googleBucketUid: '#/components/schemas/GoogleBucketUid'
+#          googleProjectUid: '#/components/schemas/GoogleProjectUid'
+#    GoogleBucketUid:
+#      allOf:
+#        - $ref: '#/components/schemas/CloudResourceUid'
+#        - type: object
+#          required:
+#            - bucketName
+#          properties:
+#            bucketName:
+#              type: string
+#    GoogleProjectUid:
+#      allOf:
+#        - $ref: '#/components/schemas/CloudResourceUid'
+#        - type: object
+#          required:
+#            - projectId
+#          properties:
+#            projectId:
+#              type: string
+
+
+
+#    GoogleBucketUid:
+#      type: object
+#      required:
+#        - bucketName
+#      properties:
+#        bucketName:
+#          type: string
+#    GoogleProjectUid:
+#      type: object
+#      required:
+#        - projectId
+#      properties:
+#        projectId:
+#          type: string
+#    CloudResourceUid:
+#      type: object
+#      properties:
+#        googleBucketUid:
+#          $ref: '#/components/schemas/GoogleBucketUid'
+#        googleProjectUid:
+#          $ref: '#/components/schemas/GoogleProjectUid'
+    GoogleBucketUid:
       type: object
       required:
         - resourceType
+        - bucketName
       properties:
         resourceType:
           type: string
-      discriminator:
-        propertyName: resourceType
-    GoogleBucketUid:
-      allOf:
-        - $ref: '#/components/schemas/CloudResourceUid'
-        - type: object
-          required:
-            - bucketName
-          properties:
-            bucketName:
-              type: string
+          default: googleBucketUid
+        bucketName:
+          type: string
     GoogleProjectUid:
-      allOf:
-        - $ref: '#/components/schemas/CloudResourceUid'
-        - type: object
-          required:
-            - projectId
-          properties:
-            projectId:
-              type: string
+      type: object
+      required:
+        - resourceType
+        - projectId
+      properties:
+        resourceType:
+          type: string
+          default: googleProjectUid
+        projectId:
+          type: string
+    CloudResourceUid:
+      oneOf:
+      - $ref: '#/components/schemas/GoogleBucketUid'
+      - $ref: '#/components/schemas/GoogleProjectUid'
+      discriminator:
+        # Use the resourceType property to figure out which schema is represented by the CloudResourceUid.
+        propertyName: resourceType
+        mapping:
+          # Mapping should match the default resourceType values. Default resourceType values allow created Java objects
+          # to have the same value as created -> serialized -> deserialized values.
+          googleBucketUid: '#/components/schemas/GoogleBucketUid'
+          googleProjectUid: '#/components/schemas/GoogleProjectUid'
