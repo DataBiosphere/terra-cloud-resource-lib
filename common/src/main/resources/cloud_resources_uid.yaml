@@ -10,60 +10,6 @@ paths: {}
 
 components:
   schemas:
-#    CloudResourceUid:
-#      type: object
-#      required:
-#        - resourceType
-#      properties:
-#        resourceType:
-#          type: string
-#      discriminator:
-#        propertyName: resourceType
-#        mapping:
-#          googleBucketUid: '#/components/schemas/GoogleBucketUid'
-#          googleProjectUid: '#/components/schemas/GoogleProjectUid'
-#    GoogleBucketUid:
-#      allOf:
-#        - $ref: '#/components/schemas/CloudResourceUid'
-#        - type: object
-#          required:
-#            - bucketName
-#          properties:
-#            bucketName:
-#              type: string
-#    GoogleProjectUid:
-#      allOf:
-#        - $ref: '#/components/schemas/CloudResourceUid'
-#        - type: object
-#          required:
-#            - projectId
-#          properties:
-#            projectId:
-#              type: string
-
-
-
-#    GoogleBucketUid:
-#      type: object
-#      required:
-#        - bucketName
-#      properties:
-#        bucketName:
-#          type: string
-#    GoogleProjectUid:
-#      type: object
-#      required:
-#        - projectId
-#      properties:
-#        projectId:
-#          type: string
-#    CloudResourceUid:
-#      type: object
-#      properties:
-#        googleBucketUid:
-#          $ref: '#/components/schemas/GoogleBucketUid'
-#        googleProjectUid:
-#          $ref: '#/components/schemas/GoogleProjectUid'
     GoogleBucketUid:
       type: object
       required:
