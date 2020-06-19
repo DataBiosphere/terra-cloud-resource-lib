@@ -5,7 +5,7 @@ info:
     Terra Cloud Resources Library definitions of unique identifiers for cloud resources.
   version: 0.0.1
 
-# This file defines components modles to be reused, not a service path.
+# This file defines component models to be reused, not a service path.
 paths: {}
 
 components:
