@@ -6,8 +6,7 @@ dependencies {
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
 
-    testCompileOnly 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
-
+    testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
 
     // -- OpenAPI CodeGen dependencies --
     api 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
