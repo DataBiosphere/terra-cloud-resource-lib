@@ -12,9 +12,12 @@ import java.time.Duration;
 @AutoValue
 public abstract class CleanupConfig {
 
-  /** An id to differentiate this run of CRL in cleanup mode from other runs. Any format allowed.
-   * <p> Each integration test run could be given a different cleanup id to allow resources from each run to be
-   * distinguished from each other.*/
+  /**
+   * An id to differentiate this run of CRL in cleanup mode from other runs. Any format allowed.
+   *
+   * <p>Each integration test run could be given a different cleanup id to allow resources from each
+   * run to be distinguished from each other.
+   */
   public abstract String cleanupId();
 
   /** How long created resources should live (at least) before being cleaned up. */
