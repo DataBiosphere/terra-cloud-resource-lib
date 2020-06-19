@@ -7,7 +7,7 @@ import java.time.Duration;
  * Configuration for CRL running in cleanup mode, where it tracks cloud resources being created and
  * cleans them up later.
  *
- * <p>TODO(CA-867): Write a README and link it here explaining cleanup mode.
+ * <p>See the README on Cleanup Mode.
  */
 @AutoValue
 public abstract class CleanupConfig {
