@@ -3,7 +3,9 @@ package bio.terra.cloudres.common;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import bio.terra.cloudres.common.cleanup.CleanupConfig;
+import bio.terra.cloudres.common.cleanup.CleanupRecorderLocator;
 import bio.terra.cloudres.common.cleanup.InMemoryCleanupRecorder;
+import bio.terra.cloudres.common.cleanup.NullCleanupRecorder;
 import bio.terra.cloudres.resources.GoogleBucketUid;
 import bio.terra.cloudres.resources.GoogleProjectUid;
 import java.time.Duration;
@@ -23,13 +25,11 @@ public class ClientConfigTest {
 
   @Test
   public void recordForCleanup_recordsWithCleanupConfig() {
-    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder();
+    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder(new NullCleanupRecorder());
+    CleanupRecorderLocator.provide(recorder);
+
     ClientConfig clientConfig =
-        ClientConfig.Builder.newBuilder()
-            .setClient("foo")
-            .setCleanupConfig(CLEANUP_CONFIG)
-            .setCleanupRecorder(recorder)
-            .build();
+        ClientConfig.Builder.newBuilder().setClient("foo").setCleanupConfig(CLEANUP_CONFIG).build();
 
     clientConfig.recordForCleanup(BUCKET_1);
     clientConfig.recordForCleanup(BUCKET_2);
@@ -43,23 +43,15 @@ public class ClientConfigTest {
 
   @Test
   public void recordForCleanup_noRecordWithoutCleanupConfig() {
-    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder();
-    ClientConfig clientConfig =
-        ClientConfig.Builder.newBuilder().setClient("foo").setCleanupRecorder(recorder).build();
+    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder(new NullCleanupRecorder());
+    CleanupRecorderLocator.provide(recorder);
+
+    ClientConfig clientConfig = ClientConfig.Builder.newBuilder().setClient("foo").build();
 
     clientConfig.recordForCleanup(BUCKET_1);
     clientConfig.recordForCleanup(BUCKET_2);
 
     assertThat(recorder.getRecords(BUCKET_1), Matchers.empty());
     assertThat(recorder.getRecords(BUCKET_2), Matchers.empty());
-  }
-
-  @Test
-  public void recordForCleanup_noRecorderIsOk() {
-    // Even though no CleanupRecorder is set on ClientConfig, we can still use the recordForCleanup
-    // method.
-    ClientConfig clientConfig =
-        ClientConfig.Builder.newBuilder().setClient("foo").setCleanupConfig(CLEANUP_CONFIG).build();
-    clientConfig.recordForCleanup(BUCKET_1);
   }
 }

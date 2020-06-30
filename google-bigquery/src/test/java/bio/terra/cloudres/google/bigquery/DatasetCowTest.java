@@ -35,7 +35,7 @@ public class DatasetCowTest {
     String description = "new description";
     DatasetCow updatedDatasetCow =
         new DatasetCow(
-            IntegrationUtils.createDefaultClientConfig(),
+            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
             (Dataset)
                 datasetCow.getDatasetInfo().toBuilder().setDescription("new description").build());
     updatedDatasetCow.update();

@@ -56,19 +56,13 @@ public class StorageCowTest {
 
   @Test
   public void createBucketRecorded() {
-    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder();
-    StorageCow recordingCow =
-        new StorageCow(
-            IntegrationUtils.createDefaultClientConfigBuilder()
-                .setCleanupRecorder(recorder)
-                .build(),
-            StorageIntegrationUtils.defaultStorageOptions());
+    InMemoryCleanupRecorder recorder = IntegrationUtils.provideInMemoryRecorder();
     String bucketName = IntegrationUtils.randomName();
-    recordingCow.create(BucketInfo.of(bucketName));
+    storageCow.create(BucketInfo.of(bucketName));
 
     assertTrue(recorder.hasRecord(new GoogleBucketUid().bucketName(bucketName)));
 
-    recordingCow.delete(bucketName);
+    storageCow.delete(bucketName);
   }
 
   @Test

@@ -3,8 +3,7 @@ package bio.terra.cloudres.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import bio.terra.cloudres.common.cleanup.CleanupConfig;
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.cloudres.common.cleanup.NullCleanupRecorder;
+import bio.terra.cloudres.common.cleanup.CleanupRecorderLocator;
 import bio.terra.cloudres.resources.CloudResourceUid;
 import java.util.Optional;
 
@@ -12,11 +11,8 @@ import java.util.Optional;
 public class ClientConfig {
   private final String clientName;
   private final Optional<CleanupConfig> cleanupConfig;
-  private final CleanupRecorder cleanupRecorder;
 
-  private ClientConfig(
-      String clientName, Optional<CleanupConfig> cleanupConfig, CleanupRecorder recorder) {
-    cleanupRecorder = recorder;
+  private ClientConfig(String clientName, Optional<CleanupConfig> cleanupConfig) {
     checkNotNull(clientName, "client name must be set");
 
     this.clientName = clientName;
@@ -36,25 +32,14 @@ public class ClientConfig {
     return cleanupConfig;
   }
 
-  /**
-   * The {@link CleanupRecorder} to use to record resources for clenaup, if running in cleanup mode.
-   */
-  public CleanupRecorder getCleanupRecorder() {
-    return cleanupRecorder;
-  }
-
   /** Record a cloud resource to be created for cleanup, if running in cleanup mode. */
   public void recordForCleanup(CloudResourceUid resource) {
-    if (!getCleanupConfig().isPresent()) {
-      return;
-    }
-    getCleanupRecorder().record(resource, getCleanupConfig().get());
+    getCleanupConfig().ifPresent(cleanup -> CleanupRecorderLocator.get().record(resource, cleanup));
   }
 
   public static class Builder {
     private String client;
     private Optional<CleanupConfig> cleanupConfig = Optional.empty();
-    private CleanupRecorder cleanupRecorder = new NullCleanupRecorder();
 
     private Builder() {}
 
@@ -74,13 +59,8 @@ public class ClientConfig {
       return this;
     }
 
-    public Builder setCleanupRecorder(CleanupRecorder recorder) {
-      this.cleanupRecorder = recorder;
-      return this;
-    }
-
     public ClientConfig build() {
-      return new ClientConfig(this.client, cleanupConfig, cleanupRecorder);
+      return new ClientConfig(this.client, cleanupConfig);
     }
   }
 }

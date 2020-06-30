@@ -1,7 +1,7 @@
 package bio.terra.cloudres.testing;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.cleanup.CleanupConfig;
+import bio.terra.cloudres.common.cleanup.*;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -24,15 +24,13 @@ public class IntegrationUtils {
           .setCleanupConfig(DEFAULT_CLEANUP_CONFIG)
           .build();
 
-  public static ClientConfig.Builder createDefaultClientConfigBuilder() {
-    // TODO(CA-874): Set a real persistence backend for cleanup.
-    return ClientConfig.Builder.newBuilder()
-        .setClient(DEFAULT_CLIENT_NAME)
-        .setCleanupConfig(DEFAULT_CLEANUP_CONFIG);
-  }
-
-  public static ClientConfig createDefaultClientConfig() {
-    return createDefaultClientConfigBuilder().build();
+  /** Creates a new {@link InMemoryCleanupRecorder} and sets it to be used. */
+  public static InMemoryCleanupRecorder provideInMemoryRecorder() {
+    // TODO(CA-874): Set a real original CleanupRecorder based on configuration. The real
+    // CleanupRecorder should always be used by default.
+    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder(new NullCleanupRecorder());
+    CleanupRecorderLocator.provide(recorder);
+    return recorder;
   }
 
   /** Generates a random name to use for a cloud resource. */

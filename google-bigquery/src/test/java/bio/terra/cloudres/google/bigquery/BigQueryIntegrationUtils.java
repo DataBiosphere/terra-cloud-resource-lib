@@ -18,7 +18,7 @@ public class BigQueryIntegrationUtils {
     ServiceAccountCredentials googleCredentials =
         IntegrationCredentials.getAdminGoogleCredentialsOrDie();
     return new BigQueryCow(
-        IntegrationUtils.createDefaultClientConfig(),
+        IntegrationUtils.DEFAULT_CLIENT_CONFIG,
         BigQueryOptions.newBuilder()
             .setCredentials(googleCredentials)
             .setProjectId(googleCredentials.getProjectId())
