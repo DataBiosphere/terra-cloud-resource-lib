@@ -5,15 +5,15 @@ public class CleanupRecorderLocator {
   private CleanupRecorderLocator() {}
 
   // TODO: Set a real CleanupRecorder from configuration.
-  private static CleanupRecorder recorder = new NullCleanupRecorder();
+  private static CleanupRecorder instance = new NullCleanupRecorder();
 
   /** Returns the CleanupRecorder to be used. */
   public static CleanupRecorder get() {
-    return recorder;
+    return instance;
   }
 
   /** Provide a new CleanupRecorder to be returned. */
   public static void provide(CleanupRecorder recorder) {
-    recorder = recorder;
+    instance = recorder;
   }
 }
