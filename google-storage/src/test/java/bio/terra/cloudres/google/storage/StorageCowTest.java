@@ -1,8 +1,10 @@
 package bio.terra.cloudres.google.storage;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
-import bio.terra.cloudres.common.cleanup.InMemoryCleanupRecorder;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.CloudResourceUid;
 import bio.terra.cloudres.resources.GoogleBucketUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.WriteChannel;
@@ -12,6 +14,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -56,11 +60,11 @@ public class StorageCowTest {
 
   @Test
   public void createBucketRecorded() {
-    InMemoryCleanupRecorder recorder = IntegrationUtils.provideInMemoryRecorder();
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     String bucketName = IntegrationUtils.randomName();
     storageCow.create(BucketInfo.of(bucketName));
 
-    assertTrue(recorder.hasRecord(new GoogleBucketUid().bucketName(bucketName)));
+    assertThat(record, Matchers.contains(new GoogleBucketUid().bucketName(bucketName)));
 
     storageCow.delete(bucketName);
   }

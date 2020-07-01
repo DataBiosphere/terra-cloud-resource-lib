@@ -24,15 +24,6 @@ public class IntegrationUtils {
           .setCleanupConfig(DEFAULT_CLEANUP_CONFIG)
           .build();
 
-  /** Creates a new {@link InMemoryCleanupRecorder} and sets it to be used. */
-  public static InMemoryCleanupRecorder provideInMemoryRecorder() {
-    // TODO(CA-874): Set a real original CleanupRecorder based on configuration. The real
-    // CleanupRecorder should always be used by default.
-    InMemoryCleanupRecorder recorder = new InMemoryCleanupRecorder(new NullCleanupRecorder());
-    CleanupRecorderLocator.provide(recorder);
-    return recorder;
-  }
-
   /** Generates a random name to use for a cloud resource. */
   public static String randomName() {
     return UUID.randomUUID().toString();
