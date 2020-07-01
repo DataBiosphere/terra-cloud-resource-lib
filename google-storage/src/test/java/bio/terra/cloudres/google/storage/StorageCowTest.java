@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.resources.CloudResourceUid;
+import bio.terra.cloudres.resources.GoogleBlobUid;
 import bio.terra.cloudres.resources.GoogleBucketUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.WriteChannel;
@@ -85,6 +86,21 @@ public class StorageCowTest {
   }
 
   @Test
+  public void createBlobRecorded() {
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+    BlobId blobId =
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+    BlobCow createdBlob = storageCow.create(BlobInfo.newBuilder(blobId).build());
+
+    assertThat(
+        record,
+        Matchers.contains(
+            new GoogleBlobUid().bucketName(blobId.getBucket()).blobName(blobId.getName())));
+
+    storageCow.delete(createdBlob.getBlobInfo().getBlobId());
+  }
+
+  @Test
   public void createGetDeleteBlobAcl() {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
@@ -115,6 +131,21 @@ public class StorageCowTest {
     BlobCow blob = storageCow.get(blobId);
     assertEquals(contents, StorageIntegrationUtils.readContents(blob));
     assertTrue(storageCow.delete(blobId));
+  }
+
+  @Test
+  public void blobWriterRecorded() throws Exception {
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+    BlobId blobId =
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+    storageCow.writer(BlobInfo.newBuilder(blobId).build()).close();
+
+    assertThat(
+        record,
+        Matchers.contains(
+            new GoogleBlobUid().blobName(blobId.getName()).bucketName(blobId.getBucket())));
+
+    storageCow.delete(blobId);
   }
 
   /** Helper assert that compares an {@link Acl}'s entity and role, but ignores the etag and id. */

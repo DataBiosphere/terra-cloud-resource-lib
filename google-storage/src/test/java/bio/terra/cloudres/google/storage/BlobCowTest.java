@@ -1,9 +1,13 @@
 package bio.terra.cloudres.google.storage;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.CloudResourceUid;
+import bio.terra.cloudres.resources.GoogleBlobUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobId;
@@ -13,6 +17,8 @@ import com.google.cloud.storage.CopyWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -74,6 +80,28 @@ public class BlobCowTest {
 
     assertTrue(source.delete());
     assertTrue(target.delete());
+  }
+
+  @Test
+  public void copyToRecorded() throws Exception {
+    BlobId sourceBlobId =
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+    BlobCow source = storageCow.create(BlobInfo.newBuilder(sourceBlobId).build());
+
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+    BlobId targetBlobId =
+        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
+    source.copyTo(targetBlobId).getResult();
+
+    assertThat(
+        record,
+        Matchers.contains(
+            new GoogleBlobUid()
+                .blobName(targetBlobId.getName())
+                .bucketName(targetBlobId.getBucket())));
+
+    source.delete();
+    storageCow.delete(targetBlobId);
   }
 
   @Test
