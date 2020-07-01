@@ -1,9 +1,19 @@
-# terra-cloud-resource-lib
+# Terra Cloud Resource Library
 
 Cloud Resource Library (CRL) wraps cloud API client libraries for Terra services. It enforces unified logging and
 allows central changes to how Terra services use Cloud APIs.
 
 TODO add more about library principles and Cloud Object Wrappers.
+
+## Cleanup Mode
+Terra manages cloud resources for users. To have confidence in our changes, we need integration test suites that
+exercises real cloud resource lifecycle operations. The expected use of tests is that tests will fail sometimes.
+Nevertheless, we still want to (eventually) clean up cloud resources created by tests. Enter CRL cleanup mode.
+
+CRL can be configured to run in an integration test cleanup mode. In this mode, when a cloud resource is about to be
+created with a Cloud Object Wrapper method, the unique identifier for that cloud resource is persisted to an external
+database. The resources tracked for cleanup can be later deleted, if they have not already been deleted. See
+[CRL Janitor](https://github.com/DataBiosphere/crl-janitor).
 
 # Development
 
@@ -61,3 +71,5 @@ use. To add a new CRL package to support a new client library:
 4. Add the gradle project for the new package to the top [`settings.gradle`](settings.gradle).
 5. Add the gradle project for the new package to the list of `artifactory` `publications` in the top
 [`build.gradle`](build.gradle)
+
+TODO add instructions/considerations for adding a new Cloud Object Wrapper or cloud resource.

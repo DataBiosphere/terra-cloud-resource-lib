@@ -1,0 +1,46 @@
+openapi: 3.0.0
+info:
+  title: Terra Cloud Resource UIDs
+  description: |
+    Terra Cloud Resources Library definitions of unique identifiers for cloud resources.
+  version: 0.0.1
+
+# This file defines component models to be reused, not a service path.
+paths: {}
+
+components:
+  schemas:
+    GoogleBucketUid:
+      type: object
+      required:
+        - resourceType
+        - bucketName
+      properties:
+        resourceType:
+          type: string
+          default: googleBucketUid
+        bucketName:
+          type: string
+    GoogleProjectUid:
+      type: object
+      required:
+        - resourceType
+        - projectId
+      properties:
+        resourceType:
+          type: string
+          default: googleProjectUid
+        projectId:
+          type: string
+    CloudResourceUid:
+      oneOf:
+      - $ref: '#/components/schemas/GoogleBucketUid'
+      - $ref: '#/components/schemas/GoogleProjectUid'
+      discriminator:
+        # Use the resourceType property to figure out which schema is represented by the CloudResourceUid.
+        propertyName: resourceType
+        mapping:
+          # Mapping should match the default resourceType values. Default resourceType values allow created Java objects
+          # to have the same value as created -> serialized -> deserialized values.
+          googleBucketUid: '#/components/schemas/GoogleBucketUid'
+          googleProjectUid: '#/components/schemas/GoogleProjectUid'

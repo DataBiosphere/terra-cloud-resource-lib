@@ -2,27 +2,37 @@ package bio.terra.cloudres.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/** Config class to manage Google resources. */
+import bio.terra.cloudres.common.cleanup.CleanupConfig;
+import java.util.Optional;
+
+/** Configuration class to manage CRL behavior. */
 public class ClientConfig {
   private final String clientName;
+  private final Optional<CleanupConfig> cleanupConfig;
 
-  private ClientConfig(String clientName) {
+  private ClientConfig(String clientName, Optional<CleanupConfig> cleanupConfig) {
     checkNotNull(clientName, "client name must be set");
 
     this.clientName = clientName;
+    this.cleanupConfig = cleanupConfig;
   }
 
-  /**
-   * Gets the client name from the config.
-   *
-   * @return the client name
-   */
+  /** The name of the client running CRL, e.g. the name of the service. */
   public String getClientName() {
     return clientName;
   }
 
+  /**
+   * The {@link CleanupConfig} of how created resources should be cleaned up, or empty if not
+   * running in cleanup mode.
+   */
+  public Optional<CleanupConfig> getCleanupConfig() {
+    return cleanupConfig;
+  }
+
   public static class Builder {
     private String client;
+    private Optional<CleanupConfig> cleanupConfig = Optional.empty();
 
     private Builder() {}
 
@@ -37,8 +47,13 @@ public class ClientConfig {
       return this;
     }
 
+    public Builder setCleanupConfig(CleanupConfig cleanupConfig) {
+      this.cleanupConfig = Optional.of(cleanupConfig);
+      return this;
+    }
+
     public ClientConfig build() {
-      return new ClientConfig(this.client);
+      return new ClientConfig(this.client, cleanupConfig);
     }
   }
 }

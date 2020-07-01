@@ -14,6 +14,7 @@ plugins {
     id 'maven-publish'
     id 'com.jfrog.artifactory' version '4.13.0'
     id 'com.diffplug.gradle.spotless' version '3.27.2'
+    id 'org.openapi.generator' version '4.3.1'
 }
 
 subprojects { subproject ->
@@ -22,6 +23,7 @@ subprojects { subproject ->
         google()
     }
 
+    apply plugin: 'idea'
     apply plugin: 'java-library'
     apply plugin: 'java-test-fixtures'
     apply plugin: 'com.diffplug.gradle.spotless'

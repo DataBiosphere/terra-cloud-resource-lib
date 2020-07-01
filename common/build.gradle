@@ -1,6 +1,42 @@
+apply plugin: 'org.openapi.generator'
+
 dependencies {
+    implementation "com.google.auto.value:auto-value-annotations:1.7.3"
+    annotationProcessor "com.google.auto.value:auto-value:1.7.3"
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
 
     testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+
+    // -- OpenAPI CodeGen dependencies --
+    api 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.11.0'
+    // TODO: this version of swagger-annotations is old, but the code gen is still relying on it
+    //  There is an open bug tracking the fix: https://github.com/OpenAPITools/openapi-generator/issues/4245
+    api 'io.swagger:swagger-annotations:1.6.0'
 }
+
+def openapiSourceFile = "$projectDir/src/main/resources/cloud_resources_uid.yaml"
+def openapiTargetFolder = "$buildDir/generated/openapi".toString()
+
+openApiGenerate {
+    generatorName = 'java'
+    inputSpec = openapiSourceFile
+    outputDir = openapiTargetFolder
+    library = 'jersey2'
+    modelPackage = 'bio.terra.cloudres.resources'
+    configOptions = [
+            'dateLibrary': 'java8'
+    ]
+    systemProperties = [
+            // Only generate model java classes and not API classes.
+            models   : '',
+            modelDocs : 'false',
+            modelTests: 'false',
+    ]
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+ideaModule.dependsOn tasks.openApiGenerate
+
+sourceSets.main.java.srcDir("$openapiTargetFolder/src/main/java")
