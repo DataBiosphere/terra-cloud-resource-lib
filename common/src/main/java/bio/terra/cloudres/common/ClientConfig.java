@@ -3,8 +3,6 @@ package bio.terra.cloudres.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import bio.terra.cloudres.common.cleanup.CleanupConfig;
-import bio.terra.cloudres.common.cleanup.CleanupRecorderLocator;
-import bio.terra.cloudres.resources.CloudResourceUid;
 import java.util.Optional;
 
 /** Configuration class to manage CRL behavior. */
@@ -30,11 +28,6 @@ public class ClientConfig {
    */
   public Optional<CleanupConfig> getCleanupConfig() {
     return cleanupConfig;
-  }
-
-  /** Record a cloud resource to be created for cleanup, if running in cleanup mode. */
-  public void recordForCleanup(CloudResourceUid resource) {
-    getCleanupConfig().ifPresent(cleanup -> CleanupRecorderLocator.get().record(resource, cleanup));
   }
 
   public static class Builder {
