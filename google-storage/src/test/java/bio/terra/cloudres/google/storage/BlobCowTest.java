@@ -72,27 +72,13 @@ public class BlobCowTest {
     BlobCow source = createBlobWithContents(sourceBlobId, contents);
     assertEquals(contents, StorageIntegrationUtils.readContents(source));
 
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     assertNull(storageCow.get(targetBlobId));
     CopyWriter copyWriter = source.copyTo(targetBlobId);
     copyWriter.getResult();
     BlobCow target = storageCow.get(targetBlobId);
+
     assertEquals(contents, StorageIntegrationUtils.readContents(target));
-
-    assertTrue(source.delete());
-    assertTrue(target.delete());
-  }
-
-  @Test
-  public void copyToRecorded() throws Exception {
-    BlobId sourceBlobId =
-        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
-    BlobCow source = storageCow.create(BlobInfo.newBuilder(sourceBlobId).build());
-
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-    BlobId targetBlobId =
-        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
-    source.copyTo(targetBlobId).getResult();
-
     assertThat(
         record,
         Matchers.contains(
@@ -100,8 +86,8 @@ public class BlobCowTest {
                 .blobName(targetBlobId.getName())
                 .bucketName(targetBlobId.getBucket())));
 
-    source.delete();
-    storageCow.delete(targetBlobId);
+    assertTrue(source.delete());
+    assertTrue(target.delete());
   }
 
   @Test
