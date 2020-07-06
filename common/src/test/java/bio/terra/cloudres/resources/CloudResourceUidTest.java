@@ -41,7 +41,7 @@ public class CloudResourceUidTest {
         new GoogleBigQueryTableUid()
             .projectId("my-project")
             .datasetId("my-dataset")
-            .tableName("my-table");
+            .tableId("my-table");
     assertSerializationIdempotency(table, GoogleBigQueryTableUid.class);
   }
 

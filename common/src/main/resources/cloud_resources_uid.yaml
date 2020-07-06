@@ -30,7 +30,7 @@ components:
         - resourceType
         - projectId
         - datasetId
-        - tableName
+        - tableId
       properties:
         resourceType:
           type: string
@@ -39,7 +39,7 @@ components:
           type: string
         datasetId:
           type: string
-        tableName:
+        tableId:
           type: string
     GoogleBlobUid:
       type: object

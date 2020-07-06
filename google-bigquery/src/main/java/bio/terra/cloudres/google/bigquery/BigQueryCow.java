@@ -95,7 +95,7 @@ public class BigQueryCow {
         new GoogleBigQueryTableUid()
             .projectId(tableId.getProject() == null ? defaultProjectId : tableId.getProject())
             .datasetId(tableId.getDataset())
-            .tableName(tableId.getTable());
+            .tableId(tableId.getTable());
     CleanupRecorder.record(tableUid, clientConfig.getCleanupConfig());
 
     return new TableCow(

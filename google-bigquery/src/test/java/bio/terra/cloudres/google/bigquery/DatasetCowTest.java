@@ -76,7 +76,7 @@ public class DatasetCowTest {
             new GoogleBigQueryTableUid()
                 .projectId(datasetCow.getDatasetInfo().getDatasetId().getProject())
                 .datasetId(tableId.getDataset())
-                .tableName(tableId.getTable())));
+                .tableId(tableId.getTable())));
 
     bigQueryCow.delete(tableId);
   }

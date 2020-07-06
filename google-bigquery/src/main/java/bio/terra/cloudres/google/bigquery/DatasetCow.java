@@ -66,7 +66,7 @@ public class DatasetCow {
         new GoogleBigQueryTableUid()
             .projectId(datasetId.getProject())
             .datasetId(datasetId.getDataset())
-            .tableName(tableId),
+            .tableId(tableId),
         clientConfig.getCleanupConfig());
 
     return new TableCow(

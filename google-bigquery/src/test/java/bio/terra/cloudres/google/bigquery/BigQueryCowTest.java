@@ -114,7 +114,7 @@ public class BigQueryCowTest {
             new GoogleBigQueryTableUid()
                 .projectId(tableId.getProject())
                 .datasetId(tableId.getDataset())
-                .tableName(tableId.getTable())));
+                .tableId(tableId.getTable())));
   }
 
   @Test
