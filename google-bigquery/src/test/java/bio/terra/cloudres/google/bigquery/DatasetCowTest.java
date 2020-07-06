@@ -1,10 +1,16 @@
 package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.CloudResourceUid;
+import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.*;
+import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
@@ -56,12 +62,21 @@ public class DatasetCowTest {
   @Test
   public void createThenGetTable() {
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
     String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
     TableId tableId = TableId.of(datasetId, generatedTableId);
     datasetCow.create(generatedTableId, StandardTableDefinition.newBuilder().build());
 
     assertTableIdEqual(tableId, datasetCow.getTable(generatedTableId).getTableInfo().getTableId());
+    assertThat(
+        record,
+        Matchers.contains(
+            new GoogleBigQueryTableUid()
+                .projectId(datasetCow.getDatasetInfo().getDatasetId().getProject())
+                .datasetId(tableId.getDataset())
+                .tableName(tableId.getTable())));
 
     bigQueryCow.delete(tableId);
   }

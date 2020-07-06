@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 
 /** Utils for serializing {@link com.google.cloud.bigquery} objects. */
 public class SerializeUtils {
+  private SerializeUtils() {}
+
   static JsonObject convert(DatasetInfo datasetInfo, BigQuery.DatasetOption... options) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();

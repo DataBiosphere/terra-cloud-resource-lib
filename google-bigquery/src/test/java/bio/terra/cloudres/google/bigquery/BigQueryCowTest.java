@@ -1,13 +1,20 @@
 package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.CloudResourceUid;
+import bio.terra.cloudres.resources.GoogleBigQueryDatasetUid;
+import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Iterator;
+import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
@@ -43,6 +50,7 @@ public class BigQueryCowTest {
 
   @Test
   public void createDataset() {
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertEquals(
@@ -50,6 +58,13 @@ public class BigQueryCowTest {
         bigQueryCow
             .getDataSet(datasetCow.getDatasetInfo().getDatasetId().getDataset())
             .getDatasetInfo());
+    DatasetId datasetId = datasetCow.getDatasetInfo().getDatasetId();
+    assertThat(
+        record,
+        Matchers.contains(
+            new GoogleBigQueryDatasetUid()
+                .projectId(datasetId.getProject())
+                .datasetId(datasetId.getDataset())));
   }
 
   @Test
@@ -86,11 +101,20 @@ public class BigQueryCowTest {
 
   @Test
   public void createTable() {
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     TableCow tableCow = resourceTracker.createTableCow();
 
+    TableId tableId = tableCow.getTableInfo().getTableId();
     assertTableIdEqual(
-        tableCow.getTableInfo().getTableId(),
+        tableId,
         bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo().getTableId());
+    assertThat(
+        record,
+        Matchers.contains(
+            new GoogleBigQueryTableUid()
+                .projectId(tableId.getProject())
+                .datasetId(tableId.getDataset())
+                .tableName(tableId.getTable())));
   }
 
   @Test
