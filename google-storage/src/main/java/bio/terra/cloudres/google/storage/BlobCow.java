@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.storage;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -16,10 +17,12 @@ import org.slf4j.LoggerFactory;
 public class BlobCow {
   private final Logger logger = LoggerFactory.getLogger(BlobCow.class);
 
+  private final ClientConfig clientConfig;
   private final OperationAnnotator operationAnnotator;
   private final Blob blob;
 
   BlobCow(ClientConfig clientConfig, Blob blob) {
+    this.clientConfig = clientConfig;
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.blob = blob;
   }
@@ -30,6 +33,7 @@ public class BlobCow {
 
   /** See {@link Blob#copyTo(BlobId, Blob.BlobSourceOption...)} */
   public CopyWriter copyTo(BlobId targetblob) {
+    CleanupRecorder.record(SerializeUtils.create(targetblob), clientConfig.getCleanupConfig());
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_COPY_BLOB,
         () -> blob.copyTo(targetblob),

@@ -10,6 +10,20 @@ paths: {}
 
 components:
   schemas:
+    GoogleBlobUid:
+      type: object
+      required:
+        - resourceType
+        - bucketName
+        - blobName
+      properties:
+        resourceType:
+          type: string
+          default: googleBlobUid
+        bucketName:
+          type: string
+        blobName:
+          type: string
     GoogleBucketUid:
       type: object
       required:
@@ -34,6 +48,7 @@ components:
           type: string
     CloudResourceUid:
       oneOf:
+      - $ref: '#/components/schemas/GoogleBlobUid'
       - $ref: '#/components/schemas/GoogleBucketUid'
       - $ref: '#/components/schemas/GoogleProjectUid'
       discriminator:
@@ -42,5 +57,6 @@ components:
         mapping:
           # Mapping should match the default resourceType values. Default resourceType values allow created Java objects
           # to have the same value as created -> serialized -> deserialized values.
+          googleBlobUid: '#/components/schemas/GoogleBlobUid'
           googleBucketUid: '#/components/schemas/GoogleBucketUid'
           googleProjectUid: '#/components/schemas/GoogleProjectUid'

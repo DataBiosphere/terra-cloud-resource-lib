@@ -29,6 +29,12 @@ public class CloudResourceUidTest {
   }
 
   @Test
+  public void googleBlob() throws Exception {
+    GoogleBlobUid blob = new GoogleBlobUid().bucketName("my-bucket").blobName("my-blob");
+    assertSerializationIdempotency(blob, GoogleBlobUid.class);
+  }
+
+  @Test
   public void googleBucket() throws Exception {
     GoogleBucketUid bucket = new GoogleBucketUid().bucketName("my-bucket");
     assertSerializationIdempotency(bucket, GoogleBucketUid.class);
