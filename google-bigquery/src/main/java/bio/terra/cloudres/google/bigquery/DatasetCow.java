@@ -5,6 +5,8 @@ import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.bigquery.BigQuery.TableOption;
 import org.slf4j.Logger;
@@ -59,10 +61,18 @@ public class DatasetCow {
   /** See {@link Dataset#create(String, TableDefinition, TableOption...)}. */
   public TableCow create(
       String tableId, TableDefinition tableDefinition, TableOption... tableOptions) {
+    DatasetId datasetId = dataset.getDatasetId();
+    CleanupRecorder.record(
+        new GoogleBigQueryTableUid()
+            .projectId(datasetId.getProject())
+            .datasetId(datasetId.getDataset())
+            .tableId(tableId),
+        clientConfig.getCleanupConfig());
+
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_BIGQUERY_TABLE,
+            CloudOperation.GOOGLE_CREATE_BIGQUERY_TABLE,
             () -> dataset.create(tableId, tableDefinition, tableOptions),
             () ->
                 convert(

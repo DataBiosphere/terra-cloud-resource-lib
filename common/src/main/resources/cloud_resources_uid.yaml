@@ -10,6 +10,37 @@ paths: {}
 
 components:
   schemas:
+    GoogleBigQueryDatasetUid:
+      type: object
+      required:
+        - resourceType
+        - projectId
+        - datasetId
+      properties:
+        resourceType:
+          type: string
+          default: googleBigQueryDatasetUid
+        projectId:
+          type: string
+        datasetId:
+          type: string
+    GoogleBigQueryTableUid:
+      type: object
+      required:
+        - resourceType
+        - projectId
+        - datasetId
+        - tableId
+      properties:
+        resourceType:
+          type: string
+          default: googleBigQueryTableUid
+        projectId:
+          type: string
+        datasetId:
+          type: string
+        tableId:
+          type: string
     GoogleBlobUid:
       type: object
       required:
@@ -48,6 +79,8 @@ components:
           type: string
     CloudResourceUid:
       oneOf:
+      - $ref: '#/components/schemas/GoogleBigQueryDatasetUid'
+      - $ref: '#/components/schemas/GoogleBigQueryTableUid'
       - $ref: '#/components/schemas/GoogleBlobUid'
       - $ref: '#/components/schemas/GoogleBucketUid'
       - $ref: '#/components/schemas/GoogleProjectUid'
@@ -57,6 +90,8 @@ components:
         mapping:
           # Mapping should match the default resourceType values. Default resourceType values allow created Java objects
           # to have the same value as created -> serialized -> deserialized values.
+          googleBigQueryDatasetUid: '#/components/schemas/GoogleBigQueryDatasetUid'
+          googleBigQueryTableUid: '#/components/schemas/GoogleBigQueryTableUid'
           googleBlobUid: '#/components/schemas/GoogleBlobUid'
           googleBucketUid: '#/components/schemas/GoogleBucketUid'
           googleProjectUid: '#/components/schemas/GoogleProjectUid'

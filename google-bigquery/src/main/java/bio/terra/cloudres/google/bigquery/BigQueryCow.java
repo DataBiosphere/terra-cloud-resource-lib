@@ -6,12 +6,16 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.TransformPage;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.GoogleBigQueryDatasetUid;
+import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.bigquery.BigQuery.DatasetDeleteOption;
 import com.google.cloud.bigquery.BigQuery.DatasetOption;
 import com.google.cloud.bigquery.BigQuery.TableListOption;
 import com.google.cloud.bigquery.BigQuery.TableOption;
+import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,16 +25,33 @@ public class BigQueryCow {
 
   private final OperationAnnotator operationAnnotator;
   private final BigQuery bigQuery;
+  /**
+   * The default Google project id for this bigquery cow. The default project id can be omitted from
+   * arguments on {@link BigQuery} methods.
+   */
+  private final String defaultProjectId;
+
   private final ClientConfig clientConfig;
 
   public BigQueryCow(ClientConfig clientConfig, BigQueryOptions bigQueryOptions) {
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.bigQuery = bigQueryOptions.getService();
+    this.defaultProjectId = bigQueryOptions.getProjectId();
+    Preconditions.checkNotNull(this.defaultProjectId);
     this.clientConfig = clientConfig;
   }
 
   /** See {@link BigQuery#create(DatasetInfo, DatasetOption...)}. */
   public DatasetCow create(DatasetInfo datasetInfo, DatasetOption... datasetOptions) {
+    GoogleBigQueryDatasetUid datasetUid =
+        new GoogleBigQueryDatasetUid()
+            .projectId(
+                datasetInfo.getDatasetId().getProject() == null
+                    ? defaultProjectId
+                    : datasetInfo.getDatasetId().getProject())
+            .datasetId(datasetInfo.getDatasetId().getDataset());
+    CleanupRecorder.record(datasetUid, clientConfig.getCleanupConfig());
+
     return new DatasetCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
@@ -69,6 +90,14 @@ public class BigQueryCow {
 
   /** See {@link BigQuery#create(TableInfo, TableOption...)}. */
   public TableCow create(TableInfo tableInfo, TableOption... tableOptions) {
+    TableId tableId = tableInfo.getTableId();
+    GoogleBigQueryTableUid tableUid =
+        new GoogleBigQueryTableUid()
+            .projectId(tableId.getProject() == null ? defaultProjectId : tableId.getProject())
+            .datasetId(tableId.getDataset())
+            .tableId(tableId.getTable());
+    CleanupRecorder.record(tableUid, clientConfig.getCleanupConfig());
+
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
@@ -109,6 +138,7 @@ public class BigQueryCow {
   public TableCow getTable(String datasetId, String tableId, TableOption... tableOptions) {
     return getTable(TableId.of(datasetId, tableId), tableOptions);
   }
+
   /** See {@link BigQuery#listTables(DatasetId, TableListOption...)}. */
   public Page<TableCow> listTables(DatasetId datasetId, TableListOption... tableListOptions) {
     return new TransformPage<>(
