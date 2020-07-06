@@ -1,5 +1,5 @@
 dependencies {
+    implementation project(':cloud-resource-schema')
     implementation project(':common')
-
     api 'com.google.cloud:google-cloud-bigquery:1.116.0'
 }
