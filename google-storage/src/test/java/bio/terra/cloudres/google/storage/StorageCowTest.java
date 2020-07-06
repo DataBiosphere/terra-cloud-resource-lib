@@ -47,6 +47,7 @@ public class StorageCowTest {
 
   @Test
   public void createGetDeleteBucket() {
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     String bucketName = IntegrationUtils.randomName();
     assertNull(storageCow.get(bucketName));
 
@@ -54,20 +55,10 @@ public class StorageCowTest {
     assertEquals(bucketName, createdBucket.getBucketInfo().getName());
 
     assertEquals(bucketName, storageCow.get(bucketName).getBucketInfo().getName());
+    assertThat(record, Matchers.contains(new GoogleBucketUid().bucketName(bucketName)));
 
     assertTrue(storageCow.delete(bucketName));
     assertNull(storageCow.get(bucketName));
-  }
-
-  @Test
-  public void createBucketRecorded() {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-    String bucketName = IntegrationUtils.randomName();
-    storageCow.create(BucketInfo.of(bucketName));
-
-    assertThat(record, Matchers.contains(new GoogleBucketUid().bucketName(bucketName)));
-
-    storageCow.delete(bucketName);
   }
 
   @Test
@@ -76,28 +67,18 @@ public class StorageCowTest {
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     assertNull(storageCow.get(blobId));
 
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     BlobCow createdBlob = storageCow.create(BlobInfo.newBuilder(blobId).build());
     assertEquals(blobId.getName(), createdBlob.getBlobInfo().getName());
 
     assertEquals(blobId.getName(), storageCow.get(blobId).getBlobInfo().getName());
-
-    assertTrue(storageCow.delete(blobId));
-    assertNull(storageCow.get(blobId));
-  }
-
-  @Test
-  public void createBlobRecorded() {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-    BlobId blobId =
-        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
-    BlobCow createdBlob = storageCow.create(BlobInfo.newBuilder(blobId).build());
-
     assertThat(
         record,
         Matchers.contains(
             new GoogleBlobUid().bucketName(blobId.getBucket()).blobName(blobId.getName())));
 
-    storageCow.delete(createdBlob.getBlobInfo().getBlobId());
+    assertTrue(storageCow.delete(blobId));
+    assertNull(storageCow.get(blobId));
   }
 
   @Test
@@ -120,6 +101,7 @@ public class StorageCowTest {
 
   @Test
   public void blobWriter() throws Exception {
+    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     assertNull(storageCow.get(blobId));
@@ -130,22 +112,11 @@ public class StorageCowTest {
     }
     BlobCow blob = storageCow.get(blobId);
     assertEquals(contents, StorageIntegrationUtils.readContents(blob));
-    assertTrue(storageCow.delete(blobId));
-  }
-
-  @Test
-  public void blobWriterRecorded() throws Exception {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-    BlobId blobId =
-        BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
-    storageCow.writer(BlobInfo.newBuilder(blobId).build()).close();
-
     assertThat(
         record,
         Matchers.contains(
             new GoogleBlobUid().blobName(blobId.getName()).bucketName(blobId.getBucket())));
-
-    storageCow.delete(blobId);
+    assertTrue(storageCow.delete(blobId));
   }
 
   /** Helper assert that compares an {@link Acl}'s entity and role, but ignores the etag and id. */
