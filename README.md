@@ -75,3 +75,4 @@ use. To add a new CRL package to support a new client library:
 TODO add instructions/considerations for adding a new Cloud Object Wrapper or cloud resource.
 
 # Quickstart
+CRL package and release 
