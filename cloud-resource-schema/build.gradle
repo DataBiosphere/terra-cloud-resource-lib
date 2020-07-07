@@ -9,7 +9,7 @@ dependencies {
     api 'io.swagger:swagger-annotations:1.6.0'
 }
 
-def openapiSourceFile = "$projectDir/resources/cloud_resources_uid.yaml"
+def openapiSourceFile = "$projectDir/src/main/resources/cloud_resources_uid.yaml"
 def openapiTargetFolder = "$buildDir/generated/openapi".toString()
 
 openApiGenerate {
