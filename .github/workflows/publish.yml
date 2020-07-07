@@ -47,8 +47,6 @@ jobs:
           echo ::add-mask::$ARTIFACTORY_PASSWORD
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Generate Cloud Resource Schema using openapi generator
-        run: ./gradlew openApiGenerator java
       - name: Publish packages
         run: ./gradlew artifactoryPublish
         env:

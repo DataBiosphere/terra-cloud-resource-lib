@@ -78,24 +78,14 @@ TODO add instructions/considerations for adding a new Cloud Object Wrapper or cl
 
 # Quickstart
 Cloud API client libraries are wrapped in separate CRL packages. A new version will be available along with CRL [release](.github/workflows/publish.yml).
-### google-bigquery
-Wraps [Google Cloud BigQuery API](https://cloud.google.com/bigquery/docs/apis).
+The current available packages are:  
+#### google-bigquery
+Wraps [Google Cloud BigQuery API](https://cloud.google.com/bigquery/docs/apis).  
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-bigquery).
+#### google-storage
+Wraps [Google Cloud Storage API](https://cloud.google.com/storage/docs/apis).  
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-storage).
 
-Gradle:
-```
-implementation(group: 'bio.terra.cloud-resource-lib', name: 'google-storage', version: '0.0.0-SNAPSHOT')
-```
-### google-storage
-Wraps [Google Cloud Storage API](https://cloud.google.com/storage/docs/apis).
-
-Gradle:
-```
-implementation(group: 'bio.terra.cloud-resource-lib', name: 'google-bigquery', version: '0.0.0-SNAPSHOT')
-```
-### cloud-resource-schema
-The general schema for how cloud resources are presented in CRL. 
-
-Gradle:
-```
-implementation(group: 'bio.terra.cloud-resource-lib', name: 'cloud-resource-schema', version: '0.0.0-SNAPSHOT')
-```
+#### cloud-resource-schema
+The general schema for how cloud resources are presented in CRL.   
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/cloud-resource-schema).
