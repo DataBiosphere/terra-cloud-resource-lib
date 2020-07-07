@@ -75,4 +75,22 @@ use. To add a new CRL package to support a new client library:
 TODO add instructions/considerations for adding a new Cloud Object Wrapper or cloud resource.
 
 # Quickstart
-CRL package and release 
+Cloud API client libraries are wrapped in separate CRL packages. A new version will be available along with CRL release.
+### google-bigquery
+Wraps [Google Cloud BigQuery API](https://cloud.google.com/bigquery/docs/apis).
+To use this in Gradle:
+```
+implementation(group: 'bio.terra.cloud-resource-lib', name: 'google-storage', version: '0.0.0-SNAPSHOT')
+```
+### google-storage
+Wraps [Google Cloud Storage API](https://cloud.google.com/storage/docs/apis).
+To use this in Gradle:
+```
+implementation(group: 'bio.terra.cloud-resource-lib', name: 'google-bigquery', version: '0.0.0-SNAPSHOT')
+```
+### cloud-resource-schema
+The general schema for how cloud resources are presented in CRL world. 
+To use this in Gradle:
+```
+implementation(group: 'bio.terra.cloud-resource-lib', name: 'cloud-resource-schema', version: '0.0.0-SNAPSHOT')
+```
