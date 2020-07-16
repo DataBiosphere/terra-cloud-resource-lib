@@ -55,7 +55,10 @@ public class StorageCowTest {
     assertEquals(bucketName, createdBucket.getBucketInfo().getName());
 
     assertEquals(bucketName, storageCow.get(bucketName).getBucketInfo().getName());
-    assertThat(record, Matchers.contains(new GoogleBucketUid().bucketName(bucketName)));
+    assertThat(
+        record,
+        Matchers.contains(
+            new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName(bucketName))));
 
     assertTrue(storageCow.delete(bucketName));
     assertNull(storageCow.get(bucketName));
@@ -75,7 +78,11 @@ public class StorageCowTest {
     assertThat(
         record,
         Matchers.contains(
-            new GoogleBlobUid().bucketName(blobId.getBucket()).blobName(blobId.getName())));
+            new CloudResourceUid()
+                .googleBlobUid(
+                    new GoogleBlobUid()
+                        .bucketName(blobId.getBucket())
+                        .blobName(blobId.getName()))));
 
     assertTrue(storageCow.delete(blobId));
     assertNull(storageCow.get(blobId));
@@ -115,7 +122,11 @@ public class StorageCowTest {
     assertThat(
         record,
         Matchers.contains(
-            new GoogleBlobUid().blobName(blobId.getName()).bucketName(blobId.getBucket())));
+            new CloudResourceUid()
+                .googleBlobUid(
+                    new GoogleBlobUid()
+                        .blobName(blobId.getName())
+                        .bucketName(blobId.getBucket()))));
     assertTrue(storageCow.delete(blobId));
   }
 

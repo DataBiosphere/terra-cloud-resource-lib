@@ -73,10 +73,12 @@ public class DatasetCowTest {
     assertThat(
         record,
         Matchers.contains(
-            new GoogleBigQueryTableUid()
-                .projectId(datasetCow.getDatasetInfo().getDatasetId().getProject())
-                .datasetId(tableId.getDataset())
-                .tableId(tableId.getTable())));
+            new CloudResourceUid()
+                .googleBigQueryTableUid(
+                    new GoogleBigQueryTableUid()
+                        .projectId(datasetCow.getDatasetInfo().getDatasetId().getProject())
+                        .datasetId(tableId.getDataset())
+                        .tableId(tableId.getTable()))));
 
     bigQueryCow.delete(tableId);
   }
