@@ -19,7 +19,7 @@ public class CloudResourceUidTest {
    * Asserts that serializing->deserializing a {@link CloudResourceUid} yields an "equals" instance.
    */
   public void assertSerializationIdempotency(CloudResourceUid resource, Class<?> resourceClass)
-      throws JsonProcessingException {
+          throws JsonProcessingException {
     String serialized = objectMapper.writeValueAsString(resource);
     CloudResourceUid deserialized = objectMapper.readValue(serialized, resource.getClass());
     // Asserts that serializing->deserializing a {@link CloudResourceUid} yields an "equals"
@@ -32,9 +32,9 @@ public class CloudResourceUidTest {
   @Test
   public void googleBigQueryDataset() throws Exception {
     CloudResourceUid dataset =
-        new CloudResourceUid()
-            .googleBigQueryDatasetUid(
-                new GoogleBigQueryDatasetUid().projectId("my-project").datasetId("my-dataset"));
+            new CloudResourceUid()
+                    .googleBigQueryDatasetUid(
+                            new GoogleBigQueryDatasetUid().projectId("my-project").datasetId("my-dataset"));
 
     assertSerializationIdempotency(dataset, CloudResourceUid.class);
   }
