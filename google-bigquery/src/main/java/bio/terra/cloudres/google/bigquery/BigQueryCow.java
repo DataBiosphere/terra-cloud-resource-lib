@@ -7,6 +7,7 @@ import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.TransformPage;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.CloudResourceUid;
 import bio.terra.cloudres.resources.GoogleBigQueryDatasetUid;
 import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import com.google.api.gax.paging.Page;
@@ -43,13 +44,15 @@ public class BigQueryCow {
 
   /** See {@link BigQuery#create(DatasetInfo, DatasetOption...)}. */
   public DatasetCow create(DatasetInfo datasetInfo, DatasetOption... datasetOptions) {
-    GoogleBigQueryDatasetUid datasetUid =
-        new GoogleBigQueryDatasetUid()
-            .projectId(
-                datasetInfo.getDatasetId().getProject() == null
-                    ? defaultProjectId
-                    : datasetInfo.getDatasetId().getProject())
-            .datasetId(datasetInfo.getDatasetId().getDataset());
+    CloudResourceUid datasetUid =
+        new CloudResourceUid()
+            .googleBigQueryDatasetUid(
+                new GoogleBigQueryDatasetUid()
+                    .projectId(
+                        datasetInfo.getDatasetId().getProject() == null
+                            ? defaultProjectId
+                            : datasetInfo.getDatasetId().getProject())
+                    .datasetId(datasetInfo.getDatasetId().getDataset()));
     CleanupRecorder.record(datasetUid, clientConfig.getCleanupConfig());
 
     return new DatasetCow(
@@ -91,11 +94,14 @@ public class BigQueryCow {
   /** See {@link BigQuery#create(TableInfo, TableOption...)}. */
   public TableCow create(TableInfo tableInfo, TableOption... tableOptions) {
     TableId tableId = tableInfo.getTableId();
-    GoogleBigQueryTableUid tableUid =
-        new GoogleBigQueryTableUid()
-            .projectId(tableId.getProject() == null ? defaultProjectId : tableId.getProject())
-            .datasetId(tableId.getDataset())
-            .tableId(tableId.getTable());
+    CloudResourceUid tableUid =
+        new CloudResourceUid()
+            .googleBigQueryTableUid(
+                new GoogleBigQueryTableUid()
+                    .projectId(
+                        tableId.getProject() == null ? defaultProjectId : tableId.getProject())
+                    .datasetId(tableId.getDataset())
+                    .tableId(tableId.getTable()));
     CleanupRecorder.record(tableUid, clientConfig.getCleanupConfig());
 
     return new TableCow(

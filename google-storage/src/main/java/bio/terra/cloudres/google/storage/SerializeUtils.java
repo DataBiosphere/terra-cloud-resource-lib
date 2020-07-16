@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.storage;
 
+import bio.terra.cloudres.resources.CloudResourceUid;
 import bio.terra.cloudres.resources.GoogleBlobUid;
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;
@@ -13,8 +14,10 @@ import java.lang.reflect.Type;
 class SerializeUtils {
   private SerializeUtils() {}
 
-  static GoogleBlobUid create(BlobId blobId) {
-    return new GoogleBlobUid().blobName(blobId.getName()).bucketName(blobId.getBucket());
+  static CloudResourceUid create(BlobId blobId) {
+    return new CloudResourceUid()
+        .googleBlobUid(
+            new GoogleBlobUid().blobName(blobId.getName()).bucketName(blobId.getBucket()));
   }
 
   static JsonObject convert(Acl acl) {

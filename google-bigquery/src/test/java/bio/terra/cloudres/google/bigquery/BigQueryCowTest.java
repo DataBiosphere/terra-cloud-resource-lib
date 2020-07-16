@@ -62,9 +62,11 @@ public class BigQueryCowTest {
     assertThat(
         record,
         Matchers.contains(
-            new GoogleBigQueryDatasetUid()
-                .projectId(datasetId.getProject())
-                .datasetId(datasetId.getDataset())));
+            new CloudResourceUid()
+                .googleBigQueryDatasetUid(
+                    new GoogleBigQueryDatasetUid()
+                        .projectId(datasetId.getProject())
+                        .datasetId(datasetId.getDataset()))));
   }
 
   @Test
@@ -111,10 +113,12 @@ public class BigQueryCowTest {
     assertThat(
         record,
         Matchers.contains(
-            new GoogleBigQueryTableUid()
-                .projectId(tableId.getProject())
-                .datasetId(tableId.getDataset())
-                .tableId(tableId.getTable())));
+            new CloudResourceUid()
+                .googleBigQueryTableUid(
+                    new GoogleBigQueryTableUid()
+                        .projectId(tableId.getProject())
+                        .datasetId(tableId.getDataset())
+                        .tableId(tableId.getTable()))));
   }
 
   @Test

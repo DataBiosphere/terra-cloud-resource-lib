@@ -82,9 +82,11 @@ public class BlobCowTest {
     assertThat(
         record,
         Matchers.contains(
-            new GoogleBlobUid()
-                .blobName(targetBlobId.getName())
-                .bucketName(targetBlobId.getBucket())));
+            new CloudResourceUid()
+                .googleBlobUid(
+                    new GoogleBlobUid()
+                        .blobName(targetBlobId.getName())
+                        .bucketName(targetBlobId.getBucket()))));
 
     assertTrue(source.delete());
     assertTrue(target.delete());

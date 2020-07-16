@@ -3,7 +3,7 @@ info:
   title: Terra Cloud Resource UIDs
   description: |
     Terra Cloud Resources Library definitions of unique identifiers for cloud resources.
-  version: 0.0.1
+  version: 0.0.2
 
 # This file defines component models to be reused, not a service path.
 paths: {}
@@ -13,13 +13,9 @@ components:
     GoogleBigQueryDatasetUid:
       type: object
       required:
-        - resourceType
         - projectId
         - datasetId
       properties:
-        resourceType:
-          type: string
-          default: googleBigQueryDatasetUid
         projectId:
           type: string
         datasetId:
@@ -27,14 +23,10 @@ components:
     GoogleBigQueryTableUid:
       type: object
       required:
-        - resourceType
         - projectId
         - datasetId
         - tableId
       properties:
-        resourceType:
-          type: string
-          default: googleBigQueryTableUid
         projectId:
           type: string
         datasetId:
@@ -44,13 +36,9 @@ components:
     GoogleBlobUid:
       type: object
       required:
-        - resourceType
         - bucketName
         - blobName
       properties:
-        resourceType:
-          type: string
-          default: googleBlobUid
         bucketName:
           type: string
         blobName:
@@ -58,40 +46,31 @@ components:
     GoogleBucketUid:
       type: object
       required:
-        - resourceType
         - bucketName
       properties:
-        resourceType:
-          type: string
-          default: googleBucketUid
         bucketName:
           type: string
     GoogleProjectUid:
       type: object
       required:
-        - resourceType
         - projectId
       properties:
-        resourceType:
-          type: string
-          default: googleProjectUid
         projectId:
           type: string
+    # A cloud resource unique identifier. Each CloudResourceUid represents exactly one cloud resource.
+    # We are not doing polymorphism at this moment because of lack of support in swagger-codegen or openApiGenerator
+    # Now CloudResourceUid contains all possible cloud resource types, and we will assume there is only one being set
+    # when using this.
     CloudResourceUid:
-      oneOf:
-      - $ref: '#/components/schemas/GoogleBigQueryDatasetUid'
-      - $ref: '#/components/schemas/GoogleBigQueryTableUid'
-      - $ref: '#/components/schemas/GoogleBlobUid'
-      - $ref: '#/components/schemas/GoogleBucketUid'
-      - $ref: '#/components/schemas/GoogleProjectUid'
-      discriminator:
-        # Use the resourceType property to figure out which schema is represented by the CloudResourceUid.
-        propertyName: resourceType
-        mapping:
-          # Mapping should match the default resourceType values. Default resourceType values allow created Java objects
-          # to have the same value as created -> serialized -> deserialized values.
-          googleBigQueryDatasetUid: '#/components/schemas/GoogleBigQueryDatasetUid'
-          googleBigQueryTableUid: '#/components/schemas/GoogleBigQueryTableUid'
-          googleBlobUid: '#/components/schemas/GoogleBlobUid'
-          googleBucketUid: '#/components/schemas/GoogleBucketUid'
-          googleProjectUid: '#/components/schemas/GoogleProjectUid'
+      type: object
+      properties:
+        googleProjectUid:
+          $ref: '#/components/schemas/GoogleProjectUid'
+        googleBigQueryDatasetUid:
+          $ref: '#/components/schemas/GoogleBigQueryDatasetUid'
+        googleBigQueryTableUid:
+          $ref: '#/components/schemas/GoogleBigQueryTableUid'
+        googleBlobUid:
+          $ref: '#/components/schemas/GoogleBlobUid'
+        googleBucketUid:
+          $ref: '#/components/schemas/GoogleBucketUid'

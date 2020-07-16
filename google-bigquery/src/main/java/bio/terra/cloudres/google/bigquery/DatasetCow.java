@@ -6,6 +6,7 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.cloudres.resources.CloudResourceUid;
 import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.bigquery.BigQuery.TableOption;
@@ -63,10 +64,12 @@ public class DatasetCow {
       String tableId, TableDefinition tableDefinition, TableOption... tableOptions) {
     DatasetId datasetId = dataset.getDatasetId();
     CleanupRecorder.record(
-        new GoogleBigQueryTableUid()
-            .projectId(datasetId.getProject())
-            .datasetId(datasetId.getDataset())
-            .tableId(tableId),
+        new CloudResourceUid()
+            .googleBigQueryTableUid(
+                new GoogleBigQueryTableUid()
+                    .projectId(datasetId.getProject())
+                    .datasetId(datasetId.getDataset())
+                    .tableId(tableId)),
         clientConfig.getCleanupConfig());
 
     return new TableCow(
