@@ -57,8 +57,9 @@ components:
       properties:
         projectId:
           type: string
+    # A cloud resource unique identifier. Each CloudResourceUid represents exactly one cloud resource.
     # We are not doing polymorphism at this moment because of lack of support in swagger-codegen or openApiGenerator
-    # Now CloudResourceUid contains all possible cloud resource types, and we will validate there is only one being set
+    # Now CloudResourceUid contains all possible cloud resource types, and we will assume there is only one being set
     # when using this.
     CloudResourceUid:
       type: object
