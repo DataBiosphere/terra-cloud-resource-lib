@@ -19,9 +19,12 @@ public class CleanupRecorderTest {
           .setTimeToLive(Duration.ofMinutes(1))
           .build();
 
-  private static final CloudResourceUid RESOURCE_1 = new GoogleBucketUid().bucketName("1");
-  private static final CloudResourceUid RESOURCE_2 = new GoogleBucketUid().bucketName("2");
-  private static final CloudResourceUid RESOURCE_3 = new GoogleBucketUid().bucketName("3");
+  private static final CloudResourceUid RESOURCE_1 =
+      new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName("1"));
+  private static final CloudResourceUid RESOURCE_2 =
+      new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName("2"));
+  private static final CloudResourceUid RESOURCE_3 =
+      new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName("3"));
 
   @Test
   public void recordsForTestingOnlyAfterStart() {

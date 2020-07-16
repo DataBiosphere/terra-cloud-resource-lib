@@ -31,36 +31,11 @@ public class CloudResourceUidTest {
 
   @Test
   public void googleBigQueryDataset() throws Exception {
-    GoogleBigQueryDatasetUid dataset =
-        new GoogleBigQueryDatasetUid().projectId("my-project").datasetId("my-dataset");
-    assertSerializationIdempotency(dataset, GoogleBigQueryDatasetUid.class);
-  }
+    CloudResourceUid dataset =
+        new CloudResourceUid()
+            .googleBigQueryDatasetUid(
+                new GoogleBigQueryDatasetUid().projectId("my-project").datasetId("my-dataset"));
 
-  @Test
-  public void googleBigQueryTable() throws Exception {
-    GoogleBigQueryTableUid table =
-        new GoogleBigQueryTableUid()
-            .projectId("my-project")
-            .datasetId("my-dataset")
-            .tableId("my-table");
-    assertSerializationIdempotency(table, GoogleBigQueryTableUid.class);
-  }
-
-  @Test
-  public void googleBlob() throws Exception {
-    GoogleBlobUid blob = new GoogleBlobUid().bucketName("my-bucket").blobName("my-blob");
-    assertSerializationIdempotency(blob, GoogleBlobUid.class);
-  }
-
-  @Test
-  public void googleBucket() throws Exception {
-    GoogleBucketUid bucket = new GoogleBucketUid().bucketName("my-bucket");
-    assertSerializationIdempotency(bucket, GoogleBucketUid.class);
-  }
-
-  @Test
-  public void googleProject() throws Exception {
-    GoogleProjectUid project = new GoogleProjectUid().projectId("my-project");
-    assertSerializationIdempotency(project, GoogleProjectUid.class);
+    assertSerializationIdempotency(dataset, CloudResourceUid.class);
   }
 }
