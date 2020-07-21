@@ -2,14 +2,14 @@ package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.TransformPage;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.cloudres.resources.CloudResourceUid;
-import bio.terra.cloudres.resources.GoogleBigQueryDatasetUid;
-import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
+import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.bigquery.BigQuery.DatasetDeleteOption;
@@ -26,6 +26,8 @@ public class BigQueryCow {
 
   private final OperationAnnotator operationAnnotator;
   private final BigQuery bigQuery;
+  private final CleanupRecorder recorder;
+
   /**
    * The default Google project id for this bigquery cow. The default project id can be omitted from
    * arguments on {@link BigQuery} methods.
@@ -40,6 +42,7 @@ public class BigQueryCow {
     this.defaultProjectId = bigQueryOptions.getProjectId();
     Preconditions.checkNotNull(this.defaultProjectId);
     this.clientConfig = clientConfig;
+    this.recorder = new CleanupRecorder(clientConfig);
   }
 
   /** See {@link BigQuery#create(DatasetInfo, DatasetOption...)}. */
@@ -53,7 +56,7 @@ public class BigQueryCow {
                             ? defaultProjectId
                             : datasetInfo.getDatasetId().getProject())
                     .datasetId(datasetInfo.getDatasetId().getDataset()));
-    CleanupRecorder.record(datasetUid, clientConfig.getCleanupConfig());
+    recorder.record(datasetUid);
 
     return new DatasetCow(
         clientConfig,
@@ -102,7 +105,7 @@ public class BigQueryCow {
                         tableId.getProject() == null ? defaultProjectId : tableId.getProject())
                     .datasetId(tableId.getDataset())
                     .tableId(tableId.getTable()));
-    CleanupRecorder.record(tableUid, clientConfig.getCleanupConfig());
+    recorder.record(tableUid);
 
     return new TableCow(
         clientConfig,

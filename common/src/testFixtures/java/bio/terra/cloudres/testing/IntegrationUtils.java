@@ -16,6 +16,8 @@ public class IntegrationUtils {
       CleanupConfig.builder()
           .setTimeToLive(Duration.ofHours(2))
           .setCleanupId("crl-integration")
+              .setAccessToken("access-token")
+              .setJanitorBasePath("localhost:8089")
           .build();
 
   public static final ClientConfig DEFAULT_CLIENT_CONFIG =

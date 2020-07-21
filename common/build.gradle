@@ -7,4 +7,5 @@ dependencies {
     implementation 'io.opencensus:opencensus-impl:0.26.0'
 
     testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+    testImplementation "com.github.tomakehurst:wiremock-jre8:2.27.0"
 }

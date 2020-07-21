@@ -2,7 +2,7 @@ package bio.terra.clouders.resources;
 
 import static org.junit.Assert.assertEquals;
 
-import bio.terra.cloudres.resources.*;
+import bio.terra.janitor.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
