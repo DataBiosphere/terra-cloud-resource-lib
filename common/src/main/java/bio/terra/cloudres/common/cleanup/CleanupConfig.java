@@ -2,7 +2,6 @@ package bio.terra.cloudres.common.cleanup;
 
 import com.google.auto.value.AutoValue;
 
-import java.net.URL;
 import java.time.Duration;
 
 /**

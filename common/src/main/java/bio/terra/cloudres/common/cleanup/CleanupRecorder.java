@@ -1,8 +1,6 @@
 package bio.terra.cloudres.common.cleanup;
 
-import bio.terra.cloudres.JanitorService;
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.janitor.controller.JanitorApi;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
 import com.google.common.annotations.VisibleForTesting;
@@ -12,12 +10,12 @@ import java.util.List;
 
 /** An interface for recording created cloud resources for cleanup. */
 public class CleanupRecorder {
-  private final JanitorService janitorService;
+  private final BackedUpJanitorServiceImpl janitorService;
   private final ClientConfig clientConfig;
 
   public CleanupRecorder(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
-    janitorService = clientConfig.getCleanupConfig().isPresent() ? new JanitorService(clientConfig.getCleanupConfig().get().accessToken(), clientConfig.getCleanupConfig().get().janitorBasePath()) : null;
+    janitorService = clientConfig.getCleanupConfig().isPresent() ? new BackedUpJanitorServiceImpl(clientConfig.getCleanupConfig().get().accessToken(), clientConfig.getCleanupConfig().get().janitorBasePath()) : null;
   }
 
   private static TestRecord testRecord = new TestRecord();
@@ -43,6 +41,8 @@ public class CleanupRecorder {
   private void createJanitorResource(CloudResourceUid resource) {
     CleanupConfig cleanupConfig = clientConfig.getCleanupConfig().get();
     CreateResourceRequestBody body = new CreateResourceRequestBody().resourceUid(resource).timeToLiveInMinutes((int)cleanupConfig.timeToLive().toMinutes()).putLabelsItem("client", clientConfig.getClientName()).putLabelsItem("cleanupId", cleanupConfig.cleanupId());
+    System.out.println("~~~~~~~~~!!!!!!");
+    System.out.println(body);
     janitorService.createTrackedResource(body);
 
   }

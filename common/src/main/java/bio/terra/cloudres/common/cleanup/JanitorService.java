@@ -1,13 +1,11 @@
-package bio.terra.cloudres;
+package bio.terra.cloudres.common.cleanup;
 
+import bio.terra.janitor.ApiClient;
 import bio.terra.janitor.ApiException;
 import bio.terra.janitor.controller.JanitorApi;
-import bio.terra.janitor.ApiClient;
 import bio.terra.janitor.model.CreateResourceRequestBody;
 
-import java.net.URL;
-
-/** Janitor Service Interface */
+/** An interface for Janitor service for cleanup resources in test. */
 public class JanitorService {
     private final JanitorApi janitorApi;
 
