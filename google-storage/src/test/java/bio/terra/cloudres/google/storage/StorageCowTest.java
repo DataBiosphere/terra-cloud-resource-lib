@@ -4,10 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.cloudres.resources.CloudResourceUid;
-import bio.terra.cloudres.resources.GoogleBlobUid;
-import bio.terra.cloudres.resources.GoogleBucketUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBlobUid;
+import bio.terra.janitor.model.GoogleBucketUid;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;

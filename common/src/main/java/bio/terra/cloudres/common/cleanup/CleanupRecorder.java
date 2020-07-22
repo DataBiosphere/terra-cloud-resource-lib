@@ -1,6 +1,6 @@
 package bio.terra.cloudres.common.cleanup;
 
-import bio.terra.cloudres.resources.CloudResourceUid;
+import bio.terra.janitor.model.CloudResourceUid;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;

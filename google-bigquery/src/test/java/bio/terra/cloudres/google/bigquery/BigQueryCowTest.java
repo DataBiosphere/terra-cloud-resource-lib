@@ -5,10 +5,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.cloudres.resources.CloudResourceUid;
-import bio.terra.cloudres.resources.GoogleBigQueryDatasetUid;
-import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
+import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

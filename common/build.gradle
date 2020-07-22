@@ -1,10 +1,9 @@
 dependencies {
-    implementation project(':cloud-resource-schema')
-
     implementation "com.google.auto.value:auto-value-annotations:1.7.3"
     annotationProcessor "com.google.auto.value:auto-value:1.7.3"
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
 
     testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+    testFixturesImplementation "bio.terra.janitor:terra-resource-janitor-client:0.0.1-SNAPSHOT"
 }
