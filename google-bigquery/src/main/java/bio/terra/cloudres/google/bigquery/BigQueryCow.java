@@ -2,13 +2,13 @@ package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
-import bio.terra.janitor.model.CloudResourceUid;
-import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.TransformPage;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
 import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.*;

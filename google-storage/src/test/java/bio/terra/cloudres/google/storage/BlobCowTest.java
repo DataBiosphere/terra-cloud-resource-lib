@@ -5,9 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-
 import bio.terra.cloudres.testing.IntegrationUtils;
+import bio.terra.cloudres.testing.MockJanitorService;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
 import com.google.cloud.WriteChannel;
@@ -18,16 +17,11 @@ import com.google.cloud.storage.CopyWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 @Tag("integration")
 public class BlobCowTest {
-
   private final StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
   /**
    * A bucket to be re-used between tests that need a bucket but do not care about the bucket
@@ -35,11 +29,17 @@ public class BlobCowTest {
    */
   private static BucketCow reusableBucket;
 
+  private MockJanitorService mockJanitorService;
+
   @BeforeAll
   public static void createReusableBucket() {
+    // Bring up a mock service.
+    MockJanitorService beforeAllMockService = new MockJanitorService();
+    beforeAllMockService.setup();
     reusableBucket =
         StorageIntegrationUtils.defaultStorageCow()
             .create(BucketInfo.of(IntegrationUtils.randomName()));
+    beforeAllMockService.stop();
   }
 
   @AfterAll
@@ -47,6 +47,17 @@ public class BlobCowTest {
     // This only succeeds if the reusableBucket is empty. If it's not empty, something about the
     // tests has failed.
     reusableBucket.delete();
+  }
+
+  @BeforeEach
+  public void setUp() {
+    mockJanitorService = new MockJanitorService();
+    mockJanitorService.setup();
+  }
+
+  @AfterEach
+  public void tearDown() {
+    mockJanitorService.stop();
   }
 
   @Test
@@ -73,7 +84,6 @@ public class BlobCowTest {
     BlobCow source = createBlobWithContents(sourceBlobId, contents);
     assertEquals(contents, StorageIntegrationUtils.readContents(source));
 
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     assertNull(storageCow.get(targetBlobId));
     CopyWriter copyWriter = source.copyTo(targetBlobId);
     copyWriter.getResult();
@@ -81,7 +91,7 @@ public class BlobCowTest {
 
     assertEquals(contents, StorageIntegrationUtils.readContents(target));
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid()
                 .googleBlobUid(

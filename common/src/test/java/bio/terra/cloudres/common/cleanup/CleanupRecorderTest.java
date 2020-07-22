@@ -1,24 +1,27 @@
 package bio.terra.cloudres.common.cleanup;
 
+import static bio.terra.cloudres.testing.MockJanitorService.SERVICE_BASE_PATH;
+import static bio.terra.cloudres.testing.MockJanitorService.getDefaultAccessToken;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import bio.terra.cloudres.common.ClientConfig;
+import bio.terra.cloudres.testing.MockJanitorService;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBucketUid;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.time.Duration;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.util.List;
-
-import static bio.terra.cloudres.testing.MockJanitorService.SERVICE_BASE_PATH;
-import static bio.terra.cloudres.testing.MockJanitorService.getDefaultAccessToken;
-
 @Tag("unit")
 public class CleanupRecorderTest {
-  private static final ClientConfig CLIENT_CONFIG = ClientConfig.Builder.newBuilder()
-                .setClient("clientName")
-          .setCleanupConfig(CleanupConfig.builder()
+  private static final ClientConfig CLIENT_CONFIG =
+      ClientConfig.Builder.newBuilder()
+          .setClient("clientName")
+          .setCleanupConfig(
+              CleanupConfig.builder()
                   .setCleanupId("CleanupRecorderTest")
                   .setTimeToLive(Duration.ofMinutes(1))
                   .setAccessToken(getDefaultAccessToken())
@@ -36,50 +39,35 @@ public class CleanupRecorderTest {
   private CleanupRecorder recorder = new CleanupRecorder(CLIENT_CONFIG);
   private MockJanitorService mockJanitorService;
 
-  @BeforeClass
+  @BeforeEach
   public void setUp() {
     mockJanitorService = new MockJanitorService();
     mockJanitorService.setup();
   }
 
-  @AfterClass
+  @AfterEach
   public void tearDown() {
     mockJanitorService.stop();
   }
 
   @Test
-  public void recordsForTestingOnlyAfterStart() throws Exception{
-    mockJanitorService = new MockJanitorService();
-    mockJanitorService.setup();
-
+  public void recordsAll() throws Exception {
     recorder.record(RESOURCE_1);
-    mockJanitorService.assertCreateRequestMatch(RESOURCE_1, CLIENT_CONFIG);
-
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     recorder.record(RESOURCE_2);
     recorder.record(RESOURCE_3);
 
-
-    //assertThat(record, Matchers.contains(RESOURCE_2, RESOURCE_3));
+    assertThat(
+        mockJanitorService.getRecordedResources(),
+        Matchers.contains(RESOURCE_1, RESOURCE_2, RESOURCE_3));
   }
 
-//  @Test
-//  public void recordsForTestingOnlyWithCleanupConfig() {
-//    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-//    CleanupRecorder.record(RESOURCE_1, Optional.of(CLEANUP_CONFIG));
-//    CleanupRecorder.record(RESOURCE_2, Optional.empty());
-//
-//    assertThat(record, Matchers.contains(RESOURCE_1));
-//  }
-//
-//  @Test
-//  public void recordsForTestingAreDistinct() {
-//    List<CloudResourceUid> record1 = CleanupRecorder.startNewRecordForTesting();
-//    CleanupRecorder.record(RESOURCE_1, Optional.of(CLEANUP_CONFIG));
-//    List<CloudResourceUid> record2 = CleanupRecorder.startNewRecordForTesting();
-//    CleanupRecorder.record(RESOURCE_2, Optional.of(CLEANUP_CONFIG));
-//
-//    assertThat(record1, Matchers.contains(RESOURCE_1));
-//    assertThat(record2, Matchers.contains(RESOURCE_2));
-//  }
+  @Test
+  public void recordsOnlyWithCleanupConfig() throws Exception {
+    CleanupRecorder noopRecorder =
+        new CleanupRecorder(ClientConfig.Builder.newBuilder().setClient("123").build());
+    recorder.record(RESOURCE_1);
+    noopRecorder.record(RESOURCE_2);
+
+    assertThat(mockJanitorService.getRecordedResources(), Matchers.contains(RESOURCE_1));
+  }
 }

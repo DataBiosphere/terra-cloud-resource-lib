@@ -1,7 +1,6 @@
 package bio.terra.cloudres.common.cleanup;
 
 import com.google.auto.value.AutoValue;
-
 import java.time.Duration;
 
 /**
@@ -33,7 +32,6 @@ public abstract class CleanupConfig {
   public static Builder builder() {
     return new AutoValue_CleanupConfig.Builder();
   }
-
 
   /** Builder for {@link CleanupConfig}. */
   @AutoValue.Builder

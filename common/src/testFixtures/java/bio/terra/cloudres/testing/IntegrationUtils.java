@@ -16,8 +16,8 @@ public class IntegrationUtils {
       CleanupConfig.builder()
           .setTimeToLive(Duration.ofHours(2))
           .setCleanupId("crl-integration")
-              .setAccessToken("access-token")
-              .setJanitorBasePath("localhost:8089")
+          .setAccessToken(MockJanitorService.getDefaultAccessToken())
+          .setJanitorBasePath(MockJanitorService.SERVICE_BASE_PATH)
           .build();
 
   public static final ClientConfig DEFAULT_CLIENT_CONFIG =

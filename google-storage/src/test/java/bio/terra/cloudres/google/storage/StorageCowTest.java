@@ -3,8 +3,8 @@ package bio.terra.cloudres.google.storage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import bio.terra.cloudres.testing.MockJanitorService;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
 import bio.terra.janitor.model.GoogleBucketUid;
@@ -15,12 +15,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 @Tag("integration")
 public class StorageCowTest {
@@ -31,11 +27,28 @@ public class StorageCowTest {
    */
   private static BucketCow reusableBucket;
 
+  private MockJanitorService mockJanitorService;
+
   @BeforeAll
   public static void createReusableBucket() {
+    // Bring up a mock service.
+    MockJanitorService beforeAllMockService = new MockJanitorService();
+    beforeAllMockService.setup();
     reusableBucket =
         StorageIntegrationUtils.defaultStorageCow()
             .create(BucketInfo.of(IntegrationUtils.randomName()));
+    beforeAllMockService.stop();
+  }
+
+  @BeforeEach
+  public void setUp() {
+    mockJanitorService = new MockJanitorService();
+    mockJanitorService.setup();
+  }
+
+  @AfterEach
+  public void tearDown() {
+    mockJanitorService.stop();
   }
 
   @AfterAll
@@ -46,8 +59,7 @@ public class StorageCowTest {
   }
 
   @Test
-  public void createGetDeleteBucket() {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+  public void createGetDeleteBucket() throws Exception {
     String bucketName = IntegrationUtils.randomName();
     assertNull(storageCow.get(bucketName));
 
@@ -56,7 +68,7 @@ public class StorageCowTest {
 
     assertEquals(bucketName, storageCow.get(bucketName).getBucketInfo().getName());
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName(bucketName))));
 
@@ -65,18 +77,17 @@ public class StorageCowTest {
   }
 
   @Test
-  public void createGetDeleteBlob() {
+  public void createGetDeleteBlob() throws Exception {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     assertNull(storageCow.get(blobId));
 
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     BlobCow createdBlob = storageCow.create(BlobInfo.newBuilder(blobId).build());
     assertEquals(blobId.getName(), createdBlob.getBlobInfo().getName());
 
     assertEquals(blobId.getName(), storageCow.get(blobId).getBlobInfo().getName());
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid()
                 .googleBlobUid(
@@ -89,7 +100,7 @@ public class StorageCowTest {
   }
 
   @Test
-  public void createGetDeleteBlobAcl() {
+  public void createGetDeleteBlobAcl() throws Exception {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     storageCow.create(BlobInfo.newBuilder(blobId).build());
@@ -108,7 +119,6 @@ public class StorageCowTest {
 
   @Test
   public void blobWriter() throws Exception {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     assertNull(storageCow.get(blobId));
@@ -120,7 +130,7 @@ public class StorageCowTest {
     BlobCow blob = storageCow.get(blobId);
     assertEquals(contents, StorageIntegrationUtils.readContents(blob));
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid()
                 .googleBlobUid(

@@ -1,7 +1,7 @@
 package bio.terra.cloudres.google.storage;
 
-import bio.terra.cloudres.resources.CloudResourceUid;
-import bio.terra.cloudres.resources.GoogleBlobUid;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBlobUid;
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;

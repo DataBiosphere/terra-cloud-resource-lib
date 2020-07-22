@@ -1,16 +1,22 @@
 package bio.terra.cloudres.google.bigquery;
 
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.janitor.model.*;
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.bigquery.*;
-import java.util.List;
+import bio.terra.cloudres.testing.MockJanitorService;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryTableUid;
+import com.google.cloud.bigquery.Dataset;
+import com.google.cloud.bigquery.StandardTableDefinition;
+import com.google.cloud.bigquery.TableId;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class DatasetCowTest {
@@ -18,14 +24,22 @@ public class DatasetCowTest {
   private BigQueryCow bigQueryCow = defaultBigQueryCow();
   private final ResourceTracker resourceTracker =
       new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+  private MockJanitorService mockJanitorService;
+
+  @BeforeEach
+  public void setUp() {
+    mockJanitorService = new MockJanitorService();
+    mockJanitorService.setup();
+  }
 
   @AfterEach
   public void tearDown() {
     resourceTracker.tearDown();
+    mockJanitorService.stop();
   }
 
   @Test
-  public void reload() {
+  public void reload() throws Exception {
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertEquals(datasetCow.getDatasetInfo(), datasetCow.reload().getDatasetInfo());
@@ -59,9 +73,8 @@ public class DatasetCowTest {
   }
 
   @Test
-  public void createThenGetTable() {
+  public void createThenGetTable() throws Exception {
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
 
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
     String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
@@ -70,7 +83,7 @@ public class DatasetCowTest {
 
     assertTableIdEqual(tableId, datasetCow.getTable(generatedTableId).getTableInfo().getTableId());
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid()
                 .googleBigQueryTableUid(

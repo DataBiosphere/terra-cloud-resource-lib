@@ -4,14 +4,15 @@ import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.janitor.model.*;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import bio.terra.cloudres.testing.MockJanitorService;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
+import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Iterator;
-import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 
@@ -29,11 +30,16 @@ public class BigQueryCowTest {
   private static DatasetInfo reusableDataset;
   private final ResourceTracker resourceTracker =
       new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+  private MockJanitorService mockJanitorService;
 
   @BeforeAll
   public static void createReusableDataset() {
+    // Bring up a mock service.
+    MockJanitorService beforeAllMockService = new MockJanitorService();
+    beforeAllMockService.setup();
     reusableDataset =
         bigQueryCow.create(DatasetInfo.newBuilder(REUSABLE_DATASET_ID).build()).getDatasetInfo();
+    beforeAllMockService.stop();
   }
 
   @AfterAll
@@ -41,14 +47,20 @@ public class BigQueryCowTest {
     bigQueryCow.delete(REUSABLE_DATASET_ID);
   }
 
+  @BeforeEach
+  public void setUp() {
+    mockJanitorService = new MockJanitorService();
+    mockJanitorService.setup();
+  }
+
   @AfterEach
   public void tearDown() {
     resourceTracker.tearDown();
+    mockJanitorService.stop();
   }
 
   @Test
-  public void createDataset() {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+  public void createDataset() throws Exception {
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
 
     assertEquals(
@@ -57,8 +69,9 @@ public class BigQueryCowTest {
             .getDataSet(datasetCow.getDatasetInfo().getDatasetId().getDataset())
             .getDatasetInfo());
     DatasetId datasetId = datasetCow.getDatasetInfo().getDatasetId();
+
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid()
                 .googleBigQueryDatasetUid(
@@ -100,8 +113,7 @@ public class BigQueryCowTest {
   }
 
   @Test
-  public void createTable() {
-    List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
+  public void createTable() throws Exception {
     TableCow tableCow = resourceTracker.createTableCow();
 
     TableId tableId = tableCow.getTableInfo().getTableId();
@@ -109,7 +121,7 @@ public class BigQueryCowTest {
         tableId,
         bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo().getTableId());
     assertThat(
-        record,
+        mockJanitorService.getRecordedResources(),
         Matchers.contains(
             new CloudResourceUid()
                 .googleBigQueryTableUid(

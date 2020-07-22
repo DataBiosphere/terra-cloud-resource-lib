@@ -6,8 +6,8 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.cloudres.resources.CloudResourceUid;
-import bio.terra.cloudres.resources.GoogleBigQueryTableUid;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.bigquery.BigQuery.TableOption;
 import org.slf4j.Logger;
@@ -20,11 +20,13 @@ public class DatasetCow {
   private final OperationAnnotator operationAnnotator;
   private final Dataset dataset;
   private final ClientConfig clientConfig;
+  private final CleanupRecorder recorder;
 
   DatasetCow(ClientConfig clientConfig, Dataset dataset) {
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.dataset = dataset;
     this.clientConfig = clientConfig;
+    this.recorder = new CleanupRecorder(clientConfig);
   }
 
   public DatasetInfo getDatasetInfo() {
@@ -63,14 +65,13 @@ public class DatasetCow {
   public TableCow create(
       String tableId, TableDefinition tableDefinition, TableOption... tableOptions) {
     DatasetId datasetId = dataset.getDatasetId();
-    CleanupRecorder.record(
+    recorder.record(
         new CloudResourceUid()
             .googleBigQueryTableUid(
                 new GoogleBigQueryTableUid()
                     .projectId(datasetId.getProject())
                     .datasetId(datasetId.getDataset())
-                    .tableId(tableId)),
-        clientConfig.getCleanupConfig());
+                    .tableId(tableId)));
 
     return new TableCow(
         clientConfig,

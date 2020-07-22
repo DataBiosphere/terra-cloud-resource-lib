@@ -20,11 +20,13 @@ public class BlobCow {
   private final ClientConfig clientConfig;
   private final OperationAnnotator operationAnnotator;
   private final Blob blob;
+  private final CleanupRecorder recorder;
 
   BlobCow(ClientConfig clientConfig, Blob blob) {
     this.clientConfig = clientConfig;
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.blob = blob;
+    this.recorder = new CleanupRecorder(clientConfig);
   }
 
   public BlobInfo getBlobInfo() {
@@ -33,7 +35,7 @@ public class BlobCow {
 
   /** See {@link Blob#copyTo(BlobId, Blob.BlobSourceOption...)} */
   public CopyWriter copyTo(BlobId targetblob) {
-    CleanupRecorder.record(SerializeUtils.create(targetblob), clientConfig.getCleanupConfig());
+    recorder.record(SerializeUtils.create(targetblob));
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_COPY_BLOB,
         () -> blob.copyTo(targetblob),
