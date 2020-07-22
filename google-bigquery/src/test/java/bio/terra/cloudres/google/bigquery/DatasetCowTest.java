@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import bio.terra.cloudres.testing.MockJanitorService;
 import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
 import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.Dataset;
 import com.google.cloud.bigquery.StandardTableDefinition;
@@ -85,6 +86,11 @@ public class DatasetCowTest {
     assertThat(
         mockJanitorService.getRecordedResources(),
         Matchers.contains(
+            new CloudResourceUid()
+                .googleBigQueryDatasetUid(
+                    new GoogleBigQueryDatasetUid()
+                        .projectId(datasetCow.getDatasetInfo().getDatasetId().getProject())
+                        .datasetId(datasetId)),
             new CloudResourceUid()
                 .googleBigQueryTableUid(
                     new GoogleBigQueryTableUid()

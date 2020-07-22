@@ -1,10 +1,13 @@
 package bio.terra.cloudres.google.bigquery;
 
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.bigquery.*;
+import bio.terra.cloudres.testing.MockJanitorService;
+import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.Table;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
@@ -14,11 +17,16 @@ public class TabletCowTest {
   private static DatasetInfo reusableDataset;
   private final ResourceTracker resourceTracker =
       new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
+  private MockJanitorService mockJanitorService;
 
   @BeforeAll
   public static void createReusableDataset() {
+    // Bring up a mock service.
+    MockJanitorService beforeAllMockService = new MockJanitorService();
+    beforeAllMockService.setup();
     reusableDataset =
         bigQueryCow.create(DatasetInfo.newBuilder(REUSABLE_DATASET_ID).build()).getDatasetInfo();
+    beforeAllMockService.stop();
   }
 
   @AfterAll
@@ -26,9 +34,16 @@ public class TabletCowTest {
     bigQueryCow.delete(REUSABLE_DATASET_ID);
   }
 
+  @BeforeEach
+  public void setUp() {
+    mockJanitorService = new MockJanitorService();
+    mockJanitorService.setup();
+  }
+
   @AfterEach
   public void tearDown() {
     resourceTracker.tearDown();
+    mockJanitorService.stop();
   }
 
   @Test

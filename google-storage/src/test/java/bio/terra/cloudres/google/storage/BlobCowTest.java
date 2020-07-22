@@ -39,6 +39,7 @@ public class BlobCowTest {
     reusableBucket =
         StorageIntegrationUtils.defaultStorageCow()
             .create(BucketInfo.of(IntegrationUtils.randomName()));
+
     beforeAllMockService.stop();
   }
 
@@ -93,6 +94,11 @@ public class BlobCowTest {
     assertThat(
         mockJanitorService.getRecordedResources(),
         Matchers.contains(
+            new CloudResourceUid()
+                .googleBlobUid(
+                    new GoogleBlobUid()
+                        .blobName(sourceBlobId.getName())
+                        .bucketName(targetBlobId.getBucket())),
             new CloudResourceUid()
                 .googleBlobUid(
                     new GoogleBlobUid()

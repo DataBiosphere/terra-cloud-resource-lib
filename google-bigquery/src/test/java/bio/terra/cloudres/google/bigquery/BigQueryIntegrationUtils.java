@@ -7,7 +7,8 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.BigQueryOptions;
+import com.google.cloud.bigquery.TableId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,12 +49,5 @@ public class BigQueryIntegrationUtils {
             .collect(Collectors.toList())
             .containsAll(
                 actualTableIds.stream().map(TableId::getDataset).collect(Collectors.toList())));
-  }
-
-  static DatasetCow createDatasetCow(BigQueryCow bigQueryCow, List<String> createdDatasetIds) {
-    String datasetId = IntegrationUtils.randomNameWithUnderscore();
-    createdDatasetIds.add(datasetId);
-
-    return bigQueryCow.create(DatasetInfo.newBuilder(datasetId).build());
   }
 }
