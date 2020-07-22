@@ -21,6 +21,9 @@ subprojects { subproject ->
     repositories {
         mavenCentral()
         google()
+        maven {
+            url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
+        }
     }
 
     apply plugin: 'idea'
@@ -33,11 +36,12 @@ subprojects { subproject ->
         api 'com.google.cloud:google-cloud-core-http:1.93.5'
 
         implementation 'org.slf4j:slf4j-api:1.7.28'
-
         implementation 'com.google.code.gson:gson:2.8.6'
-        testImplementation "org.mockito:mockito-core:2.+"
-
         implementation("com.google.guava:guava:29.0-jre")
+
+        implementation group: 'bio.terra.janitor', name: 'terra-resource-janitor-client', version: '0.0.1-SNAPSHOT'
+
+        testImplementation "org.mockito:mockito-core:2.+"
         testImplementation 'junit:junit:4.13'
         testFixturesImplementation 'junit:junit:4.13'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'

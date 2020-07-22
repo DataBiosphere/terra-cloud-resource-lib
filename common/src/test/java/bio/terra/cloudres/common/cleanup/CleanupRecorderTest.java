@@ -1,15 +1,16 @@
 package bio.terra.cloudres.common.cleanup;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import bio.terra.cloudres.resources.CloudResourceUid;
-import bio.terra.cloudres.resources.GoogleBucketUid;
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBucketUid;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @Tag("unit")
 public class CleanupRecorderTest {
