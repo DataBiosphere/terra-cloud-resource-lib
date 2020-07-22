@@ -1,6 +1,4 @@
 dependencies {
-    implementation project(':cloud-resource-schema')
-
     implementation "com.google.auto.value:auto-value-annotations:1.7.3"
     annotationProcessor "com.google.auto.value:auto-value:1.7.3"
     implementation 'io.opencensus:opencensus-api:0.26.0'
