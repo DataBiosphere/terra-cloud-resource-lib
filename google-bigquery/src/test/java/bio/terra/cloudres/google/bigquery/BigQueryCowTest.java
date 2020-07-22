@@ -1,5 +1,9 @@
 package bio.terra.cloudres.google.bigquery;
 
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import bio.terra.janitor.model.CloudResourceUid;
@@ -8,15 +12,10 @@ import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.cloud.bigquery.*;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
-
 import java.util.Iterator;
 import java.util.List;
-
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.*;
 
 @Tag("integration")
 /**
