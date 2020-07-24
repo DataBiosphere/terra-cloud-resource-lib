@@ -29,7 +29,7 @@ public abstract class CleanupConfig {
    */
   public abstract String accessToken();
 
-  /** The janitor server base path, e.g. 127.0.0.1. */
+  /** The janitor server base path, e.g. https://127.0.0.1. */
   public abstract String janitorBasePath();
 
   public static Builder builder() {

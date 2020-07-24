@@ -43,7 +43,7 @@ public class CleanupRecorder {
     return testRecord.startNewRecord();
   }
 
-  /** Providers an API Client. */
+  /** Providers an {@link ApiClient}. */
   public static void providerApiClient(ApiClient apiClient) {
     client = apiClient;
   }
