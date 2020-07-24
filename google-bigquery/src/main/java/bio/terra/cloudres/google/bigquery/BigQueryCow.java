@@ -53,7 +53,7 @@ public class BigQueryCow {
                             ? defaultProjectId
                             : datasetInfo.getDatasetId().getProject())
                     .datasetId(datasetInfo.getDatasetId().getDataset()));
-    CleanupRecorder.record(datasetUid, clientConfig.getCleanupConfig());
+    CleanupRecorder.record(datasetUid, clientConfig);
 
     return new DatasetCow(
         clientConfig,
@@ -102,7 +102,7 @@ public class BigQueryCow {
                         tableId.getProject() == null ? defaultProjectId : tableId.getProject())
                     .datasetId(tableId.getDataset())
                     .tableId(tableId.getTable()));
-    CleanupRecorder.record(tableUid, clientConfig.getCleanupConfig());
+    CleanupRecorder.record(tableUid, clientConfig);
 
     return new TableCow(
         clientConfig,

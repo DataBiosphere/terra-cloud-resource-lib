@@ -23,6 +23,15 @@ public abstract class CleanupConfig {
   /** How long created resources should live (at least) before being cleaned up. */
   public abstract Duration timeToLive();
 
+  /**
+   * The client access token when calling Janitor, e.g. when using Google SA account credentials, it
+   * would be {@code serviceAccountCredentials.refreshAccessToken().getTokenValue()}
+   */
+  public abstract String accessToken();
+
+  /** The janitor server base path, e.g. 127.0.0.1. */
+  public abstract String janitorBasePath();
+
   public static Builder builder() {
     return new AutoValue_CleanupConfig.Builder();
   }
@@ -33,6 +42,10 @@ public abstract class CleanupConfig {
     public abstract Builder setCleanupId(String value);
 
     public abstract Builder setTimeToLive(Duration value);
+
+    public abstract Builder setAccessToken(String value);
+
+    public abstract Builder setJanitorBasePath(String value);
 
     public abstract CleanupConfig build();
   }
