@@ -53,7 +53,7 @@ public class CleanupRecorderTest {
         .when(spyApiClient)
         .invokeAPI(
             anyString(), anyString(), any(), any(), any(), any(), any(), any(), any(), any());
-    CleanupRecorder.providerApiClient(spyApiClient);
+    CleanupRecorder.provideApiClient(spyApiClient);
   }
 
   @Test
@@ -65,9 +65,6 @@ public class CleanupRecorderTest {
     CleanupRecorder.record(RESOURCE_3, CLIENT_CONFIG);
 
     assertThat(record, Matchers.contains(RESOURCE_2, RESOURCE_3));
-
-    // All record are captured.
-    assertApiClientSet(3);
   }
 
   @Test
@@ -78,7 +75,6 @@ public class CleanupRecorderTest {
         RESOURCE_2, ClientConfig.Builder.newBuilder().setClient("crl-test").build());
 
     assertThat(record, Matchers.contains(RESOURCE_1));
-    assertApiClientSet(1);
   }
 
   @Test
@@ -90,12 +86,20 @@ public class CleanupRecorderTest {
 
     assertThat(record1, Matchers.contains(RESOURCE_1));
     assertThat(record2, Matchers.contains(RESOURCE_2));
-    assertApiClientSet(2);
+  }
+
+  @Test
+  public void recordWithJanitorApiCInvoked() {
+    CleanupRecorder.record(RESOURCE_1, CLIENT_CONFIG);
+    CleanupRecorder.record(RESOURCE_2, CLIENT_CONFIG);
+    CleanupRecorder.record(RESOURCE_3, CLIENT_CONFIG);
+
+    // All record are captured.
+    assertApiClientSet(3);
   }
 
   @Test
   public void createJanitorResource() {
-    // Not worth testing but fine to have.
     assertEquals(
         new CreateResourceRequestBody()
             .resourceUid(RESOURCE_1)

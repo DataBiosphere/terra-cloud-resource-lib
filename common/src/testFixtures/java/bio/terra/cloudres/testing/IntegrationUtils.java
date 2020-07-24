@@ -48,6 +48,6 @@ public class IntegrationUtils {
         .when(spyApiClient)
         .invokeAPI(
             anyString(), anyString(), any(), any(), any(), any(), any(), any(), any(), any());
-    CleanupRecorder.providerApiClient(spyApiClient);
+    CleanupRecorder.provideApiClient(spyApiClient);
   }
 }

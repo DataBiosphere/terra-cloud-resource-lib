@@ -43,8 +43,9 @@ public class CleanupRecorder {
     return testRecord.startNewRecord();
   }
 
-  /** Providers an {@link ApiClient}. */
-  public static void providerApiClient(ApiClient apiClient) {
+  /** Provides an {@link ApiClient}. */
+  @VisibleForTesting
+  public static void provideApiClient(ApiClient apiClient) {
     client = apiClient;
   }
 
