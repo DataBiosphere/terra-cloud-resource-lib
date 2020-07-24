@@ -7,13 +7,19 @@ import bio.terra.janitor.ApiException;
 import bio.terra.janitor.controller.JanitorApi;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /** An interface for recording created cloud resources for cleanup. */
 public class CleanupRecorder {
   private CleanupRecorder() {}
+
+  /** Scopes required by Janitor. */
+  private static final List<String> SCOPES = Arrays.asList("openid", "email", "profile");
 
   private static TestRecord testRecord = new TestRecord();
   private static ApiClient client = new ApiClient();
@@ -24,7 +30,16 @@ public class CleanupRecorder {
     }
 
     CleanupConfig cleanupConfig = clientConfig.getCleanupConfig().get();
-    client.setAccessToken(cleanupConfig.accessToken());
+    GoogleCredentials googleCredentials =
+        clientConfig.getCleanupConfig().get().credentials().createScoped(SCOPES);
+
+    try {
+      googleCredentials.refreshIfExpired();
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Failed to refresh the access token used by Janitor during cleanup.", e);
+    }
+    client.setAccessToken(googleCredentials.getAccessToken().getTokenValue());
     client.setBasePath(cleanupConfig.janitorBasePath());
     try {
       new JanitorApi(client).createResource(createJanitorResource(resource, clientConfig));
@@ -44,7 +59,6 @@ public class CleanupRecorder {
   }
 
   /** Provides an {@link ApiClient}. */
-  @VisibleForTesting
   public static void provideApiClient(ApiClient apiClient) {
     client = apiClient;
   }

@@ -20,8 +20,8 @@ public class IntegrationUtils {
       CleanupConfig.builder()
           .setTimeToLive(Duration.ofHours(2))
           .setCleanupId("crl-integration")
-          // TODO(PF-14): Read value from config.
-          .setAccessToken("access-token")
+          // TODO(PF-14): Replace with correct credential.
+          .setCredentials(IntegrationCredentials.getAdminGoogleCredentialsOrDie())
           .setJanitorBasePath("http://1.1.1.1")
           .build();
 

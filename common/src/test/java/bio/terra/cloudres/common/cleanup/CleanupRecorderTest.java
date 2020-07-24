@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import bio.terra.cloudres.common.ClientConfig;
+import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.janitor.ApiClient;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
 import bio.terra.janitor.model.GoogleBucketUid;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import java.time.Duration;
 import java.util.List;
 import org.hamcrest.Matchers;
@@ -19,16 +21,17 @@ import org.junit.jupiter.api.Test;
 @Tag("unit")
 public class CleanupRecorderTest {
   private static final String JANITOR_PATH = "http://1.1.1.0";
-  private static final String ACCESS_TOKEN = "token";
   private static final String CLIENT_NAME = "crl-test";
   private static final String CLEANUP_ID = "CleanupRecorderTest";
   private static final int TTL_MIN = 1;
+  private static final ServiceAccountCredentials CREDENTIALS =
+      IntegrationCredentials.getAdminGoogleCredentialsOrDie();
 
   private static final CleanupConfig CLEANUP_CONFIG =
       CleanupConfig.builder()
           .setCleanupId(CLEANUP_ID)
           .setTimeToLive(Duration.ofMinutes(TTL_MIN))
-          .setAccessToken(ACCESS_TOKEN)
+          .setCredentials(CREDENTIALS)
           .setJanitorBasePath(JANITOR_PATH)
           .build();
   private static final ClientConfig CLIENT_CONFIG =
@@ -111,6 +114,6 @@ public class CleanupRecorderTest {
 
   private void assertApiClientSet(int times) {
     verify(spyApiClient, times(times)).setBasePath(JANITOR_PATH);
-    verify(spyApiClient, times(times)).setAccessToken(ACCESS_TOKEN);
+    verify(spyApiClient, times(times)).setAccessToken(anyString());
   }
 }
