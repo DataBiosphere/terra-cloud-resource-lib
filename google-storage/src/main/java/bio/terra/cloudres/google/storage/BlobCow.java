@@ -33,7 +33,7 @@ public class BlobCow {
 
   /** See {@link Blob#copyTo(BlobId, Blob.BlobSourceOption...)} */
   public CopyWriter copyTo(BlobId targetblob) {
-    CleanupRecorder.record(SerializeUtils.create(targetblob), clientConfig.getCleanupConfig());
+    CleanupRecorder.record(SerializeUtils.create(targetblob), clientConfig);
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_COPY_BLOB,
         () -> blob.copyTo(targetblob),

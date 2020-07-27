@@ -28,8 +28,7 @@ public class StorageCow {
 
   /** See {@link Storage#create(BlobInfo, Storage.BlobTargetOption...)}. */
   public BlobCow create(BlobInfo blobInfo) {
-    CleanupRecorder.record(
-        SerializeUtils.create(blobInfo.getBlobId()), clientConfig.getCleanupConfig());
+    CleanupRecorder.record(SerializeUtils.create(blobInfo.getBlobId()), clientConfig);
     Blob blob =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_CREATE_BLOB,
@@ -43,7 +42,7 @@ public class StorageCow {
     CleanupRecorder.record(
         new CloudResourceUid()
             .googleBucketUid(new GoogleBucketUid().bucketName(bucketInfo.getName())),
-        clientConfig.getCleanupConfig());
+        clientConfig);
     Bucket bucket =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_CREATE_BUCKET,
@@ -132,8 +131,7 @@ public class StorageCow {
 
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */
   public WriteChannel writer(BlobInfo blobInfo) {
-    CleanupRecorder.record(
-        SerializeUtils.create(blobInfo.getBlobId()), clientConfig.getCleanupConfig());
+    CleanupRecorder.record(SerializeUtils.create(blobInfo.getBlobId()), clientConfig);
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_CREATE_BLOB_AND_WRITER,
         () -> storage.writer(blobInfo),

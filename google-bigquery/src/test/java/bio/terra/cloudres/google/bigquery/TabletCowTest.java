@@ -1,10 +1,13 @@
 package bio.terra.cloudres.google.bigquery;
 
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
+import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.bigquery.*;
+import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.Table;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
@@ -16,7 +19,8 @@ public class TabletCowTest {
       new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
 
   @BeforeAll
-  public static void createReusableDataset() {
+  public static void createReusableDataset() throws Exception {
+    setUpSpyJanitorApi();
     reusableDataset =
         bigQueryCow.create(DatasetInfo.newBuilder(REUSABLE_DATASET_ID).build()).getDatasetInfo();
   }

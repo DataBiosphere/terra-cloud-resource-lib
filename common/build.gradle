@@ -5,5 +5,8 @@ dependencies {
     implementation 'io.opencensus:opencensus-impl:0.26.0'
 
     testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+
+    testFixturesImplementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "2.31"
+    testFixturesImplementation "org.mockito:mockito-core:2.+"
     testFixturesImplementation "bio.terra.janitor:terra-resource-janitor-client:0.0.1-SNAPSHOT"
 }

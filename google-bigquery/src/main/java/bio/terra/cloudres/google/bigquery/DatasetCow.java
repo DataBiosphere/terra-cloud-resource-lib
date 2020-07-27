@@ -70,7 +70,7 @@ public class DatasetCow {
                     .projectId(datasetId.getProject())
                     .datasetId(datasetId.getDataset())
                     .tableId(tableId)),
-        clientConfig.getCleanupConfig());
+        clientConfig);
 
     return new TableCow(
         clientConfig,
