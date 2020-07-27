@@ -1,7 +1,6 @@
 package bio.terra.cloudres.common.cleanup;
 
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auto.value.AutoValue;
 import java.time.Duration;
 
@@ -26,7 +25,7 @@ public abstract class CleanupConfig {
   public abstract Duration timeToLive();
 
   /**
-   * The Google's {@link OAuth2Credentials} for accessing Janitor service. CRL refresh/generate
+   * The Google's {@link GoogleCredentials} for accessing Janitor service. CRL refresh/generate
    * access token using this credential.
    *
    * <p>Current Janitor only supports Google Credentials, and the most common usage would be a

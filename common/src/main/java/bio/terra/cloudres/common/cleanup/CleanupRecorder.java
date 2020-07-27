@@ -1,7 +1,8 @@
 package bio.terra.cloudres.common.cleanup;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.JanitorException;
+import bio.terra.cloudres.common.JanitorAccessException;
+import bio.terra.cloudres.common.JanitorApiException;
 import bio.terra.janitor.ApiClient;
 import bio.terra.janitor.ApiException;
 import bio.terra.janitor.controller.JanitorApi;
@@ -36,7 +37,7 @@ public class CleanupRecorder {
     try {
       googleCredentials.refreshIfExpired();
     } catch (IOException e) {
-      throw new RuntimeException(
+      throw new JanitorAccessException(
           "Failed to refresh the access token used by Janitor during cleanup.", e);
     }
     client.setAccessToken(googleCredentials.getAccessToken().getTokenValue());
@@ -44,7 +45,7 @@ public class CleanupRecorder {
     try {
       new JanitorApi(client).createResource(createJanitorResource(resource, clientConfig));
     } catch (ApiException e) {
-      throw new JanitorException("Failed to create tracked resource in Janitor", e);
+      throw new JanitorApiException("Failed to create tracked resource in Janitor", e);
     }
     testRecord.add(resource);
   }
@@ -59,6 +60,7 @@ public class CleanupRecorder {
   }
 
   /** Provides an {@link ApiClient}. */
+  @VisibleForTesting
   public static void provideApiClient(ApiClient apiClient) {
     client = apiClient;
   }
