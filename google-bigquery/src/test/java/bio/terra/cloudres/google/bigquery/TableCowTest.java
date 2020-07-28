@@ -1,17 +1,17 @@
 package bio.terra.cloudres.google.bigquery;
 
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
-import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
-import static org.junit.jupiter.api.Assertions.*;
-
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.DatasetInfo;
 import com.google.cloud.bigquery.Table;
 import org.junit.jupiter.api.*;
 
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
+import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
+import static org.junit.jupiter.api.Assertions.*;
+
 @Tag("integration")
-public class TabletCowTest {
+public class TableCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private static BigQueryCow bigQueryCow = defaultBigQueryCow();
   private static DatasetInfo reusableDataset;
