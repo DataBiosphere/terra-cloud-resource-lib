@@ -1,14 +1,14 @@
 package bio.terra.cloudres.google.bigquery;
 
-import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.cloud.bigquery.DatasetInfo;
-import com.google.cloud.bigquery.Table;
-import org.junit.jupiter.api.*;
-
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
 import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static org.junit.jupiter.api.Assertions.*;
+
+import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.Table;
+import org.junit.jupiter.api.*;
 
 @Tag("integration")
 public class TableCowTest {
