@@ -11,7 +11,7 @@ import com.google.cloud.bigquery.Table;
 import org.junit.jupiter.api.*;
 
 @Tag("integration")
-public class TabletCowTest {
+public class TableCowTest {
   private static final String REUSABLE_DATASET_ID = IntegrationUtils.randomNameWithUnderscore();
   private static BigQueryCow bigQueryCow = defaultBigQueryCow();
   private static DatasetInfo reusableDataset;
