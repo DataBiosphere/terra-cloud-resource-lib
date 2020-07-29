@@ -3,6 +3,7 @@ dependencies {
     annotationProcessor "com.google.auto.value:auto-value:1.7.3"
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
+    implementation 'com.google.cloud:google-cloud-pubsub:1.108.0'
 
     testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
 

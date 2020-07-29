@@ -33,6 +33,12 @@ public abstract class CleanupConfig {
    */
   public abstract GoogleCredentials credentials();
 
+  /** The Janitor pub/sub topic name */
+  public abstract String janitorTopicName();
+
+  /** The Janitor pub/sub project id */
+  public abstract String janitorProjectId();
+
   /** The janitor server base path, e.g. https://127.0.0.1. */
   public abstract String janitorBasePath();
 
@@ -50,6 +56,10 @@ public abstract class CleanupConfig {
     public abstract Builder setCredentials(GoogleCredentials value);
 
     public abstract Builder setJanitorBasePath(String value);
+
+    public abstract Builder setJanitorTopicName(String value);
+
+    public abstract Builder setJanitorProjectId(String value);
 
     public abstract CleanupConfig build();
   }
