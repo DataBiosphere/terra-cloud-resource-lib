@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.*;
-import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +34,6 @@ public class BigQueryCowTest {
 
   @BeforeAll
   public static void createReusableDataset() throws Exception {
-    setUpSpyJanitorApi();
     reusableDataset =
         bigQueryCow.create(DatasetInfo.newBuilder(REUSABLE_DATASET_ID).build()).getDatasetInfo();
   }

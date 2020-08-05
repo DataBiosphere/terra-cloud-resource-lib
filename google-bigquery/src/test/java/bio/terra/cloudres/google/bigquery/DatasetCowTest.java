@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
-import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +14,9 @@ import com.google.cloud.bigquery.StandardTableDefinition;
 import com.google.cloud.bigquery.TableId;
 import java.util.List;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class DatasetCowTest {
@@ -23,11 +24,6 @@ public class DatasetCowTest {
   private BigQueryCow bigQueryCow = defaultBigQueryCow();
   private final ResourceTracker resourceTracker =
       new ResourceTracker(bigQueryCow, REUSABLE_DATASET_ID);
-
-  @BeforeAll
-  public static void setup() throws Exception {
-    setUpSpyJanitorApi();
-  }
 
   @AfterEach
   public void tearDown() {

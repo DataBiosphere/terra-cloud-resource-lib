@@ -1,6 +1,5 @@
 package bio.terra.cloudres.google.storage;
 
-import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static org.junit.Assert.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 public class BucketCowTest {
   @Test
   public void deleteCreatedBucket() throws Exception {
-    setUpSpyJanitorApi();
     StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
     String bucketName = IntegrationUtils.randomName();
     assertNull(storageCow.get(bucketName));

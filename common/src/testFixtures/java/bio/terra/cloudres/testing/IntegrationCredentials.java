@@ -7,7 +7,7 @@ public class IntegrationCredentials {
   /**
    * Path to the admin service account credentials file.
    *
-   * <p>he admin service account has the roles needed to operate the CRL APIs in the integration
+   * <p>The admin service account has the roles needed to operate the CRL APIs in the integration
    * test project, e.g. create and delete resources
    */
   private static final String GOOGLE_SERVICE_ACCOUNT_ADMIN_PATH =
@@ -22,12 +22,26 @@ public class IntegrationCredentials {
   private static final String GOOGLE_SERVICE_ACCOUNT_USER_PATH =
       "integration_service_account_user.json";
 
+  /**
+   * Path to the janitor user service account credentials file.
+   *
+   * <p>Use service account is used to publish message to Janitor. All those configs should be
+   * populated directory from vault, but for now, we have to hard-coded them here. TODO: Find a
+   * better solution for piping config&secrets workflow.
+   */
+  private static final String GOOGLE_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH =
+      "integration_service_account_janitor_client.json";
+
   public static ServiceAccountCredentials getAdminGoogleCredentialsOrDie() {
     return getGoogleCredentialsOrDie(GOOGLE_SERVICE_ACCOUNT_ADMIN_PATH);
   }
 
   public static ServiceAccountCredentials getUserGoogleCredentialsOrDie() {
     return getGoogleCredentialsOrDie(GOOGLE_SERVICE_ACCOUNT_USER_PATH);
+  }
+
+  public static ServiceAccountCredentials getJanitorClientGoogleCredentialsOrDie() {
+    return getGoogleCredentialsOrDie(GOOGLE_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH);
   }
 
   private static ServiceAccountCredentials getGoogleCredentialsOrDie(String serviceAccountPath) {

@@ -1,11 +1,7 @@
 package bio.terra.cloudres.testing;
 
-import static org.mockito.Mockito.*;
-
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.cleanup.CleanupConfig;
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.janitor.ApiClient;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -16,13 +12,14 @@ public class IntegrationUtils {
   public static final String DEFAULT_CLIENT_NAME = "crl-integration-test";
 
   // TODO(CA-874): Consider setting per-integration run environment variable for the cleanup id.
+  // TODO(yonghao): Figure a better config pulling solution to replace the hardcoded configs.
   public static final CleanupConfig DEFAULT_CLEANUP_CONFIG =
       CleanupConfig.builder()
           .setTimeToLive(Duration.ofHours(2))
           .setCleanupId("crl-integration")
-          // TODO(PF-14): Replace with correct credential.
-          .setCredentials(IntegrationCredentials.getAdminGoogleCredentialsOrDie())
-          .setJanitorBasePath("http://1.1.1.1")
+          .setCredentials(IntegrationCredentials.getJanitorClientGoogleCredentialsOrDie())
+          .setJanitorTopicName("crljanitor-tools-pubsub-topic")
+          .setJanitorProjectId("terra-kernel-k8s")
           .build();
 
   public static final ClientConfig DEFAULT_CLIENT_CONFIG =
@@ -39,15 +36,5 @@ public class IntegrationUtils {
   /** Generates a random name to and replace '-' with '_'. */
   public static String randomNameWithUnderscore() {
     return UUID.randomUUID().toString().replace('-', '_');
-  }
-
-  /** Use a fake ApiClient to avoid the call. TODO(PF-19): Switch to real Janitor. */
-  public static void setUpSpyJanitorApi() throws Exception {
-    ApiClient spyApiClient = spy(new ApiClient());
-    doReturn(null)
-        .when(spyApiClient)
-        .invokeAPI(
-            anyString(), anyString(), any(), any(), any(), any(), any(), any(), any(), any());
-    CleanupRecorder.provideApiClient(spyApiClient);
   }
 }

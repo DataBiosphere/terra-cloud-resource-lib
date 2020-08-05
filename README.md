@@ -41,12 +41,7 @@ And `common/src/testFixtures/resources/integration_service_account-user.json`
 
 Broad employees can get the credentials from Vault with:
 ```
-docker run -it --rm -v $HOME:/root broadinstitute/dsde-toolbox:dev \
-  vault read -format json secret/dsde/terra/crl-test/default/service-account-admin.json \
-  | jq .data > common/src/testFixtures/resources/integration_service_account_admin.json &&#
-docker run -it --rm -v $HOME:/root broadinstitute/dsde-toolbox:dev \
-  vault read -format json secret/dsde/terra/crl-test/default/service-account-user.json \
-  | jq .data > common/src/testFixtures/resources/integration_service_account_user.json
+./render-config.sh
 ```
 Then actually run the tests with:
 ```

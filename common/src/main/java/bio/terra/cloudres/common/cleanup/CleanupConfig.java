@@ -39,9 +39,6 @@ public abstract class CleanupConfig {
   /** The Janitor pub/sub project id */
   public abstract String janitorProjectId();
 
-  /** The janitor server base path, e.g. https://127.0.0.1. */
-  public abstract String janitorBasePath();
-
   public static Builder builder() {
     return new AutoValue_CleanupConfig.Builder();
   }
@@ -54,8 +51,6 @@ public abstract class CleanupConfig {
     public abstract Builder setTimeToLive(Duration value);
 
     public abstract Builder setCredentials(GoogleCredentials value);
-
-    public abstract Builder setJanitorBasePath(String value);
 
     public abstract Builder setJanitorTopicName(String value);
 

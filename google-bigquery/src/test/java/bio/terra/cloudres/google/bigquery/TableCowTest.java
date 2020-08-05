@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.bigquery;
 
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
 import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
-import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -20,7 +19,6 @@ public class TableCowTest {
 
   @BeforeAll
   public static void createReusableDataset() throws Exception {
-    setUpSpyJanitorApi();
     reusableDataset =
         bigQueryCow.create(DatasetInfo.newBuilder(REUSABLE_DATASET_ID).build()).getDatasetInfo();
   }
