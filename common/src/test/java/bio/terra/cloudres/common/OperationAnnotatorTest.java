@@ -79,7 +79,7 @@ public class OperationAnnotatorTest {
     sleepForSpansExport();
 
     // One cloud api count
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
+    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 2);
 
     // No error
     assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
