@@ -75,7 +75,8 @@ jobs:
         run: ./gradlew integrationTest
       - name: Upload Test Reports
         if: always()
+        run: mkdir -p build/reports/tests
         uses: actions/upload-artifact@v1
         with:
           name: Test Reports
-          path: common/build/reports/tests
+          path: build/reports/tests
