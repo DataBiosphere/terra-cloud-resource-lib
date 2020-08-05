@@ -41,7 +41,7 @@ And `common/src/testFixtures/resources/integration_service_account-user.json`
 
 Broad employees can get the credentials from Vault with:
 ```
-./render-config.sh
+./render-test-config.sh
 ```
 Then actually run the tests with:
 ```

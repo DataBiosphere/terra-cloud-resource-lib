@@ -74,7 +74,7 @@ jobs:
         id: integration-test
         run: ./gradlew integrationTest
       - name: Upload Test Reports
-        if: steps.unit-test.outputs.status == 'failure' || steps.integration-test.outputs.status == 'failure'
+        if: always()
         uses: actions/upload-artifact@v1
         with:
           name: Test Reports
