@@ -78,4 +78,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: Test Reports
-          path: build/reports/tests
+          path: common/build/reports/tests
