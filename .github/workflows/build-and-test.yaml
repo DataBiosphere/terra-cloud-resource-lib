@@ -73,11 +73,12 @@ jobs:
       - name: Integration Test
         id: integration-test
         run: ./gradlew integrationTest
-      - name: Create Test Reports Directory
-        run: mkdir -p build/reports/tests
       - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v1
         with:
           name: Test Reports
-          path: build/reports/tests
+          path: |
+            commond/build/reports/tests
+            google-bigquery/build/reports/tests
+            google-storage/build/reports/tests
