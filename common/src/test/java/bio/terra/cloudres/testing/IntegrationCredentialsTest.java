@@ -1,9 +1,9 @@
 package bio.terra.cloudres.testing;
 
+import static org.junit.Assert.fail;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.Assert.fail;
 
 @Tag("integration")
 public class IntegrationCredentialsTest {
