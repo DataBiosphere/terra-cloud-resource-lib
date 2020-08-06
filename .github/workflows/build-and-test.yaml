@@ -74,9 +74,9 @@ jobs:
         id: integration-test
         run: ./gradlew integrationTest
       - name: Upload Test Reports
-        if: always()
+        if: steps.unit-test.outputs.status == 'failure' || steps.integration-test.outputs.status == 'failure'
         uses: actions/upload-artifact@v1
         with:
           name: Test Reports
           path: |
-            terra-cloud-resource-lib/*/build/reports/tests
+            */build/reports/tests
