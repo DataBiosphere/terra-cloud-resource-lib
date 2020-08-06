@@ -1,6 +1,5 @@
 package bio.terra.cloudres.google.storage;
 
-import static bio.terra.cloudres.testing.IntegrationUtils.setUpSpyJanitorApi;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
@@ -37,7 +36,6 @@ public class BlobCowTest {
 
   @BeforeAll
   public static void createReusableBucket() throws Exception {
-    setUpSpyJanitorApi();
     reusableBucket =
         StorageIntegrationUtils.defaultStorageCow()
             .create(BucketInfo.of(IntegrationUtils.randomName()));

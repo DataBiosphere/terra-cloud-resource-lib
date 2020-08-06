@@ -24,4 +24,13 @@ public class IntegrationCredentialsTest {
       fail("Should not have thrown any exception getting credentials, but threw " + e);
     }
   }
+
+  @Test
+  public void googleCredentialsAreAccessible_janitor() {
+    try {
+      IntegrationCredentials.getJanitorClientGoogleCredentialsOrDie();
+    } catch (Exception e) {
+      fail("Should not have thrown any exception getting credentials, but threw " + e);
+    }
+  }
 }
