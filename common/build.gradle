@@ -4,6 +4,10 @@ dependencies {
     implementation 'io.opencensus:opencensus-api:0.26.0'
     implementation 'io.opencensus:opencensus-impl:0.26.0'
     implementation group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '1.104.1'
+    implementation group: 'bio.terra.janitor', name: 'terra-resource-janitor-client', version: '0.0.2-SNAPSHOT'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.11.2'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.11.2'
 
     testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
 
