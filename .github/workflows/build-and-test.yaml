@@ -79,6 +79,4 @@ jobs:
         with:
           name: Test Reports
           path: |
-            commond/build/reports/tests
-            google-bigquery/build/reports/tests
-            google-storage/build/reports/tests
+            */build/reports/tests
