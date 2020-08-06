@@ -79,4 +79,4 @@ jobs:
         with:
           name: Test Reports
           path: |
-            */build/reports/tests
+            terra-cloud-resource-lib/*/build/reports/tests
