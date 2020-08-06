@@ -8,13 +8,18 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
 import bio.terra.janitor.model.GoogleBucketUid;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.api.core.ApiFutures;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.pubsub.v1.Publisher;
-import com.google.gson.Gson;
 import com.google.pubsub.v1.PubsubMessage;
-import com.google.pubsub.v1.TopicName;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
@@ -31,12 +36,13 @@ public class CleanupRecorderTest {
   private final ArgumentCaptor<PubsubMessage> messageArgumentCaptor =
       ArgumentCaptor.forClass(PubsubMessage.class);
 
-  private static final String JANITOR_PATH = "http://1.1.1.0";
   private static final String CLIENT_NAME = "crl-test";
   private static final String CLEANUP_ID = "CleanupRecorderTest";
   private static final String TOPIC_NAME = "test-topic";
   private static final String PROJECT_ID = "test-project";
   private static final int TTL_MIN = 1;
+  private static final OffsetDateTime CREATION = OffsetDateTime.now(ZoneId.systemDefault());
+  private static final OffsetDateTime EXPIRATION = CREATION.plusMinutes(TTL_MIN);
   private static final ServiceAccountCredentials CREDENTIALS =
       IntegrationCredentials.getAdminGoogleCredentialsOrDie();
 
@@ -53,7 +59,6 @@ public class CleanupRecorderTest {
           .setClient(CLIENT_NAME)
           .setCleanupConfig(CLEANUP_CONFIG)
           .build();
-  private static final TopicName topicName = TopicName.of(PROJECT_ID, TOPIC_NAME);
 
   private static final CloudResourceUid RESOURCE_1 =
       new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName("1"));
@@ -64,13 +69,21 @@ public class CleanupRecorderTest {
 
   private static final CreateResourceRequestBody MESSAGE_BODY =
       new CreateResourceRequestBody()
-          .timeToLiveInMinutes(TTL_MIN)
+          .creation(CREATION)
+          .expiration(EXPIRATION)
           .putLabelsItem("client", CLIENT_NAME)
           .putLabelsItem("cleanupId", CLEANUP_ID);
+
+  private ObjectMapper objectMapper =
+      new ObjectMapper()
+          .registerModule(new Jdk8Module())
+          .registerModule(new JavaTimeModule())
+          .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
   @BeforeEach
   private void setup() throws Exception {
     CleanupRecorder.providePublisher(mockPublisher);
+    CleanupRecorder.provideClock(Clock.fixed(CREATION.toInstant(), ZoneId.systemDefault()));
     when(mockPublisher.publish(any(PubsubMessage.class)))
         .thenReturn(ApiFutures.immediateFuture("123"));
   }
@@ -108,20 +121,20 @@ public class CleanupRecorderTest {
   }
 
   @Test
-  public void recordWithJanitorApiCInvoked() {
+  public void recordWithJanitorApiCInvoked() throws Exception {
     CleanupRecorder.record(RESOURCE_1, CLIENT_CONFIG);
     CleanupRecorder.record(RESOURCE_2, CLIENT_CONFIG);
     CleanupRecorder.record(RESOURCE_3, CLIENT_CONFIG);
 
-    Gson gson = new Gson();
     verify(mockPublisher, times(3)).publish(messageArgumentCaptor.capture());
+
     assertThat(
         messageArgumentCaptor.getAllValues().stream()
             .map(m -> m.getData().toStringUtf8())
             .collect(Collectors.toList()),
         Matchers.containsInAnyOrder(
-            gson.toJson(MESSAGE_BODY.resourceUid(RESOURCE_1)),
-            gson.toJson(MESSAGE_BODY.resourceUid(RESOURCE_2)),
-            gson.toJson(MESSAGE_BODY.resourceUid(RESOURCE_3))));
+            objectMapper.writeValueAsString(MESSAGE_BODY.resourceUid(RESOURCE_1)),
+            objectMapper.writeValueAsString(MESSAGE_BODY.resourceUid(RESOURCE_2)),
+            objectMapper.writeValueAsString(MESSAGE_BODY.resourceUid(RESOURCE_3))));
   }
 }
