@@ -15,7 +15,7 @@ public class IntegrationUtils {
   // TODO(yonghao): Figure a better config pulling solution to replace the hardcoded configs.
   public static final CleanupConfig DEFAULT_CLEANUP_CONFIG =
       CleanupConfig.builder()
-          .setTimeToLive(Duration.ofHours(2))
+          .setTimeToLive(Duration.ofMinutes(1))
           .setCleanupId("crl-integration")
           .setCredentials(IntegrationCredentials.getJanitorClientGoogleCredentialsOrDie())
           .setJanitorTopicName("crljanitor-tools-pubsub-topic")
