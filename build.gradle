@@ -36,8 +36,8 @@ subprojects { subproject ->
         api 'com.google.cloud:google-cloud-core-http:1.93.5'
 
         implementation 'org.slf4j:slf4j-api:1.7.28'
-        api 'com.google.code.gson:gson:2.8.6'
-        api "com.google.guava:guava:29.0-jre"
+        implementation 'com.google.code.gson:gson:2.8.6'
+        api 'com.google.guava:guava:29.0-jre'
 
         implementation group: 'bio.terra.janitor', name: 'terra-resource-janitor-client', version: '0.0.2-SNAPSHOT'
 
@@ -122,7 +122,7 @@ artifactory {
             password = "${artifactory_password}"
         }
         defaults {
-            publications('cloud-resource-schema', 'google-bigquery', 'google-storage')
+            publications('common', 'cloud-resource-schema', 'google-bigquery', 'google-storage')
         }
     }
 }
