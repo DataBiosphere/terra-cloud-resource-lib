@@ -1,12 +1,12 @@
 package bio.terra.cloudres.google.storage;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.google.cloud.storage.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("unit")
 public class SerializeUtilsTest {
@@ -61,9 +61,9 @@ public class SerializeUtilsTest {
   @Test
   public void bucketNameAndBucketTargetOption() {
     JsonObject jsonObject =
-        SerializeUtils.convert("my-name", Storage.BucketTargetOption.metagenerationMatch());
+        SerializeUtils.convert(BucketInfo.newBuilder("my-name").build(), Storage.BucketTargetOption.metagenerationMatch());
     assertEquals(
-        "{\"bucketName\":\"my-name\",\"bucketTargetOption\":[{\"rpcOption\":\"IF_METAGENERATION_MATCH\"}]}",
+        "{\"bucketInfo\":{\"name\":\"my-name\"},\"bucketTargetOption\":[{\"rpcOption\":\"IF_METAGENERATION_MATCH\"}]}",
         jsonObject.toString());
   }
 }

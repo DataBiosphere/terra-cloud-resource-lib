@@ -45,10 +45,10 @@ class SerializeUtils {
     return jsonObject;
   }
 
-  static JsonObject convert(String bucketName, Storage.BucketTargetOption... options) {
+  static JsonObject convert(BucketInfo bucketInfo, Storage.BucketTargetOption... options) {
     Gson gson = new Gson();
     JsonObject jsonObject = new JsonObject();
-    jsonObject.add("bucketName", gson.toJsonTree(bucketName));
+    jsonObject.add("bucketInfo", convertWithGson(bucketInfo, BucketInfo.class));
     jsonObject.add("bucketTargetOption", gson.toJsonTree(options));
     return jsonObject;
   }

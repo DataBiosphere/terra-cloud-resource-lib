@@ -1,7 +1,5 @@
 package bio.terra.cloudres.google.storage;
 
-import static bio.terra.cloudres.google.storage.SerializeUtils.convert;
-
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
@@ -9,9 +7,12 @@ import bio.terra.cloudres.common.TransformPage;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 import com.google.gson.JsonObject;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+
+import static bio.terra.cloudres.google.storage.SerializeUtils.convert;
 
 /** A Cloud Object Wrapper(COW) for {@link Bucket}. */
 public class BucketCow {
@@ -56,7 +57,7 @@ public class BucketCow {
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_UPDATE_BUCKET,
             () -> bucket.update(options),
-            () -> convert(bucket.getName(), options)));
+            () -> convert(bucket, options)));
   }
 
   /** See {@link Bucket#delete(Bucket.BucketSourceOption...)} */
