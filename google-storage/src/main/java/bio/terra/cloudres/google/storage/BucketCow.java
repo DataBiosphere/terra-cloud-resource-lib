@@ -41,7 +41,15 @@ public class BucketCow {
         (Blob t) -> new BlobCow(clientConfig, t));
   }
 
-  /** See {@link Bucket#update(Storage.BucketTargetOption...)} */
+  /**
+   * See {@link Bucket#update(Storage.BucketTargetOption...)}
+   *
+   * <p>Example of updating the bucket's information.
+   *
+   * <pre>{@code
+   * BucketCow updatedBucket = bucketCow.toBuilder().setVersioningEnabled(true).build().update();
+   * }</pre>
+   */
   public BucketCow update(Storage.BucketTargetOption... options) {
     return new BucketCow(
         clientConfig,
@@ -55,7 +63,7 @@ public class BucketCow {
   public boolean delete() {
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_DELETE_BUCKET,
-        () -> bucket.delete(),
+        bucket::delete,
         () -> {
           JsonObject request = new JsonObject();
           request.addProperty("bucket_name", bucket.getName());
@@ -67,13 +75,19 @@ public class BucketCow {
     return new Builder(bucket.toBuilder(), clientConfig);
   }
 
+  /** Builder for {@link BucketCow} and setters are mapped to {@link Bucket.Builder}. */
   public static class Builder {
-    private Bucket.Builder bucketBuilder;
-    private ClientConfig clientConfig;
+    private final Bucket.Builder bucketBuilder;
+    private final ClientConfig clientConfig;
 
     private Builder(Bucket.Builder bucketBuilder, ClientConfig clientConfig) {
       this.bucketBuilder = bucketBuilder;
       this.clientConfig = clientConfig;
+    }
+
+    public Builder setVersioningEnabled(Boolean enable) {
+      bucketBuilder.setVersioningEnabled(enable);
+      return this;
     }
 
     public Builder setLifecycleRules(Iterable<? extends BucketInfo.LifecycleRule> rules) {
