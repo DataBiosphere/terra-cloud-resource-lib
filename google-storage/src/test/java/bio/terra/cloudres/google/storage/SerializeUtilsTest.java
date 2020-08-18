@@ -1,15 +1,12 @@
 package bio.terra.cloudres.google.storage;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.google.cloud.storage.Acl;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.BucketInfo;
+import com.google.cloud.storage.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("unit")
 public class SerializeUtilsTest {
@@ -51,5 +48,22 @@ public class SerializeUtilsTest {
         SerializeUtils.convert(
             BucketInfo.newBuilder("my-name").setLabels(ImmutableMap.of("k1", "v1")).build());
     assertEquals("{\"name\":\"my-name\",\"labels\":{\"k1\":\"v1\"}}", jsonObject.toString());
+  }
+
+  @Test
+  public void bucketNameAndBlobListOption() {
+    JsonObject jsonObject = SerializeUtils.convert("my-name", Storage.BlobListOption.pageSize(1));
+    assertEquals(
+        "{\"bucketName\":\"my-name\",\"blobListOption\":[{\"rpcOption\":\"MAX_RESULTS\",\"value\":1}]}",
+        jsonObject.toString());
+  }
+
+  @Test
+  public void bucketNameAndBucketTargetOption() {
+    JsonObject jsonObject =
+        SerializeUtils.convert("my-name", Storage.BucketTargetOption.metagenerationMatch());
+    assertEquals(
+        "{\"bucketName\":\"my-name\",\"bucketTargetOption\":[{\"rpcOption\":\"IF_METAGENERATION_MATCH\"}]}",
+        jsonObject.toString());
   }
 }
