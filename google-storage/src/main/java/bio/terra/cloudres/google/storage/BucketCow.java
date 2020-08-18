@@ -7,11 +7,9 @@ import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.TransformPage;
 import com.google.api.gax.paging.Page;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.BucketInfo;
-import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.*;
 import com.google.gson.JsonObject;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,5 +61,38 @@ public class BucketCow {
           request.addProperty("bucket_name", bucket.getName());
           return request;
         });
+  }
+
+  public Builder toBuilder() {
+    return new Builder(bucket.toBuilder(), clientConfig);
+  }
+
+  public static class Builder {
+    private Bucket.Builder bucketBuilder;
+    private ClientConfig clientConfig;
+
+    private Builder(Bucket.Builder bucketBuilder, ClientConfig clientConfig) {
+      this.bucketBuilder = bucketBuilder;
+      this.clientConfig = clientConfig;
+    }
+
+    public Builder setLifecycleRules(Iterable<? extends BucketInfo.LifecycleRule> rules) {
+      bucketBuilder.setLifecycleRules(rules);
+      return this;
+    }
+
+    public Builder setAcl(Iterable<Acl> acl) {
+      bucketBuilder.setAcl(acl);
+      return this;
+    }
+
+    public Builder setLabels(Map<String, String> labels) {
+      bucketBuilder.setLabels(labels);
+      return this;
+    }
+
+    public BucketCow build() {
+      return new BucketCow(clientConfig, bucketBuilder.build());
+    }
   }
 }

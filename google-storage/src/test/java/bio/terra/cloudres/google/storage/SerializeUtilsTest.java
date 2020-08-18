@@ -1,12 +1,12 @@
 package bio.terra.cloudres.google.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.cloud.storage.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("unit")
 public class SerializeUtilsTest {
