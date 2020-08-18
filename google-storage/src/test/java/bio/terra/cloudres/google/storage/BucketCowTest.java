@@ -1,23 +1,22 @@
 package bio.terra.cloudres.google.storage;
 
-import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.api.gax.paging.Page;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BucketInfo;
-import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.createBlobWithContents;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.api.gax.paging.Page;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BucketInfo;
+import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class BucketCowTest {
@@ -46,11 +45,17 @@ public class BucketCowTest {
             BucketInfo.LifecycleRule.LifecycleAction.newDeleteAction(),
             BucketInfo.LifecycleRule.LifecycleCondition.newBuilder().setAge(1).build());
 
-    BucketCow updatedBucketCow = bucketCow.toBuilder().setLifecycleRules(ImmutableList.of(lifecycleRule)).build().update();
+    BucketCow updatedBucketCow =
+        bucketCow.toBuilder().setLifecycleRules(ImmutableList.of(lifecycleRule)).build().update();
 
-    assertEquals(1, storageCow.get(updatedBucketCow.getBucketInfo().getName()).getBucketInfo().getLifecycleRules().size());
     assertEquals(
-        lifecycleRule, updatedBucketCow.getBucketInfo().getLifecycleRules().get(0));
+        1,
+        storageCow
+            .get(updatedBucketCow.getBucketInfo().getName())
+            .getBucketInfo()
+            .getLifecycleRules()
+            .size());
+    assertEquals(lifecycleRule, updatedBucketCow.getBucketInfo().getLifecycleRules().get(0));
 
     assertTrue(updatedBucketCow.delete());
     assertNull(storageCow.get(bucketName));
