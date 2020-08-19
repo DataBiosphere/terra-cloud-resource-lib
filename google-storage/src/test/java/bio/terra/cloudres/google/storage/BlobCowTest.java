@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.storage;
 
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.createBlobWithContents;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
@@ -9,14 +10,10 @@ import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
-import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
 import com.google.cloud.storage.CopyWriter;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
@@ -69,7 +66,7 @@ public class BlobCowTest {
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
 
     final String contents = "hello my blob";
-    BlobCow source = createBlobWithContents(sourceBlobId, contents);
+    BlobCow source = createBlobWithContents(storageCow, sourceBlobId, contents);
     assertEquals(contents, StorageIntegrationUtils.readContents(source));
 
     List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
@@ -98,17 +95,10 @@ public class BlobCowTest {
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
 
     final String contents = "hello my blob";
-    BlobCow blob = createBlobWithContents(blobId, contents);
+    BlobCow blob = createBlobWithContents(storageCow, blobId, contents);
 
     assertEquals(contents, StorageIntegrationUtils.readContents(blob));
 
     assertTrue(blob.delete());
-  }
-
-  private BlobCow createBlobWithContents(BlobId blobId, String contents) throws IOException {
-    try (WriteChannel writeChannel = storageCow.writer(BlobInfo.newBuilder(blobId).build())) {
-      writeChannel.write(ByteBuffer.wrap(contents.getBytes(StandardCharsets.UTF_8)));
-    }
-    return storageCow.get(blobId);
   }
 }

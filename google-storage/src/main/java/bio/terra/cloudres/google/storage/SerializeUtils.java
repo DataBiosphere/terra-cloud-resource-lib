@@ -2,10 +2,7 @@ package bio.terra.cloudres.google.storage;
 
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
-import com.google.cloud.storage.Acl;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.BucketInfo;
+import com.google.cloud.storage.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.lang.reflect.Type;
@@ -38,6 +35,22 @@ class SerializeUtils {
 
   static JsonObject convert(BucketInfo bucketInfo) {
     return convertWithGson(bucketInfo, BucketInfo.class);
+  }
+
+  static JsonObject convert(String bucketName, Storage.BlobListOption... options) {
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("bucketName", gson.toJsonTree(bucketName));
+    jsonObject.add("blobListOption", gson.toJsonTree(options));
+    return jsonObject;
+  }
+
+  static JsonObject convert(BucketInfo bucketInfo, Storage.BucketTargetOption... options) {
+    Gson gson = new Gson();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("bucketInfo", convertWithGson(bucketInfo, BucketInfo.class));
+    jsonObject.add("bucketTargetOption", gson.toJsonTree(options));
+    return jsonObject;
   }
 
   /**
