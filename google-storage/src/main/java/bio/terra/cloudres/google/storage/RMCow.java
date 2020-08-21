@@ -37,13 +37,6 @@ public class RMCow {
                 () -> SerializeUtils.convert(project)));
     }
 
-    public boolean delete(String projectId) throws IOException {
-        CleanupRecorder.record(SerializeUtils.create(projectId), clientConfig);
-        return operationAnnotator.executeCheckedCowOperation(
-                CloudOperation.GOOGLE_CREATE_PROJECT,
-                () -> cloudResourceManager.projects().delete(projectId).execute(),
-                () -> SerializeUtils.convert("projectId", projectId));
-    }
 
     private CloudResourceManager createCloudResourceManagerService(ClientConfig clientConfig, GoogleCredentials googleCredentials)
             throws IOException, GeneralSecurityException {
