@@ -92,9 +92,19 @@ public class BigQueryCowTest {
   }
 
   @Test
-  public void deleteDataset() {
+  public void deleteDataset_byStringName() {
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
+
+    assertNotNull(bigQueryCow.getDataSet(datasetId));
+    bigQueryCow.delete(datasetId);
+    assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo());
+  }
+
+  @Test
+  public void deleteDataset_byDatasetId() {
+    DatasetCow datasetCow = resourceTracker.createDatasetCow();
+    DatasetId datasetId = datasetCow.getDatasetInfo().getDatasetId();
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     bigQueryCow.delete(datasetId);

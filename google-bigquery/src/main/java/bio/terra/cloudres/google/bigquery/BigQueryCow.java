@@ -81,6 +81,14 @@ public class BigQueryCow {
         () -> convert(DatasetId.of(datasetId), deleteOptions));
   }
 
+  /** See {@link BigQuery#delete(DatasetId, DatasetDeleteOption...)}. */
+  public boolean delete(DatasetId datasetId, DatasetDeleteOption... deleteOptions) {
+    return operationAnnotator.executeCowOperation(
+        CloudOperation.GOOGLE_DELETE_DATASET,
+        () -> bigQuery.delete(datasetId, deleteOptions),
+        () -> convert(datasetId, deleteOptions));
+  }
+
   /** See {@link BigQuery#getDataset(String, DatasetOption...)}. */
   public DatasetCow getDataSet(String datasetId, DatasetOption... datasetOptions) {
     return new DatasetCow(
@@ -89,6 +97,16 @@ public class BigQueryCow {
             CloudOperation.GOOGLE_GET_DATASET,
             () -> bigQuery.getDataset(datasetId, datasetOptions),
             () -> convert(DatasetId.of(datasetId), datasetOptions)));
+  }
+
+  /** See {@link BigQuery#getDataset(DatasetId, DatasetOption...)}. */
+  public DatasetCow getDataSet(DatasetId datasetId, DatasetOption... datasetOptions) {
+    return new DatasetCow(
+        clientConfig,
+        operationAnnotator.executeCowOperation(
+            CloudOperation.GOOGLE_GET_DATASET,
+            () -> bigQuery.getDataset(datasetId, datasetOptions),
+            () -> convert(datasetId, datasetOptions)));
   }
 
   /** See {@link BigQuery#create(TableInfo, TableOption...)}. */
