@@ -90,7 +90,7 @@ public class BigQueryCow {
   }
 
   /** See {@link BigQuery#getDataset(String, DatasetOption...)}. */
-  public DatasetCow getDataSet(String datasetId, DatasetOption... datasetOptions) {
+  public DatasetCow getDataset(String datasetId, DatasetOption... datasetOptions) {
     Dataset rawDataset =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_GET_DATASET,
@@ -100,7 +100,7 @@ public class BigQueryCow {
   }
 
   /** See {@link BigQuery#getDataset(DatasetId, DatasetOption...)}. */
-  public DatasetCow getDataSet(DatasetId datasetId, DatasetOption... datasetOptions) {
+  public DatasetCow getDataset(DatasetId datasetId, DatasetOption... datasetOptions) {
     Dataset rawDataset =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_GET_DATASET,
