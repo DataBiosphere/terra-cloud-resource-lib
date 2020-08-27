@@ -1,13 +1,13 @@
 package bio.terra.cloudres.google.bigquery;
 
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
-import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
-import static org.junit.jupiter.api.Assertions.*;
-
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.cloud.bigquery.DatasetInfo;
 import com.google.cloud.bigquery.Table;
 import org.junit.jupiter.api.*;
+
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.assertTableIdEqual;
+import static bio.terra.cloudres.google.bigquery.BigQueryIntegrationUtils.defaultBigQueryCow;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("integration")
 public class TableCowTest {
@@ -67,6 +67,6 @@ public class TableCowTest {
     TableCow tableCow = resourceTracker.createTableCow();
     tableCow.delete();
 
-    assertNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());
+    assertNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()));
   }
 }

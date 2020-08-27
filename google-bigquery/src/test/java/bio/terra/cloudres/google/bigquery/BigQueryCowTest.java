@@ -98,7 +98,7 @@ public class BigQueryCowTest {
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     bigQueryCow.delete(datasetId);
-    assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo());
+    assertNull(bigQueryCow.getDataSet(datasetId));
   }
 
   @Test
@@ -108,7 +108,7 @@ public class BigQueryCowTest {
 
     assertNotNull(bigQueryCow.getDataSet(datasetId));
     bigQueryCow.delete(datasetId);
-    assertNull(bigQueryCow.getDataSet(datasetId).getDatasetInfo());
+    assertNull(bigQueryCow.getDataSet(datasetId));
   }
 
   @Test
@@ -152,7 +152,7 @@ public class BigQueryCowTest {
     assertNotNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());
 
     bigQueryCow.delete(tableId);
-    assertNull(bigQueryCow.getTable(tableId).getTableInfo());
+    assertNull(bigQueryCow.getTable(tableId));
   }
 
   @Test

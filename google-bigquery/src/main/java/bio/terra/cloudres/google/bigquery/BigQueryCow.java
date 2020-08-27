@@ -91,22 +91,22 @@ public class BigQueryCow {
 
   /** See {@link BigQuery#getDataset(String, DatasetOption...)}. */
   public DatasetCow getDataSet(String datasetId, DatasetOption... datasetOptions) {
-    return new DatasetCow(
-        clientConfig,
+    Dataset rawDataset =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_GET_DATASET,
             () -> bigQuery.getDataset(datasetId, datasetOptions),
-            () -> convert(DatasetId.of(datasetId), datasetOptions)));
+            () -> convert(DatasetId.of(datasetId), datasetOptions));
+    return (rawDataset == null) ? null : new DatasetCow(clientConfig, rawDataset);
   }
 
   /** See {@link BigQuery#getDataset(DatasetId, DatasetOption...)}. */
   public DatasetCow getDataSet(DatasetId datasetId, DatasetOption... datasetOptions) {
-    return new DatasetCow(
-        clientConfig,
+    Dataset rawDataset =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_GET_DATASET,
             () -> bigQuery.getDataset(datasetId, datasetOptions),
-            () -> convert(datasetId, datasetOptions)));
+            () -> convert(datasetId, datasetOptions));
+    return (rawDataset == null) ? null : new DatasetCow(clientConfig, rawDataset);
   }
 
   /** See {@link BigQuery#create(TableInfo, TableOption...)}. */
@@ -150,12 +150,12 @@ public class BigQueryCow {
 
   /** See {@link BigQuery#getTable(TableId, TableOption...)}. */
   public TableCow getTable(TableId tableId, TableOption... tableOptions) {
-    return new TableCow(
-        clientConfig,
+    Table rawTable =
         operationAnnotator.executeCowOperation(
             CloudOperation.GOOGLE_GET_BIGQUERY_TABLE,
             () -> bigQuery.getTable(tableId, tableOptions),
-            () -> convert(tableId, tableOptions)));
+            () -> convert(tableId, tableOptions));
+    return (rawTable == null) ? null : new TableCow(clientConfig, rawTable);
   }
 
   /** See {@link BigQuery#getTable(String, String, TableOption...)}. */
