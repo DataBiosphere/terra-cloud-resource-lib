@@ -21,10 +21,9 @@ public class CloudResourceManagerCowTest {
 
   /** What parent resource (organizatino or folder) to create projects within. */
   // TODO(PF-67): Figure out how to pipe configuration to test.
-  // Current value from
-  // https://github.com/broadinstitute/terraform-ap-deployments/blob/f40ee29943179d590be129c95d0f2dd9da93f66d/janitor-test/tfvars/default.tfvars#L3
+  // Current value from vault 'config/terraform/terra/crl-test/default/container_folder_id'.
   private static final ResourceId PARENT_RESOURCE =
-      new ResourceId().setType("folder").setId("1074206284898");
+      new ResourceId().setType("folder").setId("866104354540");
 
   private static CloudResourceManagerCow defaultManager() {
     HttpTransport httpTransport;
@@ -33,7 +32,6 @@ public class CloudResourceManagerCowTest {
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException("Unable to create HttpTransport.", e);
     }
-    IntegrationCredentials.getAdminGoogleCredentialsOrDie();
     return new CloudResourceManagerCow(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
         new CloudResourceManager.Builder(
@@ -49,7 +47,6 @@ public class CloudResourceManagerCowTest {
   public void createDeleteProject() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
     String projectId = randomProjectId();
-    System.out.println(projectId);
     // TODO poll operation.
     Operation operation =
         managerCow

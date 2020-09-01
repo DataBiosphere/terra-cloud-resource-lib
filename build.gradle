@@ -123,8 +123,8 @@ artifactory {
         }
         defaults {
             publications(
-                    'common',
                     'cloud-resource-schema',
+                    'common',
                     'google-bigquery',
                     'google-cloudresourcemanager',
                     'google-storage')
