@@ -1,11 +1,10 @@
 package bio.terra.cloudres.google.cloudresourcemanager.operation;
 
 import bio.terra.cloudres.google.cloudresourcemanager.AbstractRequestCow;
-
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * A Cloud Object Wrapper (COW) for api-services Operations.
@@ -56,7 +55,9 @@ public class OperationCow<T> {
     AbstractRequestCow<T> create(T operation) throws IOException;
   }
 
-  /** An interface to unite the different api services model classes of the same "operation" data. */
+  /**
+   * An interface to unite the different api services model classes of the same "operation" data.
+   */
   public interface OperationAdapter<T> {
     /** Return the underlying Operation. */
     T getOperation();

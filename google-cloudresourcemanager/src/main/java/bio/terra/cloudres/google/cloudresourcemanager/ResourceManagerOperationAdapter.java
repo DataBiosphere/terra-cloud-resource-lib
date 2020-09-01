@@ -38,11 +38,7 @@ class ResourceManagerOperationAdapter implements OperationCow.OperationAdapter<O
     return new StatusAdapter(status);
   }
 
-  /**
-   * A {@link
-   * OperationCow.OperationAdapter.StatusAdapter} for
-   * {@link Status}.
-   */
+  /** A {@link OperationCow.OperationAdapter.StatusAdapter} for {@link Status}. */
   private static class StatusAdapter implements OperationCow.OperationAdapter.StatusAdapter {
     private final Status status;
 

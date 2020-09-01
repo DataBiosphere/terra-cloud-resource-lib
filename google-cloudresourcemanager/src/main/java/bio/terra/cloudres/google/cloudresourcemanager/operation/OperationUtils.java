@@ -12,8 +12,8 @@ public class OperationUtils {
   /**
    * Poll an operation until it completes, the operation get errors, or the timeout is reached.
    *
-   * <p>Note that this does not throw an error if the operation executes "successfully" but returns an
-   * error.
+   * <p>Note that this does not throw an error if the operation executes "successfully" but returns
+   * an error.
    */
   @CheckReturnValue
   public static <T> OperationCow<T> pollUntilComplete(
