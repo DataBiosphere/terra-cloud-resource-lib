@@ -1,19 +1,16 @@
 package bio.terra.cloudres.google.cloudresourcemanager;
 
-import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationAdapter;
+import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationCow;
 import com.google.api.services.cloudresourcemanager.model.Operation;
 import com.google.api.services.cloudresourcemanager.model.Status;
 import java.util.List;
 import java.util.Map;
 
-/** A {@link OperationAdapter} for {@link Operation}. */
-class ResourceManagerOperationAdapter implements OperationAdapter<Operation> {
-  public static OperationAdapter.Factory<Operation> FACTORY =
-      operation -> new ResourceManagerOperationAdapter(operation);
-
+/** A {@link OperationCow.OperationAdapter} for {@link Operation}. */
+class ResourceManagerOperationAdapter implements OperationCow.OperationAdapter<Operation> {
   private final Operation operation;
 
-  private ResourceManagerOperationAdapter(Operation operation) {
+  ResourceManagerOperationAdapter(Operation operation) {
     this.operation = operation;
   }
 
@@ -43,10 +40,10 @@ class ResourceManagerOperationAdapter implements OperationAdapter<Operation> {
 
   /**
    * A {@link
-   * bio.terra.cloudres.google.cloudresourcemanager.operation.OperationAdapter.StatusAdapter} for
+   * OperationCow.OperationAdapter.StatusAdapter} for
    * {@link Status}.
    */
-  private static class StatusAdapter implements OperationAdapter.StatusAdapter {
+  private static class StatusAdapter implements OperationCow.OperationAdapter.StatusAdapter {
     private final Status status;
 
     private StatusAdapter(Status status) {

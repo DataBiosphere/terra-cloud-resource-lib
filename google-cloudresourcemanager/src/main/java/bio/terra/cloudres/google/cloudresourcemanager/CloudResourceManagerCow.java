@@ -129,7 +129,7 @@ public class CloudResourceManagerCow {
 
     public OperationCow<Operation> operationCow(Operation operation) {
       return new OperationCow<>(
-          operation, ResourceManagerOperationAdapter.FACTORY, op -> get(op.getName()));
+          operation, ResourceManagerOperationAdapter::new, op -> get(op.getName()));
     }
   }
 }

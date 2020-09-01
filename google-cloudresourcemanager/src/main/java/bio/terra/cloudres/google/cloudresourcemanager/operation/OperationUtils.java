@@ -35,7 +35,7 @@ public class OperationUtils {
   }
 
   /** Convenience method for checking if an operation is done. */
-  public static boolean isDone(OperationAdapter<?> operationAdapter) {
+  public static boolean isDone(OperationCow.OperationAdapter<?> operationAdapter) {
     // Google lets getDone on operations return null, which is also not done.
     return operationAdapter.getDone() != null && operationAdapter.getDone();
   }
