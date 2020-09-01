@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
@@ -42,6 +43,7 @@ public class CloudResourceManagerCow {
       this.projects = projects;
     }
 
+    /** See {@link CloudResourceManager.Projects#create(Project)}. */
     public Create create(Project project) throws IOException {
       return new Create(projects.create(project), project);
     }
@@ -67,6 +69,7 @@ public class CloudResourceManagerCow {
       }
     }
 
+    /** See {@link CloudResourceManager.Projects#delete(String)}. */
     public Delete delete(String projectId) throws IOException {
       return new Delete(projects.delete(projectId));
     }
@@ -85,6 +88,48 @@ public class CloudResourceManagerCow {
         result.addProperty("project_id", delete.getProjectId());
         return result;
       }
+    }
+  }
+
+  public Operations operations() {
+    return new Operations(manager.operations());
+  }
+
+  public class Operations {
+    private final CloudResourceManager.Operations operations;
+
+    private Operations(CloudResourceManager.Operations operations) {
+      this.operations = operations;
+    }
+
+    /** See {@link CloudResourceManager.Operations#get(String)} */
+    public Get get(String name) throws IOException {
+      return new Get(manager.operations().get(name));
+    }
+
+    public class Get extends AbstractRequestCow<Operation> {
+      private final CloudResourceManager.Operations.Get get;
+
+      public Get(CloudResourceManager.Operations.Get get) {
+        super(
+            CloudOperation.GOOGLE_RESOURCE_MANAGER_OPERATION_GET,
+            clientConfig,
+            operationAnnotator,
+            get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("operation_name", get.getName());
+        return result;
+      }
+    }
+
+    public OperationCow<Operation> operationCow(Operation operation) {
+      return new OperationCow<>(
+          operation, ResourceManagerOperationAdapter.FACTORY, op -> get(op.getName()));
     }
   }
 }

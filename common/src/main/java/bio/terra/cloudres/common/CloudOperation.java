@@ -5,6 +5,7 @@ public enum CloudOperation {
   // Google Resource Manager Operations
   GOOGLE_CREATE_PROJECT,
   GOOGLE_DELETE_PROJECT,
+  GOOGLE_RESOURCE_MANAGER_OPERATION_GET,
 
   // Google Storage Operations
   GOOGLE_COPY_BLOB,

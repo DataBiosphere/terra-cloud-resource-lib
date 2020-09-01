@@ -1,0 +1,71 @@
+package bio.terra.cloudres.google.cloudresourcemanager;
+
+import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationAdapter;
+import com.google.api.services.cloudresourcemanager.model.Operation;
+import com.google.api.services.cloudresourcemanager.model.Status;
+import java.util.List;
+import java.util.Map;
+
+/** A {@link OperationAdapter} for {@link Operation}. */
+class ResourceManagerOperationAdapter implements OperationAdapter<Operation> {
+  public static OperationAdapter.Factory<Operation> FACTORY =
+      operation -> new ResourceManagerOperationAdapter(operation);
+
+  private final Operation operation;
+
+  private ResourceManagerOperationAdapter(Operation operation) {
+    this.operation = operation;
+  }
+
+  @Override
+  public Operation getOperation() {
+    return operation;
+  }
+
+  @Override
+  public String getName() {
+    return operation.getName();
+  }
+
+  @Override
+  public Boolean getDone() {
+    return operation.getDone();
+  }
+
+  @Override
+  public StatusAdapter getError() {
+    Status status = operation.getError();
+    if (status == null) {
+      return null;
+    }
+    return new StatusAdapter(status);
+  }
+
+  /**
+   * A {@link
+   * bio.terra.cloudres.google.cloudresourcemanager.operation.OperationAdapter.StatusAdapter} for
+   * {@link Status}.
+   */
+  private static class StatusAdapter implements OperationAdapter.StatusAdapter {
+    private final Status status;
+
+    private StatusAdapter(Status status) {
+      this.status = status;
+    }
+
+    @Override
+    public Integer getCode() {
+      return status.getCode();
+    }
+
+    @Override
+    public String getMessage() {
+      return status.getMessage();
+    }
+
+    @Override
+    public List<Map<String, Object>> getDetails() {
+      return status.getDetails();
+    }
+  }
+}
