@@ -75,7 +75,7 @@ jobs:
         run: ./gradlew integrationTest
       - name: Upload Test Reports
         if: always()
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: Test Reports
           path: |
