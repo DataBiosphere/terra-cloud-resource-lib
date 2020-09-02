@@ -1,12 +1,12 @@
 package bio.terra.cloudres.google.cloudresourcemanager;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Operation;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
@@ -33,9 +33,13 @@ public class CloudResourceManagerCowTest {
   }
 
   @Test
-  public void createDeleteProject() throws Exception {
+  public void createGetDeleteProject() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
     String projectId = randomProjectId();
+
+    assertThrows(
+        GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
+
     Operation operation =
         managerCow
             .projects()
@@ -47,6 +51,10 @@ public class CloudResourceManagerCowTest {
             operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
     assertTrue(operationCow.getOperation().getDone());
     assertNull(operationCow.getOperation().getError());
+
+    Project project = managerCow.projects().get(projectId).execute();
+    assertEquals(projectId, project.getProjectId());
+
     managerCow.projects().delete(projectId).execute();
   }
 
