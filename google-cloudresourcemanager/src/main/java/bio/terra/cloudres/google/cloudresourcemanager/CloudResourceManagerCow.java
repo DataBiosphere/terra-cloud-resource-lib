@@ -127,7 +127,7 @@ public class CloudResourceManagerCow {
 
     /** See {@link CloudResourceManager.Operations#get(String)} */
     public Get get(String name) throws IOException {
-      return new Get(manager.operations().get(name));
+      return new Get(operations.get(name));
     }
 
     public class Get extends AbstractRequestCow<Operation> {
