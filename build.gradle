@@ -122,7 +122,13 @@ artifactory {
             password = "${artifactory_password}"
         }
         defaults {
-            publications('common', 'cloud-resource-schema', 'google-bigquery', 'google-storage')
+            publications(
+                    'cloud-resource-schema',
+                    'common',
+                    'google-api-services-common',
+                    'google-bigquery',
+                    'google-cloudresourcemanager',
+                    'google-storage')
         }
     }
 }

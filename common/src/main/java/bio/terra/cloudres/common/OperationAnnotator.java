@@ -1,6 +1,7 @@
 package bio.terra.cloudres.common;
 
 import bio.terra.cloudres.util.MetricsHelper;
+import com.google.api.client.http.HttpResponseException;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
@@ -136,9 +137,15 @@ public class OperationAnnotator {
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {
-    return e instanceof BaseHttpServiceException
-        ? OptionalInt.of(((BaseHttpServiceException) e).getCode())
-        : OptionalInt.empty();
+    // com.google.cloud library standard HTTP exception.
+    if (e instanceof BaseHttpServiceException) {
+      return OptionalInt.of(((BaseHttpServiceException) e).getCode());
+    }
+    // com.google.api library standard HTTP exception.
+    if (e instanceof HttpResponseException) {
+      return OptionalInt.of(((HttpResponseException) e).getStatusCode());
+    }
+    return OptionalInt.empty();
   }
 
   private JsonObject createExceptionEntry(Exception executionException) {
