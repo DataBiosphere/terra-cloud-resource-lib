@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.cloudresourcemanager.operation;
+package bio.terra.cloudres.google.api.services.common;
 
 import java.io.IOException;
 import java.time.Duration;

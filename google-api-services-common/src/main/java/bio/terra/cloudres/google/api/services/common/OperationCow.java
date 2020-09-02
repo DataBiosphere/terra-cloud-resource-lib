@@ -1,6 +1,5 @@
-package bio.terra.cloudres.google.cloudresourcemanager.operation;
+package bio.terra.cloudres.google.api.services.common;
 
-import bio.terra.cloudres.google.cloudresourcemanager.AbstractRequestCow;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;

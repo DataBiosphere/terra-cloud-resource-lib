@@ -1,6 +1,6 @@
 package bio.terra.cloudres.google.cloudresourcemanager;
 
-import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationCow;
+import bio.terra.cloudres.google.api.services.common.OperationCow;
 import com.google.api.services.cloudresourcemanager.model.Operation;
 import com.google.api.services.cloudresourcemanager.model.Status;
 import java.util.List;

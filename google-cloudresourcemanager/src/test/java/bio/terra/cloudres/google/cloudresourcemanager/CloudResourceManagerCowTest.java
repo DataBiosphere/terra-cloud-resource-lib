@@ -3,8 +3,8 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationCow;
-import bio.terra.cloudres.google.cloudresourcemanager.operation.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.OperationCow;
+import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
