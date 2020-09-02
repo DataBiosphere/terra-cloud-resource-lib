@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.cloudresourcemanager;
+package bio.terra.cloudres.google.api.services.common;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
@@ -14,7 +14,6 @@ import java.util.Optional;
  * An abstract Cloud Object Wrapper to mirror {@link
  * com.google.api.client.googleapis.services.AbstractGoogleClientRequest}.
  */
-// TODO move this class to a new google-apicommon package.
 public abstract class AbstractRequestCow<T> {
   private final AbstractGoogleClientRequest<T> request;
 

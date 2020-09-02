@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;

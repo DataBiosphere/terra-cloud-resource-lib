@@ -125,6 +125,7 @@ artifactory {
             publications(
                     'cloud-resource-schema',
                     'common',
+                    'google-api-services-common',
                     'google-bigquery',
                     'google-cloudresourcemanager',
                     'google-storage')
