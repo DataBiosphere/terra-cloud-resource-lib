@@ -67,6 +67,6 @@ public class TableCowTest {
     TableCow tableCow = resourceTracker.createTableCow();
     tableCow.delete();
 
-    assertNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()).getTableInfo());
+    assertNull(bigQueryCow.getTable(tableCow.getTableInfo().getTableId()));
   }
 }
