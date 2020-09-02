@@ -10,10 +10,7 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.Optional;
 
-/**
- * An abstract Cloud Object Wrapper to mirror {@link
- * com.google.api.client.googleapis.services.AbstractGoogleClientRequest}.
- */
+/** An abstract Cloud Object Wrapper to mirror {@link AbstractGoogleClientRequest}. */
 public abstract class AbstractRequestCow<T> {
   private final AbstractGoogleClientRequest<T> request;
 
@@ -33,7 +30,7 @@ public abstract class AbstractRequestCow<T> {
   }
 
   /** See {@link AbstractGoogleClientRequest#execute()}. */
-  public T execute() throws IOException {
+  public final T execute() throws IOException {
     resourceUidCreation()
         .ifPresent(resourceUid -> CleanupRecorder.record(resourceUid, clientConfig));
     return operationAnnotator.executeCheckedCowOperation(

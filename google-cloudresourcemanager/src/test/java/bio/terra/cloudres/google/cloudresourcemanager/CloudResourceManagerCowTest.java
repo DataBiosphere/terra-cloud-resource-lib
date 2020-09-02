@@ -7,15 +7,9 @@ import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.cloudresourcemanager.CloudResourceManager;
-import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
 import com.google.api.services.cloudresourcemanager.model.Operation;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
-import com.google.auth.http.HttpCredentialsAdapter;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
@@ -31,22 +25,11 @@ public class CloudResourceManagerCowTest {
   private static final ResourceId PARENT_RESOURCE =
       new ResourceId().setType("folder").setId("866104354540");
 
-  private static CloudResourceManagerCow defaultManager() {
-    HttpTransport httpTransport;
-    try {
-      httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-    } catch (GeneralSecurityException | IOException e) {
-      throw new RuntimeException("Unable to create HttpTransport.", e);
-    }
-    return new CloudResourceManagerCow(
+  private static CloudResourceManagerCow defaultManager()
+      throws GeneralSecurityException, IOException {
+    return CloudResourceManagerCow.create(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
-        new CloudResourceManager.Builder(
-                httpTransport,
-                JacksonFactory.getDefaultInstance(),
-                new HttpCredentialsAdapter(
-                    IntegrationCredentials.getAdminGoogleCredentialsOrDie()
-                        .createScoped(CloudResourceManagerScopes.all())))
-            .setApplicationName("crl-test"));
+        IntegrationCredentials.getAdminGoogleCredentialsOrDie());
   }
 
   @Test

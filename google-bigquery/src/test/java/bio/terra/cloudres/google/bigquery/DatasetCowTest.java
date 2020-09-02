@@ -59,7 +59,7 @@ public class DatasetCowTest {
     DatasetCow datasetCow = resourceTracker.createDatasetCow();
     String datasetId = datasetCow.getDatasetInfo().getDatasetId().getDataset();
 
-    assertNotNull(bigQueryCow.getDataSet(datasetId));
+    assertNotNull(bigQueryCow.getDataset(datasetId));
     datasetCow.delete();
     assertNull(datasetCow.reload().getDatasetInfo());
   }
