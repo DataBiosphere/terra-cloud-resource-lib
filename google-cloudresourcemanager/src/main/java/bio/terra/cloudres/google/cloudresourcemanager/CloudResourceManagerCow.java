@@ -36,6 +36,7 @@ public class CloudResourceManagerCow {
     return new Projects(manager.projects());
   }
 
+  /** See {@link CloudResourceManager.Projects}. */
   public class Projects {
     private final CloudResourceManager.Projects projects;
 
@@ -43,10 +44,12 @@ public class CloudResourceManagerCow {
       this.projects = projects;
     }
 
+    /** See {@link CloudResourceManager.Projects#create(Project)}. */
     public Create create(Project project) throws IOException {
       return new Create(projects.create(project), project);
     }
 
+    /** See {@link CloudResourceManager.Projects.Create}. */
     public class Create extends AbstractRequestCow<Operation> {
       private final Project project;
 
@@ -68,10 +71,12 @@ public class CloudResourceManagerCow {
       }
     }
 
+    /** See {@link CloudResourceManager.Projects#delete(String)}. */
     public Delete delete(String projectId) throws IOException {
       return new Delete(projects.delete(projectId));
     }
 
+    /** See {@link CloudResourceManager.Projects.Delete}. */
     public class Delete extends AbstractRequestCow<Empty> {
       private final CloudResourceManager.Projects.Delete delete;
 
