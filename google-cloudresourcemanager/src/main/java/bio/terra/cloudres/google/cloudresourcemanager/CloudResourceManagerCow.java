@@ -112,6 +112,28 @@ public class CloudResourceManagerCow {
         return result;
       }
     }
+
+    /** See {@link CloudResourceManager.Projects#get(String)}. */
+    public Get get(String projectId) throws IOException {
+      return new Get(projects.get(projectId));
+    }
+
+    /** See {@link CloudResourceManager.Projects.Get} */
+    public class Get extends AbstractRequestCow<Project> {
+      private final CloudResourceManager.Projects.Get get;
+
+      private Get(CloudResourceManager.Projects.Get get) {
+        super(CloudOperation.GOOGLE_GET_PROJECT, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProjectId());
+        return result;
+      }
+    }
   }
 
   public Operations operations() {
