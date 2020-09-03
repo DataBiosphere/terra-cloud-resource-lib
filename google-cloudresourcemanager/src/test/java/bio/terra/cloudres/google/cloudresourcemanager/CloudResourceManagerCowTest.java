@@ -88,6 +88,8 @@ public class CloudResourceManagerCowTest {
     Policy secondRetrieval =
         managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
+
+    managerCow.projects().delete(projectId).execute();
   }
 
   private static void createProject(CloudResourceManagerCow managerCow, Project project)
