@@ -55,8 +55,12 @@ public class CloudResourceManagerCowTest {
 
     Project project = managerCow.projects().get(projectId).execute();
     assertEquals(projectId, project.getProjectId());
+    assertEquals("ACTIVE", project.getLifecycleState());
 
     managerCow.projects().delete(projectId).execute();
+    // After "deletion," the project still exists for up to 30 days where it can be recovered.
+    project = managerCow.projects().get(projectId).execute();
+    assertEquals("DELETE_REQUESTED", project.getLifecycleState());
   }
 
   @Test
