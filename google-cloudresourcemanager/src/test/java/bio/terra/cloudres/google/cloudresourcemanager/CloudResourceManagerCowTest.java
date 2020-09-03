@@ -1,5 +1,10 @@
 package bio.terra.cloudres.google.cloudresourcemanager;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import bio.terra.cloudres.google.api.services.common.OperationCow;
+import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Operation;
@@ -7,6 +12,7 @@ import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -30,13 +36,17 @@ public class CloudResourceManagerCowTest {
   public void createDeleteProject() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
     String projectId = randomProjectId();
-    // TODO poll operation.
     Operation operation =
         managerCow
             .projects()
             .create(new Project().setProjectId(projectId).setParent(PARENT_RESOURCE))
             .execute();
-    Thread.sleep(30000);
+    OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
+    operationCow =
+        OperationUtils.pollUntilComplete(
+            operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
+    assertTrue(operationCow.getOperation().getDone());
+    assertNull(operationCow.getOperation().getError());
     managerCow.projects().delete(projectId).execute();
   }
 
