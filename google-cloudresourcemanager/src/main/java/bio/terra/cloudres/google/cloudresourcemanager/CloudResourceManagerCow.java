@@ -10,9 +10,7 @@ import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
-import com.google.api.services.cloudresourcemanager.model.Empty;
-import com.google.api.services.cloudresourcemanager.model.Operation;
-import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
@@ -107,9 +105,7 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        JsonObject result = new JsonObject();
-        result.addProperty("project_id", delete.getProjectId());
-        return result;
+        return serializeProjectId(delete.getProjectId());
       }
     }
 
@@ -129,10 +125,64 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        JsonObject result = new JsonObject();
-        result.addProperty("project_id", get.getProjectId());
-        return result;
+        return serializeProjectId(get.getProjectId());
       }
+    }
+
+    /** See {@link CloudResourceManager.Projects#getIamPolicy(String, GetIamPolicyRequest)}. */
+    public GetIamPolicy getIamPolicy(String resource, GetIamPolicyRequest content)
+        throws IOException {
+      return new GetIamPolicy(projects.getIamPolicy(resource, content));
+    }
+
+    /** See {@link CloudResourceManager.Projects.GetIamPolicy}. */
+    public class GetIamPolicy extends AbstractRequestCow<Policy> {
+      private final CloudResourceManager.Projects.GetIamPolicy getIamPolicy;
+
+      private GetIamPolicy(CloudResourceManager.Projects.GetIamPolicy getIamPolicy) {
+        super(
+            CloudOperation.GOOGLE_GET_IAM_POLICY_PROJECT,
+            clientConfig,
+            operationAnnotator,
+            getIamPolicy);
+        this.getIamPolicy = getIamPolicy;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        return serializeProjectId(getIamPolicy.getResource());
+      }
+    }
+
+    /** See {@link CloudResourceManager.Projects#setIamPolicy(String, SetIamPolicyRequest)} )}. */
+    public SetIamPolicy setIamPolicy(String resource, SetIamPolicyRequest content)
+        throws IOException {
+      return new SetIamPolicy(projects.setIamPolicy(resource, content));
+    }
+
+    /** See {@link CloudResourceManager.Projects.SetIamPolicy}. */
+    public class SetIamPolicy extends AbstractRequestCow<Policy> {
+      private final CloudResourceManager.Projects.SetIamPolicy setIamPolicy;
+
+      private SetIamPolicy(CloudResourceManager.Projects.SetIamPolicy setIamPolicy) {
+        super(
+            CloudOperation.GOOGLE_SET_IAM_POLICY_PROJECT,
+            clientConfig,
+            operationAnnotator,
+            setIamPolicy);
+        this.setIamPolicy = setIamPolicy;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        return serializeProjectId(setIamPolicy.getResource());
+      }
+    }
+
+    private JsonObject serializeProjectId(String projectId) {
+      JsonObject result = new JsonObject();
+      result.addProperty("project_id", projectId);
+      return result;
     }
   }
 
