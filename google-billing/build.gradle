@@ -3,4 +3,7 @@ dependencies {
     api project(':common')
 
     api 'com.google.cloud:google-cloud-billing:1.1.1'
+
+    testImplementation project(':google-cloudresourcemanager')
+    testImplementation(testFixtures(project(':google-cloudresourcemanager')))
 }

@@ -2,6 +2,7 @@ package bio.terra.cloudres.common;
 
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.gax.rpc.ApiException;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
@@ -140,6 +141,10 @@ public class OperationAnnotator {
     // com.google.cloud library standard HTTP exception.
     if (e instanceof BaseHttpServiceException) {
       return OptionalInt.of(((BaseHttpServiceException) e).getCode());
+    }
+    // com.google.cloud library standard gRPC exception. Not technically an http error code, but equivalent.
+    if (e instanceof ApiException) {
+      return OptionalInt.of(((ApiException) e).getStatusCode().getCode().getHttpStatusCode());
     }
     // com.google.api library standard HTTP exception.
     if (e instanceof HttpResponseException) {

@@ -4,12 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Operation;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.cloudresourcemanager.model.ResourceId;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
@@ -18,12 +19,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class CloudResourceManagerCowTest {
-
-  /** What parent resource (organizatino or folder) to create projects within. */
-  // TODO(PF-67): Figure out how to pipe configuration to test.
-  // Current value from vault 'config/terraform/terra/crl-test/default/container_folder_id'.
-  private static final ResourceId PARENT_RESOURCE =
-      new ResourceId().setType("folder").setId("866104354540");
 
   private static CloudResourceManagerCow defaultManager()
       throws GeneralSecurityException, IOException {
@@ -35,7 +30,7 @@ public class CloudResourceManagerCowTest {
   @Test
   public void createGetDeleteProject() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
-    String projectId = randomProjectId();
+    String projectId = ProjectUtils.randomProjectId();
 
     assertThrows(
         GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
@@ -43,7 +38,7 @@ public class CloudResourceManagerCowTest {
     Operation operation =
         managerCow
             .projects()
-            .create(new Project().setProjectId(projectId).setParent(PARENT_RESOURCE))
+            .create(new Project().setProjectId(projectId).setParent(ProjectUtils.PARENT_RESOURCE))
             .execute();
     OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
     operationCow =
@@ -62,8 +57,4 @@ public class CloudResourceManagerCowTest {
     assertEquals("DELETE_REQUESTED", project.getLifecycleState());
   }
 
-  private static String randomProjectId() {
-    // Project ids must start with a letter and be no more than 30 characters long.
-    return "p" + IntegrationUtils.randomName().substring(0, 29);
-  }
 }
