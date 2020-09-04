@@ -8,10 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.opencensus.common.Scope;
-import io.opencensus.trace.TraceId;
-import io.opencensus.trace.Tracer;
-import io.opencensus.trace.Tracing;
+import io.opencensus.trace.*;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -67,29 +64,38 @@ public class OperationAnnotator {
       throws E {
     Optional<Exception> executionException = Optional.empty();
 
-    try (Scope ss = tracer.spanBuilder(cloudOperation.name()).startScopedSpan()) {
-      // Record the Cloud API usage.
-      recordApiCount(cloudOperation);
+    Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
 
-      Stopwatch stopwatch = Stopwatch.createStarted();
-      try {
-        R response = cowExecute.execute();
-        recordLatency(stopwatch.stop().elapsed(), cloudOperation);
-        return response;
-      } catch (Exception e) {
-        // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
-        // different scenarios.
-        recordLatency(stopwatch.stop().elapsed(), cloudOperation);
-        recordErrors(getHttpErrorCode(e), cloudOperation);
-        executionException = Optional.of(e);
-        throw e;
-      } finally {
-        logEvent(
-            tracer.getCurrentSpan().getContext().getTraceId(),
-            cloudOperation,
-            cowSerialize.serializeRequest(),
-            executionException);
-      }
+    // Record the Cloud API usage.
+    recordApiCount(cloudOperation);
+
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    try {
+      R response = cowExecute.execute();
+      recordLatency(stopwatch.stop().elapsed(), cloudOperation);
+      return response;
+    } catch (Exception e) {
+      // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
+      // different scenarios.
+      recordLatency(stopwatch.stop().elapsed(), cloudOperation);
+      OptionalInt httpErrorCode = getHttpErrorCode(e);
+      tracer
+          .getCurrentSpan()
+          .putAttribute(
+              "httpErrorCode", AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
+      recordErrors(getHttpErrorCode(e), cloudOperation);
+      executionException = Optional.of(e);
+      throw e;
+    } finally {
+      logEvent(
+          tracer.getCurrentSpan().getContext().getTraceId(),
+          cloudOperation,
+          cowSerialize.serializeRequest(),
+          executionException);
+      // We manually manage the span so that the expected span is still present in catch and
+      // finally.
+      // See warning on SpanBuilder#startScopedSpan.
+      span.end();
     }
   }
 
