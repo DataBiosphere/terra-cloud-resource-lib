@@ -10,10 +10,9 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.*;
-import com.google.common.collect.ImmutableList;
 import com.google.api.services.cloudresourcemanager.model.Operation;
 import com.google.api.services.cloudresourcemanager.model.Project;
-
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
@@ -32,7 +31,7 @@ public class CloudResourceManagerCowTest {
   }
 
   private static Project defaultProject(String projectId) {
-    return new Project().setProjectId(projectId).setParent(PARENT_RESOURCE);
+    return new Project().setProjectId(projectId).setParent(ProjectUtils.PARENT_RESOURCE);
   }
 
   @Test
@@ -64,8 +63,7 @@ public class CloudResourceManagerCowTest {
   @Test
   public void getSetIamPolicy() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
-    String projectId = randomProjectId();
-    createProject(managerCow, defaultProject(projectId));
+    String projectId = ProjectUtils.executeCreateProject().getProjectId();
 
     String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
 
@@ -88,20 +86,5 @@ public class CloudResourceManagerCowTest {
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
 
     managerCow.projects().delete(projectId).execute();
-  }
-
-  private static void createProject(CloudResourceManagerCow managerCow, Project project)
-      throws IOException, InterruptedException {
-    Operation operation = managerCow.projects().create(project).execute();
-    OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
-    operationCow =
-        OperationUtils.pollUntilComplete(
-            operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
-    assertNull(operationCow.getOperation().getError());
-  }
-
-  private static String randomProjectId() {
-    // Project ids must start with a letter and be no more than 30 characters long.
-    return "p" + IntegrationUtils.randomName().substring(0, 29);
   }
 }

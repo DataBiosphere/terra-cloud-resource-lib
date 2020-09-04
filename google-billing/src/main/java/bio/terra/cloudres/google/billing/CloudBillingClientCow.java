@@ -3,6 +3,8 @@ package bio.terra.cloudres.google.billing;
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.billing.v1.CloudBillingClient;
 import com.google.cloud.billing.v1.CloudBillingSettings;
 import com.google.cloud.billing.v1.ProjectBillingInfo;
@@ -27,8 +29,13 @@ public class CloudBillingClientCow implements AutoCloseable {
 
   private final ClientConfig clientConfig;
 
-  public CloudBillingClientCow(ClientConfig clientConfig) throws IOException {
-    this(clientConfig, CloudBillingSettings.newBuilder().build());
+  public CloudBillingClientCow(ClientConfig clientConfig, GoogleCredentials credentials)
+      throws IOException {
+    this(
+        clientConfig,
+        CloudBillingSettings.newBuilder()
+            .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
+            .build());
   }
 
   public CloudBillingClientCow(ClientConfig clientConfig, CloudBillingSettings settings)

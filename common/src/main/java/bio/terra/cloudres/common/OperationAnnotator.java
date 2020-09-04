@@ -142,7 +142,8 @@ public class OperationAnnotator {
     if (e instanceof BaseHttpServiceException) {
       return OptionalInt.of(((BaseHttpServiceException) e).getCode());
     }
-    // com.google.cloud library standard gRPC exception. Not technically an http error code, but equivalent.
+    // com.google.cloud library standard gRPC exception. Not technically an http error code, but
+    // equivalent.
     if (e instanceof ApiException) {
       return OptionalInt.of(((ApiException) e).getStatusCode().getCode().getHttpStatusCode());
     }
