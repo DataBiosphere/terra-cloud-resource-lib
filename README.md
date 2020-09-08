@@ -84,6 +84,9 @@ Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadins
 Wraps [Google Cloud ResourceManager Client API](https://cloud.google.com/bigquery/docs/apis).
 Targets the Cloud Resource Manager v1 for Projects and Organizations. [github](https://github.com/googleapis/google-api-java-client-services/tree/master/clients/google-api-services-cloudresourcemanager/v1).
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-cloudresourcemanager).
+#### google-serviceusage
+Wraps [Google Service Usage API](https://cloud.google.com/service-usage/docs/overview).  
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-serviceusage).
 
 #### google-storage
 Wraps [Google Cloud Storage API](https://cloud.google.com/storage/docs/apis).  
