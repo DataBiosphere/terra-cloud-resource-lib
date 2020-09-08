@@ -1,8 +1,7 @@
 package bio.terra.cloudres.google.serviceusage;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
@@ -69,6 +68,35 @@ public class ServiceUsageCowTest {
             .map(GoogleApiServiceusageV1Service::getName)
             .collect(Collectors.toList());
     assertThat(services2, Matchers.hasItem(storageServiceName));
+  }
+
+  @Test
+  public void batchEnableSerialize() throws Exception {
+    ServiceUsageCow.Services.BatchEnable batchEnable =
+        defaultServiceUsage()
+            .services()
+            .batchEnable(
+                "projects/my-project",
+                new BatchEnableServicesRequest()
+                    .setServiceIds(ImmutableList.of(STORAGE_SERVICE_ID)));
+    assertEquals(
+        "{\"parent\":\"projects/my-project\","
+            + "\"content\":{\"serviceIds\":[\"storage-api.googleapis.com\"]}}",
+        batchEnable.serialize().toString());
+  }
+
+  @Test
+  public void listSerialize() throws Exception {
+    ServiceUsageCow.Services.List list =
+        defaultServiceUsage()
+            .services()
+            .list("projects/my-project")
+            .setFilter(ENABLED_FILTER)
+            .setFields("my-fields");
+    assertEquals(
+        "{\"parent\":\"projects/my-project\","
+            + "\"filter\":\"state:ENABLED\",\"fields\":\"my-fields\"}",
+        list.serialize().toString());
   }
 
   private static String projectIdToName(String projectId) {
