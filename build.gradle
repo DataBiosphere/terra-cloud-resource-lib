@@ -128,6 +128,7 @@ artifactory {
                     'google-api-services-common',
                     'google-bigquery',
                     'google-cloudresourcemanager',
+                    'google-serviceusage',
                     'google-storage')
         }
     }

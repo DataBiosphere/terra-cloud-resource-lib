@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':cloud-resource-schema')
+    api project(':common')
+    api project(':google-api-services-common')
+    api 'com.google.apis:google-api-services-serviceusage:v1-rev20200821-1.30.10'
+}
