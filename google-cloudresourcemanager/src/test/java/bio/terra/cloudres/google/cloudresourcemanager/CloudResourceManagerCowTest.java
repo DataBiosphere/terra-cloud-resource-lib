@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 public class CloudResourceManagerCowTest {
 
   private static CloudResourceManagerCow defaultManager()
-          throws GeneralSecurityException, IOException {
+      throws GeneralSecurityException, IOException {
     return CloudResourceManagerCow.create(
-            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
-            IntegrationCredentials.getAdminGoogleCredentialsOrDie());
+        IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+        IntegrationCredentials.getAdminGoogleCredentialsOrDie());
   }
 
   private static Project defaultProject(String projectId) {
@@ -40,13 +40,13 @@ public class CloudResourceManagerCowTest {
     String projectId = ProjectUtils.randomProjectId();
 
     assertThrows(
-            GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
+        GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
 
     Operation operation = managerCow.projects().create(defaultProject(projectId)).execute();
     OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
     operationCow =
-            OperationUtils.pollUntilComplete(
-                    operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
+        OperationUtils.pollUntilComplete(
+            operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
     assertTrue(operationCow.getOperation().getDone());
     assertNull(operationCow.getOperation().getError());
 
@@ -68,21 +68,21 @@ public class CloudResourceManagerCowTest {
     String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
 
     Policy policy =
-            managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
+        managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
     Binding binding =
-            new Binding()
-                    .setRole("roles/viewer")
-                    .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
+        new Binding()
+            .setRole("roles/viewer")
+            .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
     policy.getBindings().add(binding);
     Policy updatedPolicy =
-            managerCow
-                    .projects()
-                    .setIamPolicy(projectId, new SetIamPolicyRequest().setPolicy(policy))
-                    .execute();
+        managerCow
+            .projects()
+            .setIamPolicy(projectId, new SetIamPolicyRequest().setPolicy(policy))
+            .execute();
 
     assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
     Policy secondRetrieval =
-            managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
+        managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
 
     managerCow.projects().delete(projectId).execute();
