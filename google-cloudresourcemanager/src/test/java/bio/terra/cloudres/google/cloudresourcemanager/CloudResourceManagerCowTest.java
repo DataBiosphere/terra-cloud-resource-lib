@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.*;
+import com.google.api.services.cloudresourcemanager.model.Operation;
+import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -20,36 +23,30 @@ import org.junit.jupiter.api.Test;
 @Tag("integration")
 public class CloudResourceManagerCowTest {
 
-  /** What parent resource (organizatino or folder) to create projects within. */
-  // TODO(PF-67): Figure out how to pipe configuration to test.
-  // Current value from vault 'config/terraform/terra/crl-test/default/container_folder_id'.
-  private static final ResourceId PARENT_RESOURCE =
-      new ResourceId().setType("folder").setId("866104354540");
-
   private static CloudResourceManagerCow defaultManager()
-      throws GeneralSecurityException, IOException {
+          throws GeneralSecurityException, IOException {
     return CloudResourceManagerCow.create(
-        IntegrationUtils.DEFAULT_CLIENT_CONFIG,
-        IntegrationCredentials.getAdminGoogleCredentialsOrDie());
+            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+            IntegrationCredentials.getAdminGoogleCredentialsOrDie());
   }
 
   private static Project defaultProject(String projectId) {
-    return new Project().setProjectId(projectId).setParent(PARENT_RESOURCE);
+    return new Project().setProjectId(projectId).setParent(ProjectUtils.PARENT_RESOURCE);
   }
 
   @Test
   public void createGetDeleteProject() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
-    String projectId = randomProjectId();
+    String projectId = ProjectUtils.randomProjectId();
 
     assertThrows(
-        GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
+            GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
 
     Operation operation = managerCow.projects().create(defaultProject(projectId)).execute();
     OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
     operationCow =
-        OperationUtils.pollUntilComplete(
-            operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
+            OperationUtils.pollUntilComplete(
+                    operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
     assertTrue(operationCow.getOperation().getDone());
     assertNull(operationCow.getOperation().getError());
 
@@ -66,44 +63,28 @@ public class CloudResourceManagerCowTest {
   @Test
   public void getSetIamPolicy() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
-    String projectId = randomProjectId();
-    createProject(managerCow, defaultProject(projectId));
+    String projectId = ProjectUtils.executeCreateProject().getProjectId();
 
     String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
 
     Policy policy =
-        managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
+            managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
     Binding binding =
-        new Binding()
-            .setRole("roles/viewer")
-            .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
+            new Binding()
+                    .setRole("roles/viewer")
+                    .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
     policy.getBindings().add(binding);
     Policy updatedPolicy =
-        managerCow
-            .projects()
-            .setIamPolicy(projectId, new SetIamPolicyRequest().setPolicy(policy))
-            .execute();
+            managerCow
+                    .projects()
+                    .setIamPolicy(projectId, new SetIamPolicyRequest().setPolicy(policy))
+                    .execute();
 
     assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
     Policy secondRetrieval =
-        managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
+            managerCow.projects().getIamPolicy(projectId, new GetIamPolicyRequest()).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
 
     managerCow.projects().delete(projectId).execute();
-  }
-
-  private static void createProject(CloudResourceManagerCow managerCow, Project project)
-      throws IOException, InterruptedException {
-    Operation operation = managerCow.projects().create(project).execute();
-    OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
-    operationCow =
-        OperationUtils.pollUntilComplete(
-            operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
-    assertNull(operationCow.getOperation().getError());
-  }
-
-  private static String randomProjectId() {
-    // Project ids must start with a letter and be no more than 30 characters long.
-    return "p" + IntegrationUtils.randomName().substring(0, 29);
   }
 }
