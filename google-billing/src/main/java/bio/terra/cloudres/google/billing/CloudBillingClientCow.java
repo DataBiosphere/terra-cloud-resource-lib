@@ -55,7 +55,7 @@ public class CloudBillingClientCow implements AutoCloseable {
       String name, ProjectBillingInfo projectBillingInfo) {
     return operationAnnotator.executeCowOperation(
         CloudOperation.GOOGLE_UPDATE_PROJECT_BILLING,
-        () -> billing.getProjectBillingInfo(name),
+        () -> billing.updateProjectBillingInfo(name, projectBillingInfo),
         () -> serialize(name, projectBillingInfo));
   }
 
