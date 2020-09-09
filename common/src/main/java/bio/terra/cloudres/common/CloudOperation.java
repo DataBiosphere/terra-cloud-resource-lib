@@ -44,4 +44,5 @@ public enum CloudOperation {
   // Google Service Usage Operations,
   GOOGLE_BATCH_ENABLE_SERVICES,
   GOOGLE_LIST_SERVICES,
+  GOOGLE_SERVICE_USAGE_OPERATION_GET,
 }
