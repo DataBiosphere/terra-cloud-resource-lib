@@ -2,19 +2,14 @@ package bio.terra.cloudres.google.billing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.ServiceUsageCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.serviceusage.v1.model.BatchEnableServicesRequest;
 import com.google.cloud.billing.v1.ProjectBillingInfo;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -40,8 +35,6 @@ public class CloudBillingClientCowTest {
   @Test
   public void getSetProjectBillingInfo() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
-    executeEnableBilling(project.getProjectId());
-
     try (CloudBillingClientCow billingCow = defaultBillingCow()) {
       ProjectBillingInfo initialBilling =
           billingCow.getProjectBillingInfo("projects/" + project.getProjectId());
@@ -59,23 +52,27 @@ public class CloudBillingClientCowTest {
     ProjectUtils.getManagerCow().projects().delete(project.getProjectId());
   }
 
-  /** Enables the cloud billing service on the project. */
-  private static void executeEnableBilling(String projectId)
-      throws GeneralSecurityException, IOException, InterruptedException {
-    ServiceUsageCow serviceUsageCow = defaultServiceUsage();
-    OperationCow<?> operation =
-        serviceUsageCow
-            .operations()
-            .operationCow(
-                serviceUsageCow
-                    .services()
-                    .batchEnable(
-                        "projects/" + projectId,
-                        new BatchEnableServicesRequest()
-                            .setServiceIds(ImmutableList.of(BILLING_SERVICE_ID)))
-                    .execute());
-    operation =
-        OperationUtils.pollUntilComplete(operation, Duration.ofSeconds(5), Duration.ofSeconds(60));
-    assertTrue(operation.getOperationAdapter().getDone());
+  @Test
+  public void serializeProjectName() {
+    assertEquals(
+        "{\"project_name\":\"projects/my-project\"}",
+        CloudBillingClientCow.serializeProjectName("projects/my-project").toString());
+  }
+
+  @Test
+  public void serialize() {
+    assertEquals(
+        "{\"project_name\":\"projects/my-project\","
+            + "\"project_billing_info\":{\"name_\":\"\",\"projectId_\":\"my-project\","
+            + "\"billingAccountName_\":\"billingAccounts/01A82E-CA8A14-367457\",\"billingEnabled_\":false,"
+            + "\"memoizedIsInitialized\":1,\"unknownFields\":{\"fields\":{},\"fieldsDescending\":{}},"
+            + "\"memoizedSize\":-1,\"memoizedHashCode\":0}}",
+        CloudBillingClientCow.serialize(
+                "projects/my-project",
+                ProjectBillingInfo.newBuilder()
+                    .setProjectId("my-project")
+                    .setBillingAccountName(BILLING_ACCOUNT_NAME)
+                    .build())
+            .toString());
   }
 }

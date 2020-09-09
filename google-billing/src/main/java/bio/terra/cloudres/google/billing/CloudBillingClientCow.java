@@ -69,7 +69,7 @@ public class CloudBillingClientCow implements AutoCloseable {
   @VisibleForTesting
   static JsonObject serialize(String projectName, ProjectBillingInfo projectBillingInfo) {
     JsonObject result = serializeProjectName(projectName);
-    result.addProperty("project_billing_info", new Gson().toJson(projectBillingInfo));
+    result.add("project_billing_info", new Gson().toJsonTree(projectBillingInfo));
     return result;
   }
 
