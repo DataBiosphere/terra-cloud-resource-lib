@@ -27,8 +27,6 @@ public class CloudBillingClientCow implements AutoCloseable {
   private final OperationAnnotator operationAnnotator;
   private final CloudBillingClient billing;
 
-  private final ClientConfig clientConfig;
-
   public CloudBillingClientCow(ClientConfig clientConfig, GoogleCredentials credentials)
       throws IOException {
     this(
@@ -40,7 +38,6 @@ public class CloudBillingClientCow implements AutoCloseable {
 
   public CloudBillingClientCow(ClientConfig clientConfig, CloudBillingSettings settings)
       throws IOException {
-    this.clientConfig = clientConfig;
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.billing = CloudBillingClient.create(settings);
   }
