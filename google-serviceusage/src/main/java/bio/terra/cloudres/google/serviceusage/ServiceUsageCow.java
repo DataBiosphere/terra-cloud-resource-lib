@@ -152,7 +152,7 @@ public class ServiceUsageCow {
 
       public Get(ServiceUsage.Operations.Get get) {
         super(
-            CloudOperation.GOOGLE_RESOURCE_MANAGER_OPERATION_GET,
+            CloudOperation.GOOGLE_SERVICE_USAGE_OPERATION_GET,
             clientConfig,
             operationAnnotator,
             get);
