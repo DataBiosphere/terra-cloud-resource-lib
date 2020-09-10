@@ -41,6 +41,10 @@ public enum CloudOperation {
   GOOGLE_RELOAD_DATASET,
   GOOGLE_RELOAD_BIGQUERY_TABLE,
 
+  // Google Billing Operations
+  GOOGLE_GET_PROJECT_BILLING,
+  GOOGLE_UPDATE_PROJECT_BILLING,
+
   // Google Service Usage Operations,
   GOOGLE_BATCH_ENABLE_SERVICES,
   GOOGLE_LIST_SERVICES,

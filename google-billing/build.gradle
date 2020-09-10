@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':cloud-resource-schema')
+    api project(':common')
+
+    api 'com.google.cloud:google-cloud-billing:1.1.1'
+
+    testImplementation project(':google-cloudresourcemanager')
+    testImplementation project(':google-serviceusage')
+    testImplementation(testFixtures(project(':google-cloudresourcemanager')))
+}
