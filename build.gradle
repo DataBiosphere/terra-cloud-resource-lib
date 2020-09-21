@@ -131,6 +131,7 @@ artifactory {
                     'google-bigquery',
                     'google-billing',
                     'google-cloudresourcemanager',
+                    'google-compute',
                     'google-serviceusage',
                     'google-storage')
         }

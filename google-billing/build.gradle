@@ -7,4 +7,5 @@ dependencies {
     testImplementation project(':google-cloudresourcemanager')
     testImplementation project(':google-serviceusage')
     testImplementation(testFixtures(project(':google-cloudresourcemanager')))
+    testFixturesImplementation(testFixtures(project(':common')))
 }
