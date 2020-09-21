@@ -35,6 +35,7 @@ class ResourceManagerOperationAdapter implements OperationCow.OperationAdapter<O
     if (status == null) {
       return null;
     }
+
     return new StatusAdapter(status);
   }
 
