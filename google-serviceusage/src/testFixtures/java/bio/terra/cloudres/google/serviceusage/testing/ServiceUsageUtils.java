@@ -1,16 +1,16 @@
-package bio.terra.cloudres.google.serviceusage;
+package bio.terra.cloudres.google.serviceusage.testing;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.serviceusage.ServiceUsageCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.serviceusage.v1.model.BatchEnableServicesRequest;
 import com.google.api.services.serviceusage.v1.model.Operation;
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /** Testing utilities for service usage. */
 public class ServiceUsageUtils {
@@ -26,11 +26,13 @@ public class ServiceUsageUtils {
     return serviceUsageCow;
   }
 
-  /** Enable services for a project. */
-  public static void enableServices(String projectId, long projectNumber, List<String> services)
-      throws Exception {
-    List<String> serviceNames =
-        services.stream().map(s -> serviceName(projectNumber, s)).collect(Collectors.toList());
+  /**
+   * Enables batch services for a project.
+   *
+   * @param projectId: The projectId to enable services on.
+   * @param services: Services to be enabled. See {@link BatchEnableServicesRequest}
+   */
+  public static void enableServices(String projectId, List<String> services) throws Exception {
     Operation operation =
         getServiceUsageCow()
             .services()

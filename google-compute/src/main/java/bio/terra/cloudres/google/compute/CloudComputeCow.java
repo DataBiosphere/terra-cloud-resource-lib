@@ -19,24 +19,25 @@ import java.security.GeneralSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A Cloud Object Wrapper(COW) for Google API Client Library: {@link ComputeCow} */
-public class ComputeCow {
-  private final Logger logger = LoggerFactory.getLogger(ComputeCow.class);
+/** A Cloud Object Wrapper(COW) for Google API Client Library: {@link CloudComputeCow} */
+public class CloudComputeCow {
+  private final Logger logger = LoggerFactory.getLogger(CloudComputeCow.class);
 
   private final ClientConfig clientConfig;
   private final OperationAnnotator operationAnnotator;
   private final Compute compute;
 
-  public ComputeCow(ClientConfig clientConfig, Compute.Builder computeBuilder) {
+  public CloudComputeCow(ClientConfig clientConfig, Compute.Builder computeBuilder) {
     this.clientConfig = clientConfig;
     operationAnnotator = new OperationAnnotator(clientConfig, logger);
     this.compute = computeBuilder.build();
   }
 
-  /** Create a {@link ComputeCow} with some default configurations for convenience. */
-  public static ComputeCow create(ClientConfig clientConfig, GoogleCredentials googleCredentials)
+  /** Create a {@link CloudComputeCow} with some default configurations for convenience. */
+  public static CloudComputeCow create(
+      ClientConfig clientConfig, GoogleCredentials googleCredentials)
       throws GeneralSecurityException, IOException {
-    return new ComputeCow(
+    return new CloudComputeCow(
         clientConfig,
         new Compute.Builder(
                 Defaults.httpTransport(),

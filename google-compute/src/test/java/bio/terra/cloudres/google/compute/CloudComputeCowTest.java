@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
-import bio.terra.cloudres.google.billing.CloudBillingUtils;
+import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.ServiceUsageCow;
-import bio.terra.cloudres.google.serviceusage.ServiceUsageUtils;
+import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Project;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("integration")
-public class ComputeCowTest {
+public class CloudComputeCowTest {
   private static final String COMPUTE_SERVICE_ID = "compute.googleapis.com";
 
   // TODO(PF-67): Find solution for piping configs and secrets.
@@ -29,31 +29,31 @@ public class ComputeCowTest {
 
   private ServiceUsageCow serviceUsageCow;
 
-  private static ComputeCow defaultCompute() throws GeneralSecurityException, IOException {
-    return ComputeCow.create(
+  private static CloudComputeCow defaultCompute() throws GeneralSecurityException, IOException {
+    return CloudComputeCow.create(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
         IntegrationCredentials.getAdminGoogleCredentialsOrDie());
   }
 
   @Test
   public void createAndGetNetwork() throws Exception {
-    Project project = prepareProject();
+    Project project = createPreparedProject();
 
-    ComputeCow computeCow = defaultCompute();
+    CloudComputeCow cloudComputeCow = defaultCompute();
 
     String projectId = project.getProjectId();
     String netWorkName = randomNetworkName();
     Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
-    Operation operation = computeCow.networks().insert(projectId, network).execute();
+    Operation operation = cloudComputeCow.networks().insert(projectId, network).execute();
     OperationCow<Operation> completedOperation =
         OperationUtils.pollUntilComplete(
-            computeCow.globalOperations().operationCow(projectId, operation),
+            cloudComputeCow.globalOperations().operationCow(projectId, operation),
             Duration.ofSeconds(5),
             Duration.ofSeconds(100));
     assertTrue(completedOperation.getOperationAdapter().getDone());
     assertNull(completedOperation.getOperationAdapter().getError());
 
-    Network createdNetwork = computeCow.networks().get(projectId, netWorkName).execute();
+    Network createdNetwork = cloudComputeCow.networks().get(projectId, netWorkName).execute();
 
     assertEquals(netWorkName, createdNetwork.getName());
     assertFalse(createdNetwork.getAutoCreateSubnetworks());
@@ -62,7 +62,8 @@ public class ComputeCowTest {
   @Test
   public void networkInsertSerialize() throws Exception {
     Network network = new Network().setName("network-name");
-    ComputeCow.Networks.Insert insert = defaultCompute().networks().insert("project-id", network);
+    CloudComputeCow.Networks.Insert insert =
+        defaultCompute().networks().insert("project-id", network);
 
     assertEquals(
         "{\"project\":\"project-id\",\"network\":{\"name\":\"network-name\"}}",
@@ -71,7 +72,8 @@ public class ComputeCowTest {
 
   @Test
   public void networkGetSerialize() throws Exception {
-    ComputeCow.Networks.Get get = defaultCompute().networks().get("project-id", "network-name");
+    CloudComputeCow.Networks.Get get =
+        defaultCompute().networks().get("project-id", "network-name");
 
     assertEquals(
         "{\"project\":\"project-id\",\"network_name\":\"network-name\"}",
@@ -79,7 +81,7 @@ public class ComputeCowTest {
   }
 
   /** Create Project then set billing account, enable compute compute service */
-  private static Project prepareProject() throws Exception {
+  private static Project createPreparedProject() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setProjectBillingInfo(project.getProjectId(), BILLING_ACCOUNT_NAME);
     ServiceUsageUtils.enableServices(
