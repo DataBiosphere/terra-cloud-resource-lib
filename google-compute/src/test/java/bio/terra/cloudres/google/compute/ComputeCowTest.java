@@ -43,7 +43,7 @@ public class ComputeCowTest {
 
     String projectId = project.getProjectId();
     String netWorkName = randomNetworkName();
-    Network network = new Network().setName(netWorkName);
+    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
     Operation operation = computeCow.networks().insert(projectId, network).execute();
     OperationCow<Operation> completedOperation =
         OperationUtils.pollUntilComplete(
@@ -55,7 +55,8 @@ public class ComputeCowTest {
 
     Network createdNetwork = computeCow.networks().get(projectId, netWorkName).execute();
 
-    assertEquals(network.getName(), createdNetwork.getName());
+    assertEquals(netWorkName, createdNetwork.getName());
+    assertFalse(createdNetwork.getAutoCreateSubnetworks());
   }
 
   @Test
