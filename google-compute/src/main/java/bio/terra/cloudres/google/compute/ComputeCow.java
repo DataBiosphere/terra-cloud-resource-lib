@@ -107,7 +107,7 @@ public class ComputeCow {
   }
 
   /**
-   * See {@link Compute#GlobalOperations()}.
+   * See {@link Compute#globalOperations()}.
    *
    * <p>Operations can be global, regional or zonal
    *

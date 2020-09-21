@@ -1,5 +1,7 @@
 package bio.terra.cloudres.google.compute;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.google.billing.CloudBillingUtils;
@@ -17,8 +19,6 @@ import java.security.GeneralSecurityException;
 import java.time.Duration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("integration")
 public class ComputeCowTest {
