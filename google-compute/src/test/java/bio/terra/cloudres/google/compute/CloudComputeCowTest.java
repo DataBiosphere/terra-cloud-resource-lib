@@ -84,8 +84,7 @@ public class CloudComputeCowTest {
   private static Project createPreparedProject() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setProjectBillingInfo(project.getProjectId(), BILLING_ACCOUNT_NAME);
-    ServiceUsageUtils.enableServices(
-        project.getProjectId(), ImmutableList.of(COMPUTE_SERVICE_ID));
+    ServiceUsageUtils.enableServices(project.getProjectId(), ImmutableList.of(COMPUTE_SERVICE_ID));
     return project;
   }
 
