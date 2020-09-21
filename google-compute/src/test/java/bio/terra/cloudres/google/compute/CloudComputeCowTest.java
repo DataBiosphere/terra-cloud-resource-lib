@@ -85,7 +85,7 @@ public class CloudComputeCowTest {
     Project project = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setProjectBillingInfo(project.getProjectId(), BILLING_ACCOUNT_NAME);
     ServiceUsageUtils.enableServices(
-        project.getProjectId(), project.getProjectNumber(), ImmutableList.of(COMPUTE_SERVICE_ID));
+        project.getProjectId(), ImmutableList.of(COMPUTE_SERVICE_ID));
     return project;
   }
 
