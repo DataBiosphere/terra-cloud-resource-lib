@@ -8,8 +8,10 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
+import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Subnetwork;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
@@ -69,7 +71,7 @@ public class CloudComputeCow {
       private final Network network;
 
       public Insert(Compute.Networks.Insert insert, String projectId, Network network) {
-        super(CloudOperation.GOOGLE_CREATE_NETWORK, clientConfig, operationAnnotator, insert);
+        super(CloudOperation.GOOGLE_INSERT_NETWORK, clientConfig, operationAnnotator, insert);
         this.network = network;
         this.projectId = projectId;
       }
@@ -83,12 +85,12 @@ public class CloudComputeCow {
       }
     }
 
-    /** See {@link Compute.Networks#insert(String, Network)}. */
+    /** See {@link Compute.Networks#get(String, String)}. */
     public Get get(String projectId, String networkName) throws IOException {
       return new Get(networks.get(projectId, networkName));
     }
 
-    /** See {@link Compute.Networks.Insert}. */
+    /** See {@link Compute.Networks.Get}. */
     public class Get extends AbstractRequestCow<Network> {
       private final Compute.Networks.Get get;
 
@@ -102,6 +104,138 @@ public class CloudComputeCow {
         JsonObject result = new JsonObject();
         result.addProperty("project", get.getProject());
         result.addProperty("network_name", get.getNetwork());
+        return result;
+      }
+    }
+  }
+
+  public Subnetworks subnetworks() {
+    return new Subnetworks(compute.subnetworks());
+  }
+
+  /** See {@link Compute.Subnetworks}. */
+  public class Subnetworks {
+    private final Compute.Subnetworks subnetworks;
+
+    private Subnetworks(Compute.Subnetworks subnetworks) {
+      this.subnetworks = subnetworks;
+    }
+
+    /** See {@link Compute.Subnetworks#insert(String, String, Subnetwork)}. */
+    public Insert insert(String projectId, String region, Subnetwork subnetwork)
+        throws IOException {
+      return new Insert(
+          subnetworks.insert(projectId, region, subnetwork), projectId, region, subnetwork);
+    }
+
+    /** See {@link Compute.Subnetworks.Insert}. */
+    public class Insert extends AbstractRequestCow<Operation> {
+      private final String projectId;
+      private final String region;
+      private final Subnetwork subnetwork;
+
+      public Insert(
+          Compute.Subnetworks.Insert insert,
+          String projectId,
+          String region,
+          Subnetwork subnetwork) {
+        super(CloudOperation.GOOGLE_INSERT_SUBNETWORK, clientConfig, operationAnnotator, insert);
+        this.subnetwork = subnetwork;
+        this.region = region;
+        this.projectId = projectId;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.addProperty("region", region);
+        result.add("subnetwork", new Gson().toJsonTree(subnetwork).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Subnetworks#get(String, String, String)}. */
+    public Get get(String projectId, String region, String networkName) throws IOException {
+      return new Get(subnetworks.get(projectId, region, networkName));
+    }
+
+    /** See {@link Compute.Subnetworks.Get}. */
+    public class Get extends AbstractRequestCow<Subnetwork> {
+      private final Compute.Subnetworks.Get get;
+
+      public Get(Compute.Subnetworks.Get get) {
+        super(CloudOperation.GOOGLE_GET_SUBNETWORK, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("region", get.getRegion());
+        result.addProperty("network_name", get.getSubnetwork());
+        return result;
+      }
+    }
+  }
+
+  public Firewalls firewalls() {
+    return new Firewalls(compute.firewalls());
+  }
+
+  /** See {@link Compute.Firewalls}. */
+  public class Firewalls {
+    private final Compute.Firewalls firewalls;
+
+    private Firewalls(Compute.Firewalls firewalls) {
+      this.firewalls = firewalls;
+    }
+
+    /** See {@link Compute.Firewalls#insert(String, Firewall)}. */
+    public Insert insert(String projectId, Firewall firewall) throws IOException {
+      return new Insert(firewalls.insert(projectId, firewall), projectId, firewall);
+    }
+
+    /** See {@link Compute.Firewalls.Insert}. */
+    public class Insert extends AbstractRequestCow<Operation> {
+      private final String projectId;
+      private final Firewall firewall;
+
+      public Insert(Compute.Firewalls.Insert insert, String projectId, Firewall firewall) {
+        super(CloudOperation.GOOGLE_INSERT_FIREWALL, clientConfig, operationAnnotator, insert);
+        this.firewall = firewall;
+        this.projectId = projectId;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.add("firewall", new Gson().toJsonTree(firewall).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Firewalls#get(String, String)}. */
+    public Get get(String projectId, String firewallName) throws IOException {
+      return new Get(firewalls.get(projectId, firewallName));
+    }
+
+    /** See {@link Compute.Firewalls.Get}. */
+    public class Get extends AbstractRequestCow<Firewall> {
+      private final Compute.Firewalls.Get get;
+
+      public Get(Compute.Firewalls.Get get) {
+        super(CloudOperation.GOOGLE_GET_FIREWAL, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("firewall_name", get.getFirewall());
         return result;
       }
     }
@@ -136,7 +270,11 @@ public class CloudComputeCow {
       private final Compute.GlobalOperations.Get get;
 
       public Get(Compute.GlobalOperations.Get get) {
-        super(CloudOperation.GOOGLE_COMPUTE_OPERATION_GET, clientConfig, operationAnnotator, get);
+        super(
+            CloudOperation.GOOGLE_COMPUTE_GLOBAL_OPERATION_GET,
+            clientConfig,
+            operationAnnotator,
+            get);
         this.get = get;
       }
 
@@ -152,6 +290,60 @@ public class CloudComputeCow {
     public OperationCow<Operation> operationCow(String projectId, Operation operation) {
       return new OperationCow<>(
           operation, ComputeOperationAdapter::new, op -> get(projectId, op.getName()));
+    }
+  }
+
+  /**
+   * See {@link Compute#regionOperations()}.
+   *
+   * <p>Operations can be global, regional or zonal
+   *
+   * @see <a
+   *     href="https://cloud.google.com/compute/docs/regions-zones/global-regional-zonal-resources">Global,
+   *     Regional, and Zonal Resources</a>
+   */
+  public RegionOperations regionalOperations() {
+    return new RegionOperations(compute.regionOperations());
+  }
+
+  public class RegionOperations {
+    private final Compute.RegionOperations operations;
+
+    private RegionOperations(Compute.RegionOperations operations) {
+      this.operations = operations;
+    }
+
+    /** See {@link Compute.RegionOperations#get(String, String, String)} */
+    public Get get(String projectId, String region, String operationName) throws IOException {
+      return new Get(operations.get(projectId, region, operationName));
+    }
+
+    public class Get extends AbstractRequestCow<Operation> {
+      private final Compute.RegionOperations.Get get;
+
+      public Get(Compute.RegionOperations.Get get) {
+        super(
+            CloudOperation.GOOGLE_COMPUTE_REGION_OPERATION_GET,
+            clientConfig,
+            operationAnnotator,
+            get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("region", get.getProject());
+        result.addProperty("operation_name", get.getOperation());
+        return result;
+      }
+    }
+
+    public OperationCow<Operation> operationCow(
+        String projectId, String region, Operation operation) {
+      return new OperationCow<>(
+          operation, ComputeOperationAdapter::new, op -> get(projectId, region, op.getName()));
     }
   }
 }

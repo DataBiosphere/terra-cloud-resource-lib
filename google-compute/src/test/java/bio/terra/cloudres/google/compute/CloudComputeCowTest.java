@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.compute;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
@@ -11,12 +12,15 @@ import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Subnetwork;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -60,13 +64,83 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void createAndGetSubnetwork() throws Exception {
+    Project project = createPreparedProject();
+    String projectId = project.getProjectId();
+    String region = "us-west1";
+    String ipCidrRange = "10.130.0.0/20";
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    // Create parent network
+    String netWorkName = randomNetworkName();
+    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
+    Operation operation = cloudComputeCow.networks().insert(projectId, network).execute();
+    OperationCow<Operation> completedOperation =
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.globalOperations().operationCow(projectId, operation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
+    assertTrue(completedOperation.getOperationAdapter().getDone());
+    network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
+
+    String subnetWorkName = randomNetworkName();
+    Subnetwork subnetwork =
+        new Subnetwork()
+            .setName(subnetWorkName)
+            .setNetwork(network.getSelfLink())
+            .setIpCidrRange(ipCidrRange);
+    Operation regionOperation =
+        cloudComputeCow.subnetworks().insert(projectId, region, subnetwork).execute();
+    OperationCow<Operation> completedRegionOperation =
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.regionalOperations().operationCow(projectId, region, regionOperation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
+    assertTrue(completedRegionOperation.getOperationAdapter().getDone());
+    assertNull(completedRegionOperation.getOperationAdapter().getError());
+
+    Subnetwork createdSubnet =
+        cloudComputeCow.subnetworks().get(projectId, region, subnetWorkName).execute();
+
+    assertEquals(subnetWorkName, createdSubnet.getName());
+    assertEquals(network.getSelfLink(), createdSubnet.getNetwork());
+    assertEquals(ipCidrRange, createdSubnet.getIpCidrRange());
+    assertEquals(region, createdSubnet.getRegion());
+  }
+
+  @Test
+  public void createAndGetFirewall() throws Exception {
+    Project project = createPreparedProject();
+    String projectId = project.getProjectId();
+
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    String firewallName = "allow-internal";
+    Firewall.Allowed allowed = new Firewall.Allowed().setIPProtocol("icmp");
+    Firewall firewall = new Firewall().setName(firewallName).setAllowed(ImmutableList.of(allowed));
+    Operation operation = cloudComputeCow.firewalls().insert(projectId, firewall).execute();
+    OperationCow<Operation> completedOperation =
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.globalOperations().operationCow(projectId, operation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
+    assertTrue(completedOperation.getOperationAdapter().getDone());
+    assertNull(completedOperation.getOperationAdapter().getError());
+
+    Firewall createdFirewall = cloudComputeCow.firewalls().get(projectId, firewallName).execute();
+
+    assertEquals(firewallName, createdFirewall.getName());
+    assertThat(createdFirewall.getAllowed(), Matchers.contains(allowed));
+  }
+
+  @Test
   public void networkInsertSerialize() throws Exception {
     Network network = new Network().setName("network-name");
     CloudComputeCow.Networks.Insert insert =
         defaultCompute().networks().insert("project-id", network);
 
     assertEquals(
-        "{\"project\":\"project-id\",\"network\":{\"name\":\"network-name\"}}",
+        "{\"project_id\":\"project-id\",\"network\":{\"name\":\"network-name\"}}",
         insert.serialize().toString());
   }
 
@@ -76,7 +150,49 @@ public class CloudComputeCowTest {
         defaultCompute().networks().get("project-id", "network-name");
 
     assertEquals(
-        "{\"project\":\"project-id\",\"network_name\":\"network-name\"}",
+        "{\"project_id\":\"project-id\",\"network_name\":\"network-name\"}",
+        get.serialize().toString());
+  }
+
+  @Test
+  public void subnetworkInsertSerialize() throws Exception {
+    Subnetwork subnetwork = new Subnetwork().setName("subnetwork-name");
+    CloudComputeCow.Subnetworks.Insert insert =
+        defaultCompute().subnetworks().insert("project-id", "us-west1", subnetwork);
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\",\"subnetwork\":{\"name\":\"subnetwork-name\"}}",
+        insert.serialize().toString());
+  }
+
+  @Test
+  public void subnetworkGetSerialize() throws Exception {
+    CloudComputeCow.Subnetworks.Get get =
+        defaultCompute().subnetworks().get("project-id", "us-west1", "network-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\",\"network_name\":\"network-name\"}",
+        get.serialize().toString());
+  }
+
+  @Test
+  public void firewallInsertSerialize() throws Exception {
+    Firewall firewall = new Firewall().setName("firewall-name");
+    CloudComputeCow.Firewalls.Insert insert =
+        defaultCompute().firewalls().insert("project-id", firewall);
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"firewall\":{\"name\":\"firewall-name\"}}",
+        insert.serialize().toString());
+  }
+
+  @Test
+  public void firewallGetSerialize() throws Exception {
+    CloudComputeCow.Firewalls.Get get =
+        defaultCompute().firewalls().get("project-id", "firewall-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"firewall_name\":\"firewall-name\"}",
         get.serialize().toString());
   }
 
