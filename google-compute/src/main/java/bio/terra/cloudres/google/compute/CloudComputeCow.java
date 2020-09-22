@@ -79,7 +79,7 @@ public class CloudComputeCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        result.addProperty("project", projectId);
+        result.addProperty("project_id", projectId);
         result.add("network", new Gson().toJsonTree(network).getAsJsonObject());
         return result;
       }
@@ -102,7 +102,7 @@ public class CloudComputeCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        result.addProperty("project", get.getProject());
+        result.addProperty("project_id", get.getProject());
         result.addProperty("network_name", get.getNetwork());
         return result;
       }

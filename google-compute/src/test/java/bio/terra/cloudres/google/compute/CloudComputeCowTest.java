@@ -105,7 +105,7 @@ public class CloudComputeCowTest {
     assertEquals(subnetWorkName, createdSubnet.getName());
     assertEquals(network.getSelfLink(), createdSubnet.getNetwork());
     assertEquals(ipCidrRange, createdSubnet.getIpCidrRange());
-    assertEquals(region, createdSubnet.getRegion());
+    assertEquals(regionName(projectId, region), createdSubnet.getRegion());
   }
 
   @Test
@@ -207,5 +207,14 @@ public class CloudComputeCowTest {
   public static String randomNetworkName() {
     // Network name ids must start with a letter and be no more than 30 characters long.
     return "n" + IntegrationUtils.randomName().substring(0, 29);
+  }
+
+  /**
+   * Create a string matching the region name on {@link Subnetwork#getRegion()} ()}, e.g.
+   * https://www.googleapis.com/compute/v1/projects/p-123/regions/us-west1.
+   */
+  private static String regionName(String projectId, String region) {
+    return String.format(
+        "https://www.googleapis.com/compute/v1/projects/%s/regions/%s", projectId, region);
   }
 }
