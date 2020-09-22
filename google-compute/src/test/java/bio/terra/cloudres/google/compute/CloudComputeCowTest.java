@@ -7,7 +7,6 @@ import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
-import bio.terra.cloudres.google.serviceusage.ServiceUsageCow;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -21,6 +20,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ public class CloudComputeCowTest {
   // TODO(PF-67): Find solution for piping configs and secrets.
   private static final String BILLING_ACCOUNT_NAME = "billingAccounts/01A82E-CA8A14-367457";
 
-  private ServiceUsageCow serviceUsageCow;
+  private static Project reusableProject;
 
   private static CloudComputeCow defaultCompute() throws GeneralSecurityException, IOException {
     return CloudComputeCow.create(
@@ -39,13 +39,16 @@ public class CloudComputeCowTest {
         IntegrationCredentials.getAdminGoogleCredentialsOrDie());
   }
 
+  @BeforeAll
+  public static void createReusableProject() throws Exception {
+    reusableProject = createPreparedProject();
+  }
+
   @Test
   public void createAndGetNetwork() throws Exception {
-    Project project = createPreparedProject();
-
     CloudComputeCow cloudComputeCow = defaultCompute();
 
-    String projectId = project.getProjectId();
+    String projectId = reusableProject.getProjectId();
     String netWorkName = randomNetworkName();
     Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
     Operation operation = cloudComputeCow.networks().insert(projectId, network).execute();
@@ -65,8 +68,7 @@ public class CloudComputeCowTest {
 
   @Test
   public void createAndGetSubnetwork() throws Exception {
-    Project project = createPreparedProject();
-    String projectId = project.getProjectId();
+    String projectId = reusableProject.getProjectId();
     String region = "us-west1";
     String ipCidrRange = "10.130.0.0/20";
     CloudComputeCow cloudComputeCow = defaultCompute();
@@ -110,8 +112,7 @@ public class CloudComputeCowTest {
 
   @Test
   public void createAndGetFirewall() throws Exception {
-    Project project = createPreparedProject();
-    String projectId = project.getProjectId();
+    String projectId = reusableProject.getProjectId();
 
     CloudComputeCow cloudComputeCow = defaultCompute();
 
