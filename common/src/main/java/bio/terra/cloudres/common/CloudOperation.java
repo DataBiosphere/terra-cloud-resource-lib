@@ -59,4 +59,8 @@ public enum CloudOperation {
   GOOGLE_GET_FIREWAL,
   GOOGLE_GET_NETWORK,
   GOOGLE_GET_SUBNETWORK,
+
+  // Google DNS Operations,
+  GOOGLE_DNS_CREATE_ZONE,
+  GOOGLE_DNS_GET_ZONE,
 }

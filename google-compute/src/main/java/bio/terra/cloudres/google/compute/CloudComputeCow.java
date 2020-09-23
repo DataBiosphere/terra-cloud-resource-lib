@@ -334,7 +334,7 @@ public class CloudComputeCow {
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
         result.addProperty("project_id", get.getProject());
-        result.addProperty("region", get.getProject());
+        result.addProperty("region", get.getRegion());
         result.addProperty("operation_name", get.getOperation());
         return result;
       }
