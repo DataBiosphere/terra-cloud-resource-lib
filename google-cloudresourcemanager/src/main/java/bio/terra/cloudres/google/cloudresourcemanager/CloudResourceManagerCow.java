@@ -8,6 +8,9 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
 import com.google.api.services.cloudresourcemanager.model.*;
@@ -44,9 +47,9 @@ public class CloudResourceManagerCow {
         clientConfig,
         new CloudResourceManager.Builder(
                 Defaults.httpTransport(),
-                Defaults.jsonFactory(),
-                new HttpCredentialsAdapter(
-                    googleCredentials.createScoped(CloudResourceManagerScopes.all())))
+                Defaults.jsonFactory(), setHttpTimeout(new HttpCredentialsAdapter(
+                googleCredentials.createScoped(CloudResourceManagerScopes.all())))
+                )
             .setApplicationName(clientConfig.getClientName()));
   }
 
@@ -226,5 +229,16 @@ public class CloudResourceManagerCow {
       return new OperationCow<>(
           operation, ResourceManagerOperationAdapter::new, op -> get(op.getName()));
     }
+  }
+
+  private static HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {
+    return new HttpRequestInitializer() {
+      @Override
+      public void initialize(HttpRequest httpRequest) throws IOException {
+        requestInitializer.initialize(httpRequest);
+        httpRequest.setConnectTimeout(3 * 60000);  // 3 minutes connect timeout
+        httpRequest.setReadTimeout(3 * 60000);  // 3 minutes read timeout
+      }
+    };
   }
 }
