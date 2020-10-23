@@ -132,6 +132,7 @@ artifactory {
                     'google-billing',
                     'google-cloudresourcemanager',
                     'google-compute',
+                    'google-dns',
                     'google-serviceusage',
                     'google-storage')
         }
