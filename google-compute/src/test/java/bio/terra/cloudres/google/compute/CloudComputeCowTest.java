@@ -11,10 +11,7 @@ import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.compute.model.Firewall;
-import com.google.api.services.compute.model.Network;
-import com.google.api.services.compute.model.Operation;
-import com.google.api.services.compute.model.Subnetwork;
+import com.google.api.services.compute.model.*;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -135,6 +132,32 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void createAndGetRoute() throws Exception {
+    String projectId = reusableProject.getProjectId();
+
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    String routeName = "private-google-access-route";
+    String destRange = "199.36.153.4/30";
+    String nextHopGateway = "projects/" + projectId +"/global/gateways/default-internet-gateway";
+    Route route = new Route().setName(routeName).setDestRange(destRange).setNextHopGateway(nextHopGateway);
+    Operation operation = cloudComputeCow.routes().insert(projectId, route).execute();
+    OperationCow<Operation> completedOperation =
+            OperationUtils.pollUntilComplete(
+                    cloudComputeCow.globalOperations().operationCow(projectId, operation),
+                    Duration.ofSeconds(5),
+                    Duration.ofSeconds(100));
+    assertTrue(completedOperation.getOperationAdapter().getDone());
+    assertNull(completedOperation.getOperationAdapter().getError());
+
+    Route createdRoute = cloudComputeCow.routes().get(projectId, routeName).execute();
+
+    assertEquals(routeName, createdRoute.getName());
+    assertEquals(destRange, createdRoute.getDestRange());
+    assertEquals("https://www.googleapis.com/compute/v1/" + nextHopGateway, createdRoute.getNextHopGateway());
+  }
+
+  @Test
   public void networkInsertSerialize() throws Exception {
     Network network = new Network().setName("network-name");
     CloudComputeCow.Networks.Insert insert =
@@ -196,6 +219,28 @@ public class CloudComputeCowTest {
         "{\"project_id\":\"project-id\",\"firewall_name\":\"firewall-name\"}",
         get.serialize().toString());
   }
+
+  @Test
+  public void routeInsertSerialize() throws Exception {
+    Route route = new Route().setName("route-name");
+    CloudComputeCow.Routes.Insert insert =
+            defaultCompute().routes().insert("project-id", route);
+
+    assertEquals(
+            "{\"project_id\":\"project-id\",\"route\":{\"name\":\"route-name\"}}",
+            insert.serialize().toString());
+  }
+
+  @Test
+  public void routeGetSerialize() throws Exception {
+    CloudComputeCow.Routes.Get get =
+            defaultCompute().routes().get("project-id", "route-name");
+
+    assertEquals(
+            "{\"project_id\":\"project-id\",\"route_name\":\"route-name\"}",
+            get.serialize().toString());
+  }
+
 
   /** Create Project then set billing account, enable compute compute service */
   private static Project createPreparedProject() throws Exception {
