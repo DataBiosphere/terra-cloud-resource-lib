@@ -298,7 +298,7 @@ public class CloudComputeCow {
       }
     }
   }
-  
+
   /**
    * See {@link Compute#globalOperations()}.
    *

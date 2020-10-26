@@ -139,14 +139,15 @@ public class CloudComputeCowTest {
 
     String routeName = "private-google-access-route";
     String destRange = "199.36.153.4/30";
-    String nextHopGateway = "projects/" + projectId +"/global/gateways/default-internet-gateway";
-    Route route = new Route().setName(routeName).setDestRange(destRange).setNextHopGateway(nextHopGateway);
+    String nextHopGateway = "projects/" + projectId + "/global/gateways/default-internet-gateway";
+    Route route =
+        new Route().setName(routeName).setDestRange(destRange).setNextHopGateway(nextHopGateway);
     Operation operation = cloudComputeCow.routes().insert(projectId, route).execute();
     OperationCow<Operation> completedOperation =
-            OperationUtils.pollUntilComplete(
-                    cloudComputeCow.globalOperations().operationCow(projectId, operation),
-                    Duration.ofSeconds(5),
-                    Duration.ofSeconds(100));
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.globalOperations().operationCow(projectId, operation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
     assertTrue(completedOperation.getOperationAdapter().getDone());
     assertNull(completedOperation.getOperationAdapter().getError());
 
@@ -154,7 +155,9 @@ public class CloudComputeCowTest {
 
     assertEquals(routeName, createdRoute.getName());
     assertEquals(destRange, createdRoute.getDestRange());
-    assertEquals("https://www.googleapis.com/compute/v1/" + nextHopGateway, createdRoute.getNextHopGateway());
+    assertEquals(
+        "https://www.googleapis.com/compute/v1/" + nextHopGateway,
+        createdRoute.getNextHopGateway());
   }
 
   @Test
@@ -223,24 +226,21 @@ public class CloudComputeCowTest {
   @Test
   public void routeInsertSerialize() throws Exception {
     Route route = new Route().setName("route-name");
-    CloudComputeCow.Routes.Insert insert =
-            defaultCompute().routes().insert("project-id", route);
+    CloudComputeCow.Routes.Insert insert = defaultCompute().routes().insert("project-id", route);
 
     assertEquals(
-            "{\"project_id\":\"project-id\",\"route\":{\"name\":\"route-name\"}}",
-            insert.serialize().toString());
+        "{\"project_id\":\"project-id\",\"route\":{\"name\":\"route-name\"}}",
+        insert.serialize().toString());
   }
 
   @Test
   public void routeGetSerialize() throws Exception {
-    CloudComputeCow.Routes.Get get =
-            defaultCompute().routes().get("project-id", "route-name");
+    CloudComputeCow.Routes.Get get = defaultCompute().routes().get("project-id", "route-name");
 
     assertEquals(
-            "{\"project_id\":\"project-id\",\"route_name\":\"route-name\"}",
-            get.serialize().toString());
+        "{\"project_id\":\"project-id\",\"route_name\":\"route-name\"}",
+        get.serialize().toString());
   }
-
 
   /** Create Project then set billing account, enable compute compute service */
   private static Project createPreparedProject() throws Exception {
