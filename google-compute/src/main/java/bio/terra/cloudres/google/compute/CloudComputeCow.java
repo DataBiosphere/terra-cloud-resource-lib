@@ -8,10 +8,7 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
-import com.google.api.services.compute.model.Firewall;
-import com.google.api.services.compute.model.Network;
-import com.google.api.services.compute.model.Operation;
-import com.google.api.services.compute.model.Subnetwork;
+import com.google.api.services.compute.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
@@ -236,6 +233,67 @@ public class CloudComputeCow {
         JsonObject result = new JsonObject();
         result.addProperty("project_id", get.getProject());
         result.addProperty("firewall_name", get.getFirewall());
+        return result;
+      }
+    }
+  }
+
+  public Routes routes() {
+    return new Routes(compute.routes());
+  }
+
+  /** See {@link Compute.Routes}. */
+  public class Routes {
+    private final Compute.Routes routes;
+
+    private Routes(Compute.Routes routes) {
+      this.routes = routes;
+    }
+
+    /** See {@link Compute.Routes#insert(String, Route)}. */
+    public Insert insert(String projectId, Route route) throws IOException {
+      return new Insert(routes.insert(projectId, route), projectId, route);
+    }
+
+    /** See {@link Compute.Routes.Insert}. */
+    public class Insert extends AbstractRequestCow<Operation> {
+      private final String projectId;
+      private final Route route;
+
+      public Insert(Compute.Routes.Insert insert, String projectId, Route route) {
+        super(CloudOperation.GOOGLE_INSERT_ROUTE, clientConfig, operationAnnotator, insert);
+        this.route = route;
+        this.projectId = projectId;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.add("route", new Gson().toJsonTree(route).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Routes#get(String, String)}. */
+    public Get get(String projectId, String routeName) throws IOException {
+      return new Get(routes.get(projectId, routeName));
+    }
+
+    /** See {@link Compute.Routes.Get}. */
+    public class Get extends AbstractRequestCow<Route> {
+      private final Compute.Routes.Get get;
+
+      public Get(Compute.Routes.Get get) {
+        super(CloudOperation.GOOGLE_GET_ROUTE, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("route_name", get.getRoute());
         return result;
       }
     }
