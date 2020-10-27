@@ -125,28 +125,26 @@ public class DnsCow {
     public Create create(String projectId, String managedZoneName, Change change)
         throws IOException {
       return new Create(
-          changes.create(projectId, managedZoneName, change), projectId, managedZoneName, change);
+          changes.create(projectId, managedZoneName, change), change);
     }
 
     /** See {@link Dns.Changes.Create}. */
     public class Create extends AbstractRequestCow<Change> {
-      private final String projectId;
-      private final String managedZoneName;
       private final Change change;
+      private final Dns.Changes.Create create;
 
       public Create(
-          Dns.Changes.Create create, String projectId, String managedZoneName, Change change) {
+          Dns.Changes.Create create, Change change) {
         super(CloudOperation.GOOGLE_DNS_CREATE_CHANGEE, clientConfig, operationAnnotator, create);
-        this.projectId = projectId;
-        this.managedZoneName = managedZoneName;
         this.change = change;
+        this.create = create;
       }
 
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        result.addProperty("project_id", projectId);
-        result.addProperty("managed_zone_name", managedZoneName);
+        result.addProperty("project_id", create.getProject());
+        result.addProperty("managed_zone_name", create.getManagedZone());
         result.add("change", new Gson().toJsonTree(change).getAsJsonObject());
         return result;
       }
