@@ -108,4 +108,72 @@ public class DnsCow {
       }
     }
   }
+
+  public Changes changes() {
+    return new Changes(dns.changes());
+  }
+
+  /** See {@link Dns.Changes}. */
+  public class Changes {
+    private final Dns.Changes changes;
+
+    private Changes(Dns.Changes changes) {
+      this.changes = changes;
+    }
+
+    /** See {@link Dns.Changes#create(String, String, Change)}. */
+    public Create create(String projectId, String managedZoneName, Change change)
+        throws IOException {
+      return new Create(
+          changes.create(projectId, managedZoneName, change), projectId, managedZoneName, change);
+    }
+
+    /** See {@link Dns.Changes.Create}. */
+    public class Create extends AbstractRequestCow<Change> {
+      private final String projectId;
+      private final String managedZoneName;
+      private final Change change;
+
+      public Create(
+          Dns.Changes.Create create, String projectId, String managedZoneName, Change change) {
+        super(CloudOperation.GOOGLE_DNS_CREATE_CHANGEE, clientConfig, operationAnnotator, create);
+        this.projectId = projectId;
+        this.managedZoneName = managedZoneName;
+        this.change = change;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.addProperty("managed_zone_name", managedZoneName);
+        result.add("change", new Gson().toJsonTree(change).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /** See {@link Dns.Changes#get(String, String, String)}. */
+    public Get get(String projectId, String managedZoneName, String changeId) throws IOException {
+      return new Get(changes.get(projectId, managedZoneName, changeId));
+    }
+
+    /** See {@link Dns.Changes.Get} */
+    public class Get extends AbstractRequestCow<Change> {
+      private final Dns.Changes.Get get;
+
+      private Get(Dns.Changes.Get get) {
+        super(CloudOperation.GOOGLE_DNS_GET_CHANGE, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("managed_zone_name", get.getManagedZone());
+        result.addProperty("change_id", get.getChangeId());
+        return result;
+      }
+    }
+  }
 }

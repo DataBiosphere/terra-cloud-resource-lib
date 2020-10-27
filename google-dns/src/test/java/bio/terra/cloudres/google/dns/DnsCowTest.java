@@ -8,7 +8,9 @@ import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.dns.model.Change;
 import com.google.api.services.dns.model.ManagedZone;
+import com.google.api.services.dns.model.ResourceRecordSet;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -55,6 +57,50 @@ public class DnsCowTest {
   }
 
   @Test
+  public void createAndGetChange() throws Exception {
+    Project project = ProjectUtils.executeCreateProject();
+    String projectId = project.getProjectId();
+    CloudBillingUtils.setProjectBillingInfo(projectId, BILLING_ACCOUNT_NAME);
+    ServiceUsageUtils.enableServices(projectId, SERVICE_IDS);
+    DnsCow dnsCow = defaultDns();
+    ManagedZone managedZone =
+        new ManagedZone()
+            .setName("zone-name")
+            .setDnsName("googleapis.com.")
+            .setVisibility("private")
+            .setDescription("description");
+    dnsCow.managedZones().create(project.getProjectId(), managedZone).execute();
+
+    ResourceRecordSet resourceRecordSet =
+        new ResourceRecordSet()
+            .setType("A")
+            .setName("restricted.googleapis.com.")
+            .setRrdatas(ImmutableList.of("199.36.153.4"))
+            .setTtl(300);
+
+    Change createdChange =
+        dnsCow
+            .changes()
+            .create(
+                project.getProjectId(),
+                managedZone.getName(),
+                new Change().setAdditions(ImmutableList.of(resourceRecordSet)))
+            .execute();
+
+    List<ResourceRecordSet> actualRecordSet =
+        dnsCow
+            .changes()
+            .get(projectId, managedZone.getName(), createdChange.getId())
+            .execute()
+            .getAdditions();
+    assertEquals(1, actualRecordSet.size());
+    assertEquals("A", actualRecordSet.get(0).getType());
+    assertEquals("restricted.googleapis.com.", actualRecordSet.get(0).getName());
+    assertEquals("199.36.153.4", actualRecordSet.get(0).getRrdatas().get(0));
+    assertEquals(300, actualRecordSet.get(0).getTtl());
+  }
+
+  @Test
   public void zoneCreateSerialize() throws Exception {
     ManagedZone managedZone = new ManagedZone().setName("zone-name");
     DnsCow.ManagedZones.Create create =
@@ -71,6 +117,25 @@ public class DnsCowTest {
 
     assertEquals(
         "{\"project_id\":\"project-id\",\"managed_zone\":\"zone-name\"}",
+        get.serialize().toString());
+  }
+
+  @Test
+  public void changeCreateSerialize() throws Exception {
+    Change change = new Change().setId("change_id");
+    DnsCow.Changes.Create create = defaultDns().changes().create("project-id", "zone_name", change);
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"managed_zone_name\":\"zone_name\",\"change\":{\"id\":\"change_id\"}}",
+        create.serialize().toString());
+  }
+
+  @Test
+  public void changeGetSerialize() throws Exception {
+    DnsCow.Changes.Get get = defaultDns().changes().get("project-id", "zone_name", "change-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"managed_zone_name\":\"zone_name\",\"change_id\":\"change-name\"}",
         get.serialize().toString());
   }
 }
