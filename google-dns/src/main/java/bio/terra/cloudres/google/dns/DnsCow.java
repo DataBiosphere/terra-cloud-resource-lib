@@ -124,8 +124,7 @@ public class DnsCow {
     /** See {@link Dns.Changes#create(String, String, Change)}. */
     public Create create(String projectId, String managedZoneName, Change change)
         throws IOException {
-      return new Create(
-          changes.create(projectId, managedZoneName, change), change);
+      return new Create(changes.create(projectId, managedZoneName, change), change);
     }
 
     /** See {@link Dns.Changes.Create}. */
@@ -133,8 +132,7 @@ public class DnsCow {
       private final Change change;
       private final Dns.Changes.Create create;
 
-      public Create(
-          Dns.Changes.Create create, Change change) {
+      public Create(Dns.Changes.Create create, Change change) {
         super(CloudOperation.GOOGLE_DNS_CREATE_CHANGEE, clientConfig, operationAnnotator, create);
         this.change = change;
         this.create = create;
