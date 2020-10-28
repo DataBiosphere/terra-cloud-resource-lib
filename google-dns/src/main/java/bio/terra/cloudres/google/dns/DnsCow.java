@@ -172,4 +172,44 @@ public class DnsCow {
       }
     }
   }
+
+  public ResourceRecordSets resourceRecordSets() {
+    return new ResourceRecordSets(dns.resourceRecordSets());
+  }
+
+  /** See {@link Dns.ResourceRecordSets}. */
+  public class ResourceRecordSets {
+    private final Dns.ResourceRecordSets resourceRecordSets;
+
+    private ResourceRecordSets(Dns.ResourceRecordSets resourceRecordSets) {
+      this.resourceRecordSets = resourceRecordSets;
+    }
+
+    /** See {@link Dns.ResourceRecordSets#list(String, String)}. */
+    public List list(String projectId, String managedZoneName) throws IOException {
+      return new List(resourceRecordSets.list(projectId, managedZoneName));
+    }
+
+    /** See {@link Dns.ResourceRecordSets.List} */
+    public class List extends AbstractRequestCow<ResourceRecordSetsListResponse> {
+      private final Dns.ResourceRecordSets.List list;
+
+      private List(Dns.ResourceRecordSets.List list) {
+        super(
+            CloudOperation.GOOGLE_DNS_LIST_RESOURCE_RECORD_SETS,
+            clientConfig,
+            operationAnnotator,
+            list);
+        this.list = list;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", list.getProject());
+        result.addProperty("managed_zone_name", list.getManagedZone());
+        return result;
+      }
+    }
+  }
 }

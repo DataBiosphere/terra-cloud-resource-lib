@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.dns;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
@@ -15,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -98,6 +100,10 @@ public class DnsCowTest {
     assertEquals("restricted.googleapis.com.", actualRecordSet.get(0).getName());
     assertEquals("199.36.153.4", actualRecordSet.get(0).getRrdatas().get(0));
     assertEquals(300, actualRecordSet.get(0).getTtl());
+
+    assertThat(
+        dnsCow.resourceRecordSets().list(projectId, managedZone.getName()).execute().getRrsets(),
+        Matchers.hasItem(actualRecordSet.get(0)));
   }
 
   @Test
