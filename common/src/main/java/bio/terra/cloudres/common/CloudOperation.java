@@ -63,6 +63,8 @@ public enum CloudOperation {
   GOOGLE_GET_SUBNETWORK,
 
   // Google DNS Operations,
+  GOOGLE_DNS_CREATE_CHANGEE,
   GOOGLE_DNS_CREATE_ZONE,
+  GOOGLE_DNS_GET_CHANGE,
   GOOGLE_DNS_GET_ZONE,
 }
