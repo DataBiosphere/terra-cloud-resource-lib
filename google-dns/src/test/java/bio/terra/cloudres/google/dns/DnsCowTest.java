@@ -144,4 +144,14 @@ public class DnsCowTest {
         "{\"project_id\":\"project-id\",\"managed_zone_name\":\"zone_name\",\"change_id\":\"change-name\"}",
         get.serialize().toString());
   }
+
+  @Test
+  public void recordSetListSerialize() throws Exception {
+    DnsCow.ResourceRecordSets.List list =
+        defaultDns().resourceRecordSets().list("project-id", "zone_name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"managed_zone_name\":\"zone_name\"}",
+        list.serialize().toString());
+  }
 }
