@@ -52,3 +52,4 @@ jobs:
         env:
           ARTIFACTORY_USERNAME: ${{ steps.vault-secret-step.outputs.artifactory-username }}
           ARTIFACTORY_PASSWORD: ${{ steps.vault-secret-step.outputs.artifactory-password }}
+          ARTIFACTORY_REPO_KEY: libs-release-local
