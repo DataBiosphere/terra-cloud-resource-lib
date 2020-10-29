@@ -1,11 +1,11 @@
 package bio.terra.cloudres.common;
 
-import static bio.terra.cloudres.common.CloudOperation.GOOGLE_CREATE_PROJECT;
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import bio.terra.cloudres.testing.StubCloudOperation;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.ResourceManagerException;
 import com.google.gson.Gson;
@@ -34,7 +34,7 @@ public class OperationAnnotatorTest {
   private static final String FORMATTED_EXCEPTION =
       "\"exception\":{\"message\":\"error!\",\"errorCode\":\"404\"},";
   private static final String EXPECTED_LOG_PREFIX =
-      "{\"traceId\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation\":\"GOOGLE_CREATE_PROJECT\",\"clientName\":\"TestClient\",";
+      "{\"traceId\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation\":\"TEST_OPERATION\",\"clientName\":\"TestClient\",";
 
   /** use the {@link ResourceManagerException} as an example of a BaseHttpServiceException. */
   private static final ResourceManagerException RM_EXCEPTION =
@@ -74,7 +74,8 @@ public class OperationAnnotatorTest {
     long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
-    operationAnnotator.executeCowOperation(GOOGLE_CREATE_PROJECT, SUCCESS_COW_EXECUTE, SERIALIZE);
+    operationAnnotator.executeCowOperation(
+        StubCloudOperation.TEST_OPERATION, SUCCESS_COW_EXECUTE, SERIALIZE);
 
     sleepForSpansExport();
 
@@ -104,7 +105,7 @@ public class OperationAnnotatorTest {
         ResourceManagerException.class,
         () ->
             operationAnnotator.executeCowOperation(
-                GOOGLE_CREATE_PROJECT, FAILED_COW_EXECUTE, SERIALIZE));
+                StubCloudOperation.TEST_OPERATION, FAILED_COW_EXECUTE, SERIALIZE));
 
     sleepForSpansExport();
 
@@ -121,7 +122,7 @@ public class OperationAnnotatorTest {
         InterruptedException.class,
         () ->
             operationAnnotator.executeCheckedCowOperation(
-                GOOGLE_CREATE_PROJECT,
+                StubCloudOperation.TEST_OPERATION,
                 () -> {
                   throw new InterruptedException(ERROR_MESSAGE);
                 },
@@ -133,7 +134,7 @@ public class OperationAnnotatorTest {
    *
    * <pre>{@code
    * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation":"GOOGLE_CREATE_PROJECT",
+   *   "operation":"TEST_OPERATION",
    *   "clientName":"test_client",
    *   "request":{
    *      "requestName":"request1"
@@ -159,7 +160,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        GOOGLE_CREATE_PROJECT,
+        StubCloudOperation.TEST_OPERATION,
         PROJECT_INFO_JSON_OBJECT,
         Optional.empty());
 
@@ -174,7 +175,7 @@ public class OperationAnnotatorTest {
    *
    * <pre>{@code
    * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation":"GOOGLE_CREATE_PROJECT",
+   *   "operation":"TEST_OPERATION",
    *   "clientName":"test_client",
    *   "errorCode":"404",
    *   "request":{
@@ -194,7 +195,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        GOOGLE_CREATE_PROJECT,
+        StubCloudOperation.TEST_OPERATION,
         PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
@@ -212,7 +213,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        GOOGLE_CREATE_PROJECT,
+        StubCloudOperation.TEST_OPERATION,
         PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 

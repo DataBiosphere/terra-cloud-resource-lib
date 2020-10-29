@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.serviceusage;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
@@ -75,7 +74,7 @@ public class ServiceUsageCow {
       public BatchEnable(
           ServiceUsage.Services.BatchEnable batchEnable, BatchEnableServicesRequest content) {
         super(
-            CloudOperation.GOOGLE_BATCH_ENABLE_SERVICES,
+            ServiceUsageOperation.GOOGLE_BATCH_ENABLE_SERVICES,
             clientConfig,
             operationAnnotator,
             batchEnable);
@@ -102,7 +101,7 @@ public class ServiceUsageCow {
       private final ServiceUsage.Services.List list;
 
       private List(ServiceUsage.Services.List list) {
-        super(CloudOperation.GOOGLE_LIST_SERVICES, clientConfig, operationAnnotator, list);
+        super(ServiceUsageOperation.GOOGLE_LIST_SERVICES, clientConfig, operationAnnotator, list);
         this.list = list;
       }
 
@@ -152,7 +151,7 @@ public class ServiceUsageCow {
 
       public Get(ServiceUsage.Operations.Get get) {
         super(
-            CloudOperation.GOOGLE_SERVICE_USAGE_OPERATION_GET,
+            ServiceUsageOperation.GOOGLE_SERVICE_USAGE_OPERATION_GET,
             clientConfig,
             operationAnnotator,
             get);

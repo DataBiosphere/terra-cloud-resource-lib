@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.storage;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.janitor.model.CloudResourceUid;
@@ -31,7 +30,7 @@ public class StorageCow {
     CleanupRecorder.record(SerializeUtils.create(blobInfo.getBlobId()), clientConfig);
     Blob blob =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_CREATE_BLOB,
+            StorageOperation.GOOGLE_CREATE_BLOB,
             () -> storage.create(blobInfo),
             () -> SerializeUtils.convert(blobInfo));
     return new BlobCow(clientConfig, blob);
@@ -45,7 +44,7 @@ public class StorageCow {
         clientConfig);
     Bucket bucket =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_CREATE_BUCKET,
+            StorageOperation.GOOGLE_CREATE_BUCKET,
             () -> storage.create(bucketInfo),
             () -> SerializeUtils.convert(bucketInfo));
     return new BucketCow(clientConfig, bucket);
@@ -54,7 +53,7 @@ public class StorageCow {
   /** See {@link Storage#createAcl(BlobId, Acl)} */
   public Acl createAcl(BlobId blob, Acl acl) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_CREATE_ACL_BLOB,
+        StorageOperation.GOOGLE_CREATE_ACL_BLOB,
         () -> storage.createAcl(blob, acl),
         () -> {
           JsonObject request = new JsonObject();
@@ -68,7 +67,7 @@ public class StorageCow {
   public BlobCow get(BlobId blob) {
     Blob rawBlob =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_BLOB,
+            StorageOperation.GOOGLE_GET_BLOB,
             () -> storage.get(blob),
             () -> SerializeUtils.convert(blob));
     return (rawBlob == null) ? null : new BlobCow(clientConfig, rawBlob);
@@ -81,7 +80,7 @@ public class StorageCow {
   public BucketCow get(String bucket) {
     Bucket rawBucket =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_BUCKET,
+            StorageOperation.GOOGLE_GET_BUCKET,
             () -> storage.get(bucket),
             () -> serializeBucketName(bucket));
     return (rawBucket == null) ? null : new BucketCow(clientConfig, rawBucket);
@@ -90,7 +89,7 @@ public class StorageCow {
   /** See {@link Storage#getAcl(BlobId, Acl.Entity)}. */
   public Acl getAcl(BlobId blob, Acl.Entity entity) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_GET_ACL_BLOB,
+        StorageOperation.GOOGLE_GET_ACL_BLOB,
         () -> storage.getAcl(blob, entity),
         () -> {
           JsonObject request = new JsonObject();
@@ -103,7 +102,7 @@ public class StorageCow {
   /** See {@link Storage#delete(BlobId)}. */
   public boolean delete(BlobId blob) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BLOB,
+        StorageOperation.GOOGLE_DELETE_BLOB,
         () -> storage.delete(blob),
         () -> SerializeUtils.convert(blob));
   }
@@ -111,7 +110,7 @@ public class StorageCow {
   /** See {@link Storage#delete(String, Storage.BucketSourceOption...)}. */
   public boolean delete(String bucket) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BUCKET,
+        StorageOperation.GOOGLE_DELETE_BUCKET,
         () -> storage.delete(bucket),
         () -> serializeBucketName(bucket));
   }
@@ -119,7 +118,7 @@ public class StorageCow {
   /** See {@link Storage#deleteAcl(BlobId, Acl.Entity)}. */
   public boolean deleteAcl(BlobId blob, Acl.Entity entity) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_ACL_BLOB,
+        StorageOperation.GOOGLE_DELETE_ACL_BLOB,
         () -> storage.deleteAcl(blob, entity),
         () -> {
           JsonObject request = new JsonObject();
@@ -133,7 +132,7 @@ public class StorageCow {
   public WriteChannel writer(BlobInfo blobInfo) {
     CleanupRecorder.record(SerializeUtils.create(blobInfo.getBlobId()), clientConfig);
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_CREATE_BLOB_AND_WRITER,
+        StorageOperation.GOOGLE_CREATE_BLOB_AND_WRITER,
         () -> storage.writer(blobInfo),
         () -> SerializeUtils.convert(blobInfo));
   }

@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.compute;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
@@ -68,7 +67,8 @@ public class CloudComputeCow {
       private final Network network;
 
       public Insert(Compute.Networks.Insert insert, String projectId, Network network) {
-        super(CloudOperation.GOOGLE_INSERT_NETWORK, clientConfig, operationAnnotator, insert);
+        super(
+            CloudComputeOperation.GOOGLE_INSERT_NETWORK, clientConfig, operationAnnotator, insert);
         this.network = network;
         this.projectId = projectId;
       }
@@ -92,7 +92,7 @@ public class CloudComputeCow {
       private final Compute.Networks.Get get;
 
       public Get(Compute.Networks.Get get) {
-        super(CloudOperation.GOOGLE_GET_NETWORK, clientConfig, operationAnnotator, get);
+        super(CloudComputeOperation.GOOGLE_GET_NETWORK, clientConfig, operationAnnotator, get);
         this.get = get;
       }
 
@@ -136,7 +136,11 @@ public class CloudComputeCow {
           String projectId,
           String region,
           Subnetwork subnetwork) {
-        super(CloudOperation.GOOGLE_INSERT_SUBNETWORK, clientConfig, operationAnnotator, insert);
+        super(
+            CloudComputeOperation.GOOGLE_INSERT_SUBNETWORK,
+            clientConfig,
+            operationAnnotator,
+            insert);
         this.subnetwork = subnetwork;
         this.region = region;
         this.projectId = projectId;
@@ -162,7 +166,7 @@ public class CloudComputeCow {
       private final Compute.Subnetworks.Get get;
 
       public Get(Compute.Subnetworks.Get get) {
-        super(CloudOperation.GOOGLE_GET_SUBNETWORK, clientConfig, operationAnnotator, get);
+        super(CloudComputeOperation.GOOGLE_GET_SUBNETWORK, clientConfig, operationAnnotator, get);
         this.get = get;
       }
 
@@ -200,7 +204,8 @@ public class CloudComputeCow {
       private final Firewall firewall;
 
       public Insert(Compute.Firewalls.Insert insert, String projectId, Firewall firewall) {
-        super(CloudOperation.GOOGLE_INSERT_FIREWALL, clientConfig, operationAnnotator, insert);
+        super(
+            CloudComputeOperation.GOOGLE_INSERT_FIREWALL, clientConfig, operationAnnotator, insert);
         this.firewall = firewall;
         this.projectId = projectId;
       }
@@ -224,7 +229,7 @@ public class CloudComputeCow {
       private final Compute.Firewalls.Get get;
 
       public Get(Compute.Firewalls.Get get) {
-        super(CloudOperation.GOOGLE_GET_FIREWAL, clientConfig, operationAnnotator, get);
+        super(CloudComputeOperation.GOOGLE_GET_FIREWAL, clientConfig, operationAnnotator, get);
         this.get = get;
       }
 
@@ -261,7 +266,7 @@ public class CloudComputeCow {
       private final Route route;
 
       public Insert(Compute.Routes.Insert insert, String projectId, Route route) {
-        super(CloudOperation.GOOGLE_INSERT_ROUTE, clientConfig, operationAnnotator, insert);
+        super(CloudComputeOperation.GOOGLE_INSERT_ROUTE, clientConfig, operationAnnotator, insert);
         this.route = route;
         this.projectId = projectId;
       }
@@ -285,7 +290,7 @@ public class CloudComputeCow {
       private final Compute.Routes.Get get;
 
       public Get(Compute.Routes.Get get) {
-        super(CloudOperation.GOOGLE_GET_ROUTE, clientConfig, operationAnnotator, get);
+        super(CloudComputeOperation.GOOGLE_GET_ROUTE, clientConfig, operationAnnotator, get);
         this.get = get;
       }
 
@@ -329,7 +334,7 @@ public class CloudComputeCow {
 
       public Get(Compute.GlobalOperations.Get get) {
         super(
-            CloudOperation.GOOGLE_COMPUTE_GLOBAL_OPERATION_GET,
+            CloudComputeOperation.GOOGLE_COMPUTE_GLOBAL_OPERATION_GET,
             clientConfig,
             operationAnnotator,
             get);
@@ -381,7 +386,7 @@ public class CloudComputeCow {
 
       public Get(Compute.RegionOperations.Get get) {
         super(
-            CloudOperation.GOOGLE_COMPUTE_REGION_OPERATION_GET,
+            CloudComputeOperation.GOOGLE_COMPUTE_REGION_OPERATION_GET,
             clientConfig,
             operationAnnotator,
             get);

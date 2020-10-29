@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.billing;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -45,7 +44,7 @@ public class CloudBillingClientCow implements AutoCloseable {
   /** See {@link CloudBillingClient#getProjectBillingInfo(String)}. */
   public ProjectBillingInfo getProjectBillingInfo(String name) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_GET_PROJECT_BILLING,
+        CloudBillingOperation.GOOGLE_GET_PROJECT_BILLING,
         () -> billing.getProjectBillingInfo(name),
         () -> serializeProjectName(name));
   }
@@ -54,7 +53,7 @@ public class CloudBillingClientCow implements AutoCloseable {
   public ProjectBillingInfo updateProjectBillingInfo(
       String name, ProjectBillingInfo projectBillingInfo) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_UPDATE_PROJECT_BILLING,
+        CloudBillingOperation.GOOGLE_UPDATE_PROJECT_BILLING,
         () -> billing.updateProjectBillingInfo(name, projectBillingInfo),
         () -> serialize(name, projectBillingInfo));
   }

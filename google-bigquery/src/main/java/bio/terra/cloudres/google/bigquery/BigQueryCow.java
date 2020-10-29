@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.bigquery;
 import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.TransformPage;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
@@ -58,7 +57,7 @@ public class BigQueryCow {
     return new DatasetCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_CREATE_DATASET,
+            BigQueryOperation.GOOGLE_CREATE_DATASET,
             () -> bigQuery.create(datasetInfo, datasetOptions),
             () -> convert(datasetInfo, datasetOptions)));
   }
@@ -68,7 +67,7 @@ public class BigQueryCow {
     return new DatasetCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_UPDATE_DATASET,
+            BigQueryOperation.GOOGLE_UPDATE_DATASET,
             () -> bigQuery.update(datasetInfo, datasetOptions),
             () -> convert(datasetInfo, datasetOptions)));
   }
@@ -76,7 +75,7 @@ public class BigQueryCow {
   /** See {@link BigQuery#delete(String, DatasetDeleteOption...)}. */
   public boolean delete(String datasetId, DatasetDeleteOption... deleteOptions) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_DATASET,
+        BigQueryOperation.GOOGLE_DELETE_DATASET,
         () -> bigQuery.delete(datasetId, deleteOptions),
         () -> convert(DatasetId.of(datasetId), deleteOptions));
   }
@@ -84,7 +83,7 @@ public class BigQueryCow {
   /** See {@link BigQuery#delete(DatasetId, DatasetDeleteOption...)}. */
   public boolean delete(DatasetId datasetId, DatasetDeleteOption... deleteOptions) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_DATASET,
+        BigQueryOperation.GOOGLE_DELETE_DATASET,
         () -> bigQuery.delete(datasetId, deleteOptions),
         () -> convert(datasetId, deleteOptions));
   }
@@ -93,7 +92,7 @@ public class BigQueryCow {
   public DatasetCow getDataset(String datasetId, DatasetOption... datasetOptions) {
     Dataset rawDataset =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_DATASET,
+            BigQueryOperation.GOOGLE_GET_DATASET,
             () -> bigQuery.getDataset(datasetId, datasetOptions),
             () -> convert(DatasetId.of(datasetId), datasetOptions));
     return (rawDataset == null) ? null : new DatasetCow(clientConfig, rawDataset);
@@ -103,7 +102,7 @@ public class BigQueryCow {
   public DatasetCow getDataset(DatasetId datasetId, DatasetOption... datasetOptions) {
     Dataset rawDataset =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_DATASET,
+            BigQueryOperation.GOOGLE_GET_DATASET,
             () -> bigQuery.getDataset(datasetId, datasetOptions),
             () -> convert(datasetId, datasetOptions));
     return (rawDataset == null) ? null : new DatasetCow(clientConfig, rawDataset);
@@ -125,7 +124,7 @@ public class BigQueryCow {
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_CREATE_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_CREATE_BIGQUERY_TABLE,
             () -> bigQuery.create(tableInfo, tableOptions),
             () -> convert(tableInfo, tableOptions)));
   }
@@ -135,7 +134,7 @@ public class BigQueryCow {
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
             () -> bigQuery.update(tableInfo, tableOptions),
             () -> convert(tableInfo, tableOptions)));
   }
@@ -143,7 +142,7 @@ public class BigQueryCow {
   /** See {@link BigQuery#delete(TableId)}. */
   public boolean delete(TableId tableId) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
+        BigQueryOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
         () -> bigQuery.delete(tableId),
         () -> convert(tableId));
   }
@@ -152,7 +151,7 @@ public class BigQueryCow {
   public TableCow getTable(TableId tableId, TableOption... tableOptions) {
     Table rawTable =
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_GET_BIGQUERY_TABLE,
             () -> bigQuery.getTable(tableId, tableOptions),
             () -> convert(tableId, tableOptions));
     return (rawTable == null) ? null : new TableCow(clientConfig, rawTable);
@@ -167,7 +166,7 @@ public class BigQueryCow {
   public Page<TableCow> listTables(DatasetId datasetId, TableListOption... tableListOptions) {
     return new TransformPage<>(
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_LIST_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_LIST_BIGQUERY_TABLE,
             () -> bigQuery.listTables(datasetId, tableListOptions),
             () -> convert(datasetId, tableListOptions)),
         (Table t) -> new TableCow(clientConfig, t));
@@ -182,7 +181,7 @@ public class BigQueryCow {
   public TableResult query(QueryJobConfiguration configuration, BigQuery.JobOption... jobOptions)
       throws InterruptedException {
     return operationAnnotator.executeCheckedCowOperation(
-        CloudOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
+        BigQueryOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
         () -> bigQuery.query(configuration, jobOptions),
         () -> convert(configuration, jobOptions));
   }
@@ -192,7 +191,7 @@ public class BigQueryCow {
       QueryJobConfiguration configuration, JobId jobId, BigQuery.JobOption... jobOptions)
       throws InterruptedException {
     return operationAnnotator.executeCheckedCowOperation(
-        CloudOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
+        BigQueryOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
         () -> bigQuery.query(configuration, jobId, jobOptions),
         () -> convert(configuration, jobOptions));
   }
@@ -200,7 +199,7 @@ public class BigQueryCow {
   /** See {@link BigQuery#insertAll(InsertAllRequest)}. */
   public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
     return operationAnnotator.executeCheckedCowOperation(
-        CloudOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
+        BigQueryOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
         () -> bigQuery.insertAll(insertAllRequest),
         () -> convert(insertAllRequest));
   }

@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.bigquery;
 import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.Table;
@@ -34,7 +33,7 @@ public class TableCow {
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_RELOAD_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_RELOAD_BIGQUERY_TABLE,
             () -> table.reload(tableOptions),
             () -> convert(table.getTableId(), tableOptions)));
   }
@@ -44,7 +43,7 @@ public class TableCow {
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
             () -> table.update(TableOptions),
             () -> convert(table, TableOptions)));
   }
@@ -52,7 +51,7 @@ public class TableCow {
   /** See {@link Table#exists()} */
   public boolean exists() {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
+        BigQueryOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
         table::exists,
         () -> convert(table.getTableId()));
   }
@@ -60,7 +59,7 @@ public class TableCow {
   /** See {@link Table#delete()} */
   public boolean delete() {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
+        BigQueryOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
         table::delete,
         () -> convert(table.getTableId()));
   }
