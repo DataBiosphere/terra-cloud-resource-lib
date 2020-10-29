@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.storage;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
-import bio.terra.cloudres.common.StorageOperation;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.Blob;

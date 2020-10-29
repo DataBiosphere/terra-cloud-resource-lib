@@ -4,7 +4,6 @@ import static bio.terra.cloudres.google.storage.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
-import bio.terra.cloudres.common.StorageOperation;
 import bio.terra.cloudres.common.TransformPage;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
