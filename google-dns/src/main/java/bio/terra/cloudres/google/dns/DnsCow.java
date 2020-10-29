@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.dns;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
@@ -71,7 +70,7 @@ public class DnsCow {
       private final ManagedZone managedZone;
 
       public Create(Dns.ManagedZones.Create create, String projectId, ManagedZone managedZone) {
-        super(CloudOperation.GOOGLE_DNS_CREATE_ZONE, clientConfig, operationAnnotator, create);
+        super(DnsOperation.GOOGLE_DNS_CREATE_ZONE, clientConfig, operationAnnotator, create);
         this.projectId = projectId;
         this.managedZone = managedZone;
       }
@@ -95,7 +94,7 @@ public class DnsCow {
       private final Dns.ManagedZones.Get get;
 
       private Get(Dns.ManagedZones.Get get) {
-        super(CloudOperation.GOOGLE_DNS_GET_ZONE, clientConfig, operationAnnotator, get);
+        super(DnsOperation.GOOGLE_DNS_GET_ZONE, clientConfig, operationAnnotator, get);
         this.get = get;
       }
 
@@ -133,7 +132,7 @@ public class DnsCow {
       private final Dns.Changes.Create create;
 
       public Create(Dns.Changes.Create create, Change change) {
-        super(CloudOperation.GOOGLE_DNS_CREATE_CHANGEE, clientConfig, operationAnnotator, create);
+        super(DnsOperation.GOOGLE_DNS_CREATE_CHANGEE, clientConfig, operationAnnotator, create);
         this.change = change;
         this.create = create;
       }
@@ -158,7 +157,7 @@ public class DnsCow {
       private final Dns.Changes.Get get;
 
       private Get(Dns.Changes.Get get) {
-        super(CloudOperation.GOOGLE_DNS_GET_CHANGE, clientConfig, operationAnnotator, get);
+        super(DnsOperation.GOOGLE_DNS_GET_CHANGE, clientConfig, operationAnnotator, get);
         this.get = get;
       }
 
@@ -196,7 +195,7 @@ public class DnsCow {
 
       private List(Dns.ResourceRecordSets.List list) {
         super(
-            CloudOperation.GOOGLE_DNS_LIST_RESOURCE_RECORD_SETS,
+            DnsOperation.GOOGLE_DNS_LIST_RESOURCE_RECORD_SETS,
             clientConfig,
             operationAnnotator,
             list);

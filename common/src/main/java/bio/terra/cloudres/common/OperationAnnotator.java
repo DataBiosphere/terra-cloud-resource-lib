@@ -64,7 +64,7 @@ public class OperationAnnotator {
       throws E {
     Optional<Exception> executionException = Optional.empty();
 
-    Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
+    Span span = tracer.spanBuilder(cloudOperation.getName()).startSpan();
 
     // Record the Cloud API usage.
     recordApiCount(cloudOperation);
@@ -133,7 +133,7 @@ public class OperationAnnotator {
 
     JsonObject logEntry = new JsonObject();
     logEntry.addProperty("traceId", traceId.toString());
-    logEntry.addProperty("operation", operation.name());
+    logEntry.addProperty("operation", operation.getName());
     logEntry.addProperty("clientName", clientConfig.getClientName());
 
     executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));

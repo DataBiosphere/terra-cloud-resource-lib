@@ -3,8 +3,8 @@ package bio.terra.cloudres.google.storage;
 import static bio.terra.cloudres.google.storage.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.StorageOperation;
 import bio.terra.cloudres.common.TransformPage;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
@@ -35,7 +35,7 @@ public class BucketCow {
   public Page<BlobCow> list(Storage.BlobListOption... options) {
     return new TransformPage<>(
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_LIST_BLOB,
+            StorageOperation.GOOGLE_LIST_BLOB,
             () -> bucket.list(options),
             () -> convert(bucket.getName(), options)),
         (Blob t) -> new BlobCow(clientConfig, t));
@@ -54,7 +54,7 @@ public class BucketCow {
     return new BucketCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_UPDATE_BUCKET,
+            StorageOperation.GOOGLE_UPDATE_BUCKET,
             () -> bucket.update(options),
             () -> convert(bucket, options)));
   }
@@ -62,7 +62,7 @@ public class BucketCow {
   /** See {@link Bucket#delete(Bucket.BucketSourceOption...)} */
   public boolean delete() {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BUCKET,
+        StorageOperation.GOOGLE_DELETE_BUCKET,
         bucket::delete,
         () -> {
           JsonObject request = new JsonObject();

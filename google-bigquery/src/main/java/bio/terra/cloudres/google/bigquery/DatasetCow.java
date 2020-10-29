@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.bigquery;
 import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.janitor.model.CloudResourceUid;
@@ -36,7 +35,7 @@ public class DatasetCow {
     return new DatasetCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_RELOAD_DATASET,
+            BigQueryOperation.GOOGLE_RELOAD_DATASET,
             () -> dataset.reload(datasetOptions),
             () -> convert(dataset.getDatasetId(), datasetOptions)));
   }
@@ -46,7 +45,7 @@ public class DatasetCow {
     return new DatasetCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_UPDATE_DATASET,
+            BigQueryOperation.GOOGLE_UPDATE_DATASET,
             () -> dataset.update(datasetOptions),
             () -> convert(dataset, datasetOptions)));
   }
@@ -54,7 +53,7 @@ public class DatasetCow {
   /** See {@link Dataset#delete(BigQuery.DatasetDeleteOption...)} */
   public boolean delete(BigQuery.DatasetDeleteOption... deleteOptions) {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_DATASET,
+        BigQueryOperation.GOOGLE_DELETE_DATASET,
         () -> dataset.delete(deleteOptions),
         () -> convert(dataset.getDatasetId(), deleteOptions));
   }
@@ -75,7 +74,7 @@ public class DatasetCow {
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_CREATE_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_CREATE_BIGQUERY_TABLE,
             () -> dataset.create(tableId, tableDefinition, tableOptions),
             () ->
                 convert(
@@ -89,7 +88,7 @@ public class DatasetCow {
     return new TableCow(
         clientConfig,
         operationAnnotator.executeCowOperation(
-            CloudOperation.GOOGLE_GET_BIGQUERY_TABLE,
+            BigQueryOperation.GOOGLE_GET_BIGQUERY_TABLE,
             () -> dataset.get(tableId, tableOptions),
             () -> convert(TableId.of(dataset.getDatasetId().getDataset(), tableId), tableOptions)));
   }

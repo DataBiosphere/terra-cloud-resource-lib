@@ -4,7 +4,6 @@ import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.util.MetricsHelper;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.stats.View;
@@ -17,11 +16,12 @@ public class MetricsTestUtil {
   public static final String CLIENT = "TestClient";
   public static final List<TagValue> API_COUNT =
       Arrays.asList(
-          TagValue.create(CLIENT), TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()));
+          TagValue.create(CLIENT),
+          TagValue.create(StubCloudOperation.GOOGLE_CREATE_PROJECT.getName()));
   public static final List<TagValue> ERROR_COUNT_404 =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(CloudOperation.GOOGLE_CREATE_PROJECT.name()),
+          TagValue.create(StubCloudOperation.GOOGLE_CREATE_PROJECT.getName()),
           TagValue.create("404"));
 
   public static final View.Name API_VIEW_NAME =

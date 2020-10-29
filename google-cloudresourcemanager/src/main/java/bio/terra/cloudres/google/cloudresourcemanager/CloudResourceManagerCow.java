@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.cloudresourcemanager;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
@@ -72,7 +71,11 @@ public class CloudResourceManagerCow {
       private final Project project;
 
       public Create(CloudResourceManager.Projects.Create create, Project project) {
-        super(CloudOperation.GOOGLE_CREATE_PROJECT, clientConfig, operationAnnotator, create);
+        super(
+            CloudResourceManagerOperation.GOOGLE_CREATE_PROJECT,
+            clientConfig,
+            operationAnnotator,
+            create);
         this.project = project;
       }
 
@@ -99,7 +102,11 @@ public class CloudResourceManagerCow {
       private final CloudResourceManager.Projects.Delete delete;
 
       private Delete(CloudResourceManager.Projects.Delete delete) {
-        super(CloudOperation.GOOGLE_DELETE_PROJECT, clientConfig, operationAnnotator, delete);
+        super(
+            CloudResourceManagerOperation.GOOGLE_DELETE_PROJECT,
+            clientConfig,
+            operationAnnotator,
+            delete);
         this.delete = delete;
       }
 
@@ -119,7 +126,11 @@ public class CloudResourceManagerCow {
       private final CloudResourceManager.Projects.Get get;
 
       private Get(CloudResourceManager.Projects.Get get) {
-        super(CloudOperation.GOOGLE_GET_PROJECT, clientConfig, operationAnnotator, get);
+        super(
+            CloudResourceManagerOperation.GOOGLE_GET_PROJECT,
+            clientConfig,
+            operationAnnotator,
+            get);
         this.get = get;
       }
 
@@ -141,7 +152,7 @@ public class CloudResourceManagerCow {
 
       private GetIamPolicy(CloudResourceManager.Projects.GetIamPolicy getIamPolicy) {
         super(
-            CloudOperation.GOOGLE_GET_IAM_POLICY_PROJECT,
+            CloudResourceManagerOperation.GOOGLE_GET_IAM_POLICY_PROJECT,
             clientConfig,
             operationAnnotator,
             getIamPolicy);
@@ -166,7 +177,7 @@ public class CloudResourceManagerCow {
 
       private SetIamPolicy(CloudResourceManager.Projects.SetIamPolicy setIamPolicy) {
         super(
-            CloudOperation.GOOGLE_SET_IAM_POLICY_PROJECT,
+            CloudResourceManagerOperation.GOOGLE_SET_IAM_POLICY_PROJECT,
             clientConfig,
             operationAnnotator,
             setIamPolicy);
@@ -207,7 +218,7 @@ public class CloudResourceManagerCow {
 
       public Get(CloudResourceManager.Operations.Get get) {
         super(
-            CloudOperation.GOOGLE_RESOURCE_MANAGER_OPERATION_GET,
+            CloudResourceManagerOperation.GOOGLE_RESOURCE_MANAGER_OPERATION_GET,
             clientConfig,
             operationAnnotator,
             get);

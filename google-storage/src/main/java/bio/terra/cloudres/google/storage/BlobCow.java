@@ -1,8 +1,8 @@
 package bio.terra.cloudres.google.storage;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.StorageOperation;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.Blob;
@@ -35,7 +35,7 @@ public class BlobCow {
   public CopyWriter copyTo(BlobId targetblob) {
     CleanupRecorder.record(SerializeUtils.create(targetblob), clientConfig);
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_COPY_BLOB,
+        StorageOperation.GOOGLE_COPY_BLOB,
         () -> blob.copyTo(targetblob),
         () -> {
           JsonObject request = new JsonObject();
@@ -48,7 +48,7 @@ public class BlobCow {
   /** See {@link Blob#delete(Blob.BlobSourceOption...)} */
   public boolean delete() {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_DELETE_BLOB,
+        StorageOperation.GOOGLE_DELETE_BLOB,
         () -> blob.delete(),
         () -> SerializeUtils.convert(blob.getBlobId()));
   }
@@ -56,7 +56,7 @@ public class BlobCow {
   /** See {@link Blob#reader(Blob.BlobSourceOption...)}. */
   public ReadChannel reader() {
     return operationAnnotator.executeCowOperation(
-        CloudOperation.GOOGLE_READ_BLOB,
+        StorageOperation.GOOGLE_READ_BLOB,
         () -> blob.reader(),
         () -> SerializeUtils.convert(blob.getBlobId()));
   }
