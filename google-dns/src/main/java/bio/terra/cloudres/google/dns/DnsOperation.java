@@ -8,10 +8,5 @@ public enum DnsOperation implements CloudOperation {
   GOOGLE_DNS_CREATE_ZONE,
   GOOGLE_DNS_GET_CHANGE,
   GOOGLE_DNS_GET_ZONE,
-  GOOGLE_DNS_LIST_RESOURCE_RECORD_SETS;
-
-  @Override
-  public String getName() {
-    return this.name();
-  }
+  GOOGLE_DNS_LIST_RESOURCE_RECORD_SETS,
 }

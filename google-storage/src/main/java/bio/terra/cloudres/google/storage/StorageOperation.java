@@ -18,9 +18,4 @@ public enum StorageOperation implements CloudOperation {
   GOOGLE_DELETE_BUCKET,
   GOOGLE_READ_BLOB,
   GOOGLE_UPDATE_BUCKET;
-
-  @Override
-  public String getName() {
-    return this.name();
-  }
 }

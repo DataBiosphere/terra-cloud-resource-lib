@@ -16,12 +16,11 @@ public class MetricsTestUtil {
   public static final String CLIENT = "TestClient";
   public static final List<TagValue> API_COUNT =
       Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.getName()));
+          TagValue.create(CLIENT), TagValue.create(StubCloudOperation.TEST_OPERATION.name()));
   public static final List<TagValue> ERROR_COUNT_404 =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.getName()),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
           TagValue.create("404"));
 
   public static final View.Name API_VIEW_NAME =

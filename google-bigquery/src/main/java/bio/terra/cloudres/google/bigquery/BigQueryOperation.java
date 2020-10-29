@@ -17,9 +17,4 @@ public enum BigQueryOperation implements CloudOperation {
   GOOGLE_QUERY_BIGQUERY_TABLE,
   GOOGLE_RELOAD_DATASET,
   GOOGLE_RELOAD_BIGQUERY_TABLE;
-
-  @Override
-  public String getName() {
-    return this.name();
-  }
 }

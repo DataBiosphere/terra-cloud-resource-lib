@@ -13,10 +13,5 @@ public enum CloudComputeOperation implements CloudOperation {
   GOOGLE_GET_FIREWAL,
   GOOGLE_GET_NETWORK,
   GOOGLE_GET_ROUTE,
-  GOOGLE_GET_SUBNETWORK;
-
-  @Override
-  public String getName() {
-    return this.name();
-  }
+  GOOGLE_GET_SUBNETWORK,
 }

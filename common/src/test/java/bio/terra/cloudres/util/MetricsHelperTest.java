@@ -20,7 +20,7 @@ public class MetricsHelperTest {
   private static final List<TagValue> ERROR_401_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.getName()),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
           TagValue.create("401"));
   private static final List<TagValue> ERROR_403_COUNT =
       Arrays.asList(
@@ -30,7 +30,7 @@ public class MetricsHelperTest {
   private static final List<TagValue> ERROR_GENERIC_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.getName()),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
           TagValue.create(String.valueOf(GENERIC_UNKNOWN_ERROR_CODE)));
 
   private static final View.Name LATENCY_VIEW_NAME =
@@ -59,16 +59,11 @@ public class MetricsHelperTest {
     long errorCount401 = getCurrentCount(ERROR_VIEW_NAME, ERROR_401_COUNT);
     long errorCountGeneric = getCurrentCount(ERROR_VIEW_NAME, ERROR_GENERIC_COUNT);
 
-    MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
-    MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
-    MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
-    MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(403));
-    MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.empty());
+    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
+    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
+    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
+    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(403));
+    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.empty());
 
     sleepForSpansExport();
 
@@ -89,12 +84,9 @@ public class MetricsHelperTest {
     long current1MsCount =
         getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, oneMsBucketIndex);
 
-    MetricsHelper.recordLatency(
-        CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
-    MetricsHelper.recordLatency(
-        CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
-    MetricsHelper.recordLatency(
-        CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(0));
+    MetricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
+    MetricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
+    MetricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(0));
 
     sleepForSpansExport();
 

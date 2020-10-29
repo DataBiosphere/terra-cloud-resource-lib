@@ -9,10 +9,5 @@ public enum CloudResourceManagerOperation implements CloudOperation {
   GOOGLE_GET_PROJECT,
   GOOGLE_GET_IAM_POLICY_PROJECT,
   GOOGLE_SET_IAM_POLICY_PROJECT,
-  GOOGLE_RESOURCE_MANAGER_OPERATION_GET;
-
-  @Override
-  public String getName() {
-    return this.name();
-  }
+  GOOGLE_RESOURCE_MANAGER_OPERATION_GET,
 }
