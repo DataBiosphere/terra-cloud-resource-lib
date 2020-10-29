@@ -75,7 +75,7 @@ public class OperationAnnotatorTest {
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
 
     operationAnnotator.executeCowOperation(
-        StubCloudOperation.GOOGLE_CREATE_PROJECT, SUCCESS_COW_EXECUTE, SERIALIZE);
+        StubCloudOperation.TEST_OPERATION, SUCCESS_COW_EXECUTE, SERIALIZE);
 
     sleepForSpansExport();
 
@@ -105,7 +105,7 @@ public class OperationAnnotatorTest {
         ResourceManagerException.class,
         () ->
             operationAnnotator.executeCowOperation(
-                StubCloudOperation.GOOGLE_CREATE_PROJECT, FAILED_COW_EXECUTE, SERIALIZE));
+                StubCloudOperation.TEST_OPERATION, FAILED_COW_EXECUTE, SERIALIZE));
 
     sleepForSpansExport();
 
@@ -122,7 +122,7 @@ public class OperationAnnotatorTest {
         InterruptedException.class,
         () ->
             operationAnnotator.executeCheckedCowOperation(
-                StubCloudOperation.GOOGLE_CREATE_PROJECT,
+                StubCloudOperation.TEST_OPERATION,
                 () -> {
                   throw new InterruptedException(ERROR_MESSAGE);
                 },
@@ -160,7 +160,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        StubCloudOperation.GOOGLE_CREATE_PROJECT,
+        StubCloudOperation.TEST_OPERATION,
         PROJECT_INFO_JSON_OBJECT,
         Optional.empty());
 
@@ -195,7 +195,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        StubCloudOperation.GOOGLE_CREATE_PROJECT,
+        StubCloudOperation.TEST_OPERATION,
         PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 
@@ -213,7 +213,7 @@ public class OperationAnnotatorTest {
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
-        StubCloudOperation.GOOGLE_CREATE_PROJECT,
+        StubCloudOperation.TEST_OPERATION,
         PROJECT_INFO_JSON_OBJECT,
         Optional.of(RM_EXCEPTION));
 

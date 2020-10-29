@@ -20,17 +20,17 @@ public class MetricsHelperTest {
   private static final List<TagValue> ERROR_401_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.GOOGLE_CREATE_PROJECT.getName()),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.getName()),
           TagValue.create("401"));
   private static final List<TagValue> ERROR_403_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.GOOGLE_CREATE_PROJECT.name()),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
           TagValue.create("403"));
   private static final List<TagValue> ERROR_GENERIC_COUNT =
       Arrays.asList(
           TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.GOOGLE_CREATE_PROJECT.getName()),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.getName()),
           TagValue.create(String.valueOf(GENERIC_UNKNOWN_ERROR_CODE)));
 
   private static final View.Name LATENCY_VIEW_NAME =
@@ -43,10 +43,10 @@ public class MetricsHelperTest {
   @Test
   public void testRecordApiCount() throws Exception {
     long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT);
+    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
 
     sleepForSpansExport();
 
@@ -60,15 +60,15 @@ public class MetricsHelperTest {
     long errorCountGeneric = getCurrentCount(ERROR_VIEW_NAME, ERROR_GENERIC_COUNT);
 
     MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(401));
+        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
     MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(401));
+        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
     MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(401));
+        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
     MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.of(403));
+        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(403));
     MetricsHelper.recordError(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, OptionalInt.empty());
+        CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.empty());
 
     sleepForSpansExport();
 
@@ -90,11 +90,11 @@ public class MetricsHelperTest {
         getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, oneMsBucketIndex);
 
     MetricsHelper.recordLatency(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
+        CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
     MetricsHelper.recordLatency(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(1));
+        CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
     MetricsHelper.recordLatency(
-        CLIENT, StubCloudOperation.GOOGLE_CREATE_PROJECT, Duration.ofMillis(0));
+        CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(0));
 
     sleepForSpansExport();
 
