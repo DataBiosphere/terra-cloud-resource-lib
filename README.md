@@ -23,6 +23,16 @@ Set executable permissions:
 chmod +x gradlew
 ```
 
+### Dependencies
+We use [Gradle's dependency locking](https://docs.gradle.org/current/userguide/dependency_locking.html)
+to ensure that builds use the same transitive dependencies, so they're reproducible. This means that
+adding or updating a dependency requires telling Gradle to save the change. If you're getting errors
+that mention "dependency lock state" after changing a dep, you need to do this step.
+
+```sh
+./gradlew dependencies --write-locks
+```
+
 ## Testing
 
 ### Unit tests

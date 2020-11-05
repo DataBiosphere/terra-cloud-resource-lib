@@ -4,7 +4,6 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.JanitorException;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -100,7 +99,7 @@ public class CleanupRecorder {
     ByteString data;
     try {
       data = ByteString.copyFromUtf8(objectMapper.writeValueAsString(body));
-    } catch (JsonProcessingException e) {
+    } catch (IOException e) {
       throw new JanitorException(
           String.format("Failed to serialize CreateResourceRequestBody: [%s]", body), e);
     }

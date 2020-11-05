@@ -1,8 +1,8 @@
 dependencies {
-    implementation project(':cloud-resource-schema')
-    api project(':common')
     api project(':google-api-services-common')
-    api 'com.google.apis:google-api-services-dns:v1-rev20200806-1.30.10'
+    implementation project(':cloud-resource-schema')
+
+    api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v1-rev20200806-1.30.10'
 
     testImplementation(testFixtures(project(':google-billing')))
     testImplementation(testFixtures(project(':google-cloudresourcemanager')))

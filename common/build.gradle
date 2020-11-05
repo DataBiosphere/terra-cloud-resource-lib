@@ -1,15 +1,15 @@
 dependencies {
-    implementation "com.google.auto.value:auto-value-annotations:1.7.3"
-    annotationProcessor "com.google.auto.value:auto-value:1.7.3"
-    implementation 'io.opencensus:opencensus-api:0.26.0'
-    implementation 'io.opencensus:opencensus-impl:0.26.0'
-    implementation group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '1.104.1'
+    annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'
+    implementation group: 'com.google.auto.value', name: 'auto-value-annotations', version: '1.7.3'
+    implementation group: 'io.opencensus', name: 'opencensus-api', version: '0.26.0'
+    implementation group: 'io.opencensus', name: 'opencensus-impl', version: '0.26.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.11.2'
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.11.2'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.11.2'
+    implementation group: 'com.google.cloud', name: 'google-cloud-pubsub', version: '1.104.1'
 
-    testImplementation 'com.google.cloud:google-cloud-resourcemanager:0.117.2-alpha'
+    testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager', version: '0.117.2-alpha'
 
-    testFixturesImplementation "org.mockito:mockito-core:2.+"
-    testFixturesImplementation "bio.terra.janitor:terra-resource-janitor-client:0.0.1-SNAPSHOT"
+    testFixturesImplementation group: 'bio.terra.janitor', name: 'terra-resource-janitor-client', version: '0.0.1-SNAPSHOT'
+    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '2.+'
 }
