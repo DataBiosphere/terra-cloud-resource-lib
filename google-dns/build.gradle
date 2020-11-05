@@ -1,4 +1,7 @@
+version = '0.1.0'
+
 dependencies {
+    api project(':common')
     api project(':google-api-services-common')
     implementation project(':cloud-resource-schema')
 

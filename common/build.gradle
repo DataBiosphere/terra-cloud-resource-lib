@@ -1,3 +1,5 @@
+version = '0.1.0'
+
 dependencies {
     annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'
     implementation group: 'com.google.auto.value', name: 'auto-value-annotations', version: '1.7.3'

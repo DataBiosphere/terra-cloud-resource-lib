@@ -1,4 +1,7 @@
+version = '0.1.0'
+
 dependencies {
+    api project(':common')
     api project(':google-api-services-common')
 
     api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1-rev20200821-1.30.10'
