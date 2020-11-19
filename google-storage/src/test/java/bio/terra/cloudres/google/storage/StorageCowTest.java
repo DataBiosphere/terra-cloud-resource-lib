@@ -15,6 +15,7 @@ import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
+import com.google.common.collect.ImmutableList;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -101,8 +102,8 @@ public class StorageCowTest {
 
     Acl acl = Acl.newBuilder(entity, Acl.Role.READER).build();
     Acl createdAcl = storageCow.createAcl(blobId, acl);
-    assertEquivalentAcls(acl, createdAcl);
-    assertEquivalentAcls(acl, storageCow.getAcl(blobId, entity));
+    assertAclsMatch(ImmutableList.of(acl), ImmutableList.of(createdAcl));
+    assertAclsMatch(ImmutableList.of(acl), ImmutableList.of(storageCow.getAcl(blobId, entity)));
 
     assertTrue(storageCow.deleteAcl(blobId, entity));
     assertNull(storageCow.getAcl(blobId, entity));
@@ -149,11 +150,5 @@ public class StorageCowTest {
                         .blobName(blobId.getName())
                         .bucketName(blobId.getBucket()))));
     assertTrue(storageCow.delete(blobId));
-  }
-
-  /** Helper assert that compares an {@link Acl}'s entity and role, but ignores the etag and id. */
-  private static void assertEquivalentAcls(Acl expected, Acl actual) {
-    assertEquals(expected.getEntity(), actual.getEntity());
-    assertEquals(expected.getRole(), actual.getRole());
   }
 }
