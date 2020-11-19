@@ -163,6 +163,7 @@ public class OperationAnnotatorTest {
         Optional.empty());
 
     // Expected result in Json format
+    verify(mockLogger).info(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + "\"request\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
   }
@@ -196,6 +197,7 @@ public class OperationAnnotatorTest {
         Optional.of(RM_EXCEPTION));
 
     // Expected result in Json format
+    verify(mockLogger).info(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request\":" + PROJECT_INFO_STRING + "}",
         logArgument.getValue());
