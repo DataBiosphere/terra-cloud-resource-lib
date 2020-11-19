@@ -10,6 +10,7 @@ import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.compute.model.*;
 import com.google.common.collect.ImmutableList;
@@ -108,7 +109,7 @@ public class CloudComputeCowTest {
   }
 
   @Test
-  public void createAndGetFirewall() throws Exception {
+  public void createGetAndDeleteFirewall() throws Exception {
     String projectId = reusableProject.getProjectId();
 
     CloudComputeCow cloudComputeCow = defaultCompute();
@@ -129,6 +130,21 @@ public class CloudComputeCowTest {
 
     assertEquals(firewallName, createdFirewall.getName());
     assertThat(createdFirewall.getAllowed(), Matchers.contains(allowed));
+
+    Operation deleteOperation =
+        cloudComputeCow.firewalls().delete(projectId, firewallName).execute();
+    completedOperation =
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
+    assertTrue(completedOperation.getOperationAdapter().getDone());
+    assertNull(completedOperation.getOperationAdapter().getError());
+    GoogleJsonResponseException e =
+        assertThrows(
+            GoogleJsonResponseException.class,
+            () -> cloudComputeCow.firewalls().get(projectId, firewallName).execute());
+    assertEquals(404, e.getStatusCode());
   }
 
   @Test
@@ -221,6 +237,16 @@ public class CloudComputeCowTest {
     assertEquals(
         "{\"project_id\":\"project-id\",\"firewall_name\":\"firewall-name\"}",
         get.serialize().toString());
+  }
+
+  @Test
+  public void firewallDeleteSerialize() throws Exception {
+    CloudComputeCow.Firewalls.Delete delete =
+        defaultCompute().firewalls().delete("project-id", "firewall-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"firewall_name\":\"firewall-name\"}",
+        delete.serialize().toString());
   }
 
   @Test
