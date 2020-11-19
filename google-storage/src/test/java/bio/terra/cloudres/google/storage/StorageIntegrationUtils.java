@@ -37,6 +37,10 @@ class StorageIntegrationUtils {
         .build();
   }
 
+  static String getTestUserEmailAddress() {
+    return IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
+  }
+
   static String readContents(BlobCow blob) throws IOException {
     try (InputStreamReader reader = new InputStreamReader(Channels.newInputStream(blob.reader()))) {
       return CharStreams.toString(reader);
