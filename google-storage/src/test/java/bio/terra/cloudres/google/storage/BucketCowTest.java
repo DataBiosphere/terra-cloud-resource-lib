@@ -1,7 +1,6 @@
 package bio.terra.cloudres.google.storage;
 
-import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.assertAclsMatch;
-import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.createBlobWithContents;
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertNull;
@@ -66,8 +65,9 @@ public class BucketCowTest {
     BucketCow bucketCow = storageCow.create(BucketInfo.of(bucketName));
 
     List<Acl> defaultAcl = storageCow.get(bucketName).getBucketInfo().getAcl();
-    Acl acl = Acl.newBuilder(Acl.User.ofAllAuthenticatedUsers(), Acl.Role.READER).build();
+    Acl acl = Acl.newBuilder(new Acl.User(getTestUserEmailAddress()), Acl.Role.READER).build();
     bucketCow.updateAcl(acl);
+
     // Verify that new ACL is added and previous Acls still exist.
     List<Acl> expectedAcl = new ArrayList<>(defaultAcl);
     expectedAcl.add(acl);

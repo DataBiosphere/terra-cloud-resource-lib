@@ -1,6 +1,6 @@
 package bio.terra.cloudres.google.storage;
 
-import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.assertAclsMatch;
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -97,7 +97,8 @@ public class StorageCowTest {
     BlobId blobId =
         BlobId.of(reusableBucket.getBucketInfo().getName(), IntegrationUtils.randomName());
     storageCow.create(BlobInfo.newBuilder(blobId).build());
-    Acl.User entity = Acl.User.ofAllAuthenticatedUsers();
+
+    Acl.User entity = new Acl.User(getTestUserEmailAddress());
     assertNull(storageCow.getAcl(blobId, entity));
 
     Acl acl = Acl.newBuilder(entity, Acl.Role.READER).build();
@@ -117,7 +118,7 @@ public class StorageCowTest {
     storageCow.create(BucketInfo.of(bucketName));
 
     List<Acl> defaultAcl = storageCow.get(bucketName).getBucketInfo().getAcl();
-    Acl acl = Acl.newBuilder(Acl.User.ofAllAuthenticatedUsers(), Acl.Role.READER).build();
+    Acl acl = Acl.newBuilder(new Acl.User(getTestUserEmailAddress()), Acl.Role.READER).build();
     storageCow.updateAcl(bucketName, acl);
     // Verify that new ACL is added and previous Acls still exist.
     List<Acl> expectedAcl = new ArrayList<>(defaultAcl);
