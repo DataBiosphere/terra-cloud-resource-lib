@@ -63,6 +63,19 @@ public class StorageCow {
         });
   }
 
+  /** See {@link Storage#updateAcl(String, Acl)} */
+  public Acl updateAcl(String bucketName, Acl acl) {
+    return operationAnnotator.executeCowOperation(
+        StorageOperation.GOOGLE_UPDATE_BUCKET_ACL,
+        () -> storage.updateAcl(bucketName, acl),
+        () -> {
+          JsonObject request = new JsonObject();
+          request.addProperty("bucketName", bucketName);
+          request.add("acl", SerializeUtils.convert(acl));
+          return request;
+        });
+  }
+
   /** See {@link Storage#get(BlobId)}. Returns null if blob is not found. */
   public BlobCow get(BlobId blob) {
     Blob rawBlob =

@@ -2,7 +2,6 @@ package bio.terra.cloudres.common;
 
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import bio.terra.cloudres.testing.StubCloudOperation;
@@ -156,7 +155,6 @@ public class OperationAnnotatorTest {
   @Test
   public void testLogEvent_nullError() throws Exception {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-    when(mockLogger.isDebugEnabled()).thenReturn(true);
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
@@ -165,7 +163,6 @@ public class OperationAnnotatorTest {
         Optional.empty());
 
     // Expected result in Json format
-    verify(mockLogger).debug(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + "\"request\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
   }
@@ -191,7 +188,6 @@ public class OperationAnnotatorTest {
   @Test
   public void testLogEvent_nullResponse() throws Exception {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-    when(mockLogger.isDebugEnabled()).thenReturn(true);
 
     operationAnnotator.logEvent(
         TraceId.fromBytes(TRACE_ID.getBytes()),
@@ -200,24 +196,8 @@ public class OperationAnnotatorTest {
         Optional.of(RM_EXCEPTION));
 
     // Expected result in Json format
-    verify(mockLogger).debug(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request\":" + PROJECT_INFO_STRING + "}",
         logArgument.getValue());
-  }
-
-  @Test
-  public void testLogEvent_disableDebug() throws Exception {
-    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-    when(mockLogger.isDebugEnabled()).thenReturn(false);
-
-    operationAnnotator.logEvent(
-        TraceId.fromBytes(TRACE_ID.getBytes()),
-        StubCloudOperation.TEST_OPERATION,
-        PROJECT_INFO_JSON_OBJECT,
-        Optional.of(RM_EXCEPTION));
-
-    // no expected result in this case
-    verify(mockLogger, never()).debug(anyString());
   }
 }

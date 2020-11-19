@@ -1,4 +1,4 @@
-version = '0.1.1'
+version = '0.1.2'
 
 dependencies {
     annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'

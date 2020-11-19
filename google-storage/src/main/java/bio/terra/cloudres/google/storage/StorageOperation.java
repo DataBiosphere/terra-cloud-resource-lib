@@ -17,5 +17,6 @@ public enum StorageOperation implements CloudOperation {
   GOOGLE_DELETE_BLOB,
   GOOGLE_DELETE_BUCKET,
   GOOGLE_READ_BLOB,
+  GOOGLE_UPDATE_BUCKET_ACL,
   GOOGLE_UPDATE_BUCKET;
 }
