@@ -137,11 +137,11 @@ public class OperationAnnotator {
 
     logEntry.add("request", request);
 
-    // Log as debug level if no exceptions.
-    if (executionException.isEmpty()) {
-      logger.debug(logEntry.toString());
-    } else {
+    // Log as debug level if no exceptions, otherwise use info level.
+    if (executionException.isPresent()) {
       logger.info(logEntry.toString());
+    } else {
+      logger.debug(logEntry.toString());
     }
   }
 
