@@ -58,6 +58,12 @@ public class BucketCow {
             () -> convert(bucket, options)));
   }
 
+  /** See {@link Bucket#updateAcl(Acl)} */
+  public Acl updateAcl(Acl acl) {
+    return operationAnnotator.executeCowOperation(
+        StorageOperation.GOOGLE_UPDATE_BUCKET_ACL, () -> bucket.updateAcl(acl), () -> convert(acl));
+  }
+
   /** See {@link Bucket#delete(Bucket.BucketSourceOption...)} */
   public boolean delete() {
     return operationAnnotator.executeCowOperation(

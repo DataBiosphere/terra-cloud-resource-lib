@@ -1,5 +1,3 @@
-version = '0.1.0'
-
 dependencies {
     api project(':common')
     implementation project(':cloud-resource-schema')

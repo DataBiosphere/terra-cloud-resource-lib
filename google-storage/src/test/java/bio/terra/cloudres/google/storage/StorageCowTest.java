@@ -1,7 +1,9 @@
 package bio.terra.cloudres.google.storage;
 
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.assertAclsMatch;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -13,8 +15,10 @@ import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BucketInfo;
+import com.google.common.collect.ImmutableList;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
@@ -98,12 +102,30 @@ public class StorageCowTest {
 
     Acl acl = Acl.newBuilder(entity, Acl.Role.READER).build();
     Acl createdAcl = storageCow.createAcl(blobId, acl);
-    assertEquivalentAcls(acl, createdAcl);
-    assertEquivalentAcls(acl, storageCow.getAcl(blobId, entity));
+    assertAclsMatch(ImmutableList.of(acl), ImmutableList.of(createdAcl));
+    assertAclsMatch(ImmutableList.of(acl), ImmutableList.of(storageCow.getAcl(blobId, entity)));
 
     assertTrue(storageCow.deleteAcl(blobId, entity));
     assertNull(storageCow.getAcl(blobId, entity));
     assertTrue(storageCow.delete(blobId));
+  }
+
+  @Test
+  public void updateBucketAcl() throws Exception {
+    StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
+    String bucketName = IntegrationUtils.randomName();
+    storageCow.create(BucketInfo.of(bucketName));
+
+    List<Acl> defaultAcl = storageCow.get(bucketName).getBucketInfo().getAcl();
+    Acl acl = Acl.newBuilder(Acl.User.ofAllAuthenticatedUsers(), Acl.Role.READER).build();
+    storageCow.updateAcl(bucketName, acl);
+    // Verify that new ACL is added and previous Acls still exist.
+    List<Acl> expectedAcl = new ArrayList<>(defaultAcl);
+    expectedAcl.add(acl);
+    assertAclsMatch(expectedAcl, storageCow.get(bucketName).getBucketInfo().getAcl());
+
+    assertTrue(storageCow.delete(bucketName));
+    assertNull(storageCow.get(bucketName));
   }
 
   @Test
@@ -128,11 +150,5 @@ public class StorageCowTest {
                         .blobName(blobId.getName())
                         .bucketName(blobId.getBucket()))));
     assertTrue(storageCow.delete(blobId));
-  }
-
-  /** Helper assert that compares an {@link Acl}'s entity and role, but ignores the etag and id. */
-  private static void assertEquivalentAcls(Acl expected, Acl actual) {
-    assertEquals(expected.getEntity(), actual.getEntity());
-    assertEquals(expected.getRole(), actual.getRole());
   }
 }

@@ -114,7 +114,8 @@ public class OperationAnnotator {
   /**
    * Logs cloud calls.
    *
-   * <p>This log is for debug purpose when using CRL, so should be in debug level.
+   * <p>This log is for debug purpose when using CRL, but we should be in info level, to make this
+   * log useful.
    *
    * @param traceId the traceId where log happens
    * @param operation the operation to log.
@@ -127,10 +128,6 @@ public class OperationAnnotator {
       CloudOperation operation,
       JsonObject request,
       Optional<Exception> executionException) {
-    if (!logger.isDebugEnabled()) {
-      return;
-    }
-
     JsonObject logEntry = new JsonObject();
     logEntry.addProperty("traceId", traceId.toString());
     logEntry.addProperty("operation", operation.name());
@@ -140,7 +137,12 @@ public class OperationAnnotator {
 
     logEntry.add("request", request);
 
-    logger.debug(logEntry.toString());
+    // Log as debug level if no exceptions, otherwise use info level.
+    if (executionException.isPresent()) {
+      logger.info(logEntry.toString());
+    } else {
+      logger.debug(logEntry.toString());
+    }
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {
