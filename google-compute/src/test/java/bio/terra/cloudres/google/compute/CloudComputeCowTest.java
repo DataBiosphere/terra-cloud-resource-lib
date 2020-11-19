@@ -131,18 +131,21 @@ public class CloudComputeCowTest {
     assertEquals(firewallName, createdFirewall.getName());
     assertThat(createdFirewall.getAllowed(), Matchers.contains(allowed));
 
-    Operation deleteOperation = cloudComputeCow.firewalls().delete(projectId, firewallName).execute();
+    Operation deleteOperation =
+        cloudComputeCow.firewalls().delete(projectId, firewallName).execute();
     completedOperation =
-            OperationUtils.pollUntilComplete(
-                    cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
-                    Duration.ofSeconds(5),
-                    Duration.ofSeconds(100));
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
     assertTrue(completedOperation.getOperationAdapter().getDone());
     assertNull(completedOperation.getOperationAdapter().getError());
-    GoogleJsonResponseException e = assertThrows(GoogleJsonResponseException.class, () -> cloudComputeCow.firewalls().get(projectId, firewallName).execute());
+    GoogleJsonResponseException e =
+        assertThrows(
+            GoogleJsonResponseException.class,
+            () -> cloudComputeCow.firewalls().get(projectId, firewallName).execute());
     assertEquals(404, e.getStatusCode());
   }
-
 
   @Test
   public void createAndGetRoute() throws Exception {
@@ -239,11 +242,11 @@ public class CloudComputeCowTest {
   @Test
   public void firewallDeleteSerialize() throws Exception {
     CloudComputeCow.Firewalls.Delete delete =
-            defaultCompute().firewalls().delete("project-id", "firewall-name");
+        defaultCompute().firewalls().delete("project-id", "firewall-name");
 
     assertEquals(
-            "{\"project_id\":\"project-id\",\"firewall_name\":\"firewall-name\"}",
-            delete.serialize().toString());
+        "{\"project_id\":\"project-id\",\"firewall_name\":\"firewall-name\"}",
+        delete.serialize().toString());
   }
 
   @Test

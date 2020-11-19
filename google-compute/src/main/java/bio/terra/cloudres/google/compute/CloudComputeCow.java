@@ -209,7 +209,7 @@ public class CloudComputeCow {
         this.firewall = firewall;
         this.projectId = projectId;
       }
-      
+
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
@@ -223,7 +223,7 @@ public class CloudComputeCow {
     public Delete delete(String projectId, String firewall) throws IOException {
       return new Delete(firewalls.delete(projectId, firewall), projectId, firewall);
     }
-    
+
     /** See {@link Compute.Firewalls.Delete}. */
     public class Delete extends AbstractRequestCow<Operation> {
       private final String projectId;
@@ -231,7 +231,7 @@ public class CloudComputeCow {
 
       public Delete(Compute.Firewalls.Delete delete, String projectId, String firewallName) {
         super(
-                CloudComputeOperation.GOOGLE_DELETE_FIREWALL, clientConfig, operationAnnotator, delete);
+            CloudComputeOperation.GOOGLE_DELETE_FIREWALL, clientConfig, operationAnnotator, delete);
         this.firewallName = firewallName;
         this.projectId = projectId;
       }
@@ -244,7 +244,7 @@ public class CloudComputeCow {
         return result;
       }
     }
-    
+
     /** See {@link Compute.Firewalls#get(String, String)}. */
     public Get get(String projectId, String firewallName) throws IOException {
       return new Get(firewalls.get(projectId, firewallName));
