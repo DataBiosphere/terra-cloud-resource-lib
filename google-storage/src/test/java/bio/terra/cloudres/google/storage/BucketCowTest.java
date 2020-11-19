@@ -65,7 +65,7 @@ public class BucketCowTest {
     BucketCow bucketCow = storageCow.create(BucketInfo.of(bucketName));
 
     List<Acl> defaultAcl = storageCow.get(bucketName).getBucketInfo().getAcl();
-    Acl acl = Acl.newBuilder(new Acl.User(getTestUserEmailAddress()), Acl.Role.WRITER).build();
+    Acl acl = Acl.newBuilder(new Acl.User(getTestUserEmailAddress()), Acl.Role.READER).build();
     bucketCow.updateAcl(acl);
 
     // Verify that new ACL is added and previous Acls still exist.
