@@ -153,7 +153,7 @@ public class OperationAnnotatorTest {
    * convert it back
    */
   @Test
-  public void testLogEvent_nullError() throws Exception {
+  public void testLogEvent_nullErrorShouldLogAsDebug() throws Exception {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
 
     operationAnnotator.logEvent(
@@ -163,7 +163,7 @@ public class OperationAnnotatorTest {
         Optional.empty());
 
     // Expected result in Json format
-    verify(mockLogger).info(logArgument.capture());
+    verify(mockLogger).debug(logArgument.capture());
     assertEquals(
         EXPECTED_LOG_PREFIX + "\"request\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
   }
