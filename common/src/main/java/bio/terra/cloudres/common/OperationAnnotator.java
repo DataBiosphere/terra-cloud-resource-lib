@@ -137,7 +137,12 @@ public class OperationAnnotator {
 
     logEntry.add("request", request);
 
-    logger.info(logEntry.toString());
+    // Log as debug level if no exceptions.
+    if(executionException.isEmpty()) {
+      logger.debug(logEntry.toString());
+    } else {
+      logger.info(logEntry.toString());
+    }
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {
