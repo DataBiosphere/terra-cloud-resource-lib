@@ -43,7 +43,7 @@ public class CloudComputeCowTest {
   }
 
   @Test
-  public void createAndGetNetwork() throws Exception {
+  public void createAndGetAndDeleteNetwork() throws Exception {
     CloudComputeCow cloudComputeCow = defaultCompute();
 
     String projectId = reusableProject.getProjectId();
@@ -62,6 +62,20 @@ public class CloudComputeCowTest {
 
     assertEquals(netWorkName, createdNetwork.getName());
     assertFalse(createdNetwork.getAutoCreateSubnetworks());
+
+    Operation deleteOperation = cloudComputeCow.networks().delete(projectId, netWorkName).execute();
+    completedOperation =
+        OperationUtils.pollUntilComplete(
+            cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(100));
+    assertTrue(completedOperation.getOperationAdapter().getDone());
+    assertNull(completedOperation.getOperationAdapter().getError());
+    GoogleJsonResponseException e =
+        assertThrows(
+            GoogleJsonResponseException.class,
+            () -> cloudComputeCow.networks().get(projectId, netWorkName).execute());
+    assertEquals(404, e.getStatusCode());
   }
 
   @Test
@@ -195,6 +209,16 @@ public class CloudComputeCowTest {
     assertEquals(
         "{\"project_id\":\"project-id\",\"network_name\":\"network-name\"}",
         get.serialize().toString());
+  }
+
+  @Test
+  public void networkDeleteSerialize() throws Exception {
+    CloudComputeCow.Networks.Delete delete =
+        defaultCompute().networks().delete("project-id", "network-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"network_name\":\"network-name\"}",
+        delete.serialize().toString());
   }
 
   @Test
