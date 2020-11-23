@@ -15,6 +15,7 @@ import com.google.api.services.iam.v1.model.ServiceAccount;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -43,11 +44,18 @@ public class IamCowTest {
             .create(resourceName, new CreateServiceAccountRequest().setAccountId(accountId))
             .execute();
     String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
-    // Sleep for 6s to make get after create work.
-    Thread.sleep(6000);
-    assertThat(
-        iam.projects().serviceAccounts().list(resourceName).execute().getAccounts(),
-        Matchers.contains(serviceAccount));
+    // Retry 6 times to make sure get after create work.
+    int retryNum = 0;
+    List<ServiceAccount> listResult = null;
+    while (retryNum < 6) {
+      listResult = iam.projects().serviceAccounts().list(resourceName).execute().getAccounts();
+      if (listResult != null) {
+        break;
+      }
+      retryNum++;
+      Thread.sleep(3000);
+    }
+    assertThat(listResult, Matchers.contains(serviceAccount));
 
     iam.projects().serviceAccounts().delete(fullSaName).execute();
     // Sleep for 3s to make get after delete work.
