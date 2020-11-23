@@ -25,5 +25,7 @@ public class CloudBillingUtils {
     ProjectBillingInfo setBilling =
         ProjectBillingInfo.newBuilder().setBillingAccountName(billingAccountName).build();
     getBillingClientCow().updateProjectBillingInfo("projects/" + projectId, setBilling);
+    // Sleep for 1s to make sure billing is ready.
+    Thread.sleep(1000);
   }
 }
