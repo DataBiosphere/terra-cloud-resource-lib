@@ -43,8 +43,8 @@ public class IamCowTest {
             .create(resourceName, new CreateServiceAccountRequest().setAccountId(accountId))
             .execute();
     String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
-    // Sleep for 3s to make get after create work.
-    Thread.sleep(3000);
+    // Sleep for 5s to make get after create work.
+    Thread.sleep(5000);
     assertThat(
         iam.projects().serviceAccounts().list(resourceName).execute().getAccounts(),
         Matchers.contains(serviceAccount));
