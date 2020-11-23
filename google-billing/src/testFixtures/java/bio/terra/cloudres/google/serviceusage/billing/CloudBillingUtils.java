@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.billing.testing;
+package bio.terra.cloudres.google.serviceusage.billing;
 
 import bio.terra.cloudres.google.billing.CloudBillingClientCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;

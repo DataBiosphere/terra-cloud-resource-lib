@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
-import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
+import bio.terra.cloudres.google.serviceusage.billing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
-import bio.terra.cloudres.google.iam.testing.ServiceUsageUtils;
+import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;

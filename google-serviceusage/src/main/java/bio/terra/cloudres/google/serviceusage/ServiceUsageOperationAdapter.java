@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.iam;
+package bio.terra.cloudres.google.serviceusage;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import com.google.api.services.serviceusage.v1.model.Operation;

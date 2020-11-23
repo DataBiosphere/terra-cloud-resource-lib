@@ -1,10 +1,10 @@
-package bio.terra.cloudres.google.iam.testing;
+package bio.terra.cloudres.google.serviceusage.testing;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.OperationUtils;
-import bio.terra.cloudres.google.iam.ServiceUsageCow;
+import bio.terra.cloudres.google.serviceusage.ServiceUsageCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.serviceusage.v1.model.BatchEnableServicesRequest;
