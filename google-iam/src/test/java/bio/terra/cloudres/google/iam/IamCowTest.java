@@ -3,8 +3,7 @@ package bio.terra.cloudres.google.iam;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.google.iam.IamCow;
-import bio.terra.cloudres.google.serviceusage.billing.CloudBillingUtils;
+import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
