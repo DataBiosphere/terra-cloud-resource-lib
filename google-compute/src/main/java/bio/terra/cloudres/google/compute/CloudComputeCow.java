@@ -104,6 +104,32 @@ public class CloudComputeCow {
         return result;
       }
     }
+
+    /** See {@link Compute.Networks#delete(String, String)}. */
+    public Delete delete(String projectId, String networkName) throws IOException {
+      return new Delete(networks.delete(projectId, networkName), projectId, networkName);
+    }
+
+    /** See {@link Compute.Networks.Delete}. */
+    public class Delete extends AbstractRequestCow<Operation> {
+      private final String projectId;
+      private final String networkName;
+
+      public Delete(Compute.Networks.Delete Delete, String projectId, String networkName) {
+        super(
+            CloudComputeOperation.GOOGLE_DELETE_NETWORK, clientConfig, operationAnnotator, Delete);
+        this.networkName = networkName;
+        this.projectId = projectId;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.addProperty("network_name", networkName);
+        return result;
+      }
+    }
   }
 
   public Subnetworks subnetworks() {
