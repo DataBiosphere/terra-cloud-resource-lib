@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.serviceusage;
+package bio.terra.cloudres.google.iam;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;

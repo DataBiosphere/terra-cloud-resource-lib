@@ -1,4 +1,4 @@
-package bio.terra.cloudres.google.serviceusage;
+package bio.terra.cloudres.google.iam;
 
 import bio.terra.cloudres.common.CloudOperation;
 

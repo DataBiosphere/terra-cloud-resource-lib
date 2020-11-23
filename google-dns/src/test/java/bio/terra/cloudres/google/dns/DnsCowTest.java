@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
-import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
+import bio.terra.cloudres.google.iam.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.model.Project;
