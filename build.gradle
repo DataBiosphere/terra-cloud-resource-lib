@@ -137,6 +137,7 @@ artifactory {
                     'google-cloudresourcemanager',
                     'google-compute',
                     'google-dns',
+                    'google-iam',
                     'google-serviceusage',
                     'google-storage')
         }
