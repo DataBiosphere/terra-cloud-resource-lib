@@ -35,25 +35,24 @@ public class IamCowTest {
     IamCow iam = defaultIam();
     Project project = createPreparedProject();
     String projectId = project.getProjectId();
-    String projectName = "projects/" + projectId;
-    String accountId = randomSserviceAccountIdName();
+    String resourceName = "projects/" + projectId;
+    String accountId = randomServiceAccountIdName();
     ServiceAccount serviceAccount =
         iam.projects()
             .serviceAccounts()
-            .create(
-                "projects/" + projectId, new CreateServiceAccountRequest().setAccountId(accountId))
+            .create(resourceName, new CreateServiceAccountRequest().setAccountId(accountId))
             .execute();
     String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
     // Sleep for 3s to make get after create work.
     Thread.sleep(3000);
     assertThat(
-        iam.projects().serviceAccounts().list(projectName).execute().getAccounts(),
+        iam.projects().serviceAccounts().list(resourceName).execute().getAccounts(),
         Matchers.contains(serviceAccount));
 
     iam.projects().serviceAccounts().delete(fullSaName).execute();
     // Sleep for 3s to make get after delete work.
     Thread.sleep(3000);
-    assertNull(iam.projects().serviceAccounts().list(projectName).execute().getAccounts());
+    assertNull(iam.projects().serviceAccounts().list(resourceName).execute().getAccounts());
   }
 
   @Test
@@ -99,7 +98,7 @@ public class IamCowTest {
     return project;
   }
 
-  public static String randomSserviceAccountIdName() {
+  public static String randomServiceAccountIdName() {
     // SA name ids must start with a letter and be no more than 30 characters long.
     return "sa" + IntegrationUtils.randomName().substring(0, 28);
   }
