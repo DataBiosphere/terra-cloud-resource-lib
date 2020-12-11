@@ -91,7 +91,7 @@ Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadins
 Wraps [Google Billing API](https://cloud.google.com/billing/docs/apis).  
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-billing).
 #### google-cloudresourcemanager
-Wraps [Google Cloud ResourceManager Client API](https://cloud.google.com/bigquery/docs/apis).
+Wraps [Google Cloud ResourceManager Client API](https://cloud.google.com/resource-manager/docs/apis).
 Targets the Cloud Resource Manager v1 for Projects and Organizations. [github](https://github.com/googleapis/google-api-java-client-services/tree/master/clients/google-api-services-cloudresourcemanager/v1).
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-cloudresourcemanager).
 #### google-serviceusage
