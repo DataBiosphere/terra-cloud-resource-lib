@@ -47,7 +47,7 @@ public class IamCowTest {
             .create(resourceName, new CreateServiceAccountRequest().setAccountId(accountId))
             .execute();
     String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
-    // Retry 6 times to make sure get after create work.
+    // Retry 6 times to make sure get after create works.
     int retryNum = 0;
     List<ServiceAccount> listResult = null;
     while (retryNum < 6) {
@@ -61,7 +61,7 @@ public class IamCowTest {
     assertThat(listResult, Matchers.contains(serviceAccount));
 
     iam.projects().serviceAccounts().delete(fullSaName).execute();
-    // Sleep for 3s to make get after delete work.
+    // Sleep for 3s to make get after delete works.
     Thread.sleep(3000);
     assertNull(iam.projects().serviceAccounts().list(resourceName).execute().getAccounts());
   }
@@ -101,7 +101,7 @@ public class IamCowTest {
   }
 
   @Test
-  public void createGetListDeleteRoles() throws Exception {
+  public void createGetListPatchDeleteRoles() throws Exception {
     IamCow iam = defaultIam();
     Project project = createPreparedProject();
     String projectId = project.getProjectId();
@@ -114,7 +114,7 @@ public class IamCowTest {
                 resourceName,
                 new CreateRoleRequest().setRole(roleWithSinglePermission()).setRoleId(roleId))
             .execute();
-    // Retry 18 times to make sure get after create work.
+    // Retry 6 times to make sure get after create works.
     int retryNum = 0;
     List<Role> listResult = null;
     while (retryNum < 6) {
@@ -125,15 +125,30 @@ public class IamCowTest {
       retryNum++;
       Thread.sleep(3000);
     }
-    // assertThat(listResult, Matchers.contains(createdRole));
     Role retrievedResult = iam.projects().roles().get(createdRole.getName()).execute();
     assertThat(retrievedResult, Matchers.equalTo(createdRole));
+    // By default, enumerate does not include the list of included permissions.
+    Role basicEnumerateResult =
+        new Role().setEtag(createdRole.getEtag()).setName(createdRole.getName());
+    assertThat(listResult, Matchers.contains(basicEnumerateResult));
+    // Alternatively, we can fetch the full view.
+    List<Role> fullListResult =
+        iam.projects().roles().list(resourceName).setView("FULL").execute().getRoles();
+    assertThat(fullListResult, Matchers.contains(createdRole));
 
-    iam.projects().roles().delete(createdRole.getName()).execute();
-    // Sleep for 3s to make get after delete work.
+    Role patchRole =
+        new Role().setIncludedPermissions(Collections.singletonList("iam.roles.delete"));
+    Role modifiedRole = iam.projects().roles().patch(createdRole.getName(), patchRole).execute();
+    // Sleep for 3s to make get after patch works.
+    Thread.sleep(3000);
+    retrievedResult = iam.projects().roles().get(modifiedRole.getName()).execute();
+    assertThat(retrievedResult, Matchers.equalTo(modifiedRole));
+
+    iam.projects().roles().delete(modifiedRole.getName()).execute();
+    // Sleep for 3s to make get after delete works.
     Thread.sleep(3000);
     // Note that roles take 7 days to truly delete, but will be marked as "deleted" sooner.
-    assertTrue(iam.projects().roles().get(createdRole.getName()).execute().getDeleted());
+    assertTrue(iam.projects().roles().get(modifiedRole.getName()).execute().getDeleted());
   }
 
   @Test

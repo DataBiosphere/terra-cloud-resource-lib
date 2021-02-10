@@ -225,15 +225,52 @@ public class IamCow {
       public class List extends AbstractRequestCow<ListRolesResponse> {
         private final String parent;
 
+        private static final String VIEW_FIELD_NAME = "view";
+
         public List(Iam.Projects.Roles.List list, String parent) {
           super(IamOperation.GOOGLE_LIST_ROLE, clientConfig, operationAnnotator, list);
           this.parent = parent;
+        }
+
+        /**
+         * Optional view for the returned Role objects. When `FULL` is specified, the
+         * `includedPermissions` field is returned, which includes a list of all permissions in the
+         * role. The default value is `BASIC`, which does not return the `includedPermissions`
+         * field.
+         */
+        public List setView(String view) {
+          setField(VIEW_FIELD_NAME, view);
+          return this;
         }
 
         @Override
         protected JsonObject serialize() {
           JsonObject result = new JsonObject();
           result.addProperty("parent", parent);
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.Roles#patch(String, Role)}. */
+      public Roles.Patch patch(String name, Role content) throws IOException {
+        return new Roles.Patch(roles.patch(name, content), name, content);
+      }
+
+      public class Patch extends AbstractRequestCow<Role> {
+        private final String name;
+        private final Role content;
+
+        public Patch(Iam.Projects.Roles.Patch patch, String name, Role content) {
+          super(IamOperation.GOOGLE_PATCH_ROLE, clientConfig, operationAnnotator, patch);
+          this.name = name;
+          this.content = content;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("name", name);
+          result.add("content", new Gson().toJsonTree(content).getAsJsonObject());
           return result;
         }
       }

@@ -49,4 +49,14 @@ public abstract class AbstractRequestCow<T> {
 
   /** How to serialize the request for logging. */
   protected abstract JsonObject serialize();
+
+  /**
+   * Set a field of the underlying Google request object.
+   *
+   * @param field The field name to set
+   * @param value The value to use
+   */
+  protected void setField(String field, Object value) {
+    this.request.set(field, value);
+  }
 }

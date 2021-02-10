@@ -11,4 +11,5 @@ public enum IamOperation implements CloudOperation {
   GOOGLE_DELETE_ROLE,
   GOOGLE_GET_ROLE,
   GOOGLE_LIST_ROLE,
+  GOOGLE_PATCH_ROLE,
 }
