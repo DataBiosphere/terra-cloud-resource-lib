@@ -16,7 +16,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -231,9 +230,10 @@ public class IamCow {
         private String view;
 
         /**
-         * This includes an optional view for the returned Role objects, see {@link Iam.Projects.Roles.List#setView(String)}. When `FULL` is specified,
-         * the `includedPermissions` field is returned, which includes a list of all permissions in
-         * the role. The default value is `BASIC`, which does not return the `includedPermissions`
+         * This includes an optional view for the returned Role objects, see {@link
+         * Iam.Projects.Roles.List#setView(String)}. When `FULL` is specified, the
+         * `includedPermissions` field is returned, which includes a list of all permissions in the
+         * role. The default value is `BASIC`, which does not return the `includedPermissions`
          * field.
          */
         public List(Iam.Projects.Roles.List list, String parent) {

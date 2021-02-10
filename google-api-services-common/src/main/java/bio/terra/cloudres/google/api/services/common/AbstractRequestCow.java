@@ -50,5 +50,7 @@ public abstract class AbstractRequestCow<T> {
   /** How to serialize the request for logging. */
   protected abstract JsonObject serialize();
 
-  protected AbstractGoogleClientRequest<T> request() { return request;}
+  protected AbstractGoogleClientRequest<T> request() {
+    return request;
+  }
 }

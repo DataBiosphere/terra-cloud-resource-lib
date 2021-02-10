@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -49,14 +48,12 @@ public class IamCowTest {
             .execute();
     String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
     // Retry 6 times to make sure get after create works.
-    int retryNum = 0;
     List<ServiceAccount> listResult = null;
-    while (retryNum < 6) {
+    for(int retryNum = 0; retryNum < 6; retryNum++) {
       listResult = iam.projects().serviceAccounts().list(resourceName).execute().getAccounts();
       if (listResult != null) {
         break;
       }
-      retryNum++;
       Thread.sleep(3000);
     }
     assertThat(listResult, Matchers.contains(serviceAccount));
@@ -116,14 +113,12 @@ public class IamCowTest {
                 new CreateRoleRequest().setRole(roleWithSinglePermission()).setRoleId(roleId))
             .execute();
     // Retry 6 times to make sure get after create works.
-    int retryNum = 0;
     List<Role> listResult = null;
-    while (retryNum < 6) {
+    for(int retryNum = 0; retryNum < 6; retryNum++) {
       listResult = iam.projects().roles().list(resourceName).execute().getRoles();
       if (listResult != null) {
         break;
       }
-      retryNum++;
       Thread.sleep(3000);
     }
     Role retrievedResult = iam.projects().roles().get(createdRole.getName()).execute();
@@ -227,8 +222,6 @@ public class IamCowTest {
 
   /**
    * Create a Role object with the permission iam.roles.create and no other fields specified.
-   *
-   * @return
    */
   private static Role roleWithSinglePermission() {
     return new Role().setIncludedPermissions(Collections.singletonList("iam.roles.create"));
