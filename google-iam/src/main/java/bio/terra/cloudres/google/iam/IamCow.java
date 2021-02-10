@@ -5,6 +5,9 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.Iam.Projects;
+import com.google.api.services.iam.v1.Iam.Projects.Roles;
+import com.google.api.services.iam.v1.Iam.Projects.Roles.List;
 import com.google.api.services.iam.v1.IamScopes;
 import com.google.api.services.iam.v1.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -13,6 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -224,22 +228,23 @@ public class IamCow {
 
       public class List extends AbstractRequestCow<ListRolesResponse> {
         private final String parent;
+        private String view;
 
-        private static final String VIEW_FIELD_NAME = "view";
-
+        /**
+         * This includes an optional view for the returned Role objects, see {@link Iam.Projects.Roles.List#setView(String)}. When `FULL` is specified,
+         * the `includedPermissions` field is returned, which includes a list of all permissions in
+         * the role. The default value is `BASIC`, which does not return the `includedPermissions`
+         * field.
+         */
         public List(Iam.Projects.Roles.List list, String parent) {
           super(IamOperation.GOOGLE_LIST_ROLE, clientConfig, operationAnnotator, list);
+          this.view = "BASIC";
           this.parent = parent;
         }
 
-        /**
-         * Optional view for the returned Role objects. When `FULL` is specified, the
-         * `includedPermissions` field is returned, which includes a list of all permissions in the
-         * role. The default value is `BASIC`, which does not return the `includedPermissions`
-         * field.
-         */
         public List setView(String view) {
-          setField(VIEW_FIELD_NAME, view);
+          ((Iam.Projects.Roles.List) request()).setView(view);
+          this.view = view;
           return this;
         }
 
@@ -247,6 +252,7 @@ public class IamCow {
         protected JsonObject serialize() {
           JsonObject result = new JsonObject();
           result.addProperty("parent", parent);
+          result.addProperty("view", view);
           return result;
         }
       }
