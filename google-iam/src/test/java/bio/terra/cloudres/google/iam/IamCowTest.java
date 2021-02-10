@@ -189,6 +189,19 @@ public class IamCowTest {
     assertEquals("{\"name\":\"projects/project-id/roles/role-id\"}", delete.serialize().toString());
   }
 
+  @Test
+  public void patchRoleSerialize() throws Exception {
+    IamCow.Projects.Roles.Patch patch =
+        defaultIam()
+            .projects()
+            .roles()
+            .patch("projects/project-id/roles/role-id", roleWithSinglePermission());
+
+    assertEquals(
+        "{\"name\":\"projects/project-id/roles/role-id\",\"content\":{\"includedPermissions\":[\"iam.roles.create\"]}}",
+        patch.serialize().toString());
+  }
+
   /** Create Project then set billing account, enable IAM api */
   private static Project createPreparedProject() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
