@@ -166,7 +166,7 @@ public class IamCowTest {
   public void listRoleSerialize() throws Exception {
     IamCow.Projects.Roles.List list = defaultIam().projects().roles().list("projects/project-id");
 
-    assertEquals("{\"parent\":\"projects/project-id\"}", list.serialize().toString());
+    assertEquals("{\"parent\":\"projects/project-id\",\"view\":\"BASIC\"}", list.serialize().toString());
   }
 
   @Test
