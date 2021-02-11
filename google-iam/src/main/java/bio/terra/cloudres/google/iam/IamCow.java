@@ -5,6 +5,9 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.Iam.Projects;
+import com.google.api.services.iam.v1.Iam.Projects.Roles;
+import com.google.api.services.iam.v1.Iam.Projects.Roles.List;
 import com.google.api.services.iam.v1.IamScopes;
 import com.google.api.services.iam.v1.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -134,6 +137,139 @@ public class IamCow {
         protected JsonObject serialize() {
           JsonObject result = new JsonObject();
           result.addProperty("name", name);
+          return result;
+        }
+      }
+    }
+
+    /** See {@link Iam.Projects.Roles}. */
+    public Roles roles() {
+      return new Roles(this.projects.roles());
+    }
+
+    public class Roles {
+      private final Iam.Projects.Roles roles;
+
+      public Roles(Iam.Projects.Roles roles) {
+        this.roles = roles;
+      }
+
+      /** See {@link Iam.Projects.Roles#create(String, CreateRoleRequest)}. */
+      public Roles.Create create(String parent, CreateRoleRequest content) throws IOException {
+        return new Roles.Create(roles.create(parent, content), parent, content);
+      }
+
+      public class Create extends AbstractRequestCow<Role> {
+        private final String parent;
+        private final CreateRoleRequest content;
+
+        public Create(Iam.Projects.Roles.Create create, String parent, CreateRoleRequest content) {
+          super(IamOperation.GOOGLE_CREATE_ROLE, clientConfig, operationAnnotator, create);
+          this.parent = parent;
+          this.content = content;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("parent", parent);
+          result.add("content", new Gson().toJsonTree(content).getAsJsonObject());
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.Roles#delete(String)}. */
+      public Roles.Delete delete(String name) throws IOException {
+        return new Roles.Delete(roles.delete(name), name);
+      }
+
+      public class Delete extends AbstractRequestCow<Role> {
+        private final String name;
+
+        public Delete(Iam.Projects.Roles.Delete delete, String name) {
+          super(IamOperation.GOOGLE_DELETE_ROLE, clientConfig, operationAnnotator, delete);
+          this.name = name;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("name", name);
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.Roles#get(String)}. */
+      public Roles.Get get(String name) throws IOException {
+        return new Roles.Get(roles.get(name), name);
+      }
+
+      public class Get extends AbstractRequestCow<Role> {
+        private final String name;
+
+        public Get(Iam.Projects.Roles.Get get, String name) {
+          super(IamOperation.GOOGLE_GET_ROLE, clientConfig, operationAnnotator, get);
+          this.name = name;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("name", name);
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.Roles#list(String)}. */
+      public Roles.List list(String parent) throws IOException {
+        return new Roles.List(roles.list(parent), parent);
+      }
+
+      public class List extends AbstractRequestCow<ListRolesResponse> {
+        private final String parent;
+        private final Iam.Projects.Roles.List list;
+
+        public List(Iam.Projects.Roles.List list, String parent) {
+          super(IamOperation.GOOGLE_LIST_ROLE, clientConfig, operationAnnotator, list);
+          this.list = list;
+          this.parent = parent;
+        }
+
+        /** See {@link Iam.Projects.Roles.List#setView(String)}. */
+        public List setView(String view) {
+          this.list.setView(view);
+          return this;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("parent", parent);
+          result.addProperty("view", list.getView());
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.Roles#patch(String, Role)}. */
+      public Roles.Patch patch(String name, Role content) throws IOException {
+        return new Roles.Patch(roles.patch(name, content), name, content);
+      }
+
+      public class Patch extends AbstractRequestCow<Role> {
+        private final String name;
+        private final Role content;
+
+        public Patch(Iam.Projects.Roles.Patch patch, String name, Role content) {
+          super(IamOperation.GOOGLE_PATCH_ROLE, clientConfig, operationAnnotator, patch);
+          this.name = name;
+          this.content = content;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("name", name);
+          result.add("content", new Gson().toJsonTree(content).getAsJsonObject());
           return result;
         }
       }
