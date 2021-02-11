@@ -164,10 +164,11 @@ public class IamCowTest {
 
   @Test
   public void listRoleSerialize() throws Exception {
-    IamCow.Projects.Roles.List list = defaultIam().projects().roles().list("projects/project-id");
+    IamCow.Projects.Roles.List list =
+        defaultIam().projects().roles().list("projects/project-id").setView("FULL");
 
     assertEquals(
-        "{\"parent\":\"projects/project-id\",\"view\":\"BASIC\"}", list.serialize().toString());
+        "{\"parent\":\"projects/project-id\",\"view\":\"FULL\"}", list.serialize().toString());
   }
 
   @Test
