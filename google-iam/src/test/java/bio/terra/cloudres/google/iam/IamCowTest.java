@@ -49,7 +49,7 @@ public class IamCowTest {
     String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
     // Retry 6 times to make sure get after create works.
     List<ServiceAccount> listResult = null;
-    for(int retryNum = 0; retryNum < 6; retryNum++) {
+    for (int retryNum = 0; retryNum < 6; retryNum++) {
       listResult = iam.projects().serviceAccounts().list(resourceName).execute().getAccounts();
       if (listResult != null) {
         break;
@@ -114,7 +114,7 @@ public class IamCowTest {
             .execute();
     // Retry 6 times to make sure get after create works.
     List<Role> listResult = null;
-    for(int retryNum = 0; retryNum < 6; retryNum++) {
+    for (int retryNum = 0; retryNum < 6; retryNum++) {
       listResult = iam.projects().roles().list(resourceName).execute().getRoles();
       if (listResult != null) {
         break;
@@ -166,7 +166,8 @@ public class IamCowTest {
   public void listRoleSerialize() throws Exception {
     IamCow.Projects.Roles.List list = defaultIam().projects().roles().list("projects/project-id");
 
-    assertEquals("{\"parent\":\"projects/project-id\",\"view\":\"BASIC\"}", list.serialize().toString());
+    assertEquals(
+        "{\"parent\":\"projects/project-id\",\"view\":\"BASIC\"}", list.serialize().toString());
   }
 
   @Test
@@ -220,9 +221,7 @@ public class IamCowTest {
     return String.format("projects/%s/serviceAccounts/%s", projectId, accountId);
   }
 
-  /**
-   * Create a Role object with the permission iam.roles.create and no other fields specified.
-   */
+  /** Create a Role object with the permission iam.roles.create and no other fields specified. */
   private static Role roleWithSinglePermission() {
     return new Role().setIncludedPermissions(Collections.singletonList("iam.roles.create"));
   }
