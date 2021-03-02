@@ -2,6 +2,7 @@ package bio.terra.cloudres.google.storage;
 
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
+import com.google.cloud.Policy;
 import com.google.cloud.storage.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -51,6 +52,10 @@ class SerializeUtils {
     jsonObject.add("bucketInfo", convertWithGson(bucketInfo, BucketInfo.class));
     jsonObject.add("bucketTargetOption", gson.toJsonTree(options));
     return jsonObject;
+  }
+
+  static JsonObject convert(Policy policy) {
+    return convertWithGson(policy, Policy.class);
   }
 
   /**
