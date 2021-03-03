@@ -41,7 +41,8 @@ public class IntegrationUtils {
 
   /**
    * Sets longer timeout because some operation(e.g. Dns.ManagedZones.Create) may take longer than
-   * default timeout.
+   * default timeout. We pass a {@link HttpRequestInitializer} to accept a requestInitializer to allow chaining, since
+   * API clients have exactly one initializer and credentials are typically required as well.
    */
   public static HttpRequestInitializer setHttpTimeout(
       final HttpRequestInitializer requestInitializer) {
