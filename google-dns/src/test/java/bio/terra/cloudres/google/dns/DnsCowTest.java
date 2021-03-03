@@ -13,6 +13,7 @@ import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.dns.Dns;
+import com.google.api.services.dns.DnsScopes;
 import com.google.api.services.dns.model.Change;
 import com.google.api.services.dns.model.ManagedZone;
 import com.google.api.services.dns.model.ResourceRecordSet;
@@ -40,7 +41,7 @@ public class DnsCowTest {
                 Defaults.jsonFactory(),
                 setHttpTimeout(
                     new HttpCredentialsAdapter(
-                        IntegrationCredentials.getAdminGoogleCredentialsOrDie())))
+                        IntegrationCredentials.getAdminGoogleCredentialsOrDie().createScoped(DnsScopes.all()))))
             .setApplicationName(IntegrationUtils.DEFAULT_CLIENT_NAME));
   }
 
