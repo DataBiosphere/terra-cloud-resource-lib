@@ -1,17 +1,22 @@
 package bio.terra.cloudres.google.dns;
 
+import static bio.terra.cloudres.testing.IntegrationUtils.setHttpTimeout;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.model.Change;
 import com.google.api.services.dns.model.ManagedZone;
 import com.google.api.services.dns.model.ResourceRecordSet;
+import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -28,9 +33,15 @@ public class DnsCowTest {
   private static final String BILLING_ACCOUNT_NAME = "billingAccounts/01A82E-CA8A14-367457";
 
   private static DnsCow defaultDns() throws GeneralSecurityException, IOException {
-    return DnsCow.create(
+    return new DnsCow(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
-        IntegrationCredentials.getAdminGoogleCredentialsOrDie());
+        new Dns.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                Defaults.jsonFactory(),
+                setHttpTimeout(
+                    new HttpCredentialsAdapter(
+                        IntegrationCredentials.getAdminGoogleCredentialsOrDie())))
+            .setApplicationName(IntegrationUtils.DEFAULT_CLIENT_NAME));
   }
 
   @Test
