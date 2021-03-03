@@ -10,11 +10,10 @@ import bio.terra.cloudres.testing.IntegrationUtils;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
 import bio.terra.janitor.model.GoogleBucketUid;
+import com.google.cloud.Identity;
+import com.google.cloud.Policy;
 import com.google.cloud.WriteChannel;
-import com.google.cloud.storage.Acl;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.BucketInfo;
+import com.google.cloud.storage.*;
 import com.google.common.collect.ImmutableList;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -127,6 +126,29 @@ public class StorageCowTest {
 
     assertTrue(storageCow.delete(bucketName));
     assertNull(storageCow.get(bucketName));
+  }
+
+  @Test
+  public void setBucketIamPolicy() throws Exception {
+    StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
+    String bucketName = IntegrationUtils.randomName();
+    storageCow.create(BucketInfo.of(bucketName));
+
+    Policy originalPolicy = storageCow.getIamPolicy(bucketName);
+    assertNull(originalPolicy.getBindings().get(StorageRoles.objectCreator()));
+
+    Identity expectedIdentity = Identity.serviceAccount(getTestUserEmailAddress());
+    storageCow.setIamPolicy(
+        bucketName,
+        originalPolicy
+            .toBuilder()
+            .addIdentity(StorageRoles.objectCreator(), expectedIdentity)
+            .build());
+
+    Policy postUpdatePolicy = storageCow.getIamPolicy(bucketName);
+    assertThat(
+        postUpdatePolicy.getBindings().get(StorageRoles.objectCreator()),
+        Matchers.contains(expectedIdentity));
   }
 
   @Test

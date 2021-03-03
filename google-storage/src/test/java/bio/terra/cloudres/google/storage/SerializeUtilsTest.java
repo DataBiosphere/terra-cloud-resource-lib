@@ -2,8 +2,12 @@ package bio.terra.cloudres.google.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.google.cloud.Identity;
+import com.google.cloud.Policy;
+import com.google.cloud.Role;
 import com.google.cloud.storage.*;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -66,6 +70,20 @@ public class SerializeUtilsTest {
             Storage.BucketTargetOption.metagenerationMatch());
     assertEquals(
         "{\"bucketInfo\":{\"name\":\"my-name\"},\"bucketTargetOption\":[{\"rpcOption\":\"IF_METAGENERATION_MATCH\"}]}",
+        jsonObject.toString());
+  }
+
+  @Test
+  public void policy() {
+    JsonObject jsonObject =
+        SerializeUtils.convert(
+            Policy.newBuilder()
+                .setBindings(
+                    ImmutableMap.of(
+                        Role.editor(), ImmutableSet.of(Identity.allAuthenticatedUsers())))
+                .build());
+    assertEquals(
+        "{\"bindingsList\":[{\"role\":\"roles/editor\",\"members\":[\"allAuthenticatedUsers\"]}],\"version\":0}",
         jsonObject.toString());
   }
 }

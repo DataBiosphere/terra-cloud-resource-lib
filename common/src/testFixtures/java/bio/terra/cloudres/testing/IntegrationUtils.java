@@ -2,6 +2,7 @@ package bio.terra.cloudres.testing;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.cleanup.CleanupConfig;
+import com.google.api.client.http.HttpRequestInitializer;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -36,5 +37,19 @@ public class IntegrationUtils {
   /** Generates a random name to and replace '-' with '_'. */
   public static String randomNameWithUnderscore() {
     return UUID.randomUUID().toString().replace('-', '_');
+  }
+
+  /**
+   * Sets longer timeout because some operation(e.g. Dns.ManagedZones.Create) may take longer than
+   * default timeout. We pass a {@link HttpRequestInitializer} to accept a requestInitializer to allow chaining, since
+   * API clients have exactly one initializer and credentials are typically required as well.
+   */
+  public static HttpRequestInitializer setHttpTimeout(
+      final HttpRequestInitializer requestInitializer) {
+    return httpRequest -> {
+      requestInitializer.initialize(httpRequest);
+      httpRequest.setConnectTimeout(5 * 60000); // 5 minutes connect timeout
+      httpRequest.setReadTimeout(5 * 60000); // 5 minutes read timeout
+    };
   }
 }

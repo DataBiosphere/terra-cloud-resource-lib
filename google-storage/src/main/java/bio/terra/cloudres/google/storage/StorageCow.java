@@ -5,6 +5,7 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBucketUid;
+import com.google.cloud.Policy;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import com.google.gson.JsonObject;
@@ -139,6 +140,27 @@ public class StorageCow {
           request.add("entity", SerializeUtils.convert(entity));
           return request;
         });
+  }
+
+  /** See {@link Storage#setIamPolicy(String, Policy, Storage.BucketSourceOption...)}. */
+  public Policy setIamPolicy(String bucket, Policy policy) {
+    return operationAnnotator.executeCowOperation(
+        StorageOperation.GOOGLE_SET_IAM_POLICY,
+        () -> storage.setIamPolicy(bucket, policy),
+        () -> {
+          JsonObject request = new JsonObject();
+          request.add("bucket", serializeBucketName(bucket));
+          request.add("policy", SerializeUtils.convert(policy));
+          return request;
+        });
+  }
+
+  /** See {@link Storage#getIamPolicy(String, Storage.BucketSourceOption...)}. */
+  public Policy getIamPolicy(String bucket) {
+    return operationAnnotator.executeCowOperation(
+        StorageOperation.GOOGLE_GET_IAM_POLICY,
+        () -> storage.getIamPolicy(bucket),
+        () -> serializeBucketName(bucket));
   }
 
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */
