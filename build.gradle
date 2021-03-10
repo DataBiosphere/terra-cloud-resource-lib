@@ -138,6 +138,7 @@ artifactory {
                     'google-compute',
                     'google-dns',
                     'google-iam',
+                    'google-notebooks',
                     'google-serviceusage',
                     'google-storage')
         }

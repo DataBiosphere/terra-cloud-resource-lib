@@ -50,6 +50,19 @@ components:
       properties:
         bucketName:
           type: string
+    GoogleAiNotebookUid:
+      type: object
+      required:
+        - projectId
+        - location
+        - instanceId
+      properties:
+        projectId:
+          type: string
+        location:
+          type: string
+        instanceId:
+          type: string
     GoogleProjectUid:
       type: object
       required:
@@ -74,3 +87,5 @@ components:
           $ref: '#/components/schemas/GoogleBlobUid'
         googleBucketUid:
           $ref: '#/components/schemas/GoogleBucketUid'
+        googleAiNotebookUid:
+          $ref: '#/componenets/schemas/GoogleAiNotebookUid'

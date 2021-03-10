@@ -1,0 +1,12 @@
+dependencies {
+    api project(':common')
+    api project(':google-api-services-common')
+    implementation project(':cloud-resource-schema')
+
+    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20210219-1.31.0'
+
+    testFixturesImplementation(testFixtures(project(':common')))
+    testImplementation project(':google-cloudresourcemanager')
+    testImplementation project(':google-serviceusage')
+    testImplementation(testFixtures(project(':google-cloudresourcemanager')))
+}

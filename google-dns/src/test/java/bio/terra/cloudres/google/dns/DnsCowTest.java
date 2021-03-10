@@ -41,7 +41,8 @@ public class DnsCowTest {
                 Defaults.jsonFactory(),
                 setHttpTimeout(
                     new HttpCredentialsAdapter(
-                        IntegrationCredentials.getAdminGoogleCredentialsOrDie().createScoped(DnsScopes.all()))))
+                        IntegrationCredentials.getAdminGoogleCredentialsOrDie()
+                            .createScoped(DnsScopes.all()))))
             .setApplicationName(IntegrationUtils.DEFAULT_CLIENT_NAME));
   }
 
