@@ -59,9 +59,15 @@ public class IamCowTest {
     assertThat(listResult, Matchers.contains(serviceAccount));
 
     iam.projects().serviceAccounts().delete(fullSaName).execute();
-    // Sleep for 3s to make get after delete works.
-    Thread.sleep(3000);
-    assertNull(iam.projects().serviceAccounts().list(resourceName).execute().getAccounts());
+    // Retry 6 times to make sure get after delete works.
+    for (int retryNum = 0; retryNum < 6; retryNum++) {
+      listResult = iam.projects().serviceAccounts().list(resourceName).execute().getAccounts();
+      if (listResult == null) {
+        break;
+      }
+      Thread.sleep(1000);
+    }
+    assertNull(listResult);
   }
 
   @Test
