@@ -10,7 +10,7 @@ paths: {}
 
 components:
   schemas:
-    GoogleAiNotebookUid:
+    GoogleAiNotebookInstanceUid:
       type: object
       required:
         - projectId
@@ -21,8 +21,10 @@ components:
           type: string
         location:
           type: string
+          description: The location of the instance, e.g. 'uswest1-b'.
         instanceId:
           type: string
+          description: The user-provided instance id to identify the instance.
     GoogleBigQueryDatasetUid:
       type: object
       required:
@@ -77,8 +79,8 @@ components:
     CloudResourceUid:
       type: object
       properties:
-        googleAiNotebookUid:
-          $ref: '#/componenets/schemas/GoogleAiNotebookUid'
+        googleAiNotebookInstanceUid:
+          $ref: '#/components/schemas/GoogleAiNotebookInstanceUid'
         googleBigQueryDatasetUid:
           $ref: '#/components/schemas/GoogleBigQueryDatasetUid'
         googleBigQueryTableUid:
