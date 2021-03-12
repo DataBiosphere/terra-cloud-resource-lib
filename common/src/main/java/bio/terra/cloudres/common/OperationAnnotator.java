@@ -128,20 +128,30 @@ public class OperationAnnotator {
       CloudOperation operation,
       JsonObject request,
       Optional<Exception> executionException) {
-    JsonObject logEntry = new JsonObject();
-    logEntry.addProperty("traceId", traceId.toString());
-    logEntry.addProperty("operation", operation.name());
-    logEntry.addProperty("clientName", clientConfig.getClientName());
+    Gson gson = new Gson();
+    JsonObject logData = request.deepCopy();
+    logData.addProperty("clientName", clientConfig.getClientName());
+    logData.add("operation", gson.toJsonTree(operation));
+    logData.add("request", request);
+    logData.add("traceId", gson.toJsonTree(traceId));
+    executionException.ifPresent(e -> logData.add("exception", createExceptionEntry(e)));
 
-    executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));
-
-    logEntry.add("request", request);
-
-    // Log as debug level if no exceptions, otherwise use info level.
     if (executionException.isPresent()) {
-      logger.info(logEntry.toString());
+      logger.error(
+          String.format(
+              "CRL exception in client %s during operation %s",
+              clientConfig.getClientName(), operation.name()),
+          // Include logData for terra-common-lib logging to pick up and include in JSON output.
+          logData,
+          // Include the exception, which slf4j will append to the formatted log message.
+          executionException.get());
     } else {
-      logger.debug(logEntry.toString());
+      logger.info(
+          String.format(
+              "CRL client %s completed operation %s",
+              clientConfig.getClientName(), operation.name()),
+          // Include logData for terra-common-lib logging to pick up and include in JSON output.
+          logData);
     }
   }
 
