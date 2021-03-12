@@ -4,13 +4,16 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
+import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleAiNotebookInstanceUid;
 import com.google.api.services.notebooks.v1.AIPlatformNotebooks;
 import com.google.api.services.notebooks.v1.AIPlatformNotebooksScopes;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
@@ -65,13 +68,20 @@ public class AIPlatformNotebooksCow {
       return new Create(instances.create(parent, instance), instance);
     }
 
+    /** Create an instance with the {@link InstanceName}. See {@link #create(String, Instance)}. */
+    public Create create(InstanceName instanceName, Instance instance) throws IOException {
+      Preconditions.checkArgument(
+          instance.getName() == null || instanceName.formatName().equals(instance.getName()),
+          "The instance has a different name than what it's created as.");
+      return create(instanceName.formatParent(), instance).setInstanceId(instanceName.instanceId());
+    }
+
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Create}. */
     public class Create extends AbstractRequestCow<Operation> {
       private final AIPlatformNotebooks.Projects.Locations.Instances.Create create;
       private final Instance instance;
 
-      public Create(
-          AIPlatformNotebooks.Projects.Locations.Instances.Create create, Instance instance) {
+      Create(AIPlatformNotebooks.Projects.Locations.Instances.Create create, Instance instance) {
         super(
             AIPlatformNotebooksOperation.GOOGLE_CREATE_NOTEBOOKS_INSTANCE,
             clientConfig,
@@ -100,40 +110,47 @@ public class AIPlatformNotebooksCow {
 
       @Override
       protected Optional<CloudResourceUid> resourceUidCreation() {
-        // TODO DO NOT SUBMIT: update and fix me with new Janitor client.
-        //                return Optional.of(
-        //                        new CloudResourceUid()
-        //                                .googleAiNotebookUid(new
-        // GoogleAiNotebookUid().location().instanceId());
-        return Optional.empty();
+        InstanceName instanceName =
+            InstanceName.fromParentAndId(create.getParent(), create.getInstanceId());
+        return Optional.of(
+            new CloudResourceUid()
+                .googleAiNotebookInstanceUid(
+                    new GoogleAiNotebookInstanceUid()
+                        .projectId(instanceName.projectId())
+                        .location(instanceName.location())
+                        .instanceId(instanceName.instanceId())));
       }
 
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        result.addProperty("parent", create.getParent());
-        result.addProperty("instanceId", create.getInstanceId());
+        InstanceName.fromParentAndId(create.getParent(), create.getInstanceId())
+            .addProperties(result);
         result.add("instance", new Gson().toJsonTree(instance));
         return result;
       }
     }
 
-
-    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#create(String, Instance)}. */
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#delete(String)}. */
     public Delete delete(String name) throws IOException {
       return new Delete(instances.delete(name));
     }
 
-    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Create}. */
+    /** Delete override for InstanceName. See {@link #delete(String)}. */
+    public Delete delete(InstanceName instanceName) throws IOException {
+      return delete(instanceName.formatName());
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Delete}. */
     public class Delete extends AbstractRequestCow<Operation> {
       private final AIPlatformNotebooks.Projects.Locations.Instances.Delete delete;
 
-      public Delete(AIPlatformNotebooks.Projects.Locations.Instances.Delete delete) {
+      Delete(AIPlatformNotebooks.Projects.Locations.Instances.Delete delete) {
         super(
-                AIPlatformNotebooksOperation.GOOGLE_DELETE_NOTEBOOKS_INSTANCE,
-                clientConfig,
-                operationAnnotator,
-                delete);
+            AIPlatformNotebooksOperation.GOOGLE_DELETE_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            delete);
         this.delete = delete;
       }
 
@@ -144,9 +161,87 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        result.addProperty("name", delete.getName());
+        InstanceName.fromNameFormat(delete.getName()).addProperties(result);
         return result;
       }
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#get(String)}. */
+    public Get get(String name) throws IOException {
+      return new Get(instances.get(name));
+    }
+
+    /** Get override for InstanceName. See {@link #get(String)}. */
+    public Get get(InstanceName instanceName) throws IOException {
+      return get(instanceName.formatName());
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Get}. */
+    public class Get extends AbstractRequestCow<Instance> {
+      private final AIPlatformNotebooks.Projects.Locations.Instances.Get get;
+
+      Get(AIPlatformNotebooks.Projects.Locations.Instances.Get get) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_GET_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            get);
+        this.get = get;
+      }
+
+      public String getName() {
+        return get.getName();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        InstanceName.fromNameFormat(get.getName()).addProperties(result);
+        return result;
+      }
+    }
+  }
+
+  /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#operations()}. */
+  public AIPlatformNotebooksCow.Operations operations() {
+    return new AIPlatformNotebooksCow.Operations(notebooks.projects().locations().operations());
+  }
+
+  /** See {@link AIPlatformNotebooks.Projects.Locations.Operations}. */
+  public class Operations {
+    private final AIPlatformNotebooks.Projects.Locations.Operations operations;
+
+    private Operations(AIPlatformNotebooks.Projects.Locations.Operations operations) {
+      this.operations = operations;
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Operations#get(String)} */
+    public AIPlatformNotebooksCow.Operations.Get get(String name) throws IOException {
+      return new AIPlatformNotebooksCow.Operations.Get(operations.get(name));
+    }
+
+    public class Get extends AbstractRequestCow<Operation> {
+      private final AIPlatformNotebooks.Projects.Locations.Operations.Get get;
+
+      public Get(AIPlatformNotebooks.Projects.Locations.Operations.Get get) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_NOTEBOOKS_OPERATION_GET,
+            clientConfig,
+            operationAnnotator,
+            get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("operation_name", get.getName());
+        return result;
+      }
+    }
+
+    public OperationCow<Operation> operationCow(Operation operation) {
+      return new OperationCow<>(operation, NotebooksOperationAdapter::new, op -> get(op.getName()));
     }
   }
 }
