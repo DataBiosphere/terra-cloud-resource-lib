@@ -12,7 +12,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.opencensus.trace.*;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.slf4j.Logger;
@@ -86,7 +85,8 @@ public class OperationAnnotator {
       tracer
           .getCurrentSpan()
           .putAttribute(
-              "/terra/crl/httpErrorCode", AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
+              "/terra/crl/httpErrorCode",
+              AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
       recordErrors(getHttpErrorCode(e), cloudOperation);
       executionException = Optional.of(e);
       throw e;
@@ -120,11 +120,11 @@ public class OperationAnnotator {
    * Logs an info message indicating the completion of a CRL event, or an error message indicating
    * an exception occurred.
    *
-   * A structured JsonObject is included in the logging arguments; this payload will not affect
-   * human-readable logging output, but will be included in JSON-formatted output for services
-   * which are using the terra-common-lib logging library with JSON format enabled.
+   * <p>A structured JsonObject is included in the logging arguments; this payload will not affect
+   * human-readable logging output, but will be included in JSON-formatted output for services which
+   * are using the terra-common-lib logging library with JSON format enabled.
    *
-   * If an exception is present, it will also be included as a logging argument. SLF4J should
+   * <p>If an exception is present, it will also be included as a logging argument. SLF4J should
    * recognize this argument and include a stacktrace in the resulting error log message.
    *
    * @param operation the cloud operation to log.
@@ -160,25 +160,16 @@ public class OperationAnnotator {
           executionException.get());
     } else {
       logger.debug(
-          String.format(
-              "CRL completed %s (%s)",
-              operation.name(), prettyPrintDuration(duration)),
+          String.format("CRL completed %s (%s)", operation.name(), prettyPrintDuration(duration)),
           // Include logData for terra-common-lib logging to pick up and include in JSON output.
           logData);
     }
   }
 
   private String prettyPrintDuration(Duration duration) {
-    if (duration.getSeconds() > 0) {
-      duration = duration.truncatedTo(ChronoUnit.SECONDS);
-    } else {
-      duration = duration.truncatedTo(ChronoUnit.MILLIS);
-    }
-    return duration
-        .toString()
-        .substring(2)
-        .replaceAll("(\\d[HMS])(?!$)", "$1 ")
-        .toLowerCase();
+    // Truncate to 0.1 second precision.
+    duration = Duration.ofMillis((duration.toMillis() / 100l) * 100l);
+    return duration.toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase();
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {

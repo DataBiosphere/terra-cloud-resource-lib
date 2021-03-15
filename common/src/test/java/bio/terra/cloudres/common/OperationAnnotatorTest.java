@@ -15,11 +15,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
-import io.opencensus.trace.TraceId;
-
 import java.time.Duration;
 import java.util.Optional;
-
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
@@ -35,11 +32,13 @@ public class OperationAnnotatorTest {
   private static final String CLIENT = "TestClient";
   private static final Gson JSON_PARSER = new GsonBuilder().setLenient().create();
   // A fake but somewhat-realistic create-project request payload
-  private static final JsonObject PROJECT_REQUEST = JSON_PARSER.fromJson(
-      "{name: 'myProj', projectId: 'project-id', labels: {k1: 'v1', k2: 'v2'}}", JsonObject.class);
+  private static final JsonObject PROJECT_REQUEST =
+      JSON_PARSER.fromJson(
+          "{name: 'myProj', projectId: 'project-id', labels: {k1: 'v1', k2: 'v2'}}",
+          JsonObject.class);
   // A fake but somewhat-realistic create-project response payload
-  private static final JsonObject PROJECT_RESPONSE = JSON_PARSER.fromJson(
-      "{projectId: 'project-id', projectNumber: 12345}", JsonObject.class);
+  private static final JsonObject PROJECT_RESPONSE =
+      JSON_PARSER.fromJson("{projectId: 'project-id', projectNumber: 12345}", JsonObject.class);
 
   private static final String ERROR_MESSAGE = "error!";
 
@@ -152,17 +151,14 @@ public class OperationAnnotatorTest {
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
     assertThat(
-        stringArgumentCaptor.getValue(), Matchers.containsString("CRL completed TEST_OPERATION (2s"));
-    assertThat(json.getAsJsonPrimitive("clientName").getAsString(),
-        Matchers.equalTo("TestClient"));
-    assertThat(json.getAsJsonPrimitive("durationMs").getAsLong(),
-      Matchers.equalTo(2345l));
-    assertThat(json.getAsJsonPrimitive("operation").getAsString(),
-        Matchers.equalTo("TEST_OPERATION"));
-    assertThat(json.getAsJsonObject("requestData"),
-      Matchers.equalTo(PROJECT_REQUEST));
-    assertThat(json.getAsJsonObject("responseData"),
-        Matchers.equalTo(PROJECT_RESPONSE));
+        stringArgumentCaptor.getValue(),
+        Matchers.containsString("CRL completed TEST_OPERATION (2.3s"));
+    assertThat(json.getAsJsonPrimitive("clientName").getAsString(), Matchers.equalTo("TestClient"));
+    assertThat(json.getAsJsonPrimitive("durationMs").getAsLong(), Matchers.equalTo(2345l));
+    assertThat(
+        json.getAsJsonPrimitive("operation").getAsString(), Matchers.equalTo("TEST_OPERATION"));
+    assertThat(json.getAsJsonObject("requestData"), Matchers.equalTo(PROJECT_REQUEST));
+    assertThat(json.getAsJsonObject("responseData"), Matchers.equalTo(PROJECT_RESPONSE));
     // Exception should not be included in JSON if not present.
     assertFalse(json.has("exception"));
   }
@@ -179,12 +175,18 @@ public class OperationAnnotatorTest {
         Duration.ofMillis(2345),
         Optional.of(RM_EXCEPTION));
 
-    verify(mockLogger).error(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture(), exceptionArgumentCaptor.capture());
+    verify(mockLogger)
+        .error(
+            stringArgumentCaptor.capture(),
+            gsonArgumentCaptor.capture(),
+            exceptionArgumentCaptor.capture());
     assertThat(
-        stringArgumentCaptor.getValue(), Matchers.containsString("CRL exception in TEST_OPERATION (HTTP code 404, 2s)"));
+        stringArgumentCaptor.getValue(),
+        Matchers.containsString("CRL exception in TEST_OPERATION (HTTP code 404, 2.3s)"));
     assertTrue(gsonArgumentCaptor.getValue().has("exception"));
     assertTrue(gsonArgumentCaptor.getValue().get("responseData").isJsonNull());
-    // Verify that the exception is also included as a separate logger argument, so it can be picked up by SLF4J.
+    // Verify that the exception is also included as a separate logger argument, so it can be picked
+    // up by SLF4J.
     assertThat(exceptionArgumentCaptor.getValue(), Matchers.equalTo(RM_EXCEPTION));
   }
 }
