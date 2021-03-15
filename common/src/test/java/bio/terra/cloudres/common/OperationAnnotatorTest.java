@@ -1,17 +1,26 @@
 package bio.terra.cloudres.common;
 
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 import bio.terra.cloudres.testing.StubCloudOperation;
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.ResourceManagerException;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
 import io.opencensus.trace.TraceId;
+
+import java.time.Duration;
 import java.util.Optional;
+
+import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -24,16 +33,15 @@ import org.slf4j.LoggerFactory;
 @Tag("unit")
 public class OperationAnnotatorTest {
   private static final String CLIENT = "TestClient";
-  private static final String PROJECT_INFO_STRING =
-      "{\"name\":\"myProj\",\"projectId\":\"project-id\",\"labels\":{\"k1\":\"v1\",\"k2\":\"v2\"}}";
-  private static final JsonObject PROJECT_INFO_JSON_OBJECT =
-      new Gson().fromJson(PROJECT_INFO_STRING, JsonObject.class);
-  private static final String TRACE_ID = "1234567890123456";
+  private static final Gson JSON_PARSER = new GsonBuilder().setLenient().create();
+  // A fake but somewhat-realistic create-project request payload
+  private static final JsonObject PROJECT_REQUEST = JSON_PARSER.fromJson(
+      "{name: 'myProj', projectId: 'project-id', labels: {k1: 'v1', k2: 'v2'}}", JsonObject.class);
+  // A fake but somewhat-realistic create-project response payload
+  private static final JsonObject PROJECT_RESPONSE = JSON_PARSER.fromJson(
+      "{projectId: 'project-id', projectNumber: 12345}", JsonObject.class);
+
   private static final String ERROR_MESSAGE = "error!";
-  private static final String FORMATTED_EXCEPTION =
-      "\"exception\":{\"message\":\"error!\",\"errorCode\":\"404\"},";
-  private static final String EXPECTED_LOG_PREFIX =
-      "{\"traceId\":\"TraceId{traceId=31323334353637383930313233343536}\",\"operation\":\"TEST_OPERATION\",\"clientName\":\"TestClient\",";
 
   /** use the {@link ResourceManagerException} as an example of a BaseHttpServiceException. */
   private static final ResourceManagerException RM_EXCEPTION =
@@ -56,10 +64,12 @@ public class OperationAnnotatorTest {
 
   private static final OperationAnnotator.CowSerialize SERIALIZE =
       () -> {
-        return PROJECT_INFO_JSON_OBJECT;
+        return PROJECT_REQUEST;
       };
 
-  ArgumentCaptor<String> logArgument = ArgumentCaptor.forClass(String.class);
+  ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+  ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+  ArgumentCaptor<Exception> exceptionArgumentCaptor = ArgumentCaptor.forClass(Exception.class);
 
   private final Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
 
@@ -128,78 +138,53 @@ public class OperationAnnotatorTest {
                 SERIALIZE));
   }
 
-  /**
-   * Expected log in JSON format with no error code
-   *
-   * <pre>{@code
-   * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation":"TEST_OPERATION",
-   *   "clientName":"test_client",
-   *   "request":{
-   *      "requestName":"request1"
-   *   },
-   *   "response":{
-   *       "name":"myProj",
-   *       "projectId":"project-id",
-   *       "labels":{
-   *          "k1":"v1",
-   *          "k2":"v2"
-   *       }
-   *    }
-   * }
-   * }</pre>
-   *
-   * <p>There is no public constructor for project, so the test creates Project from Json first then
-   * convert it back
-   */
   @Test
-  public void testLogEvent_nullErrorShouldLogAsDebug() throws Exception {
+  public void testLogEvent() throws Exception {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
 
     operationAnnotator.logEvent(
-        TraceId.fromBytes(TRACE_ID.getBytes()),
         StubCloudOperation.TEST_OPERATION,
-        PROJECT_INFO_JSON_OBJECT,
+        PROJECT_REQUEST,
+        PROJECT_RESPONSE,
+        Duration.ofMillis(2345),
         Optional.empty());
 
-    // Expected result in Json format
-    verify(mockLogger).debug(logArgument.capture());
-    assertEquals(
-        EXPECTED_LOG_PREFIX + "\"request\":" + PROJECT_INFO_STRING + "}", logArgument.getValue());
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    assertThat(
+        stringArgumentCaptor.getValue(), Matchers.containsString("CRL completed TEST_OPERATION (2s"));
+    assertThat(json.getAsJsonPrimitive("clientName").getAsString(),
+        Matchers.equalTo("TestClient"));
+    assertThat(json.getAsJsonPrimitive("durationMs").getAsLong(),
+      Matchers.equalTo(2345l));
+    assertThat(json.getAsJsonPrimitive("operation").getAsString(),
+        Matchers.equalTo("TEST_OPERATION"));
+    assertThat(json.getAsJsonObject("requestData"),
+      Matchers.equalTo(PROJECT_REQUEST));
+    assertThat(json.getAsJsonObject("responseData"),
+        Matchers.equalTo(PROJECT_RESPONSE));
+    // Exception should not be included in JSON if not present.
+    assertFalse(json.has("exception"));
   }
 
-  /**
-   * Expected log in JSON format with empty response:
-   *
-   * <pre>{@code
-   * { "traceId":"TraceId{traceId=31323334353637383930313233343536}",
-   *   "operation":"TEST_OPERATION",
-   *   "clientName":"test_client",
-   *   "errorCode":"404",
-   *   "request":{
-   *      "requestName":"request1"
-   *   },
-   *   "response":null
-   * }
-   * }</pre>
-   *
-   * <p>There is no public constructor for project, so the test creates Project from Json first then
-   * convert it back
-   */
   @Test
-  public void testLogEvent_nullResponse() throws Exception {
+  public void testLogEvent_withException() throws Exception {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
 
     operationAnnotator.logEvent(
-        TraceId.fromBytes(TRACE_ID.getBytes()),
         StubCloudOperation.TEST_OPERATION,
-        PROJECT_INFO_JSON_OBJECT,
+        PROJECT_REQUEST,
+        // Typically we expect to see an empty response for requests triggering an exception.
+        JsonNull.INSTANCE,
+        Duration.ofMillis(2345),
         Optional.of(RM_EXCEPTION));
 
-    // Expected result in Json format
-    verify(mockLogger).info(logArgument.capture());
-    assertEquals(
-        EXPECTED_LOG_PREFIX + FORMATTED_EXCEPTION + "\"request\":" + PROJECT_INFO_STRING + "}",
-        logArgument.getValue());
+    verify(mockLogger).error(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture(), exceptionArgumentCaptor.capture());
+    assertThat(
+        stringArgumentCaptor.getValue(), Matchers.containsString("CRL exception in TEST_OPERATION (HTTP code 404, 2s)"));
+    assertTrue(gsonArgumentCaptor.getValue().has("exception"));
+    assertTrue(gsonArgumentCaptor.getValue().get("responseData").isJsonNull());
+    // Verify that the exception is also included as a separate logger argument, so it can be picked up by SLF4J.
+    assertThat(exceptionArgumentCaptor.getValue(), Matchers.equalTo(RM_EXCEPTION));
   }
 }
