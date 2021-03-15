@@ -15,17 +15,10 @@ subprojects { subproject ->
     sourceCompatibility = JavaVersion.VERSION_1_8
 
     repositories {
-        maven {
-            // Broad proxy for maven central
-            url "https://broadinstitute.jfrog.io/broadinstitute/maven-central/"
-        }
         mavenCentral()
         google()
         maven {
             url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
-        }
-        maven {
-            url "https://broadinstitute.jfrog.io/broadinstitute/libs-release/"
         }
     }
 
