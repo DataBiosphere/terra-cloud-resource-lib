@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
-@Tag("unit")
+@Tag("integration")
 public class CleanupRecorderTest {
   @Mock private final Publisher mockPublisher = mock(Publisher.class);
 
