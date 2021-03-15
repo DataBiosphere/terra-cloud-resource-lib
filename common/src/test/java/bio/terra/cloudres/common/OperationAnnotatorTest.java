@@ -2,7 +2,7 @@ package bio.terra.cloudres.common;
 
 import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -147,12 +147,11 @@ public class OperationAnnotatorTest {
     JsonObject json = gsonArgumentCaptor.getValue();
     assertThat(
         stringArgumentCaptor.getValue(),
-        Matchers.containsString("CRL completed TEST_OPERATION (2.3s"));
-    assertThat(json.getAsJsonPrimitive("clientName").getAsString(), Matchers.equalTo("TestClient"));
-    assertThat(json.getAsJsonPrimitive("durationMs").getAsLong(), Matchers.equalTo(2345l));
-    assertThat(
-        json.getAsJsonPrimitive("operation").getAsString(), Matchers.equalTo("TEST_OPERATION"));
-    assertThat(json.getAsJsonObject("requestData"), Matchers.equalTo(PROJECT_REQUEST));
+        Matchers.containsString("CRL completed TEST_OPERATION (2.3s)"));
+    assertEquals(json.getAsJsonPrimitive("clientName").getAsString(), "TestClient");
+    assertEquals(json.getAsJsonPrimitive("durationMs").getAsLong(), 2345l);
+    assertEquals(json.getAsJsonPrimitive("operation").getAsString(), "TEST_OPERATION");
+    assertEquals(json.getAsJsonObject("requestData"), PROJECT_REQUEST);
     // Exception should not be included in JSON if not present.
     assertFalse(json.has("exception"));
   }
@@ -178,6 +177,6 @@ public class OperationAnnotatorTest {
     assertTrue(gsonArgumentCaptor.getValue().has("exception"));
     // Verify that the exception is also included as a separate logger argument, so it can be picked
     // up by SLF4J.
-    assertThat(exceptionArgumentCaptor.getValue(), Matchers.equalTo(RM_EXCEPTION));
+    assertEquals(exceptionArgumentCaptor.getValue(), RM_EXCEPTION);
   }
 }

@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.opencensus.contrib.http.util.HttpTraceAttributeConstants;
 import io.opencensus.trace.*;
 import java.time.Duration;
 import java.util.Optional;
@@ -81,7 +82,7 @@ public class OperationAnnotator {
       tracer
           .getCurrentSpan()
           .putAttribute(
-              "/terra/crl/httpErrorCode",
+              HttpTraceAttributeConstants.HTTP_STATUS_CODE,
               AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
       recordErrors(getHttpErrorCode(e), cloudOperation);
       executionException = Optional.of(e);
@@ -155,12 +156,17 @@ public class OperationAnnotator {
     }
   }
 
-  // Turns the default Duration.toString output into a more human-readable output. See
-  // https://stackoverflow.com/a/40487511 for inspiration.
+  // Turns the default Duration.toString output into a more human-readable output (e.g. "4h 2m 3s").
+  // See https://stackoverflow.com/a/40487511 for inspiration.
   private String prettyPrintDuration(Duration duration) {
-    // Truncate to 0.1 second precision.
-    duration = Duration.ofMillis((duration.toMillis() / 100l) * 100l);
-    return duration.toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase();
+    return Duration
+        // Truncate to 0.1 second precision.
+        .ofMillis((duration.toMillis() / 100l) * 100l)
+        // Format the duration and apply some fine-tuning to the string output.
+        .toString()
+        .substring(2)
+        .replaceAll("(\\d[HMS])(?!$)", "$1 ")
+        .toLowerCase();
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {
