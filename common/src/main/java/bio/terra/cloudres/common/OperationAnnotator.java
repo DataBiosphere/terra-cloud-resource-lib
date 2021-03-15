@@ -7,8 +7,6 @@ import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.opencensus.trace.*;
 import java.time.Duration;
@@ -90,10 +88,7 @@ public class OperationAnnotator {
       throw e;
     } finally {
       logEvent(
-          cloudOperation,
-          cowSerialize.serializeRequest(),
-          stopwatch.elapsed(),
-          executionException);
+          cloudOperation, cowSerialize.serializeRequest(), stopwatch.elapsed(), executionException);
       // We manually manage the span so that the expected span is still present in catch and
       // finally.
       // See warning on SpanBuilder#startScopedSpan.
@@ -114,7 +109,7 @@ public class OperationAnnotator {
   }
 
   /**
-   * Logs an info message indicating the completion of a CRL event, or an error message indicating
+   * Logs a debug message indicating the completion of a CRL event, or an error message indicating
    * an exception occurred.
    *
    * <p>A structured JsonObject is included in the logging arguments; this payload will not affect
@@ -160,6 +155,8 @@ public class OperationAnnotator {
     }
   }
 
+  // Turns the default Duration.toString output into a more human-readable output. See
+  // https://stackoverflow.com/a/40487511 for inspiration.
   private String prettyPrintDuration(Duration duration) {
     // Truncate to 0.1 second precision.
     duration = Duration.ofMillis((duration.toMillis() / 100l) * 100l);

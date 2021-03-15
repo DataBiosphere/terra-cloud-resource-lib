@@ -12,7 +12,6 @@ import bio.terra.cloudres.util.MetricsHelper;
 import com.google.cloud.resourcemanager.ResourceManagerException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
 import java.time.Duration;
