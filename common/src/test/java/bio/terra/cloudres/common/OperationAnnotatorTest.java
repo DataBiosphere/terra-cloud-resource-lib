@@ -36,9 +36,6 @@ public class OperationAnnotatorTest {
       JSON_PARSER.fromJson(
           "{name: 'myProj', projectId: 'project-id', labels: {k1: 'v1', k2: 'v2'}}",
           JsonObject.class);
-  // A fake but somewhat-realistic create-project response payload
-  private static final JsonObject PROJECT_RESPONSE =
-      JSON_PARSER.fromJson("{projectId: 'project-id', projectNumber: 12345}", JsonObject.class);
 
   private static final String ERROR_MESSAGE = "error!";
 
@@ -144,7 +141,6 @@ public class OperationAnnotatorTest {
     operationAnnotator.logEvent(
         StubCloudOperation.TEST_OPERATION,
         PROJECT_REQUEST,
-        PROJECT_RESPONSE,
         Duration.ofMillis(2345),
         Optional.empty());
 
@@ -158,7 +154,6 @@ public class OperationAnnotatorTest {
     assertThat(
         json.getAsJsonPrimitive("operation").getAsString(), Matchers.equalTo("TEST_OPERATION"));
     assertThat(json.getAsJsonObject("requestData"), Matchers.equalTo(PROJECT_REQUEST));
-    assertThat(json.getAsJsonObject("responseData"), Matchers.equalTo(PROJECT_RESPONSE));
     // Exception should not be included in JSON if not present.
     assertFalse(json.has("exception"));
   }
@@ -170,8 +165,6 @@ public class OperationAnnotatorTest {
     operationAnnotator.logEvent(
         StubCloudOperation.TEST_OPERATION,
         PROJECT_REQUEST,
-        // Typically we expect to see an empty response for requests triggering an exception.
-        JsonNull.INSTANCE,
         Duration.ofMillis(2345),
         Optional.of(RM_EXCEPTION));
 
@@ -184,7 +177,6 @@ public class OperationAnnotatorTest {
         stringArgumentCaptor.getValue(),
         Matchers.containsString("CRL exception in TEST_OPERATION (HTTP code 404, 2.3s)"));
     assertTrue(gsonArgumentCaptor.getValue().has("exception"));
-    assertTrue(gsonArgumentCaptor.getValue().get("responseData").isJsonNull());
     // Verify that the exception is also included as a separate logger argument, so it can be picked
     // up by SLF4J.
     assertThat(exceptionArgumentCaptor.getValue(), Matchers.equalTo(RM_EXCEPTION));

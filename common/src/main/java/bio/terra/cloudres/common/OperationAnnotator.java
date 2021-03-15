@@ -71,11 +71,9 @@ public class OperationAnnotator {
     recordApiCount(cloudOperation);
 
     Stopwatch stopwatch = Stopwatch.createStarted();
-    JsonElement responseData = JsonNull.INSTANCE;
     try {
       R response = cowExecute.execute();
       recordLatency(stopwatch.stop().elapsed(), cloudOperation);
-      responseData = new Gson().toJsonTree(response);
       return response;
     } catch (Exception e) {
       // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
@@ -94,7 +92,6 @@ public class OperationAnnotator {
       logEvent(
           cloudOperation,
           cowSerialize.serializeRequest(),
-          responseData,
           stopwatch.elapsed(),
           executionException);
       // We manually manage the span so that the expected span is still present in catch and
@@ -129,7 +126,6 @@ public class OperationAnnotator {
    *
    * @param operation the cloud operation to log.
    * @param requestData data included in the cloud operation request
-   * @param responseData data returned by the cloud operation
    * @param duration the duration of the CRL event
    * @param executionException Optional, only included if an error occurred.
    */
@@ -137,7 +133,6 @@ public class OperationAnnotator {
   void logEvent(
       CloudOperation operation,
       JsonObject requestData,
-      JsonElement responseData,
       Duration duration,
       Optional<Exception> executionException) {
     JsonObject logData = new JsonObject();
@@ -146,7 +141,6 @@ public class OperationAnnotator {
     executionException.ifPresent(e -> logData.add("exception", createExceptionEntry(e)));
     logData.addProperty("operation", operation.name());
     logData.add("requestData", requestData);
-    logData.add("responseData", responseData);
 
     if (executionException.isPresent()) {
       OptionalInt httpErrorCode = getHttpErrorCode(executionException.get());
