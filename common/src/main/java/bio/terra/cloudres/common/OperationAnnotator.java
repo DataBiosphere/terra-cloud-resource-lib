@@ -140,12 +140,11 @@ public class OperationAnnotator {
       JsonElement responseData,
       Duration duration,
       Optional<Exception> executionException) {
-    Gson gson = new Gson();
     JsonObject logData = new JsonObject();
     logData.addProperty("clientName", clientConfig.getClientName());
     logData.addProperty("durationMs", duration.toMillis());
     executionException.ifPresent(e -> logData.add("exception", createExceptionEntry(e)));
-    logData.add("operation", gson.toJsonTree(operation));
+    logData.addProperty("operation", operation.name());
     logData.add("requestData", requestData);
     logData.add("responseData", responseData);
 
