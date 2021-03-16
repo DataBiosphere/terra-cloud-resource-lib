@@ -66,6 +66,14 @@ Automatically fix linting issues:
 ./gradlew spotlessApply
 ```
 
+## Publishing an update
+
+The version number of each sub-project is handled manually with a two-step process:
+
+1. Bump the version of the appropriate sub-project(s) in the same PR as the code changes.
+2. Merge to the main branch, and then create a new GitHub release. The publish.yml action will run on the tagged
+   release, pushing new packages to Artifactory.
+
 ## Adding a new package
 Cloud API client libraries are wrapped in separate CRL packages to allow clients to only include the libraries that they
 use. To add a new CRL package to support a new client library:

@@ -86,6 +86,8 @@ subprojects { subproject ->
 
     java {
         withJavadocJar()
+        // Builds sources into the published package as part of the 'assemble' task.
+        withSourcesJar()
     }
 
     task minniekenny(type: Exec) {
