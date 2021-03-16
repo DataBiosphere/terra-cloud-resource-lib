@@ -29,6 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
+// Note: this is tagged as an integration / connected test because it loads integration test
+// credentials using the {@link IntegrationCredentials} class. In all other respects it is a unit
+// test, e.g. all API calls are mocked and no cloud resources are created or modified. If we found
+// an easier way to create a mock ServiceAccountCredentials instance, it could be tagged as "unit".
 @Tag("integration")
 public class CleanupRecorderTest {
   @Mock private final Publisher mockPublisher = mock(Publisher.class);

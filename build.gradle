@@ -71,12 +71,15 @@ subprojects { subproject ->
 
     build.dependsOn spotlessApply
 
+    // Modify the standard :test task to only include unit-tagged tests.
     test {
         useJUnitPlatform {
             includeTags 'unit'
         }
     }
 
+    // Create a new :integrationTest task to run integration tests. This won't be executed as
+    // part of the standard `./gradlew build` invocation.
     task integrationTest(type: Test) {
         useJUnitPlatform {
             includeTags "integration"
@@ -85,6 +88,7 @@ subprojects { subproject ->
     }
 
     java {
+        // Builds Javadoc into the published package as part of the 'assemble' task.
         withJavadocJar()
     }
 

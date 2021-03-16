@@ -167,7 +167,7 @@ public class OperationAnnotatorTest {
         Optional.of(RM_EXCEPTION));
 
     verify(mockLogger)
-        .error(
+        .debug(
             stringArgumentCaptor.capture(),
             gsonArgumentCaptor.capture(),
             exceptionArgumentCaptor.capture());

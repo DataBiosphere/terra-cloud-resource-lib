@@ -110,8 +110,7 @@ public class OperationAnnotator {
   }
 
   /**
-   * Logs a debug message indicating the completion of a CRL event, or an error message indicating
-   * an exception occurred.
+   * Logs a debug message indicating the completion of a CRL event or that an exception occurred.
    *
    * <p>A structured JsonObject is included in the logging arguments; this payload will not affect
    * human-readable logging output, but will be included in JSON-formatted output for services which
@@ -140,7 +139,7 @@ public class OperationAnnotator {
 
     if (executionException.isPresent()) {
       OptionalInt httpErrorCode = getHttpErrorCode(executionException.get());
-      logger.error(
+      logger.debug(
           String.format(
               "CRL exception in %s (HTTP code %s, %s)",
               operation.name(), httpErrorCode.orElse(-1), prettyPrintDuration(duration)),
@@ -164,7 +163,9 @@ public class OperationAnnotator {
         .ofMillis((duration.toMillis() / 100l) * 100l)
         // Format the duration and apply some fine-tuning to the string output.
         .toString()
+        // Remove the "PT" prefix
         .substring(2)
+        // Add spaces between tokens
         .replaceAll("(\\d[HMS])(?!$)", "$1 ")
         .toLowerCase();
   }
