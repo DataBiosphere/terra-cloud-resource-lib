@@ -8,6 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.opencensus.contrib.http.util.HttpTraceAttributeConstants;
 import io.opencensus.trace.*;
 import java.time.Duration;
 import java.util.Optional;
@@ -63,7 +64,6 @@ public class OperationAnnotator {
       CloudOperation cloudOperation, CowCheckedExecute<R, E> cowExecute, CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
-
     Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
 
     // Record the Cloud API usage.
@@ -82,16 +82,14 @@ public class OperationAnnotator {
       tracer
           .getCurrentSpan()
           .putAttribute(
-              "httpErrorCode", AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
+              HttpTraceAttributeConstants.HTTP_STATUS_CODE,
+              AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
       recordErrors(getHttpErrorCode(e), cloudOperation);
       executionException = Optional.of(e);
       throw e;
     } finally {
       logEvent(
-          tracer.getCurrentSpan().getContext().getTraceId(),
-          cloudOperation,
-          cowSerialize.serializeRequest(),
-          executionException);
+          cloudOperation, cowSerialize.serializeRequest(), stopwatch.elapsed(), executionException);
       // We manually manage the span so that the expected span is still present in catch and
       // finally.
       // See warning on SpanBuilder#startScopedSpan.
@@ -112,37 +110,64 @@ public class OperationAnnotator {
   }
 
   /**
-   * Logs cloud calls.
+   * Logs a debug message indicating the completion of a CRL event or that an exception occurred.
    *
-   * <p>This log is for debug purpose when using CRL, but we should be in info level, to make this
-   * log useful.
+   * <p>A structured JsonObject is included in the logging arguments; this payload will not affect
+   * human-readable logging output, but will be included in JSON-formatted output for services which
+   * are using the terra-common-lib logging library with JSON format enabled.
    *
-   * @param traceId the traceId where log happens
-   * @param operation the operation to log.
-   * @param request the request of the log
-   * @param executionException the exception to log. Optional, only presents when exception happens.
+   * <p>If an exception is present, it will also be included as a logging argument. SLF4J should
+   * recognize this argument and include a stacktrace in the resulting error log message.
+   *
+   * @param operation the cloud operation to log.
+   * @param requestData data included in the cloud operation request
+   * @param duration the duration of the CRL event
+   * @param executionException Optional, only included if an error occurred.
    */
   @VisibleForTesting
   void logEvent(
-      TraceId traceId,
       CloudOperation operation,
-      JsonObject request,
+      JsonObject requestData,
+      Duration duration,
       Optional<Exception> executionException) {
-    JsonObject logEntry = new JsonObject();
-    logEntry.addProperty("traceId", traceId.toString());
-    logEntry.addProperty("operation", operation.name());
-    logEntry.addProperty("clientName", clientConfig.getClientName());
+    JsonObject logData = new JsonObject();
+    logData.addProperty("clientName", clientConfig.getClientName());
+    logData.addProperty("durationMs", duration.toMillis());
+    executionException.ifPresent(e -> logData.add("exception", createExceptionEntry(e)));
+    logData.addProperty("operation", operation.name());
+    logData.add("requestData", requestData);
 
-    executionException.ifPresent(e -> logEntry.add("exception", createExceptionEntry(e)));
-
-    logEntry.add("request", request);
-
-    // Log as debug level if no exceptions, otherwise use info level.
     if (executionException.isPresent()) {
-      logger.info(logEntry.toString());
+      OptionalInt httpErrorCode = getHttpErrorCode(executionException.get());
+      logger.debug(
+          String.format(
+              "CRL exception in %s (HTTP code %s, %s)",
+              operation.name(), httpErrorCode.orElse(-1), prettyPrintDuration(duration)),
+          // Include logData for terra-common-lib logging to pick up and include in JSON output.
+          logData,
+          // Include the exception, which slf4j will append to the formatted log message.
+          executionException.get());
     } else {
-      logger.debug(logEntry.toString());
+      logger.debug(
+          String.format("CRL completed %s (%s)", operation.name(), prettyPrintDuration(duration)),
+          // Include logData for terra-common-lib logging to pick up and include in JSON output.
+          logData);
     }
+  }
+
+  // Turns the default Duration.toString output into a more human-readable output (e.g. "4h 2m 3s").
+  // See https://stackoverflow.com/a/40487511 for inspiration.
+  private String prettyPrintDuration(Duration duration) {
+    return Duration
+        // Truncate to 0.1 second precision.
+        .ofMillis((duration.toMillis() / 100l) * 100l)
+        // Format the duration and apply some fine-tuning to the string output.
+        .toString()
+        // Remove the "PT" prefix
+        .substring(2)
+        // Add spaces between tokens
+        .replaceAll("(\\d[HMS])(?!$)", "$1 ")
+        .toLowerCase();
   }
 
   private OptionalInt getHttpErrorCode(Exception e) {
