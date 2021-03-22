@@ -12,7 +12,7 @@ public class InstanceNameTest {
 
   @Test
   public void name() {
-    String name = "projects/my-project/location/uswest1-b/instances/my-id";
+    String name = "projects/my-project/locations/uswest1-b/instances/my-id";
     InstanceName instanceName = InstanceName.fromNameFormat(name);
 
     assertEquals("my-project", instanceName.projectId());
@@ -28,7 +28,7 @@ public class InstanceNameTest {
 
   @Test
   public void parent() {
-    String parent = "projects/my-project/location/uswest1-b";
+    String parent = "projects/my-project/locations/uswest1-b";
     InstanceName instanceName = InstanceName.fromParentAndId(parent, "my-id");
 
     assertEquals("my-project", instanceName.projectId());
@@ -48,6 +48,6 @@ public class InstanceNameTest {
     InstanceName instanceName = InstanceName.builder().projectId("my-project").location("my-location").instanceId("my-id").build();
     JsonObject jsonObject = new JsonObject();
     instanceName.addProperties(jsonObject);
-    assertEquals("{\"projectId\":\"my-project\",\"location\":\"my-location\",\"instanceId\":\"my-id\"}", jsonObject.toString());
+    assertEquals("{\"projectId\":\"my-project\",\"locations\":\"my-location\",\"instanceId\":\"my-id\"}", jsonObject.toString());
   }
 }

@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
 @AutoValue
 public abstract class InstanceName {
   private static final Pattern NAME_PATTERN =
-      Pattern.compile("^projects/([^/]+)/location/([^/]+)/instances/([^/]+)$");
+      Pattern.compile("^projects/([^/]+)/locations/([^/]+)/instances/([^/]+)$");
   private static final Pattern PARENT_PATTERN =
-      Pattern.compile("^projects/([^/]+)/location/([^/]+)$");
+      Pattern.compile("^projects/([^/]+)/locations/([^/]+)$");
 
   /** The Google project id that contains this instance. */
   public abstract String projectId();
-  /** The location where the instance is, e.g. "uswest1-b". */
+  /** The location where the instance is, e.g. "us-west1-b". */
   public abstract String location();
   /** The user specified id for the instance. */
   public abstract String instanceId();
@@ -31,7 +31,7 @@ public abstract class InstanceName {
    */
   public String formatName() {
     return String.format(
-        "projects/%s/location/%s/instances/%s", projectId(), location(), instanceId());
+        "projects/%s/locations/%s/instances/%s", projectId(), location(), instanceId());
   }
 
   /**
@@ -40,7 +40,7 @@ public abstract class InstanceName {
    * Instance)}.
    */
   public String formatParent() {
-    return String.format("projects/%s/location/%s", projectId(), location());
+    return String.format("projects/%s/locations/%s", projectId(), location());
   }
 
   /**
@@ -89,7 +89,7 @@ public abstract class InstanceName {
   /** Adds properties to the JsonObject for the fields on this. */
   void addProperties(JsonObject jsonObject) {
     jsonObject.addProperty("projectId", projectId());
-    jsonObject.addProperty("location", location());
+    jsonObject.addProperty("locations", location());
     jsonObject.addProperty("instanceId", instanceId());
   }
 
