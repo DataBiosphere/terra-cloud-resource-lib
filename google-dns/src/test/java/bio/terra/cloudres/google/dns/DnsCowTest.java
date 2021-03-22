@@ -30,9 +30,6 @@ import org.junit.jupiter.api.Test;
 public class DnsCowTest {
   private static final List<String> SERVICE_IDS = ImmutableList.of("dns.googleapis.com");
 
-  // TODO(PF-67): Find solution for piping configs and secrets.
-  private static final String BILLING_ACCOUNT_NAME = "billingAccounts/01A82E-CA8A14-367457";
-
   private static DnsCow defaultDns() throws GeneralSecurityException, IOException {
     return new DnsCow(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
@@ -50,7 +47,7 @@ public class DnsCowTest {
   public void createAndGetZone() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
     String projectId = project.getProjectId();
-    CloudBillingUtils.setProjectBillingInfo(projectId, BILLING_ACCOUNT_NAME);
+    CloudBillingUtils.setDefaultProjectBilling(projectId);
     ServiceUsageUtils.enableServices(projectId, SERVICE_IDS);
 
     DnsCow dnsCow = defaultDns();
@@ -75,7 +72,7 @@ public class DnsCowTest {
   public void createAndGetChange() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
     String projectId = project.getProjectId();
-    CloudBillingUtils.setProjectBillingInfo(projectId, BILLING_ACCOUNT_NAME);
+    CloudBillingUtils.setDefaultProjectBilling(projectId);
     ServiceUsageUtils.enableServices(projectId, SERVICE_IDS);
     DnsCow dnsCow = defaultDns();
     ManagedZone managedZone =

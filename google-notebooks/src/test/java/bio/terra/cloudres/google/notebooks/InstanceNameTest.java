@@ -45,9 +45,16 @@ public class InstanceNameTest {
 
   @Test
   public void addProperties() {
-    InstanceName instanceName = InstanceName.builder().projectId("my-project").location("my-location").instanceId("my-id").build();
+    InstanceName instanceName =
+        InstanceName.builder()
+            .projectId("my-project")
+            .location("my-location")
+            .instanceId("my-id")
+            .build();
     JsonObject jsonObject = new JsonObject();
     instanceName.addProperties(jsonObject);
-    assertEquals("{\"projectId\":\"my-project\",\"locations\":\"my-location\",\"instanceId\":\"my-id\"}", jsonObject.toString());
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"locations\":\"my-location\",\"instanceId\":\"my-id\"}",
+        jsonObject.toString());
   }
 }

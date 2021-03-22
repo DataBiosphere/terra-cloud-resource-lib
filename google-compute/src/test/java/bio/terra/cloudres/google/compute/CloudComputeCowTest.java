@@ -26,9 +26,6 @@ import org.junit.jupiter.api.Test;
 public class CloudComputeCowTest {
   private static final String COMPUTE_SERVICE_ID = "compute.googleapis.com";
 
-  // TODO(PF-67): Find solution for piping configs and secrets.
-  private static final String BILLING_ACCOUNT_NAME = "billingAccounts/01A82E-CA8A14-367457";
-
   private static Project reusableProject;
 
   private static CloudComputeCow defaultCompute() throws GeneralSecurityException, IOException {
@@ -295,7 +292,7 @@ public class CloudComputeCowTest {
   /** Create Project then set billing account, enable compute compute service */
   private static Project createPreparedProject() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
-    CloudBillingUtils.setProjectBillingInfo(project.getProjectId(), BILLING_ACCOUNT_NAME);
+    CloudBillingUtils.setDefaultProjectBilling(project.getProjectId());
     ServiceUsageUtils.enableServices(project.getProjectId(), ImmutableList.of(COMPUTE_SERVICE_ID));
     return project;
   }
