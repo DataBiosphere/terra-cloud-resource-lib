@@ -17,11 +17,10 @@ import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.api.services.notebooks.v1.model.VmImage;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
-
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -34,10 +33,10 @@ public class AIPlatformNotebooksCowTest {
 
   @BeforeAll
   public static void createReusableProject() throws Exception {
-     reusableProject = ProjectUtils.executeCreateProject();
-     CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
-     ServiceUsageUtils.enableServices(reusableProject.getProjectId(),
-     ImmutableList.of("notebooks.googleapis.com"));
+    reusableProject = ProjectUtils.executeCreateProject();
+    CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
+    ServiceUsageUtils.enableServices(
+        reusableProject.getProjectId(), ImmutableList.of("notebooks.googleapis.com"));
   }
 
   private static AIPlatformNotebooksCow defaultNotebooksCow() {
