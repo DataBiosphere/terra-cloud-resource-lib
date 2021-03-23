@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.notebooks;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,13 +15,17 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.notebooks.v1.model.Binding;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.api.services.notebooks.v1.model.Operation;
+import com.google.api.services.notebooks.v1.model.Policy;
+import com.google.api.services.notebooks.v1.model.SetIamPolicyRequest;
 import com.google.api.services.notebooks.v1.model.VmImage;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -99,6 +104,39 @@ public class AIPlatformNotebooksCowTest {
   }
 
   @Test
+  public void setGetIamPolicyNotebookInstance() throws Exception {
+    InstanceName instanceName = defaultInstanceName().instanceId("set-get-iam").build();
+
+    OperationCow<Operation> createOperation =
+        notebooks
+            .operations()
+            .operationCow(notebooks.instances().create(instanceName, createInstance()).execute());
+    createOperation =
+        OperationUtils.pollUntilComplete(
+            createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
+    assertTrue(createOperation.getOperation().getDone());
+    assertNull(createOperation.getOperation().getError());
+
+    String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
+    Binding binding =
+        new Binding()
+            .setRole("roles/notebooks.viewer")
+            .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
+    Policy policy = notebooks.instances().getIamPolicy(instanceName).execute();
+    policy.setBindings(ImmutableList.of(binding));
+
+    Policy updatedPolicy =
+        notebooks
+            .instances()
+            .setIamPolicy(instanceName, new SetIamPolicyRequest().setPolicy(policy))
+            .execute();
+
+    assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
+    Policy secondRetrieval = notebooks.instances().getIamPolicy(instanceName).execute();
+    assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
+  }
+
+  @Test
   public void instanceCreateSerialize() throws Exception {
     assertEquals(
         "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\","
@@ -145,6 +183,50 @@ public class AIPlatformNotebooksCowTest {
                     .location("us-east1-b")
                     .instanceId("my-id")
                     .build())
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceGetIamPolicySerialize() throws Exception {
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\","
+            + "\"instanceId\":\"my-id\",\"options_requested_policy_version\":3}",
+        notebooks
+            .instances()
+            .getIamPolicy(
+                InstanceName.builder()
+                    .projectId("my-project")
+                    .location("us-east1-b")
+                    .instanceId("my-id")
+                    .build())
+            .setOptionsRequestedPolicyVersion(3)
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceSetIamPolicySerialize() throws Exception {
+    Binding binding =
+        new Binding()
+            .setRole("roles/notebooks.viewer")
+            .setMembers(ImmutableList.of("userEmail:foo@gmail.com"));
+    SetIamPolicyRequest request =
+        new SetIamPolicyRequest().setPolicy(new Policy().setBindings(ImmutableList.of(binding)));
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\","
+            + "\"instanceId\":\"my-id\",\"content\":{\"policy\":{"
+            + "\"bindings\":[{\"members\":[\"userEmail:foo@gmail.com\"],"
+            + "\"role\":\"roles/notebooks.viewer\"}]}}}",
+        notebooks
+            .instances()
+            .setIamPolicy(
+                InstanceName.builder()
+                    .projectId("my-project")
+                    .location("us-east1-b")
+                    .instanceId("my-id")
+                    .build(),
+                request)
             .serialize()
             .toString());
   }
