@@ -10,6 +10,7 @@ import bio.terra.janitor.model.GoogleAiNotebookInstanceUid;
 import com.google.api.services.notebooks.v1.AIPlatformNotebooks;
 import com.google.api.services.notebooks.v1.AIPlatformNotebooksScopes;
 import com.google.api.services.notebooks.v1.model.Instance;
+import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -81,7 +82,8 @@ public class AIPlatformNotebooksCow {
       private final AIPlatformNotebooks.Projects.Locations.Instances.Create create;
       private final Instance instance;
 
-      Create(AIPlatformNotebooks.Projects.Locations.Instances.Create create, Instance instance) {
+      private Create(
+          AIPlatformNotebooks.Projects.Locations.Instances.Create create, Instance instance) {
         super(
             AIPlatformNotebooksOperation.GOOGLE_CREATE_NOTEBOOKS_INSTANCE,
             clientConfig,
@@ -145,7 +147,7 @@ public class AIPlatformNotebooksCow {
     public class Delete extends AbstractRequestCow<Operation> {
       private final AIPlatformNotebooks.Projects.Locations.Instances.Delete delete;
 
-      Delete(AIPlatformNotebooks.Projects.Locations.Instances.Delete delete) {
+      private Delete(AIPlatformNotebooks.Projects.Locations.Instances.Delete delete) {
         super(
             AIPlatformNotebooksOperation.GOOGLE_DELETE_NOTEBOOKS_INSTANCE,
             clientConfig,
@@ -180,7 +182,7 @@ public class AIPlatformNotebooksCow {
     public class Get extends AbstractRequestCow<Instance> {
       private final AIPlatformNotebooks.Projects.Locations.Instances.Get get;
 
-      Get(AIPlatformNotebooks.Projects.Locations.Instances.Get get) {
+      private Get(AIPlatformNotebooks.Projects.Locations.Instances.Get get) {
         super(
             AIPlatformNotebooksOperation.GOOGLE_GET_NOTEBOOKS_INSTANCE,
             clientConfig,
@@ -197,6 +199,65 @@ public class AIPlatformNotebooksCow {
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
         InstanceName.fromNameFormat(get.getName()).addProperties(result);
+        return result;
+      }
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#list(String). } */
+    public List list(String parent) throws IOException {
+      return new List(instances.list(parent));
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.List}. */
+    public class List extends AbstractRequestCow<ListInstancesResponse> {
+
+      private final AIPlatformNotebooks.Projects.Locations.Instances.List list;
+
+      private List(AIPlatformNotebooks.Projects.Locations.Instances.List list) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_LIST_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            list);
+        this.list = list;
+      }
+
+      /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.List#getParent()}. */
+      public String getParent() {
+        return list.getParent();
+      }
+
+      public List setParent(String parent) {
+        list.setParent(parent);
+        return this;
+      }
+
+      /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.List#getPageSize()}. */
+      public Integer getPageSize() {
+        return list.getPageSize();
+      }
+
+      public List setPageSize(Integer pageSize) {
+        list.setPageSize(pageSize);
+        return this;
+      }
+
+      /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.List#getPageToken()}. */
+      public String getPageToken() {
+        return list.getPageToken();
+      }
+
+      public List setPageToken(String pageToken) {
+        list.setPageToken(pageToken);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("parent", list.getParent());
+        result.addProperty("page_size", list.getPageSize());
+        result.addProperty("page_token", list.getPageToken());
         return result;
       }
     }

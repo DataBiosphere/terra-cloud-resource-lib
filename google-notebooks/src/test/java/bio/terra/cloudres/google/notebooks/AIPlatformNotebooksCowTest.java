@@ -15,6 +15,7 @@ import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.notebooks.v1.model.Instance;
+import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.api.services.notebooks.v1.model.VmImage;
 import com.google.common.collect.ImmutableList;
@@ -67,7 +68,7 @@ public class AIPlatformNotebooksCowTest {
   }
 
   @Test
-  public void createGetDeleteNotebookInstance() throws Exception {
+  public void createGetListDeleteNotebookInstance() throws Exception {
     InstanceName instanceName = defaultInstanceName().build();
     OperationCow<Operation> createOperation =
         notebooks
@@ -82,6 +83,11 @@ public class AIPlatformNotebooksCowTest {
 
     Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
     assertEquals(instanceName.formatName(), retrievedInstance.getName());
+
+    ListInstancesResponse listResponse =
+        notebooks.instances().list(instanceName.formatParent()).execute();
+    assertEquals(1, listResponse.getInstances().size());
+    assertEquals(instanceName.formatName(), listResponse.getInstances().get(0));
 
     OperationCow<Operation> deleteOperation =
         notebooks.operations().operationCow(notebooks.instances().delete(instanceName).execute());
@@ -145,6 +151,20 @@ public class AIPlatformNotebooksCowTest {
                     .location("us-east1-b")
                     .instanceId("my-id")
                     .build())
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceListSerialize() throws Exception {
+    assertEquals(
+        "{\"parent\":\"projects/my-project/locations/us-east1-b\",\"page_size\":10,"
+            + "\"page_token\":\"my-page-token\"}",
+        notebooks
+            .instances()
+            .list("projects/my-project/locations/us-east1-b")
+            .setPageSize(10)
+            .setPageToken("my-page-token")
             .serialize()
             .toString());
   }
