@@ -87,7 +87,7 @@ public class AIPlatformNotebooksCowTest {
     ListInstancesResponse listResponse =
         notebooks.instances().list(instanceName.formatParent()).execute();
     assertEquals(1, listResponse.getInstances().size());
-    assertEquals(instanceName.formatName(), listResponse.getInstances().get(0));
+    assertEquals(instanceName.formatName(), listResponse.getInstances().get(0).getName());
 
     OperationCow<Operation> deleteOperation =
         notebooks.operations().operationCow(notebooks.instances().delete(instanceName).execute());
