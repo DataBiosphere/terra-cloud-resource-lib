@@ -71,8 +71,8 @@ public class AIPlatformNotebooksCow {
     /** Create an instance with the {@link InstanceName}. See {@link #create(String, Instance)}. */
     public Create create(InstanceName instanceName, Instance instance) throws IOException {
       Preconditions.checkArgument(
-          instance.getName() == null || instanceName.formatName().equals(instance.getName()),
-          "The instance has a different name than what it's created as.");
+          instance.getName() == null || instance.getName().equals(instanceName.formatName()),
+          "The instance name and it's desired name should be the same if set.");
       return create(instanceName.formatParent(), instance).setInstanceId(instanceName.instanceId());
     }
 
