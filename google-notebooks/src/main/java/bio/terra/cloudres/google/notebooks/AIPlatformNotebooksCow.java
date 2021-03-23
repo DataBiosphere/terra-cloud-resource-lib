@@ -203,7 +203,7 @@ public class AIPlatformNotebooksCow {
       }
     }
 
-    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#list(String). } */
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#list(String)}. */
     public List list(String parent) throws IOException {
       return new List(instances.list(parent));
     }
