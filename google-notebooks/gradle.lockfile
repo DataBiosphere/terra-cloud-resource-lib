@@ -2,7 +2,7 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 bio.terra.janitor:terra-resource-janitor-client:0.0.1-SNAPSHOT=testFixturesRuntimeClasspath,testRuntimeClasspath
-bio.terra:terra-resource-janitor-client:0.2.0-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+bio.terra:terra-resource-janitor-client:0.3.0-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.11.0=compileClasspath,testCompileClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.11.2=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.11.1=compileClasspath,testCompileClasspath,testFixturesCompileClasspath
