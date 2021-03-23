@@ -61,6 +61,18 @@ public class CloudResourceUidTest {
   }
 
   @Test
+  public void googleNotebookInstance() throws Exception {
+    CloudResourceUid notebook =
+        new CloudResourceUid()
+            .googleAiNotebookInstanceUid(
+                new GoogleAiNotebookInstanceUid()
+                    .projectId("my-project")
+                    .location("my-location")
+                    .instanceId("my-id"));
+    assertSerializationIdempotency(notebook);
+  }
+
+  @Test
   public void googleProject() throws Exception {
     CloudResourceUid project =
         new CloudResourceUid().googleProjectUid(new GoogleProjectUid().projectId("my-project"));

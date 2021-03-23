@@ -25,9 +25,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class IamCowTest {
-  // TODO(PF-67): Find solution for piping configs and secrets.
-  private static final String BILLING_ACCOUNT_NAME = "billingAccounts/01A82E-CA8A14-367457";
-
   private static IamCow defaultIam() throws GeneralSecurityException, IOException {
     return IamCow.create(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
@@ -209,7 +206,7 @@ public class IamCowTest {
   /** Create Project then set billing account, enable IAM api */
   private static Project createPreparedProject() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
-    CloudBillingUtils.setProjectBillingInfo(project.getProjectId(), BILLING_ACCOUNT_NAME);
+    CloudBillingUtils.setDefaultProjectBilling(project.getProjectId());
     ServiceUsageUtils.enableServices(
         project.getProjectId(), ImmutableList.of("iam.googleapis.com"));
     return project;

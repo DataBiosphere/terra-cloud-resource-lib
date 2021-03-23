@@ -1,6 +1,4 @@
 dependencies {
-    annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'
-    implementation group: 'com.google.auto.value', name: 'auto-value-annotations', version: '1.7.3'
     implementation group: 'io.opencensus', name: 'opencensus-api', version: '0.26.0'
     implementation group: 'io.opencensus', name: 'opencensus-impl', version: '0.26.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'

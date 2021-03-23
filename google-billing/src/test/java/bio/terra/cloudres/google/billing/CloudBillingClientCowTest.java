@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.billing;
 
+import static bio.terra.cloudres.google.billing.testing.CloudBillingUtils.BILLING_ACCOUNT_NAME;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
@@ -16,8 +17,6 @@ import org.junit.jupiter.api.Test;
 @Tag("integration")
 public class CloudBillingClientCowTest {
   private static final String BILLING_SERVICE_ID = "cloudbilling.googleapis.com";
-  // TODO(PF-67): Find solution for piping configs and secrets.
-  private static final String BILLING_ACCOUNT_NAME = "billingAccounts/01A82E-CA8A14-367457";
 
   private static CloudBillingClientCow defaultBillingCow() throws IOException {
     return new CloudBillingClientCow(
