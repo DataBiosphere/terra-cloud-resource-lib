@@ -3,8 +3,7 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -43,12 +42,10 @@ public class CloudResourceManagerCowTest {
         GoogleJsonResponseException.class, () -> managerCow.projects().get(projectId).execute());
 
     Operation operation = managerCow.projects().create(defaultProject(projectId)).execute();
-    OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
-    operationCow =
-        OperationUtils.pollUntilComplete(
-            operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
-    assertTrue(operationCow.getOperation().getDone());
-    assertNull(operationCow.getOperation().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        managerCow.operations().operationCow(operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(30));
 
     Project project = managerCow.projects().get(projectId).execute();
     assertEquals(projectId, project.getProjectId());

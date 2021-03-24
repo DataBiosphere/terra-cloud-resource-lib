@@ -1,9 +1,6 @@
 package bio.terra.cloudres.google.serviceusage.testing;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.serviceusage.ServiceUsageCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -40,12 +37,10 @@ public class ServiceUsageUtils {
                 projectIdToName(projectId),
                 new BatchEnableServicesRequest().setServiceIds(services))
             .execute();
-    OperationCow<Operation> completedOperation =
-        OperationUtils.pollUntilComplete(
-            serviceUsageCow.operations().operationCow(operation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
+    OperationTestUtils.pollAndAssertSuccess(
+        serviceUsageCow.operations().operationCow(operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
   }
 
   private static String projectIdToName(String projectId) {

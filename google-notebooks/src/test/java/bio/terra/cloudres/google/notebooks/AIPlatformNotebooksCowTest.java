@@ -2,12 +2,10 @@ package bio.terra.cloudres.google.notebooks;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
@@ -72,11 +70,8 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .operations()
             .operationCow(notebooks.instances().create(instanceName, defaultInstance()).execute());
-    createOperation =
-        OperationUtils.pollUntilComplete(
-            createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
-    assertTrue(createOperation.getOperation().getDone());
-    assertNull(createOperation.getOperation().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
   }
 
   /** Creates an {@link Instance} that's ready to be created. */
@@ -107,11 +102,8 @@ public class AIPlatformNotebooksCowTest {
 
     OperationCow<Operation> deleteOperation =
         notebooks.operations().operationCow(notebooks.instances().delete(instanceName).execute());
-    deleteOperation =
-        OperationUtils.pollUntilComplete(
-            deleteOperation, Duration.ofSeconds(30), Duration.ofMinutes(5));
-    assertTrue(deleteOperation.getOperation().getDone());
-    assertNull(deleteOperation.getOperation().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        deleteOperation, Duration.ofSeconds(30), Duration.ofMinutes(5));
 
     GoogleJsonResponseException e =
         assertThrows(
@@ -153,20 +145,14 @@ public class AIPlatformNotebooksCowTest {
 
     OperationCow<Operation> stopOperation =
         notebooks.operations().operationCow(notebooks.instances().stop(instanceName).execute());
-    stopOperation =
-        OperationUtils.pollUntilComplete(
-            stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertTrue(stopOperation.getOperation().getDone());
-    assertNull(stopOperation.getOperation().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
     assertEquals("STOPPED", notebooks.instances().get(instanceName).execute().getState());
 
     OperationCow<Operation> startOperation =
         notebooks.operations().operationCow(notebooks.instances().start(instanceName).execute());
-    startOperation =
-        OperationUtils.pollUntilComplete(
-            startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertTrue(startOperation.getOperation().getDone());
-    assertNull(startOperation.getOperation().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
     assertEquals("PROVISIONING", notebooks.instances().get(instanceName).execute().getState());
 
     notebooks.instances().delete(instanceName).execute();
