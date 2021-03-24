@@ -266,10 +266,7 @@ public class AIPlatformNotebooksCow {
       }
     }
 
-    /**
-     * See {@link
-     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#getIamPolicy(String)}
-     */
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#getIamPolicy(String)} */
     public GetIamPolicy getIamPolicy(String resource) throws IOException {
       return new GetIamPolicy(instances.getIamPolicy(resource));
     }
@@ -327,8 +324,7 @@ public class AIPlatformNotebooksCow {
     }
 
     /**
-     * See {@link
-     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#setIamPolicy(String,
+     * See {@link AIPlatformNotebooks.Projects.Locations.Instances#setIamPolicy(String,
      * SetIamPolicyRequest)}
      */
     public SetIamPolicy setIamPolicy(String resource, SetIamPolicyRequest content)
@@ -377,8 +373,7 @@ public class AIPlatformNotebooksCow {
     }
 
     /**
-     * See {@link
-     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#start(String,
+     * See {@link AIPlatformNotebooks.Projects.Locations.Instances#start(String,
      * StartInstanceRequest)}.
      */
     public Start start(String name) throws IOException {
@@ -417,8 +412,7 @@ public class AIPlatformNotebooksCow {
     }
 
     /**
-     * See {@link
-     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#stop(String,
+     * See {@link AIPlatformNotebooks.Projects.Locations.Instances#stop(String,
      * StopInstanceRequest)}.
      */
     public Stop stop(String name) throws IOException {
