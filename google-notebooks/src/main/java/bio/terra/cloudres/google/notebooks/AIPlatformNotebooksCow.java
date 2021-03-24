@@ -12,6 +12,8 @@ import com.google.api.services.notebooks.v1.AIPlatformNotebooksScopes;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
 import com.google.api.services.notebooks.v1.model.Operation;
+import com.google.api.services.notebooks.v1.model.Policy;
+import com.google.api.services.notebooks.v1.model.SetIamPolicyRequest;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Preconditions;
@@ -258,6 +260,116 @@ public class AIPlatformNotebooksCow {
         result.addProperty("parent", list.getParent());
         result.addProperty("page_size", list.getPageSize());
         result.addProperty("page_token", list.getPageToken());
+        return result;
+      }
+    }
+
+    /**
+     * See {@link
+     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#getIamPolicy(String)}
+     */
+    public GetIamPolicy getIamPolicy(String resource) throws IOException {
+      return new GetIamPolicy(instances.getIamPolicy(resource));
+    }
+
+    /** {@link #getIamPolicy(String)} override for {@link InstanceName}. */
+    public GetIamPolicy getIamPolicy(InstanceName instanceName) throws IOException {
+      return getIamPolicy(instanceName.formatName());
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy}. */
+    public class GetIamPolicy extends AbstractRequestCow<Policy> {
+      private final AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy getIamPolicy;
+
+      private GetIamPolicy(
+          AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy getIamPolicy) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_GET_IAM_POLICY_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            getIamPolicy);
+        this.getIamPolicy = getIamPolicy;
+      }
+
+      /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy#getResource()} */
+      public String getResource() {
+        return getIamPolicy.getResource();
+      }
+
+      public GetIamPolicy setResource(String resource) {
+        getIamPolicy.setResource(resource);
+        return this;
+      }
+
+      /**
+       * See {@link
+       * AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy#getOptionsRequestedPolicyVersion()}
+       */
+      public Integer getOptionsRequestedPolicyVersion() {
+        return getIamPolicy.getOptionsRequestedPolicyVersion();
+      }
+
+      public GetIamPolicy setOptionsRequestedPolicyVersion(Integer version) {
+        getIamPolicy.setOptionsRequestedPolicyVersion(version);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        InstanceName.fromNameFormat(getResource()).addProperties(result);
+        result.addProperty(
+            "options_requested_policy_version", getIamPolicy.getOptionsRequestedPolicyVersion());
+        return result;
+      }
+    }
+
+    /**
+     * See {@link
+     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#setIamPolicy(String,
+     * SetIamPolicyRequest)}
+     */
+    public SetIamPolicy setIamPolicy(String resource, SetIamPolicyRequest content)
+        throws IOException {
+      return new SetIamPolicy(instances.setIamPolicy(resource, content));
+    }
+
+    /** {@link #setIamPolicy(String, SetIamPolicyRequest)} override for {@link InstanceName}. */
+    public SetIamPolicy setIamPolicy(InstanceName instanceName, SetIamPolicyRequest content)
+        throws IOException {
+      return setIamPolicy(instanceName.formatName(), content);
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.SetIamPolicy}. */
+    public class SetIamPolicy extends AbstractRequestCow<Policy> {
+      private final AIPlatformNotebooks.Projects.Locations.Instances.SetIamPolicy setIamPolicy;
+
+      private SetIamPolicy(
+          AIPlatformNotebooks.Projects.Locations.Instances.SetIamPolicy setIamPolicy) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_SET_IAM_POLICY_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            setIamPolicy);
+        this.setIamPolicy = setIamPolicy;
+      }
+
+      /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.SetIamPolicy#getResource()} */
+      public String getResource() {
+        return setIamPolicy.getResource();
+      }
+
+      public SetIamPolicy setResource(String resource) {
+        setIamPolicy.setResource(resource);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        InstanceName.fromNameFormat(getResource()).addProperties(result);
+        result.add(
+            "content", new Gson().toJsonTree(setIamPolicy.getJsonContent()).getAsJsonObject());
         return result;
       }
     }
