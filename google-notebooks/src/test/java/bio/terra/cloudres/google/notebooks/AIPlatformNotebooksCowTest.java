@@ -28,6 +28,7 @@ import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,7 @@ public class AIPlatformNotebooksCowTest {
   /** A dynamically created Google Project to manipulate AI Notebooks within for testing. */
   private static Project reusableProject;
 
-  // @BeforeAll
+  @BeforeAll
   public static void createReusableProject() throws Exception {
     reusableProject = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
