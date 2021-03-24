@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -91,8 +92,11 @@ public class AIPlatformNotebooksCowTest {
 
     ListInstancesResponse listResponse =
         notebooks.instances().list(instanceName.formatParent()).execute();
-    assertEquals(1, listResponse.getInstances().size());
-    assertEquals(instanceName.formatName(), listResponse.getInstances().get(0).getName());
+    // There may be other notebook instances from other tests.
+    assertThat(listResponse.getInstances().size(), Matchers.greaterThan(0));
+    assertThat(
+        listResponse.getInstances().stream().map(Instance::getName).collect(Collectors.toList()),
+        Matchers.hasItem(instanceName.formatName()));
 
     OperationCow<Operation> deleteOperation =
         notebooks.operations().operationCow(notebooks.instances().delete(instanceName).execute());
