@@ -14,6 +14,8 @@ import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.api.services.notebooks.v1.model.Policy;
 import com.google.api.services.notebooks.v1.model.SetIamPolicyRequest;
+import com.google.api.services.notebooks.v1.model.StartInstanceRequest;
+import com.google.api.services.notebooks.v1.model.StopInstanceRequest;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Preconditions;
@@ -370,6 +372,86 @@ public class AIPlatformNotebooksCow {
         InstanceName.fromNameFormat(getResource()).addProperties(result);
         result.add(
             "content", new Gson().toJsonTree(setIamPolicy.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /**
+     * See {@link
+     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#start(String,
+     * StartInstanceRequest)}.
+     */
+    public Start start(String name) throws IOException {
+      // StartRequestInstance is defined to always be empty for the API request. It's existence is a
+      // quirk of Google's auto code generation.
+      return new Start(instances.start(name, new StartInstanceRequest()));
+    }
+
+    /** {@link #start(String)} override for {@link InstanceName}. */
+    public Start start(InstanceName instanceName) throws IOException {
+      return start(instanceName.formatName());
+    }
+
+    public class Start extends AbstractRequestCow<Operation> {
+      private final AIPlatformNotebooks.Projects.Locations.Instances.Start start;
+
+      private Start(AIPlatformNotebooks.Projects.Locations.Instances.Start start) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_START_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            start);
+        this.start = start;
+      }
+
+      public String getName() {
+        return start.getName();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        InstanceName.fromNameFormat(getName()).addProperties(result);
+        return result;
+      }
+    }
+
+    /**
+     * See {@link
+     * com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances#stop(String,
+     * StopInstanceRequest)}.
+     */
+    public Stop stop(String name) throws IOException {
+      // StopRequestInstance is defined to always be empty for the API request. It's existence is a
+      // quirk of Google's auto code generation.
+      return new Stop(instances.stop(name, new StopInstanceRequest()));
+    }
+
+    /** {@link #stop(String)} override for {@link InstanceName}. */
+    public Stop stop(InstanceName instanceName) throws IOException {
+      return stop(instanceName.formatName());
+    }
+
+    public class Stop extends AbstractRequestCow<Operation> {
+      private final AIPlatformNotebooks.Projects.Locations.Instances.Stop stop;
+
+      private Stop(AIPlatformNotebooks.Projects.Locations.Instances.Stop stop) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_STOP_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            stop);
+        this.stop = stop;
+      }
+
+      public String getName() {
+        return stop.getName();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        InstanceName.fromNameFormat(getName()).addProperties(result);
         return result;
       }
     }

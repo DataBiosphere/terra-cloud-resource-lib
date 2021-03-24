@@ -28,7 +28,6 @@ import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +37,7 @@ public class AIPlatformNotebooksCowTest {
   /** A dynamically created Google Project to manipulate AI Notebooks within for testing. */
   private static Project reusableProject;
 
-  @BeforeAll
+  // @BeforeAll
   public static void createReusableProject() throws Exception {
     reusableProject = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
@@ -63,8 +62,24 @@ public class AIPlatformNotebooksCowTest {
         .instanceId("default-id");
   }
 
+  /**
+   * Creates a notebook instance for the {@link InstanceName}. Blocks until the instance is created
+   * successfully or fails
+   */
+  private void createInstance(InstanceName instanceName) throws IOException, InterruptedException {
+    OperationCow<Operation> createOperation =
+        notebooks
+            .operations()
+            .operationCow(notebooks.instances().create(instanceName, defaultInstance()).execute());
+    createOperation =
+        OperationUtils.pollUntilComplete(
+            createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
+    assertTrue(createOperation.getOperation().getDone());
+    assertNull(createOperation.getOperation().getError());
+  }
+
   /** Creates an {@link Instance} that's ready to be created. */
-  private static Instance createInstance() {
+  private static Instance defaultInstance() {
     return new Instance()
         // A VM or Container image is required.
         .setVmImage(
@@ -76,16 +91,7 @@ public class AIPlatformNotebooksCowTest {
   @Test
   public void createGetListDeleteNotebookInstance() throws Exception {
     InstanceName instanceName = defaultInstanceName().build();
-    OperationCow<Operation> createOperation =
-        notebooks
-            .operations()
-            .operationCow(notebooks.instances().create(instanceName, createInstance()).execute());
-
-    createOperation =
-        OperationUtils.pollUntilComplete(
-            createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
-    assertTrue(createOperation.getOperation().getDone());
-    assertNull(createOperation.getOperation().getError());
+    createInstance(instanceName);
 
     Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
     assertEquals(instanceName.formatName(), retrievedInstance.getName());
@@ -116,16 +122,7 @@ public class AIPlatformNotebooksCowTest {
   @Test
   public void setGetIamPolicyNotebookInstance() throws Exception {
     InstanceName instanceName = defaultInstanceName().instanceId("set-get-iam").build();
-
-    OperationCow<Operation> createOperation =
-        notebooks
-            .operations()
-            .operationCow(notebooks.instances().create(instanceName, createInstance()).execute());
-    createOperation =
-        OperationUtils.pollUntilComplete(
-            createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
-    assertTrue(createOperation.getOperation().getDone());
-    assertNull(createOperation.getOperation().getError());
+    createInstance(instanceName);
 
     String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
     Binding binding =
@@ -144,6 +141,34 @@ public class AIPlatformNotebooksCowTest {
     assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
     Policy secondRetrieval = notebooks.instances().getIamPolicy(instanceName).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
+
+    notebooks.instances().delete(instanceName).execute();
+  }
+
+  @Test
+  public void stopStartNotebookInstance() throws Exception {
+    InstanceName instanceName = defaultInstanceName().instanceId("stop-start").build();
+    createInstance(instanceName);
+
+    OperationCow<Operation> stopOperation =
+        notebooks.operations().operationCow(notebooks.instances().stop(instanceName).execute());
+    stopOperation =
+        OperationUtils.pollUntilComplete(
+            stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
+    assertTrue(stopOperation.getOperation().getDone());
+    assertNull(stopOperation.getOperation().getError());
+    assertEquals("STOPPED", notebooks.instances().get(instanceName).execute().getState());
+
+    OperationCow<Operation> startOperation =
+        notebooks.operations().operationCow(notebooks.instances().start(instanceName).execute());
+    startOperation =
+        OperationUtils.pollUntilComplete(
+            startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
+    assertTrue(startOperation.getOperation().getDone());
+    assertNull(startOperation.getOperation().getError());
+    assertEquals("PROVISIONING", notebooks.instances().get(instanceName).execute().getState());
+
+    notebooks.instances().delete(instanceName).execute();
   }
 
   @Test
@@ -160,7 +185,7 @@ public class AIPlatformNotebooksCowTest {
                     .location("us-east1-b")
                     .instanceId("my-id")
                     .build(),
-                createInstance())
+                defaultInstance())
             .serialize()
             .toString());
   }
@@ -251,6 +276,38 @@ public class AIPlatformNotebooksCowTest {
                     .instanceId("my-id")
                     .build(),
                 request)
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceStartSerialize() throws Exception {
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\",\"instanceId\":\"my-id\"}",
+        notebooks
+            .instances()
+            .start(
+                InstanceName.builder()
+                    .projectId("my-project")
+                    .location("us-east1-b")
+                    .instanceId("my-id")
+                    .build())
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceStopSerialize() throws Exception {
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\",\"instanceId\":\"my-id\"}",
+        notebooks
+            .instances()
+            .stop(
+                InstanceName.builder()
+                    .projectId("my-project")
+                    .location("us-east1-b")
+                    .instanceId("my-id")
+                    .build())
             .serialize()
             .toString());
   }
