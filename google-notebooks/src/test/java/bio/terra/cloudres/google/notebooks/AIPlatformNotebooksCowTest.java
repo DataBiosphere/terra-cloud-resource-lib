@@ -17,6 +17,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.notebooks.v1.model.Binding;
 import com.google.api.services.notebooks.v1.model.Instance;
+import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.api.services.notebooks.v1.model.Policy;
 import com.google.api.services.notebooks.v1.model.SetIamPolicyRequest;
@@ -25,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -72,7 +74,7 @@ public class AIPlatformNotebooksCowTest {
   }
 
   @Test
-  public void createGetDeleteNotebookInstance() throws Exception {
+  public void createGetListDeleteNotebookInstance() throws Exception {
     InstanceName instanceName = defaultInstanceName().build();
     OperationCow<Operation> createOperation =
         notebooks
@@ -87,6 +89,14 @@ public class AIPlatformNotebooksCowTest {
 
     Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
     assertEquals(instanceName.formatName(), retrievedInstance.getName());
+
+    ListInstancesResponse listResponse =
+        notebooks.instances().list(instanceName.formatParent()).execute();
+    // There may be other notebook instances from other tests.
+    assertThat(listResponse.getInstances().size(), Matchers.greaterThan(0));
+    assertThat(
+        listResponse.getInstances().stream().map(Instance::getName).collect(Collectors.toList()),
+        Matchers.hasItem(instanceName.formatName()));
 
     OperationCow<Operation> deleteOperation =
         notebooks.operations().operationCow(notebooks.instances().delete(instanceName).execute());
@@ -183,6 +193,20 @@ public class AIPlatformNotebooksCowTest {
                     .location("us-east1-b")
                     .instanceId("my-id")
                     .build())
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceListSerialize() throws Exception {
+    assertEquals(
+        "{\"parent\":\"projects/my-project/locations/us-east1-b\",\"page_size\":10,"
+            + "\"page_token\":\"my-page-token\"}",
+        notebooks
+            .instances()
+            .list("projects/my-project/locations/us-east1-b")
+            .setPageSize(10)
+            .setPageToken("my-page-token")
             .serialize()
             .toString());
   }
