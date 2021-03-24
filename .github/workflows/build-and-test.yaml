@@ -62,18 +62,24 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      # See https://github.com/actions/cache/blob/main/examples.md#java---gradle
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: v1-${{ runner.os }}-gradle-${{ hashfiles('**/gradle-wrapper.properties') }}-${{ hashFiles('**/*.gradle') }}
+          restore-keys: v1-${{ runner.os }}-gradle-${{ hashfiles('**/gradle-wrapper.properties') }}
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle
+      - name: Build, assemble and test
         run: ./gradlew build -x minniekenny # skip minniekenny
       # TODO(CA-814): Determine how to run tests based on modified packages.
-      - name: Test
-        id: unit-test
-        run: ./gradlew test -x minniekenny
-      - name: Integration Test
+      - name: Integration test
         id: integration-test
         run: ./gradlew integrationTest
-      - name: Upload Test Reports
+      - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v2
         with:
