@@ -3,8 +3,7 @@ package bio.terra.cloudres.google.compute;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
@@ -47,13 +46,10 @@ public class CloudComputeCowTest {
     String netWorkName = randomNetworkName();
     Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
     Operation operation = cloudComputeCow.networks().insert(projectId, network).execute();
-    OperationCow<Operation> completedOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.globalOperations().operationCow(projectId, operation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
-    assertNull(completedOperation.getOperationAdapter().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
 
     Network createdNetwork = cloudComputeCow.networks().get(projectId, netWorkName).execute();
 
@@ -61,13 +57,10 @@ public class CloudComputeCowTest {
     assertFalse(createdNetwork.getAutoCreateSubnetworks());
 
     Operation deleteOperation = cloudComputeCow.networks().delete(projectId, netWorkName).execute();
-    completedOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
-    assertNull(completedOperation.getOperationAdapter().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
     GoogleJsonResponseException e =
         assertThrows(
             GoogleJsonResponseException.class,
@@ -86,12 +79,10 @@ public class CloudComputeCowTest {
     String netWorkName = randomNetworkName();
     Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
     Operation operation = cloudComputeCow.networks().insert(projectId, network).execute();
-    OperationCow<Operation> completedOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.globalOperations().operationCow(projectId, operation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
     network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
 
     String subnetWorkName = randomNetworkName();
@@ -102,13 +93,10 @@ public class CloudComputeCowTest {
             .setIpCidrRange(ipCidrRange);
     Operation regionOperation =
         cloudComputeCow.subnetworks().insert(projectId, region, subnetwork).execute();
-    OperationCow<Operation> completedRegionOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.regionalOperations().operationCow(projectId, region, regionOperation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedRegionOperation.getOperationAdapter().getDone());
-    assertNull(completedRegionOperation.getOperationAdapter().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.regionalOperations().operationCow(projectId, region, regionOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
 
     Subnetwork createdSubnet =
         cloudComputeCow.subnetworks().get(projectId, region, subnetWorkName).execute();
@@ -129,13 +117,10 @@ public class CloudComputeCowTest {
     Firewall.Allowed allowed = new Firewall.Allowed().setIPProtocol("icmp");
     Firewall firewall = new Firewall().setName(firewallName).setAllowed(ImmutableList.of(allowed));
     Operation operation = cloudComputeCow.firewalls().insert(projectId, firewall).execute();
-    OperationCow<Operation> completedOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.globalOperations().operationCow(projectId, operation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
-    assertNull(completedOperation.getOperationAdapter().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
 
     Firewall createdFirewall = cloudComputeCow.firewalls().get(projectId, firewallName).execute();
 
@@ -144,13 +129,10 @@ public class CloudComputeCowTest {
 
     Operation deleteOperation =
         cloudComputeCow.firewalls().delete(projectId, firewallName).execute();
-    completedOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
-    assertNull(completedOperation.getOperationAdapter().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, deleteOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
     GoogleJsonResponseException e =
         assertThrows(
             GoogleJsonResponseException.class,
@@ -170,13 +152,10 @@ public class CloudComputeCowTest {
     Route route =
         new Route().setName(routeName).setDestRange(destRange).setNextHopGateway(nextHopGateway);
     Operation operation = cloudComputeCow.routes().insert(projectId, route).execute();
-    OperationCow<Operation> completedOperation =
-        OperationUtils.pollUntilComplete(
-            cloudComputeCow.globalOperations().operationCow(projectId, operation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(100));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
-    assertNull(completedOperation.getOperationAdapter().getError());
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
 
     Route createdRoute = cloudComputeCow.routes().get(projectId, routeName).execute();
 

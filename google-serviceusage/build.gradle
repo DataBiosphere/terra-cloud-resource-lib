@@ -5,6 +5,8 @@ dependencies {
     api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1-rev20200821-1.30.10'
 
     implementation project(':cloud-resource-schema')
+    testFixturesImplementation(testFixtures(project(':google-api-services-common')))
     testFixturesImplementation(testFixtures(project(':common')))
+    testImplementation(testFixtures(project(':google-api-services-common')))
     testImplementation(testFixtures(project(':google-cloudresourcemanager')))
 }

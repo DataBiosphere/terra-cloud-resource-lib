@@ -1,7 +1,7 @@
 package bio.terra.cloudres.google.cloudresourcemanager.testing;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.CloudResourceManagerCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -35,7 +35,8 @@ public class ProjectUtils {
     Project project = new Project().setProjectId(randomProjectId()).setParent(PARENT_RESOURCE);
     Operation operation = getManagerCow().projects().create(project).execute();
     OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
-    OperationUtils.pollUntilComplete(operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
+    OperationTestUtils.pollAndAssertSuccess(
+        operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
     return managerCow.projects().get(project.getProjectId()).execute();
   }
 

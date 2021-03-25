@@ -3,8 +3,7 @@ package bio.terra.cloudres.google.serviceusage;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.api.services.common.OperationUtils;
+import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -54,12 +53,10 @@ public class ServiceUsageCowTest {
                 new BatchEnableServicesRequest()
                     .setServiceIds(ImmutableList.of(STORAGE_SERVICE_ID)))
             .execute();
-    OperationCow<Operation> completedOperation =
-        OperationUtils.pollUntilComplete(
-            serviceUsage.operations().operationCow(operation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(60));
-    assertTrue(completedOperation.getOperationAdapter().getDone());
+    OperationTestUtils.pollAndAssertSuccess(
+        serviceUsage.operations().operationCow(operation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(60));
 
     ListServicesResponse response2 =
         serviceUsage.services().list(projectName).setFilter(ENABLED_FILTER).execute();
