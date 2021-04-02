@@ -8,6 +8,6 @@ dependencies {
 
     testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager', version: '0.117.2-alpha'
 
-    testFixturesImplementation group: 'bio.terra.janitor', name: 'terra-resource-janitor-client', version: '0.0.1-SNAPSHOT'
+    testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
     testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '2.+'
 }
