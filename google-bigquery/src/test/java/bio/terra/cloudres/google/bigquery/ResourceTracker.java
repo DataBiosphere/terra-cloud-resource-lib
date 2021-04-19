@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.bigquery;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.bigquery.model.Dataset;
 import com.google.api.services.bigquery.model.DatasetReference;
 import com.google.api.services.bigquery.model.Table;
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.apache.http.HttpStatus;
 
 /** Helper class to track BigQuery resources created in tests and do best effort clean up. */
 public class ResourceTracker {
@@ -77,14 +75,7 @@ public class ResourceTracker {
 
   public void tearDown() throws IOException {
     for (String tableId : createdTableIds) {
-      try {
-        bigQueryCow.tables().delete(projectId, datasetId, tableId).execute();
-      } catch (GoogleJsonResponseException e) {
-        // Ignore 404 responses, some tests exercise the delete endpoint themselves.
-        if (e.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-          throw e;
-        }
-      }
+      bigQueryCow.tables().delete(projectId, datasetId, tableId).execute();
     }
 
     for (String createdDatasetId : createdDatasetIds) {
