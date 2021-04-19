@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.bigquery;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.bigquery.model.Dataset;
 import com.google.api.services.bigquery.model.DatasetReference;
 import com.google.api.services.bigquery.model.Table;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.apache.http.HttpStatus;
 
 /** Helper class to track BigQuery resources created in tests and do best effort clean up. */
 public class ResourceTracker {
@@ -27,6 +29,7 @@ public class ResourceTracker {
     this.datasetId = datasetId;
   }
 
+  /** Create a BQ table and record it for later cleanup. */
   public Table createTable() throws IOException {
     checkNotNull(datasetId);
     String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
@@ -40,7 +43,7 @@ public class ResourceTracker {
     return bigQueryCow.tables().insert(projectId, datasetId, tableToCreate).execute();
   }
 
-  /** Create a DatasetCow also register that for cleanup. */
+  /** Create a BQ dataset and record it for cleanup. */
   public Dataset createDataset() throws IOException {
     String datasetId = IntegrationUtils.randomNameWithUnderscore();
     createdDatasetIds.add(datasetId);
@@ -50,13 +53,42 @@ public class ResourceTracker {
     return bigQueryCow.datasets().insert(projectId, datasetToCreate).execute();
   }
 
+  /** Delete a BQ table and remove its entry for cleanup. */
+  public void deleteTable(TableReference tableReference) throws IOException {
+    bigQueryCow
+        .tables()
+        .delete(
+            tableReference.getProjectId(),
+            tableReference.getDatasetId(),
+            tableReference.getTableId())
+        .execute();
+    createdTableIds.remove(tableReference.getTableId());
+  }
+
+  /** Delete a BQ dataset and remove its entry for cleanup. */
+  public void deleteDataset(DatasetReference datasetReference) throws IOException {
+    bigQueryCow
+        .datasets()
+        .delete(datasetReference.getProjectId(), datasetReference.getDatasetId())
+        .setDeleteContents(true)
+        .execute();
+    createdDatasetIds.remove(datasetReference.getDatasetId());
+  }
+
   public void tearDown() throws IOException {
     for (String tableId : createdTableIds) {
-      bigQueryCow.tables().delete(projectId, datasetId, tableId);
+      try {
+        bigQueryCow.tables().delete(projectId, datasetId, tableId).execute();
+      } catch (GoogleJsonResponseException e) {
+        // Ignore 404 responses, some tests exercise the delete endpoint themselves.
+        if (e.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
+          throw e;
+        }
+      }
     }
 
     for (String createdDatasetId : createdDatasetIds) {
-      bigQueryCow.datasets().delete(projectId, createdDatasetId);
+      bigQueryCow.datasets().delete(projectId, createdDatasetId).setDeleteContents(true).execute();
     }
   }
 }

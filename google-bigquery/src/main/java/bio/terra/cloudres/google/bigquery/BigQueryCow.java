@@ -2,8 +2,12 @@ package bio.terra.cloudres.google.bigquery;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
+import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
+import bio.terra.janitor.model.GoogleBigQueryTableUid;
 import com.google.api.services.bigquery.Bigquery;
 import com.google.api.services.bigquery.BigqueryScopes;
 import com.google.api.services.bigquery.model.Dataset;
@@ -46,9 +50,9 @@ public class BigQueryCow {
     return new BigQueryCow(
         clientConfig,
         new Bigquery.Builder(
-            Defaults.httpTransport(),
-            Defaults.jsonFactory(),
-            new HttpCredentialsAdapter(googleCredentials.createScoped(BigqueryScopes.all())))
+                Defaults.httpTransport(),
+                Defaults.jsonFactory(),
+                new HttpCredentialsAdapter(googleCredentials.createScoped(BigqueryScopes.all())))
             .setApplicationName(clientConfig.getClientName()));
   }
 
@@ -139,6 +143,14 @@ public class BigQueryCow {
     }
 
     public Insert insert(String projectId, Dataset content) throws IOException {
+      CloudResourceUid datasetUid =
+          new CloudResourceUid()
+              .googleBigQueryDatasetUid(
+                  new GoogleBigQueryDatasetUid()
+                      .projectId(projectId)
+                      .datasetId(content.getDatasetReference().getDatasetId()));
+      CleanupRecorder.record(datasetUid, clientConfig);
+
       return new Insert(datasets.insert(projectId, content));
     }
 
@@ -396,6 +408,15 @@ public class BigQueryCow {
     }
 
     public Insert insert(String projectId, String datasetId, Table content) throws IOException {
+      CloudResourceUid tableUid =
+          new CloudResourceUid()
+              .googleBigQueryTableUid(
+                  new GoogleBigQueryTableUid()
+                      .projectId(projectId)
+                      .datasetId(datasetId)
+                      .tableId(content.getTableReference().getTableId()));
+      CleanupRecorder.record(tableUid, clientConfig);
+
       return new Tables.Insert(tables.insert(projectId, datasetId, content));
     }
 

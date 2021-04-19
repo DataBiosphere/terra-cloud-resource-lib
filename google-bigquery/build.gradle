@@ -3,7 +3,7 @@ dependencies {
     api project(':google-api-services-common')
     implementation project(':cloud-resource-schema')
 
-    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20210404-1.31.0'
+    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20201030-1.30.10'
 
     testFixturesImplementation(testFixtures(project(':common')))
     testImplementation project(':google-cloudresourcemanager')
