@@ -1,206 +1,625 @@
 package bio.terra.cloudres.google.bigquery;
 
-import static bio.terra.cloudres.google.bigquery.SerializeUtils.convert;
-
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
-import bio.terra.cloudres.common.TransformPage;
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import bio.terra.janitor.model.CloudResourceUid;
-import bio.terra.janitor.model.GoogleBigQueryDatasetUid;
-import bio.terra.janitor.model.GoogleBigQueryTableUid;
-import com.google.api.gax.paging.Page;
-import com.google.cloud.bigquery.*;
-import com.google.cloud.bigquery.BigQuery.DatasetDeleteOption;
-import com.google.cloud.bigquery.BigQuery.DatasetOption;
-import com.google.cloud.bigquery.BigQuery.TableListOption;
-import com.google.cloud.bigquery.BigQuery.TableOption;
-import com.google.common.base.Preconditions;
+import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
+import bio.terra.cloudres.google.api.services.common.Defaults;
+import com.google.api.services.bigquery.Bigquery;
+import com.google.api.services.bigquery.BigqueryScopes;
+import com.google.api.services.bigquery.model.Dataset;
+import com.google.api.services.bigquery.model.DatasetList;
+import com.google.api.services.bigquery.model.GetIamPolicyRequest;
+import com.google.api.services.bigquery.model.Policy;
+import com.google.api.services.bigquery.model.SetIamPolicyRequest;
+import com.google.api.services.bigquery.model.Table;
+import com.google.api.services.bigquery.model.TableList;
+import com.google.api.services.bigquery.model.TestIamPermissionsRequest;
+import com.google.api.services.bigquery.model.TestIamPermissionsResponse;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** A Cloud Object Wrapper(COW) for Google API Client Library: {@link BigQuery} */
+/** A Cloud Object Wrapper(COW) for Google API Client Library: {@link Bigquery} */
 public class BigQueryCow {
+
   private final Logger logger = LoggerFactory.getLogger(BigQueryCow.class);
 
   private final OperationAnnotator operationAnnotator;
-  private final BigQuery bigQuery;
-  /**
-   * The default Google project id for this bigquery cow. The default project id can be omitted from
-   * arguments on {@link BigQuery} methods.
-   */
-  private final String defaultProjectId;
+  private final Bigquery bigQuery;
 
   private final ClientConfig clientConfig;
 
-  public BigQueryCow(ClientConfig clientConfig, BigQueryOptions bigQueryOptions) {
+  public BigQueryCow(ClientConfig clientConfig, Bigquery.Builder bigQueryBuilder) {
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
-    this.bigQuery = bigQueryOptions.getService();
-    this.defaultProjectId = bigQueryOptions.getProjectId();
-    Preconditions.checkNotNull(this.defaultProjectId);
+    this.bigQuery = bigQueryBuilder.build();
     this.clientConfig = clientConfig;
   }
 
-  /** See {@link BigQuery#create(DatasetInfo, DatasetOption...)}. */
-  public DatasetCow create(DatasetInfo datasetInfo, DatasetOption... datasetOptions) {
-    CloudResourceUid datasetUid =
-        new CloudResourceUid()
-            .googleBigQueryDatasetUid(
-                new GoogleBigQueryDatasetUid()
-                    .projectId(
-                        datasetInfo.getDatasetId().getProject() == null
-                            ? defaultProjectId
-                            : datasetInfo.getDatasetId().getProject())
-                    .datasetId(datasetInfo.getDatasetId().getDataset()));
-    CleanupRecorder.record(datasetUid, clientConfig);
-
-    return new DatasetCow(
+  /** Create a {@link BigQueryCow} with some default configurations for convenience. */
+  public static BigQueryCow create(ClientConfig clientConfig, GoogleCredentials googleCredentials)
+      throws GeneralSecurityException, IOException {
+    return new BigQueryCow(
         clientConfig,
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_CREATE_DATASET,
-            () -> bigQuery.create(datasetInfo, datasetOptions),
-            () -> convert(datasetInfo, datasetOptions)));
+        new Bigquery.Builder(
+            Defaults.httpTransport(),
+            Defaults.jsonFactory(),
+            new HttpCredentialsAdapter(googleCredentials.createScoped(BigqueryScopes.all())))
+            .setApplicationName(clientConfig.getClientName()));
   }
 
-  /** See {@link BigQuery#update(DatasetInfo, DatasetOption...)}. */
-  public DatasetCow update(DatasetInfo datasetInfo, DatasetOption... datasetOptions) {
-    return new DatasetCow(
-        clientConfig,
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_UPDATE_DATASET,
-            () -> bigQuery.update(datasetInfo, datasetOptions),
-            () -> convert(datasetInfo, datasetOptions)));
+  public Datasets datasets() {
+    return new Datasets(bigQuery.datasets());
   }
 
-  /** See {@link BigQuery#delete(String, DatasetDeleteOption...)}. */
-  public boolean delete(String datasetId, DatasetDeleteOption... deleteOptions) {
-    return operationAnnotator.executeCowOperation(
-        BigQueryOperation.GOOGLE_DELETE_DATASET,
-        () -> bigQuery.delete(datasetId, deleteOptions),
-        () -> convert(DatasetId.of(datasetId), deleteOptions));
+  /** See {@link Bigquery.Datasets} */
+  public class Datasets {
+
+    private final Bigquery.Datasets datasets;
+
+    private Datasets(Bigquery.Datasets datasets) {
+      this.datasets = datasets;
+    }
+
+    public Delete delete(String projectId, String datasetId) throws IOException {
+      return new Delete(datasets.delete(projectId, datasetId));
+    }
+
+    /** See {@link Bigquery.Datasets#delete(String, String)} */
+    public class Delete extends AbstractRequestCow<Void> {
+
+      private final Bigquery.Datasets.Delete delete;
+
+      private Delete(Bigquery.Datasets.Delete delete) {
+        super(
+            BigQueryOperation.GOOGLE_DELETE_BIGQUERY_DATASET,
+            clientConfig,
+            operationAnnotator,
+            delete);
+        this.delete = delete;
+      }
+
+      /** See {@link Bigquery.Datasets.Delete#setDeleteContents(Boolean)} */
+      public Delete setDeleteContents(boolean deleteContents) {
+        this.delete.setDeleteContents(deleteContents);
+        return this;
+      }
+
+      public String getProjectId() {
+        return delete.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return delete.getDatasetId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.addProperty("deleteContents", delete.getDeleteContents());
+        return result;
+      }
+    }
+
+    public Get get(String projectId, String datasetId) throws IOException {
+      return new Get(datasets.get(projectId, datasetId));
+    }
+
+    /** See {@link Bigquery.Datasets#get(String, String)} */
+    public class Get extends AbstractRequestCow<Dataset> {
+
+      private final Bigquery.Datasets.Get get;
+
+      private Get(Bigquery.Datasets.Get get) {
+        super(BigQueryOperation.GOOGLE_GET_BIGQUERY_DATASET, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      public String getProjectId() {
+        return get.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return get.getDatasetId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        return result;
+      }
+    }
+
+    public Insert insert(String projectId, Dataset content) throws IOException {
+      return new Insert(datasets.insert(projectId, content));
+    }
+
+    /** See {@link Bigquery.Datasets#insert(String, Dataset)} */
+    public class Insert extends AbstractRequestCow<Dataset> {
+
+      private final Bigquery.Datasets.Insert insert;
+
+      private Insert(Bigquery.Datasets.Insert insert) {
+        super(
+            BigQueryOperation.GOOGLE_INSERT_BIGQUERY_DATASET,
+            clientConfig,
+            operationAnnotator,
+            insert);
+        this.insert = insert;
+      }
+
+      public String getProjectId() {
+        return insert.getProjectId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.add("content", new Gson().toJsonTree(insert.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    public List list(String projectId) throws IOException {
+      return new List(datasets.list(projectId));
+    }
+
+    /** See {@link Bigquery.Datasets#list(String)} */
+    public class List extends AbstractRequestCow<DatasetList> {
+
+      private final Bigquery.Datasets.List list;
+
+      private List(Bigquery.Datasets.List list) {
+        super(
+            BigQueryOperation.GOOGLE_LIST_BIGQUERY_DATASET, clientConfig, operationAnnotator, list);
+        this.list = list;
+      }
+
+      public String getProjectId() {
+        return list.getProjectId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        return result;
+      }
+    }
+
+    public Patch patch(String projectId, String datasetId, Dataset content) throws IOException {
+      return new Patch(datasets.patch(projectId, datasetId, content));
+    }
+
+    /** See {@link Bigquery.Datasets#patch(String, String, Dataset)} */
+    public class Patch extends AbstractRequestCow<Dataset> {
+
+      private final Bigquery.Datasets.Patch patch;
+
+      private Patch(Bigquery.Datasets.Patch patch) {
+        super(
+            BigQueryOperation.GOOGLE_PATCH_BIGQUERY_DATASET,
+            clientConfig,
+            operationAnnotator,
+            patch);
+        this.patch = patch;
+      }
+
+      public String getProjectId() {
+        return patch.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return patch.getDatasetId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.add("content", new Gson().toJsonTree(patch.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    public Update update(String projectId, String datasetId, Dataset content) throws IOException {
+      return new Update(datasets.update(projectId, datasetId, content));
+    }
+
+    /** See {@link Bigquery.Datasets#update(String, String, Dataset)} */
+    public class Update extends AbstractRequestCow<Dataset> {
+
+      private final Bigquery.Datasets.Update update;
+
+      private Update(Bigquery.Datasets.Update update) {
+        super(
+            BigQueryOperation.GOOGLE_UPDATE_BIGQUERY_DATASET,
+            clientConfig,
+            operationAnnotator,
+            update);
+        this.update = update;
+      }
+
+      public String getProjectId() {
+        return update.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return update.getDatasetId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.add("content", new Gson().toJsonTree(update.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
   }
 
-  /** See {@link BigQuery#delete(DatasetId, DatasetDeleteOption...)}. */
-  public boolean delete(DatasetId datasetId, DatasetDeleteOption... deleteOptions) {
-    return operationAnnotator.executeCowOperation(
-        BigQueryOperation.GOOGLE_DELETE_DATASET,
-        () -> bigQuery.delete(datasetId, deleteOptions),
-        () -> convert(datasetId, deleteOptions));
+  public Tables tables() {
+    return new Tables(bigQuery.tables());
   }
 
-  /** See {@link BigQuery#getDataset(String, DatasetOption...)}. */
-  public DatasetCow getDataset(String datasetId, DatasetOption... datasetOptions) {
-    Dataset rawDataset =
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_GET_DATASET,
-            () -> bigQuery.getDataset(datasetId, datasetOptions),
-            () -> convert(DatasetId.of(datasetId), datasetOptions));
-    return (rawDataset == null) ? null : new DatasetCow(clientConfig, rawDataset);
-  }
+  /** See {@link Bigquery.Datasets} */
+  public class Tables {
 
-  /** See {@link BigQuery#getDataset(DatasetId, DatasetOption...)}. */
-  public DatasetCow getDataset(DatasetId datasetId, DatasetOption... datasetOptions) {
-    Dataset rawDataset =
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_GET_DATASET,
-            () -> bigQuery.getDataset(datasetId, datasetOptions),
-            () -> convert(datasetId, datasetOptions));
-    return (rawDataset == null) ? null : new DatasetCow(clientConfig, rawDataset);
-  }
+    private final Bigquery.Tables tables;
 
-  /** See {@link BigQuery#create(TableInfo, TableOption...)}. */
-  public TableCow create(TableInfo tableInfo, TableOption... tableOptions) {
-    TableId tableId = tableInfo.getTableId();
-    CloudResourceUid tableUid =
-        new CloudResourceUid()
-            .googleBigQueryTableUid(
-                new GoogleBigQueryTableUid()
-                    .projectId(
-                        tableId.getProject() == null ? defaultProjectId : tableId.getProject())
-                    .datasetId(tableId.getDataset())
-                    .tableId(tableId.getTable()));
-    CleanupRecorder.record(tableUid, clientConfig);
+    private Tables(Bigquery.Tables tables) {
+      this.tables = tables;
+    }
 
-    return new TableCow(
-        clientConfig,
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_CREATE_BIGQUERY_TABLE,
-            () -> bigQuery.create(tableInfo, tableOptions),
-            () -> convert(tableInfo, tableOptions)));
-  }
+    public Delete delete(String projectId, String datasetId, String tableId) throws IOException {
+      return new Tables.Delete(tables.delete(projectId, datasetId, tableId));
+    }
 
-  /** See {@link BigQuery#update(TableInfo, TableOption...)}. */
-  public TableCow update(TableInfo tableInfo, TableOption... tableOptions) {
-    return new TableCow(
-        clientConfig,
-        operationAnnotator.executeCowOperation(
+    /** See {@link Bigquery.Tables#delete(String, String, String)} */
+    public class Delete extends AbstractRequestCow<Void> {
+
+      private final Bigquery.Tables.Delete delete;
+
+      private Delete(Bigquery.Tables.Delete delete) {
+        super(
+            BigQueryOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
+            clientConfig,
+            operationAnnotator,
+            delete);
+        this.delete = delete;
+      }
+
+      public String getProjectId() {
+        return delete.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return delete.getDatasetId();
+      }
+
+      public String getTableId() {
+        return delete.getTableId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.addProperty("tableId", getTableId());
+        return result;
+      }
+    }
+
+    public Get get(String projectId, String datasetId, String tableId) throws IOException {
+      return new Tables.Get(tables.get(projectId, datasetId, tableId));
+    }
+
+    /** See {@link Bigquery.Tables#get(String, String, String)} */
+    public class Get extends AbstractRequestCow<Table> {
+
+      private final Bigquery.Tables.Get get;
+
+      private Get(Bigquery.Tables.Get get) {
+        super(BigQueryOperation.GOOGLE_GET_BIGQUERY_TABLE, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      public String getProjectId() {
+        return get.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return get.getDatasetId();
+      }
+
+      public String getTableId() {
+        return get.getTableId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.addProperty("tableId", getTableId());
+        return result;
+      }
+    }
+
+    // Unlike every other table endpoint, the IAM APIs take a single resource identifier string
+    // instead of a projectId + datasetId + tableId. I've hidden this quirk for consistency.
+    public GetIamPolicy getIamPolicy(
+        String projectId, String datasetId, String tableId, GetIamPolicyRequest content)
+        throws IOException {
+      return new Tables.GetIamPolicy(
+          tables.getIamPolicy(tableResourceName(projectId, datasetId, tableId), content));
+    }
+
+    /** See {@link Bigquery.Tables#getIamPolicy(String, GetIamPolicyRequest)} */
+    public class GetIamPolicy extends AbstractRequestCow<Policy> {
+
+      private final Bigquery.Tables.GetIamPolicy getIamPolicy;
+
+      private GetIamPolicy(Bigquery.Tables.GetIamPolicy getIamPolicy) {
+        super(
+            BigQueryOperation.GOOGLE_GET_IAM_POLICY_BIGQUERY_TABLE,
+            clientConfig,
+            operationAnnotator,
+            getIamPolicy);
+        this.getIamPolicy = getIamPolicy;
+      }
+
+      public String getResource() {
+        return getIamPolicy.getResource();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("resource", getResource());
+        result.add(
+            "content", new Gson().toJsonTree(getIamPolicy.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    public Insert insert(String projectId, String datasetId, Table content) throws IOException {
+      return new Tables.Insert(tables.insert(projectId, datasetId, content));
+    }
+
+    /** See {@link Bigquery.Tables#insert(String, String, Table)} */
+    public class Insert extends AbstractRequestCow<Table> {
+
+      private final Bigquery.Tables.Insert insert;
+
+      private Insert(Bigquery.Tables.Insert insert) {
+        super(
+            BigQueryOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
+            clientConfig,
+            operationAnnotator,
+            insert);
+        this.insert = insert;
+      }
+
+      public String getProjectId() {
+        return insert.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return insert.getDatasetId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.add("content", new Gson().toJsonTree(insert.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    public List list(String projectId, String datasetId) throws IOException {
+      return new Tables.List(tables.list(projectId, datasetId));
+    }
+
+    /** See {@link Bigquery.Tables#list(String, String)} */
+    public class List extends AbstractRequestCow<TableList> {
+
+      private final Bigquery.Tables.List list;
+
+      private List(Bigquery.Tables.List list) {
+        super(BigQueryOperation.GOOGLE_LIST_BIGQUERY_TABLE, clientConfig, operationAnnotator, list);
+        this.list = list;
+      }
+
+      public String getProjectId() {
+        return list.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return list.getDatasetId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        return result;
+      }
+    }
+
+    public Patch patch(String projectId, String datasetId, String tableId, Table content)
+        throws IOException {
+      return new Tables.Patch(tables.patch(projectId, datasetId, tableId, content));
+    }
+
+    /** See {@link Bigquery.Tables#patch(String, String, String, Table)} */
+    public class Patch extends AbstractRequestCow<Table> {
+
+      private final Bigquery.Tables.Patch patch;
+
+      private Patch(Bigquery.Tables.Patch patch) {
+        super(
+            BigQueryOperation.GOOGLE_PATCH_BIGQUERY_TABLE, clientConfig, operationAnnotator, patch);
+        this.patch = patch;
+      }
+
+      public String getProjectId() {
+        return patch.getProjectId();
+      }
+
+      public String getDatasetId() {
+        return patch.getDatasetId();
+      }
+
+      public String getTableId() {
+        return patch.getTableId();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.addProperty("tableId", getTableId());
+        result.add("content", new Gson().toJsonTree(patch.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    // Unlike every other table endpoint, the IAM APIs take a single resource identifier string
+    // instead of a projectId + datasetId + tableId. I've hidden this quirk for consistency.
+    public SetIamPolicy setIamPolicy(
+        String projectId, String datasetId, String tableId, SetIamPolicyRequest content)
+        throws IOException {
+      return new Tables.SetIamPolicy(
+          tables.setIamPolicy(tableResourceName(projectId, datasetId, tableId), content));
+    }
+
+    /** See {@link Bigquery.Tables#setIamPolicy(String, SetIamPolicyRequest)} */
+    public class SetIamPolicy extends AbstractRequestCow<Policy> {
+
+      private final Bigquery.Tables.SetIamPolicy setIamPolicy;
+
+      private SetIamPolicy(Bigquery.Tables.SetIamPolicy setIamPolicy) {
+        super(
+            BigQueryOperation.GOOGLE_SET_IAM_POLICY_BIGQUERY_TABLE,
+            clientConfig,
+            operationAnnotator,
+            setIamPolicy);
+        this.setIamPolicy = setIamPolicy;
+      }
+
+      public String getResource() {
+        return setIamPolicy.getResource();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("resource", getResource());
+        result.add(
+            "content", new Gson().toJsonTree(setIamPolicy.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    // Unlike every other table endpoint, the IAM APIs take a single resource identifier string
+    // instead of a projectId + datasetId + tableId. I've hidden this quirk for consistency.
+    public TestIamPermissions testIamPermissions(
+        String projectId, String datasetId, String tableId, TestIamPermissionsRequest content)
+        throws IOException {
+      return new Tables.TestIamPermissions(
+          tables.testIamPermissions(tableResourceName(projectId, datasetId, tableId), content));
+    }
+
+    /** See {@link Bigquery.Tables#testIamPermissions(String, TestIamPermissionsRequest)} */
+    public class TestIamPermissions extends AbstractRequestCow<TestIamPermissionsResponse> {
+
+      private final Bigquery.Tables.TestIamPermissions testIamPermissions;
+
+      private TestIamPermissions(Bigquery.Tables.TestIamPermissions testIamPermissions) {
+        super(
+            BigQueryOperation.GOOGLE_TEST_IAM_POLICY_BIGQUERY_TABLE,
+            clientConfig,
+            operationAnnotator,
+            testIamPermissions);
+        this.testIamPermissions = testIamPermissions;
+      }
+
+      public String getResource() {
+        return testIamPermissions.getResource();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("resource", getResource());
+        result.add(
+            "content",
+            new Gson().toJsonTree(testIamPermissions.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    public Update update(String projectId, String datasetId, String tableId, Table content)
+        throws IOException {
+      return new Tables.Update(tables.update(projectId, datasetId, tableId, content));
+    }
+
+    /** See {@link Bigquery.Tables#update(String, String, String, Table)} */
+    public class Update extends AbstractRequestCow<Table> {
+
+      private final Bigquery.Tables.Update update;
+
+      private Update(Bigquery.Tables.Update update) {
+        super(
             BigQueryOperation.GOOGLE_UPDATE_BIGQUERY_TABLE,
-            () -> bigQuery.update(tableInfo, tableOptions),
-            () -> convert(tableInfo, tableOptions)));
-  }
+            clientConfig,
+            operationAnnotator,
+            update);
+        this.update = update;
+      }
 
-  /** See {@link BigQuery#delete(TableId)}. */
-  public boolean delete(TableId tableId) {
-    return operationAnnotator.executeCowOperation(
-        BigQueryOperation.GOOGLE_DELETE_BIGQUERY_TABLE,
-        () -> bigQuery.delete(tableId),
-        () -> convert(tableId));
-  }
+      public String getProjectId() {
+        return update.getProjectId();
+      }
 
-  /** See {@link BigQuery#getTable(TableId, TableOption...)}. */
-  public TableCow getTable(TableId tableId, TableOption... tableOptions) {
-    Table rawTable =
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_GET_BIGQUERY_TABLE,
-            () -> bigQuery.getTable(tableId, tableOptions),
-            () -> convert(tableId, tableOptions));
-    return (rawTable == null) ? null : new TableCow(clientConfig, rawTable);
-  }
+      public String getDatasetId() {
+        return update.getDatasetId();
+      }
 
-  /** See {@link BigQuery#getTable(String, String, TableOption...)}. */
-  public TableCow getTable(String datasetId, String tableId, TableOption... tableOptions) {
-    return getTable(TableId.of(datasetId, tableId), tableOptions);
-  }
+      public String getTableId() {
+        return update.getTableId();
+      }
 
-  /** See {@link BigQuery#listTables(DatasetId, TableListOption...)}. */
-  public Page<TableCow> listTables(DatasetId datasetId, TableListOption... tableListOptions) {
-    return new TransformPage<>(
-        operationAnnotator.executeCowOperation(
-            BigQueryOperation.GOOGLE_LIST_BIGQUERY_TABLE,
-            () -> bigQuery.listTables(datasetId, tableListOptions),
-            () -> convert(datasetId, tableListOptions)),
-        (Table t) -> new TableCow(clientConfig, t));
-  }
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", getProjectId());
+        result.addProperty("datasetId", getDatasetId());
+        result.addProperty("tableId", getTableId());
+        result.add("content", new Gson().toJsonTree(update.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
 
-  /** See {@link BigQuery#listTables(String, TableListOption...)}. */
-  public Page<TableCow> listTables(String datasetId, TableListOption... tableListOptions) {
-    return listTables(DatasetId.of(datasetId), tableListOptions);
-  }
-
-  /** See {@link BigQuery#query(QueryJobConfiguration, BigQuery.JobOption...)}. */
-  public TableResult query(QueryJobConfiguration configuration, BigQuery.JobOption... jobOptions)
-      throws InterruptedException {
-    return operationAnnotator.executeCheckedCowOperation(
-        BigQueryOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
-        () -> bigQuery.query(configuration, jobOptions),
-        () -> convert(configuration, jobOptions));
-  }
-
-  /** See {@link BigQuery#query(QueryJobConfiguration, BigQuery.JobOption...)}. */
-  public TableResult query(
-      QueryJobConfiguration configuration, JobId jobId, BigQuery.JobOption... jobOptions)
-      throws InterruptedException {
-    return operationAnnotator.executeCheckedCowOperation(
-        BigQueryOperation.GOOGLE_QUERY_BIGQUERY_TABLE,
-        () -> bigQuery.query(configuration, jobId, jobOptions),
-        () -> convert(configuration, jobOptions));
-  }
-
-  /** See {@link BigQuery#insertAll(InsertAllRequest)}. */
-  public InsertAllResponse insertAll(InsertAllRequest insertAllRequest) {
-    return operationAnnotator.executeCheckedCowOperation(
-        BigQueryOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
-        () -> bigQuery.insertAll(insertAllRequest),
-        () -> convert(insertAllRequest));
+    private String tableResourceName(String projectId, String datasetId, String tableId) {
+      return String.format("projects/%s/datasets/%s/tables/%s", projectId, datasetId, tableId);
+    }
   }
 }

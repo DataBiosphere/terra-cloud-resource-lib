@@ -1,6 +1,14 @@
 dependencies {
     api project(':common')
+    api project(':google-api-services-common')
     implementation project(':cloud-resource-schema')
 
-    api group: 'com.google.cloud', name: 'google-cloud-bigquery', version: '1.116.0'
+    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20210404-1.31.0'
+
+    testFixturesImplementation(testFixtures(project(':common')))
+    testImplementation project(':google-cloudresourcemanager')
+    testImplementation(testFixtures(project(':google-api-services-common')))
+    testImplementation(testFixtures(project(':google-billing')))
+    testImplementation(testFixtures(project(':google-cloudresourcemanager')))
+    testImplementation(testFixtures(project(':google-serviceusage')))
 }
