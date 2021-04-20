@@ -17,4 +17,6 @@ public class BigQueryIntegrationUtils {
       throw new RuntimeException("Failure creating BigQueryCow", e);
     }
   }
+
+
 }

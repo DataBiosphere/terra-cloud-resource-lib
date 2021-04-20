@@ -52,8 +52,6 @@ public class BigQueryCowTest {
   private static String projectId =
       IntegrationCredentials.getAdminGoogleCredentialsOrDie().getProjectId();
   private static Dataset reusableDataset;
-  private final ResourceTracker resourceTracker =
-      new ResourceTracker(bigQueryCow, projectId, REUSABLE_DATASET_ID);
 
   @BeforeAll
   public static void createReusableDataset() throws Exception {
@@ -68,20 +66,15 @@ public class BigQueryCowTest {
     bigQueryCow.datasets().delete(projectId, REUSABLE_DATASET_ID).setDeleteContents(true).execute();
   }
 
-  @AfterEach
-  public void tearDown() throws IOException {
-    resourceTracker.tearDown();
-  }
-
   @Test
   public void deleteDataset() throws IOException {
-    Dataset dataset = resourceTracker.createDataset();
+    Dataset dataset = createDataset();
     DatasetReference datasetReference = dataset.getDatasetReference();
 
     Dataset fetchedDataset =
         bigQueryCow.datasets().get(projectId, datasetReference.getDatasetId()).execute();
     assertNotNull(fetchedDataset);
-    resourceTracker.deleteDataset(datasetReference);
+    deleteDataset(datasetReference);
     GoogleJsonResponseException response =
         assertThrows(
             GoogleJsonResponseException.class,
@@ -90,55 +83,9 @@ public class BigQueryCowTest {
   }
 
   @Test
-  public void deleteDatasetWithTable() throws IOException {
-    Dataset dataset = resourceTracker.createDataset();
-    DatasetReference datasetReference = dataset.getDatasetReference();
-
-    TableReference tableToCreateReference =
-        new TableReference()
-            .setProjectId(datasetReference.getProjectId())
-            .setDatasetId(datasetReference.getDatasetId())
-            .setTableId(IntegrationUtils.randomNameWithUnderscore());
-    Table tableToCreate = new Table().setTableReference(tableToCreateReference);
-    bigQueryCow
-        .tables()
-        .insert(datasetReference.getProjectId(), datasetReference.getDatasetId(), tableToCreate)
-        .execute();
-
-    Dataset fetchedDataset =
-        bigQueryCow.datasets().get(projectId, datasetReference.getDatasetId()).execute();
-    assertNotNull(fetchedDataset);
-
-    // Attempt a delete call with deleteContents flag set to false. Because this dataset contains a
-    // table, this should fail.
-    GoogleJsonResponseException errorResponse =
-        assertThrows(
-            GoogleJsonResponseException.class,
-            () ->
-                bigQueryCow
-                    .datasets()
-                    .delete(projectId, datasetReference.getDatasetId())
-                    .setDeleteContents(false)
-                    .execute());
-    assertEquals(HttpStatus.SC_BAD_REQUEST, errorResponse.getStatusCode());
-
-    fetchedDataset =
-        bigQueryCow.datasets().get(projectId, datasetReference.getDatasetId()).execute();
-    assertNotNull(fetchedDataset);
-
-    // Call delete again, this time with deleteContents true. This call should succeed.
-    resourceTracker.deleteDataset(datasetReference);
-    GoogleJsonResponseException missingResponse =
-        assertThrows(
-            GoogleJsonResponseException.class,
-            () -> bigQueryCow.datasets().get(projectId, datasetReference.getDatasetId()).execute());
-    assertEquals(HttpStatus.SC_NOT_FOUND, missingResponse.getStatusCode());
-  }
-
-  @Test
   public void insertDataset() throws IOException {
     List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-    Dataset dataset = resourceTracker.createDataset();
+    Dataset dataset = createDataset();
     DatasetReference datasetReference = dataset.getDatasetReference();
 
     Dataset fetchedDataset =
@@ -161,8 +108,8 @@ public class BigQueryCowTest {
 
   @Test
   public void listDataset() throws IOException {
-    Dataset dataset1 = resourceTracker.createDataset();
-    Dataset dataset2 = resourceTracker.createDataset();
+    Dataset dataset1 = createDataset();
+    Dataset dataset2 = createDataset();
 
     DatasetList fetchedDatasets = bigQueryCow.datasets().list(projectId).execute();
     // Because this project has been used for testing before, it may have other datasets lying
@@ -181,7 +128,7 @@ public class BigQueryCowTest {
 
   @Test
   public void patchDataset() throws IOException {
-    Dataset dataset = resourceTracker.createDataset();
+    Dataset dataset = createDataset();
     DatasetReference datasetReference = dataset.getDatasetReference();
 
     Dataset fetchedDataset =
@@ -209,7 +156,7 @@ public class BigQueryCowTest {
 
   @Test
   public void updateDataset() throws IOException {
-    Dataset dataset = resourceTracker.createDataset();
+    Dataset dataset = createDataset();
     DatasetReference datasetReference = dataset.getDatasetReference();
 
     Dataset fetchedDataset =
@@ -237,7 +184,7 @@ public class BigQueryCowTest {
 
   @Test
   public void deleteTable() throws IOException {
-    Table table = resourceTracker.createTable();
+    Table table = createTable();
     TableReference tableReference = table.getTableReference();
 
     Table fetchedTable =
@@ -246,7 +193,7 @@ public class BigQueryCowTest {
             .get(projectId, REUSABLE_DATASET_ID, tableReference.getTableId())
             .execute();
     assertNotNull(fetchedTable);
-    resourceTracker.deleteTable(tableReference);
+    deleteTable(tableReference);
     GoogleJsonResponseException missingResponse =
         assertThrows(
             GoogleJsonResponseException.class,
@@ -260,7 +207,7 @@ public class BigQueryCowTest {
 
   @Test
   public void setAndGetTableIamPolicy() throws IOException {
-    Table table = resourceTracker.createTable();
+    Table table = createTable();
     TableReference tableReference = table.getTableReference();
 
     Policy policy =
@@ -315,7 +262,7 @@ public class BigQueryCowTest {
   @Test
   public void insertTable() throws IOException {
     List<CloudResourceUid> record = CleanupRecorder.startNewRecordForTesting();
-    Table table = resourceTracker.createTable();
+    Table table = createTable();
     TableReference tableReference = table.getTableReference();
 
     Table fetchedTable =
@@ -339,24 +286,26 @@ public class BigQueryCowTest {
 
   @Test
   public void listTables() throws IOException {
-    Table table1 = resourceTracker.createTable();
-    Table table2 = resourceTracker.createTable();
+    Table table1 = createTable();
+    Table table2 = createTable();
 
     TableList tableList = bigQueryCow.tables().list(projectId, REUSABLE_DATASET_ID).execute();
     assertNotNull(tableList);
-    assertEquals(2, tableList.getTables().size());
+    // We do not delete tables between tests to avoid BQ quota issues, so tables from other tests
+    // will be present here.
+    assertTrue(tableList.getTables().size() >= 2);
     // Each entry of the list response contains information that's hard to match, such as etag
     // values. Instead, here we check the tableReference (equivalent to a UID).
     List<TableReference> tableReferences =
         tableList.getTables().stream().map(Tables::getTableReference).collect(Collectors.toList());
     assertThat(
         tableReferences,
-        containsInAnyOrder(table1.getTableReference(), table2.getTableReference()));
+        hasItems(equalTo(table1.getTableReference()), equalTo(table2.getTableReference())));
   }
 
   @Test
   public void patchTable() throws IOException {
-    Table table = resourceTracker.createTable();
+    Table table = createTable();
     TableReference tableReference = table.getTableReference();
 
     Table fetchedTable =
@@ -386,7 +335,7 @@ public class BigQueryCowTest {
 
   @Test
   public void testTableIamPolicy() throws IOException {
-    Table table = resourceTracker.createTable();
+    Table table = createTable();
     TableReference tableReference = table.getTableReference();
 
     List<String> permissionsToCheck = List.of("bigquery.tables.get");
@@ -404,7 +353,7 @@ public class BigQueryCowTest {
 
   @Test
   public void updateTable() throws IOException {
-    Table table = resourceTracker.createTable();
+    Table table = createTable();
     TableReference tableReference = table.getTableReference();
 
     Table fetchedTable =
@@ -430,5 +379,46 @@ public class BigQueryCowTest {
             .execute();
 
     assertEquals(updatedTable.getDescription(), description);
+  }
+
+  /** Create a BQ table in the reusable BQ dataset with a random table name. */
+  private Table createTable() throws IOException {
+    String generatedTableId = IntegrationUtils.randomNameWithUnderscore();
+    TableReference tableReference =
+        new TableReference()
+            .setProjectId(projectId)
+            .setDatasetId(REUSABLE_DATASET_ID)
+            .setTableId(generatedTableId);
+    Table tableToCreate = new Table().setTableReference(tableReference);
+    return bigQueryCow.tables().insert(projectId, REUSABLE_DATASET_ID, tableToCreate).execute();
+  }
+
+  /** Create a BQ dataset with a random name. */
+  private Dataset createDataset() throws IOException {
+    String datasetId = IntegrationUtils.randomNameWithUnderscore();
+    DatasetReference datasetReference =
+        new DatasetReference().setProjectId(projectId).setDatasetId(datasetId);
+    Dataset datasetToCreate = new Dataset().setDatasetReference(datasetReference);
+    return bigQueryCow.datasets().insert(projectId, datasetToCreate).execute();
+  }
+
+  /** Delete a BQ table from the reusable BQ dataset. */
+  private void deleteTable(TableReference tableReference) throws IOException {
+    bigQueryCow
+        .tables()
+        .delete(
+            tableReference.getProjectId(),
+            tableReference.getDatasetId(),
+            tableReference.getTableId())
+        .execute();
+  }
+
+  /** Delete a BQ dataset. */
+  private void deleteDataset(DatasetReference datasetReference) throws IOException {
+    bigQueryCow
+        .datasets()
+        .delete(datasetReference.getProjectId(), datasetReference.getDatasetId())
+        .setDeleteContents(true)
+        .execute();
   }
 }

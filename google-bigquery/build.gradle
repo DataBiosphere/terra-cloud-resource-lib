@@ -7,8 +7,4 @@ dependencies {
 
     testFixturesImplementation(testFixtures(project(':common')))
     testImplementation project(':google-cloudresourcemanager')
-    testImplementation(testFixtures(project(':google-api-services-common')))
-    testImplementation(testFixtures(project(':google-billing')))
-    testImplementation(testFixtures(project(':google-cloudresourcemanager')))
-    testImplementation(testFixtures(project(':google-serviceusage')))
 }

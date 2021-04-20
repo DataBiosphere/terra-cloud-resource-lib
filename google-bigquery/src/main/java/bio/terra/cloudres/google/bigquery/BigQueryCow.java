@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +70,7 @@ public class BigQueryCow {
       this.datasets = datasets;
     }
 
+    /** See {@link Bigquery.Datasets#delete(String, String)} */
     public Delete delete(String projectId, String datasetId) throws IOException {
       return new Delete(datasets.delete(projectId, datasetId));
     }
@@ -111,6 +113,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Datasets#get(String, String)} */
     public Get get(String projectId, String datasetId) throws IOException {
       return new Get(datasets.get(projectId, datasetId));
     }
@@ -142,34 +145,39 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Datasets#insert(String, Dataset)} */
     public Insert insert(String projectId, Dataset content) throws IOException {
-      CloudResourceUid datasetUid =
-          new CloudResourceUid()
-              .googleBigQueryDatasetUid(
-                  new GoogleBigQueryDatasetUid()
-                      .projectId(projectId)
-                      .datasetId(content.getDatasetReference().getDatasetId()));
-      CleanupRecorder.record(datasetUid, clientConfig);
-
-      return new Insert(datasets.insert(projectId, content));
+      return new Insert(datasets.insert(projectId, content), content.getDatasetReference().getDatasetId());
     }
 
     /** See {@link Bigquery.Datasets#insert(String, Dataset)} */
     public class Insert extends AbstractRequestCow<Dataset> {
 
       private final Bigquery.Datasets.Insert insert;
+      private final String datasetId;
 
-      private Insert(Bigquery.Datasets.Insert insert) {
+      private Insert(Bigquery.Datasets.Insert insert, String datasetId) {
         super(
             BigQueryOperation.GOOGLE_INSERT_BIGQUERY_DATASET,
             clientConfig,
             operationAnnotator,
             insert);
         this.insert = insert;
+        this.datasetId = datasetId;
       }
 
       public String getProjectId() {
         return insert.getProjectId();
+      }
+
+      @Override
+      protected Optional<CloudResourceUid> resourceUidCreation() {
+        return Optional.of(
+            new CloudResourceUid()
+                .googleBigQueryDatasetUid(
+                    new GoogleBigQueryDatasetUid()
+                        .projectId(getProjectId())
+                        .datasetId(datasetId)));
       }
 
       @Override
@@ -181,6 +189,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Datasets#list(String)} */
     public List list(String projectId) throws IOException {
       return new List(datasets.list(projectId));
     }
@@ -208,6 +217,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Datasets#patch(String, String, Dataset)} */
     public Patch patch(String projectId, String datasetId, Dataset content) throws IOException {
       return new Patch(datasets.patch(projectId, datasetId, content));
     }
@@ -244,6 +254,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Datasets#update(String, String, Dataset)} */
     public Update update(String projectId, String datasetId, Dataset content) throws IOException {
       return new Update(datasets.update(projectId, datasetId, content));
     }
@@ -294,6 +305,7 @@ public class BigQueryCow {
       this.tables = tables;
     }
 
+    /** See {@link Bigquery.Tables#delete(String, String, String)} */
     public Delete delete(String projectId, String datasetId, String tableId) throws IOException {
       return new Tables.Delete(tables.delete(projectId, datasetId, tableId));
     }
@@ -334,6 +346,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Tables#get(String, String, String)} */
     public Get get(String projectId, String datasetId, String tableId) throws IOException {
       return new Tables.Get(tables.get(projectId, datasetId, tableId));
     }
@@ -370,8 +383,11 @@ public class BigQueryCow {
       }
     }
 
-    // Unlike every other table endpoint, the IAM APIs take a single resource identifier string
-    // instead of a projectId + datasetId + tableId. I've hidden this quirk for consistency.
+    /**
+     * Wrapper around {@link Bigquery.Tables#getIamPolicy(String, GetIamPolicyRequest)}. For
+     * consistency with other methods, this method handles combining projectId, datasetId, and
+     * tableId into a single resource identifier.
+     */
     public GetIamPolicy getIamPolicy(
         String projectId, String datasetId, String tableId, GetIamPolicyRequest content)
         throws IOException {
@@ -407,31 +423,25 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Tables#insert(String, String, Table)} */
     public Insert insert(String projectId, String datasetId, Table content) throws IOException {
-      CloudResourceUid tableUid =
-          new CloudResourceUid()
-              .googleBigQueryTableUid(
-                  new GoogleBigQueryTableUid()
-                      .projectId(projectId)
-                      .datasetId(datasetId)
-                      .tableId(content.getTableReference().getTableId()));
-      CleanupRecorder.record(tableUid, clientConfig);
-
-      return new Tables.Insert(tables.insert(projectId, datasetId, content));
+      return new Tables.Insert(tables.insert(projectId, datasetId, content), content.getTableReference().getTableId());
     }
 
     /** See {@link Bigquery.Tables#insert(String, String, Table)} */
     public class Insert extends AbstractRequestCow<Table> {
 
       private final Bigquery.Tables.Insert insert;
+      private final String tableId;
 
-      private Insert(Bigquery.Tables.Insert insert) {
+      private Insert(Bigquery.Tables.Insert insert, String tableId) {
         super(
             BigQueryOperation.GOOGLE_INSERT_BIGQUERY_TABLE,
             clientConfig,
             operationAnnotator,
             insert);
         this.insert = insert;
+        this.tableId = tableId;
       }
 
       public String getProjectId() {
@@ -440,6 +450,17 @@ public class BigQueryCow {
 
       public String getDatasetId() {
         return insert.getDatasetId();
+      }
+
+      @Override
+      protected Optional<CloudResourceUid> resourceUidCreation() {
+        return Optional.of(
+            new CloudResourceUid()
+                .googleBigQueryTableUid(
+                    new GoogleBigQueryTableUid()
+                        .projectId(getProjectId())
+                        .datasetId(getDatasetId())
+                        .tableId(tableId)));
       }
 
       @Override
@@ -452,6 +473,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Tables#list(String, String)} */
     public List list(String projectId, String datasetId) throws IOException {
       return new Tables.List(tables.list(projectId, datasetId));
     }
@@ -483,6 +505,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Tables#patch(String, String, String, Table)} */
     public Patch patch(String projectId, String datasetId, String tableId, Table content)
         throws IOException {
       return new Tables.Patch(tables.patch(projectId, datasetId, tableId, content));
@@ -522,8 +545,11 @@ public class BigQueryCow {
       }
     }
 
-    // Unlike every other table endpoint, the IAM APIs take a single resource identifier string
-    // instead of a projectId + datasetId + tableId. I've hidden this quirk for consistency.
+    /**
+     * Wrapper around {@link Bigquery.Tables#setIamPolicy(String, SetIamPolicyRequest)}. For
+     * consistency with other methods, this method handles combining projectId, datasetId, and
+     * tableId into a single resource identifier.
+     */
     public SetIamPolicy setIamPolicy(
         String projectId, String datasetId, String tableId, SetIamPolicyRequest content)
         throws IOException {
@@ -559,8 +585,11 @@ public class BigQueryCow {
       }
     }
 
-    // Unlike every other table endpoint, the IAM APIs take a single resource identifier string
-    // instead of a projectId + datasetId + tableId. I've hidden this quirk for consistency.
+    /**
+     * Wrapper around {@link Bigquery.Tables#testIamPermissions(String, TestIamPermissionsRequest)}.
+     * For consistency with other methods, this method handles combining projectId, datasetId, and
+     * tableId into a single resource identifier.
+     */
     public TestIamPermissions testIamPermissions(
         String projectId, String datasetId, String tableId, TestIamPermissionsRequest content)
         throws IOException {
@@ -597,6 +626,7 @@ public class BigQueryCow {
       }
     }
 
+    /** See {@link Bigquery.Tables#update(String, String, String, Table)} */
     public Update update(String projectId, String datasetId, String tableId, Table content)
         throws IOException {
       return new Tables.Update(tables.update(projectId, datasetId, tableId, content));
@@ -638,6 +668,8 @@ public class BigQueryCow {
         return result;
       }
     }
+
+
 
     private String tableResourceName(String projectId, String datasetId, String tableId) {
       return String.format("projects/%s/datasets/%s/tables/%s", projectId, datasetId, tableId);
