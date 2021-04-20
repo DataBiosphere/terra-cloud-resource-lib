@@ -1,6 +1,7 @@
 dependencies {
     api project(':common')
+    api project(':google-api-services-common')
     implementation project(':cloud-resource-schema')
 
-    api group: 'com.google.cloud', name: 'google-cloud-bigquery', version: '1.116.0'
+    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20201030-1.30.10'
 }
