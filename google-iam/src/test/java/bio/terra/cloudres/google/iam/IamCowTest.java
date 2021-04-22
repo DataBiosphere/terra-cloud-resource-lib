@@ -79,10 +79,18 @@ public class IamCowTest {
 
     serviceAccounts.delete(serviceAccountName).execute();
 
-    GoogleJsonResponseException getAfterDelete =
-        assertThrows(
-            GoogleJsonResponseException.class,
-            () -> serviceAccounts.delete(serviceAccountName).execute());
+
+    GoogleJsonResponseException getAfterDelete = null;
+    for (int retryNum = 0; retryNum < 20; retryNum++) {
+      try {
+        serviceAccounts.get(serviceAccountName).execute();
+        Thread.sleep(3000);
+      } catch (GoogleJsonResponseException e) {
+        getAfterDelete = e;
+        break;
+      }
+    }
+    assertNotNull(getAfterDelete);
     assertEquals(404, getAfterDelete.getStatusCode());
   }
 
