@@ -98,6 +98,96 @@ public class IamCow {
         }
       }
 
+      /** See {@link Iam.Projects.ServiceAccounts#delete(String)}. */
+      public Delete delete(String name) throws IOException {
+        return new Delete(serviceAccounts.delete(name), name);
+      }
+
+      /**
+       * Delete a service account with the {@link ServiceAccountName}. See {@link #delete(String)}.
+       */
+      public Delete delete(ServiceAccountName name) throws IOException {
+        return delete(name.formatName());
+      }
+
+      public class Delete extends AbstractRequestCow<Empty> {
+        private final String name;
+
+        public Delete(Iam.Projects.ServiceAccounts.Delete delete, String name) {
+          super(
+              IamOperation.GOOGLE_DELETE_SERVICE_ACCOUNT, clientConfig, operationAnnotator, delete);
+          this.name = name;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("name", name);
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.ServiceAccounts#get(String)}. */
+      public Get get(String name) throws IOException {
+        return new Get(serviceAccounts.get(name));
+      }
+
+      /** Get a service account with the {@link ServiceAccountName}. See {@link #get(String)}. */
+      public Get get(ServiceAccountName name) throws IOException {
+        return get(name.formatName());
+      }
+
+      /** See {@link Iam.Projects.ServiceAccounts.Get}. */
+      public class Get extends AbstractRequestCow<ServiceAccount> {
+        private final Iam.Projects.ServiceAccounts.Get get;
+
+        public Get(Iam.Projects.ServiceAccounts.Get get) {
+          super(IamOperation.GOOGLE_GET_SERVICE_ACCOUNT, clientConfig, operationAnnotator, get);
+          this.get = get;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("name", get.getName());
+          return result;
+        }
+      }
+
+      /** See {@link Iam.Projects.ServiceAccounts#getIamPolicy(String)}. */
+      public GetIamPolicy getIamPolicy(String name) throws IOException {
+        return new GetIamPolicy(serviceAccounts.getIamPolicy(name));
+      }
+
+      /**
+       * Get the IAM Policy a service account with the {@link ServiceAccountName}. See {@link
+       * #getIamPolicy(String)}.
+       */
+      public GetIamPolicy getIamPolicy(ServiceAccountName name) throws IOException {
+        return getIamPolicy(name.formatName());
+      }
+
+      /** See {@link Iam.Projects.ServiceAccounts.GetIamPolicy}. */
+      public class GetIamPolicy extends AbstractRequestCow<Policy> {
+        private final Iam.Projects.ServiceAccounts.GetIamPolicy getIamPolicy;
+
+        public GetIamPolicy(Iam.Projects.ServiceAccounts.GetIamPolicy getIamPolicy) {
+          super(
+              IamOperation.GOOGLE_GET_IAM_POLICY_SERVICE_ACCOUNT,
+              clientConfig,
+              operationAnnotator,
+              getIamPolicy);
+          this.getIamPolicy = getIamPolicy;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("resource", getIamPolicy.getResource());
+          return result;
+        }
+      }
+
       /** See {@link Iam.Projects.ServiceAccounts#list(String)}. */
       public List list(String name) throws IOException {
         return new List(serviceAccounts.list(name), name);
@@ -119,24 +209,40 @@ public class IamCow {
         }
       }
 
-      /** See {@link Iam.Projects.ServiceAccounts#delete(String)}. */
-      public Delete delete(String name) throws IOException {
-        return new Delete(serviceAccounts.delete(name), name);
+      /** See {@link Iam.Projects.ServiceAccounts#setIamPolicy(String, SetIamPolicyRequest)}. */
+      public SetIamPolicy setIamPolicy(String name, SetIamPolicyRequest content)
+          throws IOException {
+        return new SetIamPolicy(serviceAccounts.setIamPolicy(name, content));
       }
 
-      public class Delete extends AbstractRequestCow<Empty> {
-        private final String name;
+      /**
+       * Get the IAM Policy a service account with the {@link ServiceAccountName}. See {@link
+       * #setIamPolicy(String, SetIamPolicyRequest)}.
+       */
+      public SetIamPolicy setIamPolicy(ServiceAccountName name, SetIamPolicyRequest content)
+          throws IOException {
+        return setIamPolicy(name.formatName(), content);
+      }
 
-        public Delete(Iam.Projects.ServiceAccounts.Delete delete, String name) {
+      /** See {@link Iam.Projects.ServiceAccounts.SetIamPolicy}. */
+      public class SetIamPolicy extends AbstractRequestCow<Policy> {
+        private final Iam.Projects.ServiceAccounts.SetIamPolicy setIamPolicy;
+
+        public SetIamPolicy(Iam.Projects.ServiceAccounts.SetIamPolicy setIamPolicy) {
           super(
-              IamOperation.GOOGLE_DELETE_SERVICE_ACCOUNT, clientConfig, operationAnnotator, delete);
-          this.name = name;
+              IamOperation.GOOGLE_SET_IAM_POLICY_SERVICE_ACCOUNT,
+              clientConfig,
+              operationAnnotator,
+              setIamPolicy);
+          this.setIamPolicy = setIamPolicy;
         }
 
         @Override
         protected JsonObject serialize() {
           JsonObject result = new JsonObject();
-          result.addProperty("name", name);
+          result.addProperty("resource", setIamPolicy.getResource());
+          result.add(
+              "content", new Gson().toJsonTree(setIamPolicy.getJsonContent()).getAsJsonObject());
           return result;
         }
       }
