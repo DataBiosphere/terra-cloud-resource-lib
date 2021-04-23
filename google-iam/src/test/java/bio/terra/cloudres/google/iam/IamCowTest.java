@@ -324,17 +324,4 @@ public class IamCowTest {
   private static Role roleWithSinglePermission() {
     return new Role().setIncludedPermissions(Collections.singletonList("iam.roles.create"));
   }
-
-  /** Retry the supplier until it returns true or until the timeout has passed. */
-  private static <E> void retryUntil(BooleanSupplier supplier, Duration interval, Duration timeout)
-      throws InterruptedException {
-    Instant deadline = Instant.now().plus(timeout);
-    while (Instant.now().isBefore(deadline)) {
-      if (supplier.getAsBoolean()) {
-        break;
-      }
-      Thread.sleep(interval.toMillis());
-    }
-    throw new InterruptedException("Operation did not complete in time.");
-  }
 }
