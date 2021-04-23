@@ -1,6 +1,7 @@
 package bio.terra.cloudres.google.iam;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
@@ -8,18 +9,26 @@ import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts;
+import com.google.api.services.iam.v1.model.Binding;
 import com.google.api.services.iam.v1.model.CreateRoleRequest;
 import com.google.api.services.iam.v1.model.CreateServiceAccountRequest;
+import com.google.api.services.iam.v1.model.Policy;
 import com.google.api.services.iam.v1.model.Role;
 import com.google.api.services.iam.v1.model.ServiceAccount;
+import com.google.api.services.iam.v1.model.SetIamPolicyRequest;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -31,40 +40,97 @@ public class IamCowTest {
         IntegrationCredentials.getAdminGoogleCredentialsOrDie());
   }
 
+  /** A dynamically created Google Project to manipulate IAM within for testing. */
+  private static Project reusableProject;
+
+  @BeforeAll
+  public static void createReusableProject() throws Exception {
+    reusableProject = createIamPreparedProject();
+  }
+
   @Test
-  public void createAndListAndDeleteServiceAccount() throws Exception {
-    IamCow iam = defaultIam();
-    Project project = createPreparedProject();
-    String projectId = project.getProjectId();
-    String resourceName = "projects/" + projectId;
-    String accountId = randomServiceAccountIdName();
+  public void createAndGetAndListAndDeleteServiceAccount() throws Exception {
+    IamCow.Projects.ServiceAccounts serviceAccounts = defaultIam().projects().serviceAccounts();
+    String projectName = "projects/" + reusableProject.getProjectId();
+    String accountId = randomServiceAccountId();
     ServiceAccount serviceAccount =
-        iam.projects()
-            .serviceAccounts()
-            .create(resourceName, new CreateServiceAccountRequest().setAccountId(accountId))
+        serviceAccounts
+            .create(projectName, new CreateServiceAccountRequest().setAccountId(accountId))
             .execute();
-    String fullSaName = fullServiceAccountName(projectId, serviceAccount.getEmail());
-    // Retry 6 times to make sure get after create works.
-    List<ServiceAccount> listResult = null;
-    for (int retryNum = 0; retryNum < 6; retryNum++) {
-      listResult = iam.projects().serviceAccounts().list(resourceName).execute().getAccounts();
-      if (listResult != null) {
+    ServiceAccountName serviceAccountName =
+        ServiceAccountName.builder()
+            .projectId(serviceAccount.getProjectId())
+            .email(serviceAccount.getEmail())
+            .build();
+    // Retry a lot of times. It apparently takes a lot of time for GCP to be ready to get a service
+    // account that was just created.
+    for (int retryNum = 0; retryNum < 20; retryNum++) {
+      try {
+        serviceAccounts.get(serviceAccountName).execute();
         break;
+      } catch (GoogleJsonResponseException e) {
+        assertEquals(404, e.getStatusCode());
+        Thread.sleep(3000);
       }
-      Thread.sleep(3000);
     }
+    assertEquals(serviceAccount, serviceAccounts.get(serviceAccountName).execute());
+    List<ServiceAccount> listResult = serviceAccounts.list(projectName).execute().getAccounts();
     assertThat(listResult, Matchers.contains(serviceAccount));
 
-    iam.projects().serviceAccounts().delete(fullSaName).execute();
-    // Retry 6 times to make sure get after delete works.
-    for (int retryNum = 0; retryNum < 6; retryNum++) {
-      listResult = iam.projects().serviceAccounts().list(resourceName).execute().getAccounts();
-      if (listResult == null) {
+    serviceAccounts.delete(serviceAccountName).execute();
+
+
+    GoogleJsonResponseException getAfterDelete = null;
+    for (int retryNum = 0; retryNum < 20; retryNum++) {
+      try {
+        serviceAccounts.get(serviceAccountName).execute();
+        Thread.sleep(3000);
+      } catch (GoogleJsonResponseException e) {
+        getAfterDelete = e;
         break;
       }
-      Thread.sleep(1000);
     }
-    assertNull(listResult);
+    assertNotNull(getAfterDelete);
+    assertEquals(404, getAfterDelete.getStatusCode());
+  }
+
+  @Test
+  public void getAndSetIamOnServiceAccount() throws Exception {
+    IamCow.Projects.ServiceAccounts serviceAccounts = defaultIam().projects().serviceAccounts();
+    String projectName = "projects/" + reusableProject.getProjectId();
+    ServiceAccount serviceAccount =
+        serviceAccounts
+            .create(
+                projectName,
+                new CreateServiceAccountRequest().setAccountId(randomServiceAccountId()))
+            .execute();
+    ServiceAccountName serviceAccountName =
+        ServiceAccountName.builder()
+            .projectId(serviceAccount.getProjectId())
+            .email(serviceAccount.getEmail())
+            .build();
+
+    Policy policy = serviceAccounts.getIamPolicy(serviceAccountName).execute();
+    assertNotNull(policy);
+
+    List<Binding> bindingList = new ArrayList<>();
+    String member =
+        String.format(
+            "serviceAccount:%s",
+            IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail());
+    Binding newBinding =
+        new Binding()
+            .setRole("roles/iam.serviceAccountUser")
+            .setMembers(Collections.singletonList(member));
+    bindingList.add(newBinding);
+    policy.setBindings(bindingList);
+
+    Policy updatedPolicy =
+        serviceAccounts
+            .setIamPolicy(serviceAccountName, new SetIamPolicyRequest().setPolicy(policy))
+            .execute();
+    assertThat(updatedPolicy.getBindings(), hasItem(newBinding));
+    assertEquals(updatedPolicy, serviceAccounts.getIamPolicy(serviceAccountName).execute());
   }
 
   @Test
@@ -82,31 +148,68 @@ public class IamCowTest {
   }
 
   @Test
-  public void listServiceAccountSerialize() throws Exception {
-    IamCow.Projects.ServiceAccounts.List list =
-        defaultIam().projects().serviceAccounts().list("projects/project-id");
-
-    assertEquals("{\"project_name\":\"projects/project-id\"}", list.serialize().toString());
-  }
-
-  @Test
   public void deleteServiceAccountSerialize() throws Exception {
     IamCow.Projects.ServiceAccounts.Delete delete =
         defaultIam()
             .projects()
             .serviceAccounts()
-            .delete(fullServiceAccountName("projectId", "saEmail"));
-
+            .delete(ServiceAccountName.builder().projectId("projectId").email("saEmail").build());
     assertEquals(
         "{\"name\":\"projects/projectId/serviceAccounts/saEmail\"}", delete.serialize().toString());
   }
 
   @Test
+  public void getServiceAccountSerialize() throws Exception {
+    IamCow.Projects.ServiceAccounts.Get get =
+        defaultIam()
+            .projects()
+            .serviceAccounts()
+            .get(ServiceAccountName.builder().projectId("projectId").email("saEmail").build());
+    assertEquals(
+        "{\"name\":\"projects/projectId/serviceAccounts/saEmail\"}", get.serialize().toString());
+  }
+
+  @Test
+  public void getIamPolicyServiceAccountSerialize() throws Exception {
+    IamCow.Projects.ServiceAccounts.GetIamPolicy getIamPolicy =
+        defaultIam()
+            .projects()
+            .serviceAccounts()
+            .getIamPolicy(
+                ServiceAccountName.builder().projectId("projectId").email("saEmail").build());
+
+    assertEquals(
+        "{\"resource\":\"projects/projectId/serviceAccounts/saEmail\"}",
+        getIamPolicy.serialize().toString());
+  }
+
+  @Test
+  public void listServiceAccountSerialize() throws Exception {
+    IamCow.Projects.ServiceAccounts.List list =
+        defaultIam().projects().serviceAccounts().list("projects/project-id");
+    assertEquals("{\"project_name\":\"projects/project-id\"}", list.serialize().toString());
+  }
+
+  @Test
+  public void setIamPolicyServiceAccountSerialize() throws Exception {
+    IamCow.Projects.ServiceAccounts.SetIamPolicy setIamPolicy =
+        defaultIam()
+            .projects()
+            .serviceAccounts()
+            .setIamPolicy(
+                ServiceAccountName.builder().projectId("projectId").email("saEmail").build(),
+                new SetIamPolicyRequest().setPolicy(new Policy().setEtag("myEtag")));
+
+    assertEquals(
+        "{\"resource\":\"projects/projectId/serviceAccounts/saEmail\","
+            + "\"content\":{\"policy\":{\"etag\":\"myEtag\"}}}",
+        setIamPolicy.serialize().toString());
+  }
+
+  @Test
   public void createGetListPatchDeleteRoles() throws Exception {
     IamCow iam = defaultIam();
-    Project project = createPreparedProject();
-    String projectId = project.getProjectId();
-    String resourceName = "projects/" + projectId;
+    String resourceName = "projects/" + reusableProject.getProjectId();
     String roleId = "myCustomRoleId";
     Role createdRole =
         iam.projects()
@@ -204,7 +307,7 @@ public class IamCowTest {
   }
 
   /** Create Project then set billing account, enable IAM api */
-  private static Project createPreparedProject() throws Exception {
+  private static Project createIamPreparedProject() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setDefaultProjectBilling(project.getProjectId());
     ServiceUsageUtils.enableServices(
@@ -212,17 +315,9 @@ public class IamCowTest {
     return project;
   }
 
-  public static String randomServiceAccountIdName() {
+  private static String randomServiceAccountId() {
     // SA name ids must start with a letter and be no more than 30 characters long.
     return "sa" + IntegrationUtils.randomName().substring(0, 28);
-  }
-
-  /**
-   * Create a string matching the region name on {@link ServiceAccounts#delete(String)}}, i.e..
-   * projects/{PROJECT_ID}/serviceAccounts/{ACCOUNT}.
-   */
-  private static String fullServiceAccountName(String projectId, String accountId) {
-    return String.format("projects/%s/serviceAccounts/%s", projectId, accountId);
   }
 
   /** Create a Role object with the permission iam.roles.create and no other fields specified. */

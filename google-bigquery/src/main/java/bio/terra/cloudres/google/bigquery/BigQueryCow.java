@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.bigquery;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.janitor.model.CloudResourceUid;
@@ -147,7 +146,8 @@ public class BigQueryCow {
 
     /** See {@link Bigquery.Datasets#insert(String, Dataset)} */
     public Insert insert(String projectId, Dataset content) throws IOException {
-      return new Insert(datasets.insert(projectId, content), content.getDatasetReference().getDatasetId());
+      return new Insert(
+          datasets.insert(projectId, content), content.getDatasetReference().getDatasetId());
     }
 
     /** See {@link Bigquery.Datasets#insert(String, Dataset)} */
@@ -175,9 +175,7 @@ public class BigQueryCow {
         return Optional.of(
             new CloudResourceUid()
                 .googleBigQueryDatasetUid(
-                    new GoogleBigQueryDatasetUid()
-                        .projectId(getProjectId())
-                        .datasetId(datasetId)));
+                    new GoogleBigQueryDatasetUid().projectId(getProjectId()).datasetId(datasetId)));
       }
 
       @Override
@@ -425,7 +423,8 @@ public class BigQueryCow {
 
     /** See {@link Bigquery.Tables#insert(String, String, Table)} */
     public Insert insert(String projectId, String datasetId, Table content) throws IOException {
-      return new Tables.Insert(tables.insert(projectId, datasetId, content), content.getTableReference().getTableId());
+      return new Tables.Insert(
+          tables.insert(projectId, datasetId, content), content.getTableReference().getTableId());
     }
 
     /** See {@link Bigquery.Tables#insert(String, String, Table)} */
@@ -668,8 +667,6 @@ public class BigQueryCow {
         return result;
       }
     }
-
-
 
     private String tableResourceName(String projectId, String datasetId, String tableId) {
       return String.format("projects/%s/datasets/%s/tables/%s", projectId, datasetId, tableId);
