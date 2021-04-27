@@ -171,7 +171,8 @@ public class CloudComputeCowTest {
 
   @Test
   public void getZone() throws Exception {
-    Zone zone = defaultCompute().zones().get(reusableProject.getProjectId(), "us-east1-b").execute();
+    Zone zone =
+        defaultCompute().zones().get(reusableProject.getProjectId(), "us-east1-b").execute();
     assertThat(zone.getRegion(), Matchers.containsString("us-east1"));
   }
 
@@ -299,8 +300,7 @@ public class CloudComputeCowTest {
   public void zoneGetSerialize() throws Exception {
     CloudComputeCow.Zones.Get get = defaultCompute().zones().get("project-id", "us-east1-b");
     assertEquals(
-            "{\"project_id\":\"project-id\",\"zone\":\"us-east1-b\"}",
-            get.serialize().toString());
+        "{\"project_id\":\"project-id\",\"zone\":\"us-east1-b\"}", get.serialize().toString());
   }
 
   /** Create Project then set billing account, enable compute compute service */
