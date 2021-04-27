@@ -69,7 +69,7 @@ public class CloudComputeCowTest {
   }
 
   @Test
-  public void createAndGetSubnetwork() throws Exception {
+  public void createAndGetAndListSubnetwork() throws Exception {
     String projectId = reusableProject.getProjectId();
     String region = "us-west1";
     String ipCidrRange = "10.130.0.0/20";
@@ -105,6 +105,9 @@ public class CloudComputeCowTest {
     assertEquals(network.getSelfLink(), createdSubnet.getNetwork());
     assertEquals(ipCidrRange, createdSubnet.getIpCidrRange());
     assertEquals(regionName(projectId, region), createdSubnet.getRegion());
+
+    SubnetworkList subnetworkList = cloudComputeCow.subnetworks().list(projectId, region).execute();
+    assertThat(subnetworkList.getItems().size(), Matchers.greaterThan(0));
   }
 
   @Test
@@ -167,6 +170,12 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void getZone() throws Exception {
+    Zone zone = defaultCompute().zones().get(reusableProject.getProjectId(), "us-east1-b").execute();
+    assertThat(zone.getRegion(), Matchers.containsString("us-east1"));
+  }
+
+  @Test
   public void networkInsertSerialize() throws Exception {
     Network network = new Network().setName("network-name");
     CloudComputeCow.Networks.Insert insert =
@@ -219,6 +228,24 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void subnetworkListSerialize() throws Exception {
+    CloudComputeCow.Subnetworks.List list =
+        defaultCompute()
+            .subnetworks()
+            .list("project-id", "us-west1")
+            .setFilter("my-filter")
+            .setMaxResults(42L)
+            .setOrderBy("order-by")
+            .setPageToken("page-token");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\","
+            + "\"filter\":\"my-filter\",\"max_results\":42,\"order_by\":\"order-by\","
+            + "\"page_token\":\"page-token\"}",
+        list.serialize().toString());
+  }
+
+  @Test
   public void firewallInsertSerialize() throws Exception {
     Firewall firewall = new Firewall().setName("firewall-name");
     CloudComputeCow.Firewalls.Insert insert =
@@ -266,6 +293,14 @@ public class CloudComputeCowTest {
     assertEquals(
         "{\"project_id\":\"project-id\",\"route_name\":\"route-name\"}",
         get.serialize().toString());
+  }
+
+  @Test
+  public void zoneGetSerialize() throws Exception {
+    CloudComputeCow.Zones.Get get = defaultCompute().zones().get("project-id", "us-east1-b");
+    assertEquals(
+            "{\"project_id\":\"project-id\",\"zone\":\"us-east1-b\"}",
+            get.serialize().toString());
   }
 
   /** Create Project then set billing account, enable compute compute service */

@@ -21,12 +21,9 @@ import com.google.api.services.iam.v1.model.SetIamPolicyRequest;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -78,7 +75,6 @@ public class IamCowTest {
     assertThat(listResult, Matchers.contains(serviceAccount));
 
     serviceAccounts.delete(serviceAccountName).execute();
-
 
     GoogleJsonResponseException getAfterDelete = null;
     for (int retryNum = 0; retryNum < 20; retryNum++) {

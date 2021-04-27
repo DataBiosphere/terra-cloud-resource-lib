@@ -205,6 +205,69 @@ public class CloudComputeCow {
         return result;
       }
     }
+
+    /** See {@link Compute.Subnetworks#list(String, String)}. */
+    public List list(String project, String region) throws IOException {
+      return new List(subnetworks.list(project, region));
+    }
+
+    /** See {@link Compute.Subnetworks.List}. */
+    public class List extends AbstractRequestCow<SubnetworkList> {
+      private final Compute.Subnetworks.List list;
+
+      public List(Compute.Subnetworks.List list) {
+        super(CloudComputeOperation.GOOGLE_LIST_SUBNETWORK, clientConfig, operationAnnotator, list);
+        this.list = list;
+      }
+
+      /** See {@link Compute.Subnetworks.List#setProject(String)}. */
+      public List setProject(String project) {
+        this.list.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.List#setRegion(String)}. */
+      public List setRegion(String region) {
+        this.list.setRegion(region);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.List#setFilter(String)}. */
+      public List setFilter(String filter) {
+        this.list.setFilter(filter);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.List#setMaxResults(Long)}. */
+      public List setMaxResults(Long maxResults) {
+        this.list.setMaxResults(maxResults);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.List#setOrderBy(String)}. */
+      public List setOrderBy(String orderBy) {
+        this.list.setOrderBy(orderBy);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.List#setPageToken(String)}. */
+      public List setPageToken(String pageToken) {
+        this.list.setPageToken(pageToken);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", list.getProject());
+        result.addProperty("region", list.getRegion());
+        result.addProperty("filter", list.getFilter());
+        result.addProperty("max_results", list.getMaxResults());
+        result.addProperty("order_by", list.getOrderBy());
+        result.addProperty("page_token", list.getPageToken());
+        return result;
+      }
+    }
   }
 
   public Firewalls firewalls() {
@@ -351,6 +414,42 @@ public class CloudComputeCow {
         JsonObject result = new JsonObject();
         result.addProperty("project_id", get.getProject());
         result.addProperty("route_name", get.getRoute());
+        return result;
+      }
+    }
+  }
+
+  public Zones zones() {
+    return new Zones(compute.zones());
+  }
+
+  /** See {@link Compute.Zones}. */
+  public class Zones {
+    private final Compute.Zones zones;
+
+    private Zones(Compute.Zones zones) {
+      this.zones = zones;
+    }
+
+    /** See {@link Compute.Zones#get(String, String)}. */
+    public Get get(String project, String zone) throws IOException {
+      return new Get(zones.get(project, zone));
+    }
+
+    /** See {@link Compute.Zones.Get}. */
+    public class Get extends AbstractRequestCow<Zone> {
+      private final Compute.Zones.Get get;
+
+      private Get(Compute.Zones.Get get) {
+        super(CloudComputeOperation.GOOGLE_GET_ZONE, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("zone", get.getZone());
         return result;
       }
     }

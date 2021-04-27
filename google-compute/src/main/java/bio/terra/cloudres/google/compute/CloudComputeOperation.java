@@ -16,4 +16,6 @@ public enum CloudComputeOperation implements CloudOperation {
   GOOGLE_GET_NETWORK,
   GOOGLE_GET_ROUTE,
   GOOGLE_GET_SUBNETWORK,
+  GOOGLE_GET_ZONE,
+  GOOGLE_LIST_SUBNETWORK,
 }
