@@ -115,3 +115,5 @@ Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadins
 #### cloud-resource-schema
 The general schema for how cloud resources are presented in CRL.   
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/cloud-resource-schema).
+
+
