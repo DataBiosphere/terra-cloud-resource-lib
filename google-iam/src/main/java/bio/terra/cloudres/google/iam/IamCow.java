@@ -66,7 +66,7 @@ public class IamCow {
     public class ServiceAccounts {
       private final Iam.Projects.ServiceAccounts serviceAccounts;
 
-      public ServiceAccounts(Iam.Projects.ServiceAccounts serviceAccounts) {
+      private ServiceAccounts(Iam.Projects.ServiceAccounts serviceAccounts) {
         this.serviceAccounts = serviceAccounts;
       }
 
@@ -79,7 +79,7 @@ public class IamCow {
         private final String name;
         private final CreateServiceAccountRequest content;
 
-        public Create(
+        private Create(
             Iam.Projects.ServiceAccounts.Create create,
             String name,
             CreateServiceAccountRequest content) {
@@ -113,7 +113,7 @@ public class IamCow {
       public class Delete extends AbstractRequestCow<Empty> {
         private final String name;
 
-        public Delete(Iam.Projects.ServiceAccounts.Delete delete, String name) {
+        private Delete(Iam.Projects.ServiceAccounts.Delete delete, String name) {
           super(
               IamOperation.GOOGLE_DELETE_SERVICE_ACCOUNT, clientConfig, operationAnnotator, delete);
           this.name = name;
@@ -141,7 +141,7 @@ public class IamCow {
       public class Get extends AbstractRequestCow<ServiceAccount> {
         private final Iam.Projects.ServiceAccounts.Get get;
 
-        public Get(Iam.Projects.ServiceAccounts.Get get) {
+        private Get(Iam.Projects.ServiceAccounts.Get get) {
           super(IamOperation.GOOGLE_GET_SERVICE_ACCOUNT, clientConfig, operationAnnotator, get);
           this.get = get;
         }
@@ -171,7 +171,7 @@ public class IamCow {
       public class GetIamPolicy extends AbstractRequestCow<Policy> {
         private final Iam.Projects.ServiceAccounts.GetIamPolicy getIamPolicy;
 
-        public GetIamPolicy(Iam.Projects.ServiceAccounts.GetIamPolicy getIamPolicy) {
+        private GetIamPolicy(Iam.Projects.ServiceAccounts.GetIamPolicy getIamPolicy) {
           super(
               IamOperation.GOOGLE_GET_IAM_POLICY_SERVICE_ACCOUNT,
               clientConfig,
@@ -196,7 +196,7 @@ public class IamCow {
       public class List extends AbstractRequestCow<ListServiceAccountsResponse> {
         private final String name;
 
-        public List(Iam.Projects.ServiceAccounts.List list, String name) {
+        private List(Iam.Projects.ServiceAccounts.List list, String name) {
           super(IamOperation.GOOGLE_LIST_SERVICE_ACCOUNT, clientConfig, operationAnnotator, list);
           this.name = name;
         }
@@ -228,7 +228,7 @@ public class IamCow {
       public class SetIamPolicy extends AbstractRequestCow<Policy> {
         private final Iam.Projects.ServiceAccounts.SetIamPolicy setIamPolicy;
 
-        public SetIamPolicy(Iam.Projects.ServiceAccounts.SetIamPolicy setIamPolicy) {
+        private SetIamPolicy(Iam.Projects.ServiceAccounts.SetIamPolicy setIamPolicy) {
           super(
               IamOperation.GOOGLE_SET_IAM_POLICY_SERVICE_ACCOUNT,
               clientConfig,
@@ -246,6 +246,49 @@ public class IamCow {
           return result;
         }
       }
+
+      /**
+       * See {@link Iam.Projects.ServiceAccounts#testIamPermissions(String,
+       * TestIamPermissionsRequest)}.
+       */
+      public TestIamPermissions testIamPermissions(
+          String resource, TestIamPermissionsRequest content) throws IOException {
+        return new TestIamPermissions(serviceAccounts.testIamPermissions(resource, content));
+      }
+
+      /**
+       * Test the IAM permissoins of a service account with the {@link ServiceAccountName}. See
+       * {@link #testIamPermissions(String, TestIamPermissionsRequest)}.
+       */
+      public TestIamPermissions testIamPermissions(
+          ServiceAccountName name, TestIamPermissionsRequest content) throws IOException {
+        return testIamPermissions(name.formatName(), content);
+      }
+
+      /** See {@link Iam.Projects.ServiceAccounts.TestIamPermissions}. */
+      public class TestIamPermissions extends AbstractRequestCow<TestIamPermissionsResponse> {
+        private final Iam.Projects.ServiceAccounts.TestIamPermissions testIamPermissions;
+
+        private TestIamPermissions(
+            Iam.Projects.ServiceAccounts.TestIamPermissions testIamPermissions) {
+          super(
+              IamOperation.GOOGLE_TEST_IAM_PERMISSIONS_SERVICE_ACCOUNT,
+              clientConfig,
+              operationAnnotator,
+              testIamPermissions);
+          this.testIamPermissions = testIamPermissions;
+        }
+
+        @Override
+        protected JsonObject serialize() {
+          JsonObject result = new JsonObject();
+          result.addProperty("resource", testIamPermissions.getResource());
+          result.add(
+              "content",
+              new Gson().toJsonTree(testIamPermissions.getJsonContent()).getAsJsonObject());
+          return result;
+        }
+      }
     }
 
     /** See {@link Iam.Projects.Roles}. */
@@ -256,7 +299,7 @@ public class IamCow {
     public class Roles {
       private final Iam.Projects.Roles roles;
 
-      public Roles(Iam.Projects.Roles roles) {
+      private Roles(Iam.Projects.Roles roles) {
         this.roles = roles;
       }
 
@@ -269,7 +312,7 @@ public class IamCow {
         private final String parent;
         private final CreateRoleRequest content;
 
-        public Create(Iam.Projects.Roles.Create create, String parent, CreateRoleRequest content) {
+        private Create(Iam.Projects.Roles.Create create, String parent, CreateRoleRequest content) {
           super(IamOperation.GOOGLE_CREATE_ROLE, clientConfig, operationAnnotator, create);
           this.parent = parent;
           this.content = content;
@@ -292,7 +335,7 @@ public class IamCow {
       public class Delete extends AbstractRequestCow<Role> {
         private final String name;
 
-        public Delete(Iam.Projects.Roles.Delete delete, String name) {
+        private Delete(Iam.Projects.Roles.Delete delete, String name) {
           super(IamOperation.GOOGLE_DELETE_ROLE, clientConfig, operationAnnotator, delete);
           this.name = name;
         }
@@ -313,7 +356,7 @@ public class IamCow {
       public class Get extends AbstractRequestCow<Role> {
         private final String name;
 
-        public Get(Iam.Projects.Roles.Get get, String name) {
+        private Get(Iam.Projects.Roles.Get get, String name) {
           super(IamOperation.GOOGLE_GET_ROLE, clientConfig, operationAnnotator, get);
           this.name = name;
         }
@@ -335,7 +378,7 @@ public class IamCow {
         private final String parent;
         private final Iam.Projects.Roles.List list;
 
-        public List(Iam.Projects.Roles.List list, String parent) {
+        private List(Iam.Projects.Roles.List list, String parent) {
           super(IamOperation.GOOGLE_LIST_ROLE, clientConfig, operationAnnotator, list);
           this.list = list;
           this.parent = parent;
@@ -365,7 +408,7 @@ public class IamCow {
         private final String name;
         private final Role content;
 
-        public Patch(Iam.Projects.Roles.Patch patch, String name, Role content) {
+        private Patch(Iam.Projects.Roles.Patch patch, String name, Role content) {
           super(IamOperation.GOOGLE_PATCH_ROLE, clientConfig, operationAnnotator, patch);
           this.name = name;
           this.content = content;

@@ -18,6 +18,8 @@ import com.google.api.services.iam.v1.model.Policy;
 import com.google.api.services.iam.v1.model.Role;
 import com.google.api.services.iam.v1.model.ServiceAccount;
 import com.google.api.services.iam.v1.model.SetIamPolicyRequest;
+import com.google.api.services.iam.v1.model.TestIamPermissionsRequest;
+import com.google.api.services.iam.v1.model.TestIamPermissionsResponse;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -91,7 +93,7 @@ public class IamCowTest {
   }
 
   @Test
-  public void getAndSetIamOnServiceAccount() throws Exception {
+  public void getAndSetAndTestIamOnServiceAccount() throws Exception {
     IamCow.Projects.ServiceAccounts serviceAccounts = defaultIam().projects().serviceAccounts();
     String projectName = "projects/" + reusableProject.getProjectId();
     ServiceAccount serviceAccount =
@@ -127,6 +129,23 @@ public class IamCowTest {
             .execute();
     assertThat(updatedPolicy.getBindings(), hasItem(newBinding));
     assertEquals(updatedPolicy, serviceAccounts.getIamPolicy(serviceAccountName).execute());
+
+    // Test the permissions of the user for which the IAM policy was set.
+    IamCow.Projects.ServiceAccounts userIamServiceAccounts =
+        IamCow.create(
+                IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+                IntegrationCredentials.getUserGoogleCredentialsOrDie())
+            .projects()
+            .serviceAccounts();
+    // The "actAs" permission associated with "roles/iam.serviceAccountUser".
+    String actAsPermission = "iam.serviceAccounts.actAs";
+    TestIamPermissionsResponse iamResponse =
+        userIamServiceAccounts
+            .testIamPermissions(
+                serviceAccountName,
+                new TestIamPermissionsRequest().setPermissions(ImmutableList.of(actAsPermission)))
+            .execute();
+    assertThat(iamResponse.getPermissions(), Matchers.contains(actAsPermission));
   }
 
   @Test
@@ -200,6 +219,22 @@ public class IamCowTest {
         "{\"resource\":\"projects/projectId/serviceAccounts/saEmail\","
             + "\"content\":{\"policy\":{\"etag\":\"myEtag\"}}}",
         setIamPolicy.serialize().toString());
+  }
+
+  @Test
+  public void testIamPermissionsServiceAccountSerialize() throws Exception {
+    IamCow.Projects.ServiceAccounts.TestIamPermissions testIamPermissions =
+        defaultIam()
+            .projects()
+            .serviceAccounts()
+            .testIamPermissions(
+                ServiceAccountName.builder().projectId("projectId").email("saEmail").build(),
+                new TestIamPermissionsRequest().setPermissions(ImmutableList.of("myPermission")));
+
+    assertEquals(
+        "{\"resource\":\"projects/projectId/serviceAccounts/saEmail\","
+            + "\"content\":{\"permissions\":[\"myPermission\"]}}",
+        testIamPermissions.serialize().toString());
   }
 
   @Test
