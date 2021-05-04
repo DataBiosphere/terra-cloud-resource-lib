@@ -16,6 +16,8 @@ import com.google.api.services.notebooks.v1.model.Policy;
 import com.google.api.services.notebooks.v1.model.SetIamPolicyRequest;
 import com.google.api.services.notebooks.v1.model.StartInstanceRequest;
 import com.google.api.services.notebooks.v1.model.StopInstanceRequest;
+import com.google.api.services.notebooks.v1.model.TestIamPermissionsRequest;
+import com.google.api.services.notebooks.v1.model.TestIamPermissionsResponse;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Preconditions;
@@ -446,6 +448,63 @@ public class AIPlatformNotebooksCow {
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
         InstanceName.fromNameFormat(getName()).addProperties(result);
+        return result;
+      }
+    }
+
+    /**
+     * See {@link AIPlatformNotebooks.Projects.Locations.Instances#testIamPermissions(String,
+     * TestIamPermissionsRequest)}.
+     */
+    public TestIamPermissions testIamPermissions(String resource, TestIamPermissionsRequest content)
+        throws IOException {
+      return new TestIamPermissions(instances.testIamPermissions(resource, content));
+    }
+
+    /**
+     * Test the IAM permissoins of a service account with the {@link InstanceName}. See {@link
+     * #testIamPermissions(String, TestIamPermissionsRequest)}.
+     */
+    public TestIamPermissions testIamPermissions(
+        InstanceName name, TestIamPermissionsRequest content) throws IOException {
+      return testIamPermissions(name.formatName(), content);
+    }
+
+    /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.TestIamPermissions}. */
+    public class TestIamPermissions extends AbstractRequestCow<TestIamPermissionsResponse> {
+      private final AIPlatformNotebooks.Projects.Locations.Instances.TestIamPermissions
+          testIamPermissions;
+
+      private TestIamPermissions(
+          AIPlatformNotebooks.Projects.Locations.Instances.TestIamPermissions testIamPermissions) {
+        super(
+            AIPlatformNotebooksOperation.GOOGLE_TEST_IAM_PERMISSIONS_NOTEBOOKS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            testIamPermissions);
+        this.testIamPermissions = testIamPermissions;
+      }
+
+      /**
+       * See {@link
+       * AIPlatformNotebooks.Projects.Locations.Instances.TestIamPermissions#getResource()}
+       */
+      public String getResource() {
+        return testIamPermissions.getResource();
+      }
+
+      public TestIamPermissions setResource(String resource) {
+        testIamPermissions.setResource(resource);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        InstanceName.fromNameFormat(getResource()).addProperties(result);
+        result.add(
+            "content",
+            new Gson().toJsonTree(testIamPermissions.getJsonContent()).getAsJsonObject());
         return result;
       }
     }

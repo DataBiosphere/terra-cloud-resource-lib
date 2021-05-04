@@ -19,6 +19,8 @@ import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
 import com.google.api.services.notebooks.v1.model.Operation;
 import com.google.api.services.notebooks.v1.model.Policy;
 import com.google.api.services.notebooks.v1.model.SetIamPolicyRequest;
+import com.google.api.services.notebooks.v1.model.TestIamPermissionsRequest;
+import com.google.api.services.notebooks.v1.model.TestIamPermissionsResponse;
 import com.google.api.services.notebooks.v1.model.VmImage;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -113,7 +115,7 @@ public class AIPlatformNotebooksCowTest {
   }
 
   @Test
-  public void setGetIamPolicyNotebookInstance() throws Exception {
+  public void setGetTestIamPolicyNotebookInstance() throws Exception {
     InstanceName instanceName = defaultInstanceName().instanceId("set-get-iam").build();
     createInstance(instanceName);
 
@@ -134,6 +136,23 @@ public class AIPlatformNotebooksCowTest {
     assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
     Policy secondRetrieval = notebooks.instances().getIamPolicy(instanceName).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
+
+    // Test the permissions of the user for which the IAM policy was set.
+    AIPlatformNotebooksCow userNotebooks =
+        AIPlatformNotebooksCow.create(
+            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+            IntegrationCredentials.getUserGoogleCredentialsOrDie());
+    // Notebook get permission from "roles/notebooks.viewer".
+    String getNotebookPermission = "notebooks.instances.get";
+    TestIamPermissionsResponse iamResponse =
+        userNotebooks
+            .instances()
+            .testIamPermissions(
+                instanceName,
+                new TestIamPermissionsRequest()
+                    .setPermissions(ImmutableList.of(getNotebookPermission)))
+            .execute();
+    assertThat(iamResponse.getPermissions(), Matchers.contains(getNotebookPermission));
 
     notebooks.instances().delete(instanceName).execute();
   }
@@ -295,6 +314,24 @@ public class AIPlatformNotebooksCowTest {
                     .location("us-east1-b")
                     .instanceId("my-id")
                     .build())
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceTestIamPermissionsSerialize() throws Exception {
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\","
+            + "\"instanceId\":\"my-id\",\"content\":{\"permissions\":[\"myPermission\"]}}",
+        notebooks
+            .instances()
+            .testIamPermissions(
+                InstanceName.builder()
+                    .projectId("my-project")
+                    .location("us-east1-b")
+                    .instanceId("my-id")
+                    .build(),
+                new TestIamPermissionsRequest().setPermissions(ImmutableList.of("myPermission")))
             .serialize()
             .toString());
   }
