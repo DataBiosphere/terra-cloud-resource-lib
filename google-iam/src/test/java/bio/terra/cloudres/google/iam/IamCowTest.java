@@ -130,10 +130,17 @@ public class IamCowTest {
     assertThat(updatedPolicy.getBindings(), hasItem(newBinding));
     assertEquals(updatedPolicy, serviceAccounts.getIamPolicy(serviceAccountName).execute());
 
+    // Test the permissions of the user for which the IAM policy was set.
+    IamCow.Projects.ServiceAccounts userIamServiceAccounts =
+        IamCow.create(
+                IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+                IntegrationCredentials.getUserGoogleCredentialsOrDie())
+            .projects()
+            .serviceAccounts();
     // The "actAs" permission associated with "roles/iam.serviceAccountUser".
     String actAsPermission = "iam.serviceAccounts.actAs";
     TestIamPermissionsResponse iamResponse =
-        serviceAccounts
+        userIamServiceAccounts
             .testIamPermissions(
                 serviceAccountName,
                 new TestIamPermissionsRequest().setPermissions(ImmutableList.of(actAsPermission)))
