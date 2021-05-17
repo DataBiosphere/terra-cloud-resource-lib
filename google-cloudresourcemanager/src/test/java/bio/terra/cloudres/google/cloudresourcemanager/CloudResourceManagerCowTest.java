@@ -8,9 +8,9 @@ import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.cloudresourcemanager.model.*;
-import com.google.api.services.cloudresourcemanager.model.Operation;
-import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.v3.model.*;
+import com.google.api.services.cloudresourcemanager.v3.model.Operation;
+import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -49,12 +49,12 @@ public class CloudResourceManagerCowTest {
 
     Project project = managerCow.projects().get(projectId).execute();
     assertEquals(projectId, project.getProjectId());
-    assertEquals("ACTIVE", project.getLifecycleState());
+    assertEquals("ACTIVE", project.getState());
 
     managerCow.projects().delete(projectId).execute();
     // After "deletion," the project still exists for up to 30 days where it can be recovered.
     project = managerCow.projects().get(projectId).execute();
-    assertEquals("DELETE_REQUESTED", project.getLifecycleState());
+    assertEquals("DELETE_REQUESTED", project.getState());
   }
 
   @Test

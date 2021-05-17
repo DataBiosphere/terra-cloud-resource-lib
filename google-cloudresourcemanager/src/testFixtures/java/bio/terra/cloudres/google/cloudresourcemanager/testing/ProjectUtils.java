@@ -5,9 +5,8 @@ import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.CloudResourceManagerCow;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.api.services.cloudresourcemanager.model.Operation;
-import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.cloudresourcemanager.model.ResourceId;
+import com.google.api.services.cloudresourcemanager.v3.model.Operation;
+import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import java.time.Duration;
 
 /** Testing utilities for projects. */
@@ -15,8 +14,7 @@ public class ProjectUtils {
   /** What parent resource (organizatino or folder) to create projects within. */
   // TODO(PF-67): Figure out how to pipe configuration to test.
   // Current value from vault 'config/terraform/terra/crl-test/default/container_folder_id'.
-  public static final ResourceId PARENT_RESOURCE =
-      new ResourceId().setType("folder").setId("866104354540");
+  public static final String PARENT_RESOURCE = "folders/866104354540";
 
   private static CloudResourceManagerCow managerCow;
 

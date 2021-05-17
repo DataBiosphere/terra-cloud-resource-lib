@@ -7,9 +7,9 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
-import com.google.api.services.cloudresourcemanager.CloudResourceManager;
-import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
-import com.google.api.services.cloudresourcemanager.model.*;
+import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager;
+import com.google.api.services.cloudresourcemanager.v3.CloudResourceManagerScopes;
+import com.google.api.services.cloudresourcemanager.v3.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
@@ -98,7 +98,7 @@ public class CloudResourceManagerCow {
     }
 
     /** See {@link CloudResourceManager.Projects.Delete}. */
-    public class Delete extends AbstractRequestCow<Empty> {
+    public class Delete extends AbstractRequestCow<Operation> {
       private final CloudResourceManager.Projects.Delete delete;
 
       private Delete(CloudResourceManager.Projects.Delete delete) {
@@ -112,7 +112,7 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(delete.getProjectId());
+        return serializeProjectName(delete.getName());
       }
     }
 
@@ -136,7 +136,7 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(get.getProjectId());
+        return serializeProjectName(get.getName());
       }
     }
 
@@ -161,7 +161,7 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(getIamPolicy.getResource());
+        return serializeProjectName(getIamPolicy.getResource());
       }
     }
 
@@ -186,13 +186,13 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(setIamPolicy.getResource());
+        return serializeProjectName(setIamPolicy.getResource());
       }
     }
 
-    private JsonObject serializeProjectId(String projectId) {
+    private JsonObject serializeProjectName(String projectId) {
       JsonObject result = new JsonObject();
-      result.addProperty("project_id", projectId);
+      result.addProperty("project_name", projectId);
       return result;
     }
   }
