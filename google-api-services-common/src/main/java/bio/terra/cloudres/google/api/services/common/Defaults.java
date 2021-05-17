@@ -3,9 +3,11 @@ package bio.terra.cloudres.google.api.services.common;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+
+// import com.google.api.client.json.jackson.JacksonFactory;
 
 /** Utility class for defaults for CRL working with {@code com.google.api.services} packages. */
 public class Defaults {
@@ -26,7 +28,7 @@ public class Defaults {
   /** Returns a defaul {@link JsonFactory} for initializing a services builder. */
   public static JsonFactory jsonFactory() {
     if (defaultJsonFactory == null) {
-      defaultJsonFactory = JacksonFactory.getDefaultInstance();
+      defaultJsonFactory = GsonFactory.getDefaultInstance();
     }
     return defaultJsonFactory;
   }
