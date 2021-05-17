@@ -7,8 +7,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-// import com.google.api.client.json.jackson.JacksonFactory;
-
 /** Utility class for defaults for CRL working with {@code com.google.api.services} packages. */
 public class Defaults {
   private Defaults() {}
