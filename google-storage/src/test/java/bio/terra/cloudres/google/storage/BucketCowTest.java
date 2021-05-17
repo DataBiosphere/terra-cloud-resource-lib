@@ -1,7 +1,10 @@
 package bio.terra.cloudres.google.storage;
 
-import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.*;
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.assertAclsMatch;
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.createBlobWithContents;
+import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.getTestUserEmailAddress;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +26,25 @@ import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class BucketCowTest {
+  private static Map<String, String> extractBlobNameWithContent(Page<BlobCow> actual) {
+    Map<String, String> actualBlobIdContentMap = new HashMap<>();
+    actual
+        .iterateAll()
+        .forEach(
+            blobCow -> {
+              try {
+                actualBlobIdContentMap.put(
+                    blobCow.getBlobInfo().getBlobId().getName(),
+                    StorageIntegrationUtils.readContents(blobCow));
+              } catch (IOException e) {
+                throw new RuntimeException(
+                    "Fail to read contents from Blob" + blobCow.getBlobInfo().getBlobId(), e);
+              }
+            });
+
+    return actualBlobIdContentMap;
+  }
+
   @Test
   public void deleteCreatedBucket() throws Exception {
     StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
@@ -41,7 +63,8 @@ public class BucketCowTest {
     StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
     String bucketName = IntegrationUtils.randomName();
     BucketCow bucketCow = storageCow.create(BucketInfo.of(bucketName));
-    assertNull(storageCow.get(bucketName).getBucketInfo().getLifecycleRules());
+    // getLifecycleRules changed behavior and returns an empty list instead of null
+    assertThat(storageCow.get(bucketName).getBucketInfo().getLifecycleRules().size(), equalTo(0));
 
     BucketInfo.LifecycleRule lifecycleRule =
         new BucketInfo.LifecycleRule(
@@ -101,24 +124,5 @@ public class BucketCowTest {
     assertTrue(blobCow2.delete());
     assertTrue(bucketCow.delete());
     assertNull(storageCow.get(bucketName));
-  }
-
-  private static Map<String, String> extractBlobNameWithContent(Page<BlobCow> actual) {
-    Map<String, String> actualBlobIdContentMap = new HashMap<>();
-    actual
-        .iterateAll()
-        .forEach(
-            blobCow -> {
-              try {
-                actualBlobIdContentMap.put(
-                    blobCow.getBlobInfo().getBlobId().getName(),
-                    StorageIntegrationUtils.readContents(blobCow));
-              } catch (IOException e) {
-                throw new RuntimeException(
-                    "Fail to read contents from Blob" + blobCow.getBlobInfo().getBlobId(), e);
-              }
-            });
-
-    return actualBlobIdContentMap;
   }
 }
