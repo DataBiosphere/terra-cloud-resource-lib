@@ -7,7 +7,7 @@ import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
-import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.api.services.serviceusage.v1.model.BatchEnableServicesRequest;
 import com.google.api.services.serviceusage.v1.model.GoogleApiServiceusageV1Service;
 import com.google.api.services.serviceusage.v1.model.ListServicesResponse;
@@ -105,6 +105,6 @@ public class ServiceUsageCowTest {
    * e.g. projects/123/services/serviceusage.googleapis.com.
    */
   private static String serviceName(Project project, String apiId) {
-    return String.format("projects/%d/services/%s", project.getProjectNumber(), apiId);
+    return String.format("%s/services/%s", project.getName(), apiId);
   }
 }

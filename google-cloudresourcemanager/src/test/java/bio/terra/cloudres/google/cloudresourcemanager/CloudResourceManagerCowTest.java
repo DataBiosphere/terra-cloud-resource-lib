@@ -3,14 +3,15 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.cloudresourcemanager.model.*;
-import com.google.api.services.cloudresourcemanager.model.Operation;
-import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.cloudresourcemanager.v3.model.*;
+import com.google.api.services.cloudresourcemanager.v3.model.Operation;
+import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -49,12 +50,17 @@ public class CloudResourceManagerCowTest {
 
     Project project = managerCow.projects().get(projectId).execute();
     assertEquals(projectId, project.getProjectId());
-    assertEquals("ACTIVE", project.getLifecycleState());
+    assertEquals("ACTIVE", project.getState());
 
-    managerCow.projects().delete(projectId).execute();
+    Operation deleteOperation = managerCow.projects().delete(projectId).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+            managerCow.operations().operationCow(deleteOperation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(30));
+
     // After "deletion," the project still exists for up to 30 days where it can be recovered.
     project = managerCow.projects().get(projectId).execute();
-    assertEquals("DELETE_REQUESTED", project.getLifecycleState());
+    assertEquals("DELETE_REQUESTED", project.getState());
   }
 
   @Test

@@ -7,9 +7,9 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
-import com.google.api.services.cloudresourcemanager.CloudResourceManager;
-import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
-import com.google.api.services.cloudresourcemanager.model.*;
+import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager;
+import com.google.api.services.cloudresourcemanager.v3.CloudResourceManagerScopes;
+import com.google.api.services.cloudresourcemanager.v3.model.*;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.gson.Gson;
@@ -92,13 +92,17 @@ public class CloudResourceManagerCow {
       }
     }
 
-    /** See {@link CloudResourceManager.Projects#delete(String)}. */
-    public Delete delete(String projectId) throws IOException {
-      return new Delete(projects.delete(projectId));
+    /**
+     * See {@link CloudResourceManager.Projects#delete(String)}.
+     *
+     * <p>CRL will add the required 'projects/` prefix if not included in {@code name}.
+     */
+    public Delete delete(String name) throws IOException {
+      return new Delete(projects.delete(prefixProjects(name)));
     }
 
     /** See {@link CloudResourceManager.Projects.Delete}. */
-    public class Delete extends AbstractRequestCow<Empty> {
+    public class Delete extends AbstractRequestCow<Operation> {
       private final CloudResourceManager.Projects.Delete delete;
 
       private Delete(CloudResourceManager.Projects.Delete delete) {
@@ -112,13 +116,17 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(delete.getProjectId());
+        return serializeProjectName(delete.getName());
       }
     }
 
-    /** See {@link CloudResourceManager.Projects#get(String)}. */
-    public Get get(String projectId) throws IOException {
-      return new Get(projects.get(projectId));
+    /**
+     * See {@link CloudResourceManager.Projects#get(String)}.
+     *
+     * <p>CRL will add the required 'projects/` prefix if not included in {@code name}.
+     */
+    public Get get(String name) throws IOException {
+      return new Get(projects.get(prefixProjects(name)));
     }
 
     /** See {@link CloudResourceManager.Projects.Get} */
@@ -136,14 +144,18 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(get.getProjectId());
+        return serializeProjectName(get.getName());
       }
     }
 
-    /** See {@link CloudResourceManager.Projects#getIamPolicy(String, GetIamPolicyRequest)}. */
+    /**
+     * See {@link CloudResourceManager.Projects#getIamPolicy(String, GetIamPolicyRequest)}.
+     *
+     * <p>CRL will add the required 'projects/` prefix if not included in the name.
+     */
     public GetIamPolicy getIamPolicy(String resource, GetIamPolicyRequest content)
         throws IOException {
-      return new GetIamPolicy(projects.getIamPolicy(resource, content));
+      return new GetIamPolicy(projects.getIamPolicy(prefixProjects(resource), content));
     }
 
     /** See {@link CloudResourceManager.Projects.GetIamPolicy}. */
@@ -161,14 +173,18 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(getIamPolicy.getResource());
+        return serializeProjectName(getIamPolicy.getResource());
       }
     }
 
-    /** See {@link CloudResourceManager.Projects#setIamPolicy(String, SetIamPolicyRequest)} )}. */
+    /**
+     * See {@link CloudResourceManager.Projects#setIamPolicy(String, SetIamPolicyRequest)} )}.
+     *
+     * <p>CRL will add the required 'projects/` prefix if not included in {@code resource}.
+     */
     public SetIamPolicy setIamPolicy(String resource, SetIamPolicyRequest content)
         throws IOException {
-      return new SetIamPolicy(projects.setIamPolicy(resource, content));
+      return new SetIamPolicy(projects.setIamPolicy(prefixProjects(resource), content));
     }
 
     /** See {@link CloudResourceManager.Projects.SetIamPolicy}. */
@@ -186,15 +202,28 @@ public class CloudResourceManagerCow {
 
       @Override
       protected JsonObject serialize() {
-        return serializeProjectId(setIamPolicy.getResource());
+        return serializeProjectName(setIamPolicy.getResource());
       }
     }
 
-    private JsonObject serializeProjectId(String projectId) {
+    private JsonObject serializeProjectName(String projectId) {
       JsonObject result = new JsonObject();
-      result.addProperty("project_id", projectId);
+      result.addProperty("project_name", projectId);
       return result;
     }
+  }
+
+  /**
+   * Helper function to prefix Project operation arguments with the required "projects/" prefix.
+   *
+   * <p>This is used on {@link Projects} to allow CRL clients to directly pass project ids or
+   * numbers, or the already prefixed name. It can also be called explicitly.
+   */
+  public static String prefixProjects(String name) {
+    if (name.startsWith("projects/")) {
+      return name;
+    }
+    return "projects/" + name;
   }
 
   public Operations operations() {
