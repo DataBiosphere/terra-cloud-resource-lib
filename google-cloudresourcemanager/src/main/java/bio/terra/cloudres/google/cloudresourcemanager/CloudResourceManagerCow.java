@@ -216,10 +216,10 @@ public class CloudResourceManagerCow {
   /**
    * Helper function to prefix Project operation arguments with the required "projects/" prefix.
    *
-   * <p>This allow CRL clients to directly pass project ids or numbers, or the already prefixed
-   * name.
+   * <p>This is used on {@link Projects} to allow CRL clients to directly pass project ids or
+   * numbers, or the already prefixed name. It can also be called explicitly.
    */
-  private static String prefixProjects(String name) {
+  public static String prefixProjects(String name) {
     if (name.startsWith("projects/")) {
       return name;
     }
