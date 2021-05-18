@@ -11,7 +11,7 @@ import java.time.Duration;
 
 /** Testing utilities for projects. */
 public class ProjectUtils {
-  /** What parent resource (organizatino or folder) to create projects within. */
+  /** What parent resource (organization or folder) to create projects within. */
   // TODO(PF-67): Figure out how to pipe configuration to test.
   // Current value from vault 'config/terraform/terra/crl-test/default/container_folder_id'.
   public static final String PARENT_RESOURCE = "folders/866104354540";

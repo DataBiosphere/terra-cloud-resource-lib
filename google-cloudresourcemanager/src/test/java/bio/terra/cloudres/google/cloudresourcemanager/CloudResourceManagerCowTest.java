@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
@@ -51,7 +52,12 @@ public class CloudResourceManagerCowTest {
     assertEquals(projectId, project.getProjectId());
     assertEquals("ACTIVE", project.getState());
 
-    managerCow.projects().delete(projectId).execute();
+    Operation deleteOperation = managerCow.projects().delete(projectId).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+            managerCow.operations().operationCow(deleteOperation),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(30));
+
     // After "deletion," the project still exists for up to 30 days where it can be recovered.
     project = managerCow.projects().get(projectId).execute();
     assertEquals("DELETE_REQUESTED", project.getState());
