@@ -95,6 +95,11 @@ public class BucketCow {
       return this;
     }
 
+    public Builder setStorageClass(StorageClass storageClass) {
+      bucketBuilder.setStorageClass(storageClass);
+      return this;
+    }
+
     public Builder setLifecycleRules(Iterable<? extends BucketInfo.LifecycleRule> rules) {
       bucketBuilder.setLifecycleRules(rules);
       return this;
