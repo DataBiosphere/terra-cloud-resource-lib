@@ -3,7 +3,7 @@ dependencies {
     api project(':google-api-services-common')
     implementation project(':cloud-resource-schema')
 
-    api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20210411-1.31.0'
+    api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v1-rev20200810-1.30.10'
 
     testImplementation(testFixtures(project(':google-api-services-common')))
     testFixturesImplementation(testFixtures(project(':google-api-services-common')))

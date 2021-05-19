@@ -11,7 +11,7 @@ import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.services.cloudresourcemanager.v3.model.Project;
+import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.DnsScopes;
 import com.google.api.services.dns.model.Change;
