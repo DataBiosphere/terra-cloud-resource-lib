@@ -49,6 +49,63 @@ public class CloudResourceManagerCow {
             .setApplicationName(clientConfig.getClientName()));
   }
 
+  public Folders folders() {
+    return new Folders(manager.folders());
+  }
+
+  /** See {@link CloudResourceManager.Folders}. */
+  public class Folders {
+    private final CloudResourceManager.Folders folders;
+
+    private Folders(CloudResourceManager.Folders folders) {
+      this.folders = folders;
+    }
+
+    /**
+     * See {@link CloudResourceManager.Folders#testIamPermissions(String,
+     * TestIamPermissionsRequest)}.
+     */
+    public TestIamPermissions testIamPermissions(String resource, TestIamPermissionsRequest request)
+        throws IOException {
+      return new TestIamPermissions(folders.testIamPermissions(resource, request));
+    }
+
+    /** See {@link CloudResourceManager.Folders.TestIamPermissions}. */
+    public class TestIamPermissions extends AbstractRequestCow<TestIamPermissionsResponse> {
+      private final CloudResourceManager.Folders.TestIamPermissions testIamPermissions;
+
+      private TestIamPermissions(
+          CloudResourceManager.Folders.TestIamPermissions testIamPermissions) {
+        super(
+            CloudResourceManagerOperation.GOOGLE_TEST_IAM_PERMISSIONS_FOLDER,
+            clientConfig,
+            operationAnnotator,
+            testIamPermissions);
+        this.testIamPermissions = testIamPermissions;
+      }
+
+      /** See {@link CloudResourceManager.Folders.TestIamPermissions#getResource()} */
+      public String getResource() {
+        return testIamPermissions.getResource();
+      }
+
+      public TestIamPermissions setResource(String resource) {
+        testIamPermissions.setResource(resource);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("resource", getResource());
+        result.add(
+            "content",
+            new Gson().toJsonTree(testIamPermissions.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+  }
+
   public Projects projects() {
     return new Projects(manager.projects());
   }

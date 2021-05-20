@@ -3,7 +3,6 @@ package bio.terra.cloudres.google.cloudresourcemanager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
@@ -35,6 +34,20 @@ public class CloudResourceManagerCowTest {
   }
 
   @Test
+  public void testIamPermissionsFolder() throws Exception {
+    String getProjectPermission = "resourcemanager.projects.get";
+    TestIamPermissionsResponse response =
+        defaultManager()
+            .folders()
+            .testIamPermissions(
+                ProjectUtils.PARENT_RESOURCE,
+                new TestIamPermissionsRequest()
+                    .setPermissions(ImmutableList.of(getProjectPermission)))
+            .execute();
+    assertThat(response.getPermissions(), Matchers.contains(getProjectPermission));
+  }
+
+  @Test
   public void createGetDeleteProject() throws Exception {
     CloudResourceManagerCow managerCow = defaultManager();
     String projectId = ProjectUtils.randomProjectId();
@@ -54,9 +67,9 @@ public class CloudResourceManagerCowTest {
 
     Operation deleteOperation = managerCow.projects().delete(projectId).execute();
     OperationTestUtils.pollAndAssertSuccess(
-            managerCow.operations().operationCow(deleteOperation),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(30));
+        managerCow.operations().operationCow(deleteOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(30));
 
     // After "deletion," the project still exists for up to 30 days where it can be recovered.
     project = managerCow.projects().get(projectId).execute();
@@ -89,5 +102,18 @@ public class CloudResourceManagerCowTest {
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
 
     managerCow.projects().delete(projectId).execute();
+  }
+
+  @Test
+  public void testIamPermissionsFolderSerializer() throws Exception {
+    assertEquals(
+        "{\"resource\":\"folders/1234\",\"content\":{\"permissions\":[\"myPermission\"]}}",
+        defaultManager()
+            .folders()
+            .testIamPermissions(
+                "folders/1234",
+                new TestIamPermissionsRequest().setPermissions(ImmutableList.of("myPermission")))
+            .serialize()
+            .toString());
   }
 }
