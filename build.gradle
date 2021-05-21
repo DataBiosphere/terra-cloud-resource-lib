@@ -33,7 +33,7 @@ subprojects { subproject ->
 
     dependencies {
         ext {
-            janitorclient = '0.3.0-SNAPSHOT'
+            janitorclient = '0.4.0-SNAPSHOT'
         }
         // Google dependencies - make sure we are using -jre and not android and use common bom
         constraints {

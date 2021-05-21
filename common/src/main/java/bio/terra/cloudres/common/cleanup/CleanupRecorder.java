@@ -4,6 +4,7 @@ import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.JanitorException;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
+import bio.terra.janitor.model.ResourceMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -21,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +37,16 @@ public class CleanupRecorder {
   private static Clock clock = Clock.systemUTC();
 
   public static void record(CloudResourceUid resource, ClientConfig clientConfig) {
+    record(resource, null, clientConfig);
+  }
+
+  public static void record(
+      CloudResourceUid resource, @Nullable ResourceMetadata metadata, ClientConfig clientConfig) {
     if (!clientConfig.getCleanupConfig().isPresent()) {
       return;
     }
 
-    publish(resource, clientConfig);
+    publish(resource, metadata, clientConfig);
     testRecord.add(resource);
   }
 
@@ -64,7 +71,8 @@ public class CleanupRecorder {
     clock = newClock;
   }
 
-  private static void publish(CloudResourceUid resource, ClientConfig clientConfig) {
+  private static void publish(
+      CloudResourceUid resource, @Nullable ResourceMetadata metadata, ClientConfig clientConfig) {
     CleanupConfig cleanupConfig = clientConfig.getCleanupConfig().get();
     if (publisher == null) {
       // Provide a new publisher if not present.
@@ -91,6 +99,7 @@ public class CleanupRecorder {
     CreateResourceRequestBody body =
         new CreateResourceRequestBody()
             .resourceUid(resource)
+            .resourceMetadata(metadata)
             .creation(now)
             .expiration(now.plus(cleanupConfig.timeToLive()))
             .putLabelsItem("client", clientConfig.getClientName())
