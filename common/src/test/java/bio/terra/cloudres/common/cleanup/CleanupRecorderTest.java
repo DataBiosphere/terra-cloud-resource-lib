@@ -8,6 +8,8 @@ import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.CreateResourceRequestBody;
 import bio.terra.janitor.model.GoogleBucketUid;
+import bio.terra.janitor.model.GoogleProjectUid;
+import bio.terra.janitor.model.ResourceMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -69,7 +71,9 @@ public class CleanupRecorderTest {
   private static final CloudResourceUid RESOURCE_2 =
       new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName("2"));
   private static final CloudResourceUid RESOURCE_3 =
-      new CloudResourceUid().googleBucketUid(new GoogleBucketUid().bucketName("3"));
+      new CloudResourceUid().googleProjectUid(new GoogleProjectUid().projectId("my-project"));
+  private static final ResourceMetadata METADATA =
+      new ResourceMetadata().googleProjectParent("parent");
 
   private static final CreateResourceRequestBody MESSAGE_BODY =
       new CreateResourceRequestBody()
@@ -128,7 +132,7 @@ public class CleanupRecorderTest {
   public void recordWithJanitorApiCInvoked() throws Exception {
     CleanupRecorder.record(RESOURCE_1, CLIENT_CONFIG);
     CleanupRecorder.record(RESOURCE_2, CLIENT_CONFIG);
-    CleanupRecorder.record(RESOURCE_3, CLIENT_CONFIG);
+    CleanupRecorder.record(RESOURCE_3, METADATA, CLIENT_CONFIG);
 
     verify(mockPublisher, times(3)).publish(messageArgumentCaptor.capture());
 
@@ -139,6 +143,7 @@ public class CleanupRecorderTest {
         Matchers.containsInAnyOrder(
             objectMapper.writeValueAsString(MESSAGE_BODY.resourceUid(RESOURCE_1)),
             objectMapper.writeValueAsString(MESSAGE_BODY.resourceUid(RESOURCE_2)),
-            objectMapper.writeValueAsString(MESSAGE_BODY.resourceUid(RESOURCE_3))));
+            objectMapper.writeValueAsString(
+                MESSAGE_BODY.resourceUid(RESOURCE_3).resourceMetadata(METADATA))));
   }
 }

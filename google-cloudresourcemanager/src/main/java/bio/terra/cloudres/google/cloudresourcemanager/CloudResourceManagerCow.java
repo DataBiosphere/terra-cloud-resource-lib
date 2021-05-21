@@ -7,6 +7,7 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleProjectUid;
+import bio.terra.janitor.model.ResourceMetadata;
 import com.google.api.services.cloudresourcemanager.v3.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.v3.CloudResourceManagerScopes;
 import com.google.api.services.cloudresourcemanager.v3.model.*;
@@ -141,6 +142,11 @@ public class CloudResourceManagerCow {
         return Optional.of(
             new CloudResourceUid()
                 .googleProjectUid(new GoogleProjectUid().projectId(project.getProjectId())));
+      }
+
+      @Override
+      protected Optional<ResourceMetadata> resourceCreationMetadata() {
+        return Optional.of(new ResourceMetadata().googleProjectParent(project.getParent()));
       }
 
       @Override
