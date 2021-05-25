@@ -148,17 +148,17 @@ artifactory {
         }
         defaults {
             publications(
-                    'cloud-resource-schema',
-                    'common',
-                    'google-api-services-common',
-                    'google-bigquery',
-                    'google-billing',
-                    'google-cloudresourcemanager',
-                    'google-compute',
-                    'google-dns',
-                    'google-iam',
-                    'google-notebooks',
-                    'google-serviceusage',
+//                    'cloud-resource-schema',
+//                    'common',
+//                    'google-api-services-common',
+//                    'google-bigquery',
+//                    'google-billing',
+//                    'google-cloudresourcemanager',
+//                    'google-compute',
+//                    'google-dns',
+//                    'google-iam',
+//                    'google-notebooks',
+//                    'google-serviceusage',
                     'google-storage')
         }
     }
