@@ -105,6 +105,11 @@ public class BucketCow {
       return this;
     }
 
+    public Builder deleteLifecycleRules() {
+      bucketBuilder.deleteLifecycleRules();
+      return this;
+    }
+
     public Builder setAcl(Iterable<Acl> acl) {
       bucketBuilder.setAcl(acl);
       return this;
