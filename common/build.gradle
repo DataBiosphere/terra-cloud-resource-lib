@@ -1,3 +1,9 @@
+plugins {
+  // Use common Gradle settings for Java libraries defined in conventions plugin:
+  // /buildSrc/src/main/groovy/terra-cloud-resource-lib.library-conventions.gradle
+  id 'terra-cloud-resource-lib.library-conventions'
+}
+
 dependencies {
     implementation group: 'io.opencensus', name: 'opencensus-api', version: '0.28.3'
     implementation group: 'io.opencensus', name: 'opencensus-impl', version: '0.28.3'
