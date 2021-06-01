@@ -37,7 +37,8 @@ artifactory {
                     'google-iam',
                     'google-notebooks',
                     'google-serviceusage',
-                    'google-storage')
+                    'google-storage',
+                    'platform')
         }
     }
 }
