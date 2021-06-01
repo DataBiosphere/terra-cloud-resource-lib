@@ -1,6 +1,8 @@
 plugins {
     id 'java-platform'
     id 'maven-publish'
+
+    id 'com.jfrog.artifactory'
 }
 
 group = 'bio.terra.cloud-resource-lib'

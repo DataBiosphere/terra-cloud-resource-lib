@@ -5,6 +5,7 @@ plugins {
     id 'maven-publish'
 
     id 'com.diffplug.gradle.spotless'
+    id 'com.jfrog.artifactory'
 }
 
 group = 'bio.terra.cloud-resource-lib'
