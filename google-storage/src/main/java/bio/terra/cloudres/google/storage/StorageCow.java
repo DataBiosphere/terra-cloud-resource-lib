@@ -168,10 +168,7 @@ public class StorageCow {
         () -> serializeBucketName(bucket));
   }
 
-  /**
-   * See {@link Storage#testIamPermissions(String, List, BucketSourceOption...)} (String, Policy,
-   * Storage.BucketSourceOption...)}.
-   */
+  /** See {@link Storage#testIamPermissions(String, List, BucketSourceOption...)}. */
   public List<Boolean> testIamPermissions(String bucket, List<String> permissions) {
     return operationAnnotator.executeCowOperation(
         StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS,
