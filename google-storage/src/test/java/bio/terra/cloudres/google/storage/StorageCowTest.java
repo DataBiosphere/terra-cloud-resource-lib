@@ -145,6 +145,14 @@ public class StorageCowTest {
             .addIdentity(StorageRoles.objectCreator(), expectedIdentity)
             .build());
 
+    StorageCow testUserCow = StorageIntegrationUtils.testUserStorageCow();
+    // StorageRoles.objectCreator() does grant storage.objects.create, but not storage.objects.get
+    List<String> expectedPermissions = ImmutableList.of("storage.objects.create", "storage.objects.get");
+    List<Boolean> testedPermissions = testUserCow.testIamPermissions(bucketName, expectedPermissions);
+    assertEquals(2, testedPermissions.size());
+    assertEquals(true, testedPermissions.get(0));
+    assertEquals(false, testedPermissions.get(1));
+
     Policy postUpdatePolicy = storageCow.getIamPolicy(bucketName);
     assertThat(
         postUpdatePolicy.getBindings().get(StorageRoles.objectCreator()),
