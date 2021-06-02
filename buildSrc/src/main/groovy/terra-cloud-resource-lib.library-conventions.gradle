@@ -1,0 +1,133 @@
+// This defines a Convention Plugin that implements the common logic to use
+// for building all Java libraries in the terra-cloud-resource-lib project.
+// If we add any non-library Java subprojects to this repo, we should consider
+// factoring the Java common build logic into a Java Convention plugin to be
+// used by both; for now we only intend to have library projects here.
+//
+// For more info please see:
+//
+// https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html
+// https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#sec:build_sources
+//
+
+plugins {
+    id 'idea'
+    id 'java-library'
+    id 'java-test-fixtures'
+    id 'maven-publish'
+
+    id 'com.diffplug.gradle.spotless'
+    id 'com.jfrog.artifactory'
+}
+
+group = 'bio.terra.cloud-resource-lib'
+sourceCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+    google()
+    maven {
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
+    }
+}
+
+configurations {
+    testImplementation.extendsFrom testFixturesImplementation
+}
+
+dependencies {
+    ext {
+        janitorclient = '0.4.0-SNAPSHOT'
+    }
+    // Google dependencies - make sure we are using -jre and not android and use common bom
+    constraints {
+        implementation 'com.google.guava:guava:30.1.1-jre' // "-jre" for Java 8 or higher
+        testFixturesImplementation 'com.google.guava:guava:30.1.1-jre' // "-jre" for Java 8 or higher
+    }
+    implementation platform('com.google.cloud:libraries-bom:20.2.0')
+    testFixturesImplementation platform('com.google.cloud:libraries-bom:20.2.0')
+
+    api group: 'com.google.auth', name: 'google-auth-library-oauth2-http'
+    api group: 'com.google.cloud', name: 'google-cloud-core-http'
+
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
+    annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'
+    implementation group: 'com.google.auto.value', name: 'auto-value-annotations', version: '1.7.3'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+    api group: 'com.google.guava', name: 'guava'
+
+    implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
+
+    testFixturesImplementation group: 'junit', name: 'junit', version: '4.13'
+    testFixturesImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30' // For simple logging during testing
+    testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
+    testImplementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "2.31"
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'
+
+    testImplementation(testFixtures(project(':common')))
+}
+
+dependencyLocking {
+    lockAllConfigurations() // see https://docs.gradle.org/current/userguide/dependency_locking.html
+}
+
+processTestResources {
+    // Include common/testFixtures/resources for integration test credentials.
+    from("${project(':common:').projectDir}/testFixtures/resources")
+}
+
+// Linter
+spotless {
+    java {
+        googleJavaFormat()
+        targetExclude "${buildDir}/**"
+    }
+}
+
+build.dependsOn spotlessApply
+
+// Modify the standard :test task to only include unit-tagged tests.
+test {
+    useJUnitPlatform {
+        includeTags 'unit'
+    }
+}
+
+// Create a new :integrationTest task to run integration tests. This won't be executed as
+// part of the standard `./gradlew build` invocation.
+task integrationTest(type: Test) {
+    useJUnitPlatform {
+        includeTags "integration"
+    }
+    shouldRunAfter test
+}
+
+java {
+    // Builds Javadoc into the published package as part of the 'assemble' task.
+    withJavadocJar()
+    // Builds sources into the published package as part of the 'assemble' task.
+    withSourcesJar()
+}
+
+// Enforce that 'git secrets' is correctly installed and configured on the
+// current cloned git repo.
+task minniekenny(type: Exec) {
+    commandLine 'sh', file('../minnie-kenny.sh')
+}
+
+test.dependsOn minniekenny
+
+publishing {
+    publications {
+        "$project.name"(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+            from components.java
+            suppressPomMetadataWarningsFor('testFixturesApiElements')
+            suppressPomMetadataWarningsFor('testFixturesApiRuntimeElements')
+        }
+    }
+}

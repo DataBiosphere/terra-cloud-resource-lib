@@ -1,3 +1,9 @@
+plugins {
+  // Use common Gradle settings for Java libraries defined in conventions plugin:
+  // /buildSrc/src/main/groovy/terra-cloud-resource-lib.library-conventions.gradle
+  id 'terra-cloud-resource-lib.library-conventions'
+}
+
 dependencies {
     api project(':common')
 }
