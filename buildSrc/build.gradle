@@ -4,6 +4,7 @@
 // "subprojects{}" and "allprojects{}" constructs.  For more info please see:
 //
 // https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html
+// https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#sec:build_sources
 //
 
 plugins {

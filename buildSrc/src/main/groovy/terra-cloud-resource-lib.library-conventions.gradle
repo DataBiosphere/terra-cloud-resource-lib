@@ -1,3 +1,15 @@
+// This defines a Convention Plugin that implements the common logic to use
+// for building all Java libraries in the terra-cloud-resource-lib project.
+// If we add any non-library Java subprojects to this repo, we should consider
+// factoring the Java common build logic into a Java Convention plugin to be
+// used by both; for now we only intend to have library projects here.
+//
+// For more info please see:
+//
+// https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html
+// https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#sec:build_sources
+//
+
 plugins {
     id 'idea'
     id 'java-library'
@@ -99,6 +111,8 @@ java {
     withSourcesJar()
 }
 
+// Enforce that 'git secrets' is correctly installed and configured on the
+// current cloned git repo.
 task minniekenny(type: Exec) {
     commandLine 'sh', file('../minnie-kenny.sh')
 }
