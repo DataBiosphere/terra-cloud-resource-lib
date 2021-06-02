@@ -168,14 +168,18 @@ public class StorageCow {
         () -> serializeBucketName(bucket));
   }
 
-  /** See {@link Storage#testIamPermissions(String, List, BucketSourceOption...)} (String, Policy, Storage.BucketSourceOption...)}. */
+  /**
+   * See {@link Storage#testIamPermissions(String, List, BucketSourceOption...)} (String, Policy,
+   * Storage.BucketSourceOption...)}.
+   */
   public List<Boolean> testIamPermissions(String bucket, List<String> permissions) {
-    return operationAnnotator.executeCowOperation(StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS,
+    return operationAnnotator.executeCowOperation(
+        StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS,
         () -> storage.testIamPermissions(bucket, permissions),
         () -> {
           JsonObject request = new JsonObject();
           Gson gson = new Gson();
-          Type permissionsType = new TypeToken<List<Boolean>>(){}.getType();
+          Type permissionsType = new TypeToken<List<Boolean>>() {}.getType();
           request.add("bucket", serializeBucketName(bucket));
           request.add("permissions", gson.toJsonTree(permissions, permissionsType));
           return request;
