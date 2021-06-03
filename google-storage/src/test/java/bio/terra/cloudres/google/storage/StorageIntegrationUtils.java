@@ -25,28 +25,23 @@ class StorageIntegrationUtils {
   private StorageIntegrationUtils() {}
 
   static StorageCow defaultStorageCow() {
-    return new StorageCow(IntegrationUtils.DEFAULT_CLIENT_CONFIG, defaultStorageOptions());
+    ServiceAccountCredentials googleCredentials =
+        IntegrationCredentials.getAdminGoogleCredentialsOrDie();
+    return new StorageCow(
+        IntegrationUtils.DEFAULT_CLIENT_CONFIG, buildStorageOptions(googleCredentials));
   }
 
   static StorageCow testUserStorageCow() {
-    return new StorageCow(IntegrationUtils.DEFAULT_CLIENT_CONFIG, testUserStorageOptions());
-  }
-
-  static StorageOptions defaultStorageOptions() {
-    ServiceAccountCredentials googleCredentials =
-        IntegrationCredentials.getAdminGoogleCredentialsOrDie();
-    return StorageOptions.newBuilder()
-        .setCredentials(googleCredentials)
-        .setProjectId(googleCredentials.getProjectId())
-        .build();
-  }
-
-  static StorageOptions testUserStorageOptions() {
-    ServiceAccountCredentials testUserCredentials =
+    ServiceAccountCredentials userCredentials =
         IntegrationCredentials.getUserGoogleCredentialsOrDie();
+    return new StorageCow(
+        IntegrationUtils.DEFAULT_CLIENT_CONFIG, buildStorageOptions(userCredentials));
+  }
+
+  static StorageOptions buildStorageOptions(ServiceAccountCredentials credentials) {
     return StorageOptions.newBuilder()
-        .setCredentials(testUserCredentials)
-        .setProjectId(testUserCredentials.getProjectId())
+        .setCredentials(credentials)
+        .setProjectId(credentials.getProjectId())
         .build();
   }
 

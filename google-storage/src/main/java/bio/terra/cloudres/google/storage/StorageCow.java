@@ -9,10 +9,9 @@ import com.google.cloud.Policy;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
 import com.google.cloud.storage.Storage.BucketSourceOption;
-import com.google.gson.Gson;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,14 +172,20 @@ public class StorageCow {
     return operationAnnotator.executeCowOperation(
         StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS,
         () -> storage.testIamPermissions(bucket, permissions),
-        () -> {
-          JsonObject request = new JsonObject();
-          Gson gson = new Gson();
-          Type permissionsType = new TypeToken<List<Boolean>>() {}.getType();
-          request.add("bucket", serializeBucketName(bucket));
-          request.add("permissions", gson.toJsonTree(permissions, permissionsType));
-          return request;
-        });
+        serializeTestIamPermissions(bucket, permissions));
+  }
+
+  @VisibleForTesting
+  public OperationAnnotator.CowSerialize serializeTestIamPermissions(
+      String bucket, List<String> permissions) {
+    return () -> {
+      JsonObject request = new JsonObject();
+      JsonArray serializedPermissions = new JsonArray();
+      permissions.forEach(serializedPermissions::add);
+      request.add("bucket", serializeBucketName(bucket));
+      request.add("permissions", serializedPermissions);
+      return request;
+    };
   }
 
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */

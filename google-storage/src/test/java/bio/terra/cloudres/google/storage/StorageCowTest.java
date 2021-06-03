@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.storage;
 import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
@@ -152,8 +153,8 @@ public class StorageCowTest {
     List<Boolean> testedPermissions =
         testUserCow.testIamPermissions(bucketName, expectedPermissions);
     assertEquals(2, testedPermissions.size());
-    assertEquals(true, testedPermissions.get(0));
-    assertEquals(false, testedPermissions.get(1));
+    assertTrue(testedPermissions.get(0));
+    assertFalse(testedPermissions.get(1));
 
     Policy postUpdatePolicy = storageCow.getIamPolicy(bucketName);
     assertThat(
@@ -183,5 +184,15 @@ public class StorageCowTest {
                         .blobName(blobId.getName())
                         .bucketName(blobId.getBucket()))));
     assertTrue(storageCow.delete(blobId));
+  }
+
+  @Test
+  public void serializeTestIamPermissions() {
+    StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
+    String bucket = "my-bucket";
+    List<String> permissions = ImmutableList.of("storage.objects.create", "storage.objects.get");
+    assertEquals(
+        "{\"bucket\":{\"bucket_name\":\"my-bucket\"},\"permissions\":[\"storage.objects.create\",\"storage.objects.get\"]}",
+        storageCow.serializeTestIamPermissions(bucket, permissions).serializeRequest().toString());
   }
 }
