@@ -25,15 +25,23 @@ class StorageIntegrationUtils {
   private StorageIntegrationUtils() {}
 
   static StorageCow defaultStorageCow() {
-    return new StorageCow(IntegrationUtils.DEFAULT_CLIENT_CONFIG, defaultStorageOptions());
-  }
-
-  static StorageOptions defaultStorageOptions() {
     ServiceAccountCredentials googleCredentials =
         IntegrationCredentials.getAdminGoogleCredentialsOrDie();
+    return new StorageCow(
+        IntegrationUtils.DEFAULT_CLIENT_CONFIG, buildStorageOptions(googleCredentials));
+  }
+
+  static StorageCow testUserStorageCow() {
+    ServiceAccountCredentials userCredentials =
+        IntegrationCredentials.getUserGoogleCredentialsOrDie();
+    return new StorageCow(
+        IntegrationUtils.DEFAULT_CLIENT_CONFIG, buildStorageOptions(userCredentials));
+  }
+
+  static StorageOptions buildStorageOptions(ServiceAccountCredentials credentials) {
     return StorageOptions.newBuilder()
-        .setCredentials(googleCredentials)
-        .setProjectId(googleCredentials.getProjectId())
+        .setCredentials(credentials)
+        .setProjectId(credentials.getProjectId())
         .build();
   }
 

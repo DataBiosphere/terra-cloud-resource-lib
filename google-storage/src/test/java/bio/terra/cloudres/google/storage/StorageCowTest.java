@@ -3,6 +3,7 @@ package bio.terra.cloudres.google.storage;
 import static bio.terra.cloudres.google.storage.StorageIntegrationUtils.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
@@ -145,6 +146,16 @@ public class StorageCowTest {
             .addIdentity(StorageRoles.objectCreator(), expectedIdentity)
             .build());
 
+    StorageCow testUserCow = StorageIntegrationUtils.testUserStorageCow();
+    // StorageRoles.objectCreator() does grant storage.objects.create, but not storage.objects.get
+    List<String> expectedPermissions =
+        ImmutableList.of("storage.objects.create", "storage.objects.get");
+    List<Boolean> testedPermissions =
+        testUserCow.testIamPermissions(bucketName, expectedPermissions);
+    assertEquals(2, testedPermissions.size());
+    assertTrue(testedPermissions.get(0));
+    assertFalse(testedPermissions.get(1));
+
     Policy postUpdatePolicy = storageCow.getIamPolicy(bucketName);
     assertThat(
         postUpdatePolicy.getBindings().get(StorageRoles.objectCreator()),
@@ -173,5 +184,15 @@ public class StorageCowTest {
                         .blobName(blobId.getName())
                         .bucketName(blobId.getBucket()))));
     assertTrue(storageCow.delete(blobId));
+  }
+
+  @Test
+  public void serializeTestIamPermissions() {
+    StorageCow storageCow = StorageIntegrationUtils.defaultStorageCow();
+    String bucket = "my-bucket";
+    List<String> permissions = ImmutableList.of("storage.objects.create", "storage.objects.get");
+    assertEquals(
+        "{\"bucket\":{\"bucket_name\":\"my-bucket\"},\"permissions\":[\"storage.objects.create\",\"storage.objects.get\"]}",
+        storageCow.serializeTestIamPermissions(bucket, permissions).serializeRequest().toString());
   }
 }

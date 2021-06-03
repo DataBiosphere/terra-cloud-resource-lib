@@ -8,7 +8,11 @@ import bio.terra.janitor.model.GoogleBucketUid;
 import com.google.cloud.Policy;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.storage.*;
+import com.google.cloud.storage.Storage.BucketSourceOption;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +149,7 @@ public class StorageCow {
   /** See {@link Storage#setIamPolicy(String, Policy, Storage.BucketSourceOption...)}. */
   public Policy setIamPolicy(String bucket, Policy policy) {
     return operationAnnotator.executeCowOperation(
-        StorageOperation.GOOGLE_SET_IAM_POLICY,
+        StorageOperation.GOOGLE_SET_IAM_POLICY_BUCKET,
         () -> storage.setIamPolicy(bucket, policy),
         () -> {
           JsonObject request = new JsonObject();
@@ -158,9 +162,30 @@ public class StorageCow {
   /** See {@link Storage#getIamPolicy(String, Storage.BucketSourceOption...)}. */
   public Policy getIamPolicy(String bucket) {
     return operationAnnotator.executeCowOperation(
-        StorageOperation.GOOGLE_GET_IAM_POLICY,
+        StorageOperation.GOOGLE_GET_IAM_POLICY_BUCKET,
         () -> storage.getIamPolicy(bucket),
         () -> serializeBucketName(bucket));
+  }
+
+  /** See {@link Storage#testIamPermissions(String, List, BucketSourceOption...)}. */
+  public List<Boolean> testIamPermissions(String bucket, List<String> permissions) {
+    return operationAnnotator.executeCowOperation(
+        StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS_BUCKET,
+        () -> storage.testIamPermissions(bucket, permissions),
+        serializeTestIamPermissions(bucket, permissions));
+  }
+
+  @VisibleForTesting
+  OperationAnnotator.CowSerialize serializeTestIamPermissions(
+      String bucket, List<String> permissions) {
+    return () -> {
+      JsonObject request = new JsonObject();
+      JsonArray serializedPermissions = new JsonArray();
+      permissions.forEach(serializedPermissions::add);
+      request.add("bucket", serializeBucketName(bucket));
+      request.add("permissions", serializedPermissions);
+      return request;
+    };
   }
 
   /** See {@link Storage#writer(BlobInfo, Storage.BlobWriteOption...)} */
