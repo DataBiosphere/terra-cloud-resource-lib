@@ -149,7 +149,7 @@ public class StorageCow {
   /** See {@link Storage#setIamPolicy(String, Policy, Storage.BucketSourceOption...)}. */
   public Policy setIamPolicy(String bucket, Policy policy) {
     return operationAnnotator.executeCowOperation(
-        StorageOperation.GOOGLE_SET_IAM_POLICY,
+        StorageOperation.GOOGLE_SET_IAM_POLICY_BUCKET,
         () -> storage.setIamPolicy(bucket, policy),
         () -> {
           JsonObject request = new JsonObject();
@@ -162,7 +162,7 @@ public class StorageCow {
   /** See {@link Storage#getIamPolicy(String, Storage.BucketSourceOption...)}. */
   public Policy getIamPolicy(String bucket) {
     return operationAnnotator.executeCowOperation(
-        StorageOperation.GOOGLE_GET_IAM_POLICY,
+        StorageOperation.GOOGLE_GET_IAM_POLICY_BUCKET,
         () -> storage.getIamPolicy(bucket),
         () -> serializeBucketName(bucket));
   }
@@ -170,13 +170,13 @@ public class StorageCow {
   /** See {@link Storage#testIamPermissions(String, List, BucketSourceOption...)}. */
   public List<Boolean> testIamPermissions(String bucket, List<String> permissions) {
     return operationAnnotator.executeCowOperation(
-        StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS,
+        StorageOperation.GOOGLE_TEST_IAM_PERMISSIONS_BUCKET,
         () -> storage.testIamPermissions(bucket, permissions),
         serializeTestIamPermissions(bucket, permissions));
   }
 
   @VisibleForTesting
-  public OperationAnnotator.CowSerialize serializeTestIamPermissions(
+  OperationAnnotator.CowSerialize serializeTestIamPermissions(
       String bucket, List<String> permissions) {
     return () -> {
       JsonObject request = new JsonObject();
