@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -170,6 +171,82 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void createAndGetAndDeleteRouter() throws Exception {
+    final CloudComputeCow cloudComputeCow = defaultCompute();
+
+    final String projectId = reusableProject.getProjectId();
+    final String region = "us-west1";
+
+    // Create parent network
+    final String networkName = randomNetworkName();
+    final Network network = new Network().setName(networkName).setAutoCreateSubnetworks(false);
+    final Operation insertNetworkOperation =
+        cloudComputeCow.networks().insert(projectId, network).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, insertNetworkOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
+
+    final String routerName = randomRouterName();
+    final String gatewayName = randomGatewayName();
+    final RouterNat nat =
+        new RouterNat()
+            .setName(gatewayName)
+            .setSourceSubnetworkIpRangesToNat("ALL_SUBNETWORKS_ALL_IP_RANGES")
+            .setNatIpAllocateOption("AUTO_ONLY");
+    final Router router =
+        new Router()
+            .setName(routerName)
+            .setRegion(region)
+            .setNetwork(networkName(projectId, networkName))
+            .setNats(ImmutableList.of(nat));
+    final Operation insertRouterOperation =
+        cloudComputeCow.routers().insert(projectId, region, router).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.regionalOperations().operationCow(projectId, region, insertRouterOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
+
+    final Router createdRouter =
+        cloudComputeCow.routers().get(projectId, region, routerName).execute();
+
+    assertEquals(routerName, createdRouter.getName());
+    assertEquals(regionName(projectId, region), createdRouter.getRegion());
+    assertEquals(networkName(projectId, networkName), createdRouter.getNetwork());
+
+    final List<RouterNat> nats = createdRouter.getNats();
+    assertEquals(nats.size(), 1);
+    final RouterNat createdNat = nats.get(0);
+    assertEquals(gatewayName, createdNat.getName());
+    assertEquals("ALL_SUBNETWORKS_ALL_IP_RANGES", createdNat.getSourceSubnetworkIpRangesToNat());
+    assertEquals("AUTO_ONLY", createdNat.getNatIpAllocateOption());
+
+    final Operation deleteRouterOperation =
+        cloudComputeCow.routers().delete(projectId, region, routerName).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.regionalOperations().operationCow(projectId, region, deleteRouterOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
+    final GoogleJsonResponseException deleteRouterException =
+        assertThrows(
+            GoogleJsonResponseException.class,
+            () -> cloudComputeCow.routers().get(projectId, region, routerName).execute());
+    assertEquals(404, deleteRouterException.getStatusCode());
+
+    final Operation deleteNetworkOperation =
+        cloudComputeCow.networks().delete(projectId, networkName).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, deleteNetworkOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
+    final GoogleJsonResponseException deleteNetworkException =
+        assertThrows(
+            GoogleJsonResponseException.class,
+            () -> cloudComputeCow.networks().get(projectId, networkName).execute());
+    assertEquals(404, deleteNetworkException.getStatusCode());
+  }
+
+  @Test
   public void getZone() throws Exception {
     Zone zone =
         defaultCompute().zones().get(reusableProject.getProjectId(), "us-east1-b").execute();
@@ -297,6 +374,37 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void routerInsertSerialize() throws Exception {
+    Router router = new Router().setName("router-name");
+    CloudComputeCow.Routers.Insert insert =
+        defaultCompute().routers().insert("project-id", "us-west1", router);
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\",\"router\":{\"name\":\"router-name\"}}",
+        insert.serialize().toString());
+  }
+
+  @Test
+  public void routerGetSerialize() throws Exception {
+    CloudComputeCow.Routers.Get get =
+        defaultCompute().routers().get("project-id", "us-west1", "router-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\",\"router_name\":\"router-name\"}",
+        get.serialize().toString());
+  }
+
+  @Test
+  public void routerDeleteSerialize() throws Exception {
+    CloudComputeCow.Routers.Delete delete =
+        defaultCompute().routers().delete("project-id", "us-west1", "router-name");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\",\"router_name\":\"router-name\"}",
+        delete.serialize().toString());
+  }
+
+  @Test
   public void zoneGetSerialize() throws Exception {
     CloudComputeCow.Zones.Get get = defaultCompute().zones().get("project-id", "us-east1-b");
     assertEquals(
@@ -316,6 +424,18 @@ public class CloudComputeCowTest {
     return "n" + IntegrationUtils.randomName().substring(0, 29);
   }
 
+  public static String randomRouterName() {
+    // Router name ids must start with a lowercase letter followed by up to 62 lowercase letters,
+    // numbers, or hyphens, and cannot end with a hyphen.
+    return "r" + IntegrationUtils.randomName();
+  }
+
+  public static String randomGatewayName() {
+    // Gateway name ids must start with a lowercase letter followed by up to 62 lowercase letters,
+    // numbers, or hyphens, and cannot end with a hyphen.
+    return "g" + IntegrationUtils.randomName();
+  }
+
   /**
    * Create a string matching the region name on {@link Subnetwork#getRegion()} ()}, e.g.
    * https://www.googleapis.com/compute/v1/projects/p-123/regions/us-west1.
@@ -323,5 +443,14 @@ public class CloudComputeCowTest {
   private static String regionName(String projectId, String region) {
     return String.format(
         "https://www.googleapis.com/compute/v1/projects/%s/regions/%s", projectId, region);
+  }
+
+  /**
+   * Create a string matching the network URI on {@link Router#getNetwork()}, e.g.
+   * https://www.googleapis.com/compute/v1/projects/p-123/global/networks/n-456.
+   */
+  private static String networkName(final String projectId, final String network) {
+    return String.format(
+        "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, network);
   }
 }

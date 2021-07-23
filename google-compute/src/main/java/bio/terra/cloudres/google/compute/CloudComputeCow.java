@@ -419,6 +419,112 @@ public class CloudComputeCow {
     }
   }
 
+  public Routers routers() {
+    return new Routers(compute.routers());
+  }
+
+  public class Routers {
+    private final Compute.Routers routers;
+
+    /** See {@link Compute.Routers}. */
+    public Routers(final Compute.Routers routers) {
+      this.routers = routers;
+    }
+
+    /** See {@link Compute.Routers#insert(String, String, Router)}. */
+    public Routers.Insert insert(final String projectId, final String region, final Router router)
+        throws IOException {
+      return new Routers.Insert(
+          routers.insert(projectId, region, router), projectId, region, router);
+    }
+
+    /** See {@link Compute.Routers.Insert}. */
+    public class Insert extends AbstractRequestCow<Operation> {
+      private final String projectId;
+      private final String region;
+      private final Router router;
+
+      public Insert(
+          final Compute.Routers.Insert insert,
+          final String projectId,
+          final String region,
+          final Router router) {
+        super(CloudComputeOperation.GOOGLE_INSERT_ROUTER, clientConfig, operationAnnotator, insert);
+        this.projectId = projectId;
+        this.region = region;
+        this.router = router;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.addProperty("region", region);
+        result.add("router", new Gson().toJsonTree(router).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Routers#delete(String, String, String)}. */
+    public Delete delete(final String projectId, final String region, final String routerName)
+        throws IOException {
+      return new Routers.Delete(
+          routers.delete(projectId, region, routerName), projectId, region, routerName);
+    }
+
+    /** See {@link Compute.Routers.Delete}. */
+    public class Delete extends AbstractRequestCow<Operation> {
+      private final String projectId;
+      private final String region;
+      private final String routerName;
+
+      public Delete(
+          final Compute.Routers.Delete delete,
+          final String projectId,
+          final String region,
+          final String routerName) {
+        super(CloudComputeOperation.GOOGLE_DELETE_ROUTER, clientConfig, operationAnnotator, delete);
+        this.projectId = projectId;
+        this.region = region;
+        this.routerName = routerName;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", projectId);
+        result.addProperty("region", region);
+        result.addProperty("router_name", routerName);
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Routers#get(String, String, String)}. */
+    public Get get(final String projectId, final String region, final String router)
+        throws IOException {
+      return new Get(routers.get(projectId, region, router));
+    }
+
+    /** See {@link Compute.Routers.Get}. */
+    public class Get extends AbstractRequestCow<Router> {
+      private final Compute.Routers.Get get;
+
+      public Get(final Compute.Routers.Get get) {
+        super(CloudComputeOperation.GOOGLE_GET_ROUTER, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("region", get.getRegion());
+        result.addProperty("router_name", get.getRouter());
+        return result;
+      }
+    }
+  }
+
   public Zones zones() {
     return new Zones(compute.zones());
   }
