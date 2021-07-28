@@ -5,3 +5,5 @@ include 'cloud-resource-schema', 'common', 'google-api-services-common', 'google
         'platform'
 
 enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
+include 'azure-resource-manager'
+
