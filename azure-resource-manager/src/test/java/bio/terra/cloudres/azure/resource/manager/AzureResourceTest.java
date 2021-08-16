@@ -3,7 +3,6 @@ package bio.terra.cloudres.azure.resource.manager;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.azure.resouce.manager.*;
-import com.azure.identity.UsernamePasswordCredential;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +19,8 @@ public class AzureResourceTest {
   @BeforeEach
   private void setup() throws IOException {
     profileModel = BillingProfileModel.getFromPropsFile(testPropsFileName);
-    UserNamePasswordCredentials credentials = UserNamePasswordCredentials.getFromPropsFile(testPropsFileName);
+//    SecretCredentials credentials = SecretCredentials.getFromPropsFile(testPropsFileName);
+    UsernamePasswordCredentials credentials = UsernamePasswordCredentials.getFromPropsFile(testPropsFileName);
     resourceConfiguration = new AzureResourceConfiguration(credentials);
     client = new AzureResourceManagerClient(resourceConfiguration, profileModel);
 

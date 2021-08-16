@@ -5,7 +5,7 @@ import com.azure.resourcemanager.*;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentMode;
 import com.azure.resourcemanager.resources.models.ResourceReference;
-import org.gradle.internal.impldep.org.apache.commons.io.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
