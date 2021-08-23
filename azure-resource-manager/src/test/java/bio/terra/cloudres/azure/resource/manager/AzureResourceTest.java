@@ -13,6 +13,7 @@ import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.TargetResource;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 
 @Tag("integration")
+@Disabled
 public class AzureResourceTest {
     private static final Logger logger = LoggerFactory.getLogger(AzureResourceTest.class);
 
