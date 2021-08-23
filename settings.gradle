@@ -2,6 +2,6 @@ rootProject.name = 'terra-cloud-resource-lib'
 include 'cloud-resource-schema', 'common', 'google-api-services-common', 'google-bigquery',
         'google-billing', 'google-cloudresourcemanager', 'google-compute', 'google-dns',
         'google-iam', 'google-notebooks', 'google-serviceusage','google-storage',
-        'platform'
+        'platform', 'azure-resource-manager'
 
 enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')

@@ -35,11 +35,11 @@ public class AzureResourceTest {
     private static final Logger logger = LoggerFactory.getLogger(AzureResourceTest.class);
 
     // TODO replace me
-    private static final String APPLICATION_ID = "app-id";
-    private static final String HOME_TENANT_ID = "home-tenant-id";
+    private static final UUID APPLICATION_ID = UUID.fromString("app-id");
+    private static final UUID HOME_TENANT_ID = UUID.fromString("home-tenant-id");
     private static final String SECRET = "secret";
-    private static final String TENANT_ID = "tenant-id";
-    private static final String SUBSCRIPTION_ID = "subscription-id";
+    private static final UUID TENANT_ID = UUID.fromString("tenant-id");
+    private static final UUID SUBSCRIPTION_ID = UUID.fromString("subscription-id");
     private static final String RESOURCE_GROUP = "mrg-name";
 
     private AzureResourceManagerClient client;
@@ -48,10 +48,7 @@ public class AzureResourceTest {
     public void beforeEach() {
         client = new AzureResourceManagerClient(
                 new AzureResourceConfiguration(
-                        new SecretCredentials(
-                                UUID.fromString(APPLICATION_ID),
-                                UUID.fromString(HOME_TENANT_ID),
-                                SECRET)));
+                        new SecretCredentials(APPLICATION_ID, HOME_TENANT_ID, SECRET)));
     }
 
   @Test
@@ -68,8 +65,8 @@ public class AzureResourceTest {
       // Deploy VM
       logger.info("Deploying VM...");
       Accepted<Deployment> deployment = client.beginDeployTemplate(
-              UUID.fromString(TENANT_ID),
-              UUID.fromString(SUBSCRIPTION_ID),
+              TENANT_ID,
+              SUBSCRIPTION_ID,
               RESOURCE_GROUP,
               template,
               deploymentName,
@@ -118,8 +115,8 @@ public class AzureResourceTest {
       // Note: this deletes everything in the resource group
       logger.info("Deleting VM...");
       Accepted<Deployment> deleteDeployment = client.beginDeployTemplate(
-              UUID.fromString(TENANT_ID),
-              UUID.fromString(SUBSCRIPTION_ID),
+              TENANT_ID,
+              SUBSCRIPTION_ID,
               RESOURCE_GROUP,
               deleteTemplate,
               deploymentName,
@@ -135,8 +132,8 @@ public class AzureResourceTest {
       // Finally delete the deployment
       logger.info("Deleting deployment " + deploymentName);
       client.deleteDeployment(
-              UUID.fromString(TENANT_ID),
-              UUID.fromString(SUBSCRIPTION_ID),
+              TENANT_ID,
+              SUBSCRIPTION_ID,
               deletePoller.getFinalResult().id()
       );
   }
