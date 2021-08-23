@@ -55,6 +55,7 @@ public class AzureResourceTest {
   public void deployDsvmTemplate() throws IOException {
       final String template;
       try (InputStream stream = getClass().getClassLoader().getResourceAsStream("azuredeploy.json")) {
+
           template = IOUtils.toString(stream, StandardCharsets.UTF_8);
       } catch (IOException e) {
           throw new RuntimeException("Problem reading resource", e);
