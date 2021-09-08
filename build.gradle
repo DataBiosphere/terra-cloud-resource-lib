@@ -38,7 +38,9 @@ artifactory {
                     'google-notebooks',
                     'google-serviceusage',
                     'google-storage',
-                    'platform')
+                    'platform',
+                    'azure-resourcemanager-resources',
+                    'azure-resourcemanager-compute')
         }
     }
 }
