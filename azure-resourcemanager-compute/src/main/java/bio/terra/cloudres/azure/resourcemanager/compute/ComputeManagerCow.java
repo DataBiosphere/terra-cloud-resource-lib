@@ -20,7 +20,7 @@ public class ComputeManagerCow {
     return new ComputeManagerCow(
         clientConfig,
         ComputeManager.configure()
-            .withLogOptions(Defaults.logOptions())
+            .withLogOptions(Defaults.logOptions(clientConfig))
             .authenticate(credential, profile));
   }
 

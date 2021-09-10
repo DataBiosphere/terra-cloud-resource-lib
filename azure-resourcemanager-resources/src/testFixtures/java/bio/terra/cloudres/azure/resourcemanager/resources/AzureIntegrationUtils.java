@@ -4,7 +4,6 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.ClientSecretCredentialBuilder;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -33,7 +32,8 @@ public class AzureIntegrationUtils {
         throw new RuntimeException(
             "Unable to read Azure admin client id from " + AZURE_PROPERTIES_PATH);
       }
-      final String clientSecret = properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.clientSecret");
+      final String clientSecret =
+          properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.clientSecret");
       if (clientSecret == null) {
         throw new RuntimeException(
             "Unable to read Azure admin application secret from " + AZURE_PROPERTIES_PATH);
@@ -71,7 +71,8 @@ public class AzureIntegrationUtils {
         throw new RuntimeException(
             "Unable to read Azure user tenant id from " + AZURE_PROPERTIES_PATH);
       }
-      final String subscriptionId = properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.subscriptionId");
+      final String subscriptionId =
+          properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.subscriptionId");
       if (subscriptionId == null) {
         throw new RuntimeException(
             "Unable to read Azure user subscription id from " + AZURE_PROPERTIES_PATH);

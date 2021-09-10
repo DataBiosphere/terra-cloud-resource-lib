@@ -74,6 +74,6 @@ public class ComputeManagerCowTest {
         .withRegion(Region.US_EAST)
         .withExistingResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup())
         .withDynamicIP()
-        .create();
+        .create(); // TODO add Context
   }
 }
