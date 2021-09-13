@@ -57,7 +57,9 @@ public class AzureResponseLogger implements HttpResponseLogger {
         logData.addProperty("operation", (String) contextMap.get(CLOUD_OPERATION_CONTEXT_KEY));
       }
       if (contextMap.containsKey(CLOUD_RESOURCE_REQUEST_DATA_KEY)) {
-        logData.add("requestData", (JsonObject) contextMap.get(CLOUD_RESOURCE_REQUEST_DATA_KEY));
+        AzureRequestData requestData =
+            (AzureRequestData) contextMap.get(CLOUD_RESOURCE_REQUEST_DATA_KEY);
+        logData.add("requestData", requestData.getRequestData());
       }
     }
 

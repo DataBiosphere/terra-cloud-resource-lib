@@ -26,7 +26,7 @@ public class Defaults {
 
   public static HttpLogOptions logOptions(ClientConfig clientConfig) {
     return new HttpLogOptions()
-        .setRequestLogger(new AzureRequestLogger())
+        .setRequestLogger(new AzureRequestLogger(clientConfig))
         .setResponseLogger(new AzureResponseLogger(clientConfig))
         .setLogLevel(HttpLogDetailLevel.BODY_AND_HEADERS);
   }

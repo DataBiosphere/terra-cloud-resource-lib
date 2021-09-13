@@ -1,31 +1,35 @@
 package bio.terra.cloudres.azure.resourcemanager.resources;
 
+import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_RESOURCE_REQUEST_DATA_KEY;
+
+import bio.terra.cloudres.common.ClientConfig;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import com.azure.core.http.policy.HttpRequestLogger;
 import com.azure.core.http.policy.HttpRequestLoggingContext;
+import com.azure.core.util.Context;
 import com.azure.core.util.logging.ClientLogger;
-import java.util.Arrays;
 import reactor.core.publisher.Mono;
 
 public class AzureRequestLogger implements HttpRequestLogger {
+  private final ClientConfig clientConfig;
+
+  public AzureRequestLogger(ClientConfig clientConfig) {
+    this.clientConfig = clientConfig;
+  }
+
   @Override
   public Mono<Void> logRequest(ClientLogger logger, HttpRequestLoggingContext loggingOptions) {
-    // TODO send pubsub request to Janitor
-
-    logger.info("IN logRequest");
-    logger.info("The http request: " + loggingOptions.getHttpRequest().toString());
-    logger.info(
-        loggingOptions.getHttpRequest().getHttpMethod().toString()
-            + " "
-            + loggingOptions.getHttpRequest().getUrl().toString());
-    logger.info(loggingOptions.getHttpRequest().getHeaders().toMap().toString());
-    //        logger.info(loggingOptions.getHttpRequest().getBody().);
-    logger.info("The try count: " + loggingOptions.getTryCount());
-    logger.info("The context: " + loggingOptions.getContext().toString());
-    logger.info(loggingOptions.getContext().getValues().toString());
-    logger.info(
-        Arrays.asList((String[]) loggingOptions.getContext().getData("ARMScopes").get())
-            .toString());
-
+    final Context context = loggingOptions.getContext();
+    if (context != null) {
+      context
+          .getData(CLOUD_RESOURCE_REQUEST_DATA_KEY)
+          .ifPresent(
+              requestData ->
+                  ((AzureRequestData) requestData)
+                      .getCloudResourceUid()
+                      .ifPresent(
+                          resourceUid -> CleanupRecorder.record(resourceUid, null, clientConfig)));
+    }
     return Mono.empty();
   }
 }
