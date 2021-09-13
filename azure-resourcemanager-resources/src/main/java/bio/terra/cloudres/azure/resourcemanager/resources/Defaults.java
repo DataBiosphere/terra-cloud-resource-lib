@@ -28,7 +28,6 @@ public class Defaults {
     return new HttpLogOptions()
         .setRequestLogger(new AzureRequestLogger())
         .setResponseLogger(new AzureResponseLogger(clientConfig))
-        .setLogLevel(HttpLogDetailLevel.BODY_AND_HEADERS)
-        .setPrettyPrintBody(true);
+        .setLogLevel(HttpLogDetailLevel.BODY_AND_HEADERS);
   }
 }

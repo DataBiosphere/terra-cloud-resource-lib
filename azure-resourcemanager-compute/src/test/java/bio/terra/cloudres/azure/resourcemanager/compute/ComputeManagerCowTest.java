@@ -67,6 +67,8 @@ public class ComputeManagerCowTest {
     assertEquals(404, e.getResponse().getStatusCode());
   }
 
+  // TODO add more tests building up to VM cration
+
   private static PublicIpAddress createPublicIp(String name) {
     return computeManagerCow
         .computeManager()
