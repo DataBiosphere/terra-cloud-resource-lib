@@ -5,9 +5,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import bio.terra.cloudres.azure.resourcemanager.resources.Defaults;
 import com.azure.core.management.Region;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
@@ -74,6 +76,13 @@ public class ComputeManagerCowTest {
         .withRegion(Region.US_EAST)
         .withExistingResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup())
         .withDynamicIP()
-        .create(); // TODO add Context
+        .create(
+            Defaults.buildContext(
+                ComputeManagerOperation.AZURE_CREATE_PUBLIC_IP,
+                new PublicIpRequestData(
+                    ComputeManagerIntegrationUtils.getReusableResourceGroup(),
+                    name,
+                    Region.US_EAST,
+                    Optional.empty())));
   }
 }

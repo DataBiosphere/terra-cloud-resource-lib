@@ -1,16 +1,18 @@
 package bio.terra.cloudres.azure.resourcemanager.resources;
 
+import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_OPERATION_CONTEXT_KEY;
+import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_RESOURCE_REQUEST_DATA_KEY;
+
 import bio.terra.cloudres.common.ClientConfig;
-import com.azure.core.http.HttpHeaders;
+import com.azure.core.http.HttpRequest;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.policy.HttpResponseLogger;
 import com.azure.core.http.policy.HttpResponseLoggingContext;
+import com.azure.core.util.Context;
 import com.azure.core.util.logging.ClientLogger;
-import com.google.api.client.http.HttpStatusCodes;
 import com.google.gson.JsonObject;
-import java.io.ByteArrayOutputStream;
 import java.time.Duration;
-import java.util.Optional;
+import java.util.Map;
 import reactor.core.publisher.Mono;
 
 /**
@@ -28,18 +30,6 @@ public class AzureResponseLogger implements HttpResponseLogger {
     this.clientConfig = clientConfig;
   }
 
-  private static Optional<Long> getContentLength(HttpHeaders headers) {
-    final String contentLengthStr = headers.getValue("Content-Length");
-    if (contentLengthStr != null && !contentLengthStr.trim().isBlank()) {
-      try {
-        return Optional.of(Long.parseLong(contentLengthStr));
-      } catch (NumberFormatException e) {
-        return Optional.empty();
-      }
-    }
-    return Optional.empty();
-  }
-
   @Override
   public Mono<HttpResponse> logResponse(
       ClientLogger logger, HttpResponseLoggingContext loggingOptions) {
@@ -49,48 +39,32 @@ public class AzureResponseLogger implements HttpResponseLogger {
     if (responseDuration != null) {
       logData.addProperty("durationMs", responseDuration.toMillis());
     }
+    final Integer tryCount = loggingOptions.getTryCount();
+    if (tryCount != null) {
+      logData.addProperty("tryCount", tryCount);
+    }
     final HttpResponse response = loggingOptions.getHttpResponse();
     logData.addProperty("responseStatusCode", response.getStatusCode());
-    // If the request was not successful, include the response body as a string
 
-    if (!HttpStatusCodes.isSuccess(response.getStatusCode())) {
-      getContentLength(response.getHeaders())
-          .ifPresent(
-              contentLength -> {
-                HttpResponse bufferedResponse = response.buffer();
-                ByteArrayOutputStream outputStream =
-                    new ByteArrayOutputStream(contentLength.intValue());
-              });
+    final HttpRequest request = response.getRequest();
+    logData.addProperty("requestMethod", request.getHttpMethod().toString());
+    logData.addProperty("requestUrl", request.getUrl().toString());
 
-      //            HttpResponse bufferedResponse = response.buffer();
-      //            ByteArrayOutputStream outputStream = new ByteArrayOutputStream((int)
-      // contentLength);
-      //            WritableByteChannel bodyContentChannel = Channels.newChannel(outputStream);
-      //            return bufferedResponse.getBody()
-      //                    .flatMap(byteBuffer -> writeBufferToBodyStream(bodyContentChannel,
-      // byteBuffer))
-      //                    .doFinally(ignored -> {
-      //                        responseLogMessage.append("Response body:")
-      //                                .append(System.lineSeparator())
-      //                                .append(prettyPrintIfNeeded(logger, prettyPrintBody,
-      // contentTypeHeader,
-      //                                        convertStreamToString(outputStream, logger)))
-      //                                .append(System.lineSeparator())
-      //                                .append("<-- END HTTP");
-      //
-      //                        logAndReturn(logger, logLevel, responseLogMessage, response);
-      //                    }).then(Mono.just(bufferedResponse));
+    final Context context = loggingOptions.getContext();
+    if (context != null) {
+      final Map<Object, Object> contextMap = context.getValues();
+      if (contextMap.containsKey(CLOUD_OPERATION_CONTEXT_KEY)) {
+        logData.addProperty("operation", (String) contextMap.get(CLOUD_OPERATION_CONTEXT_KEY));
+      }
+      if (contextMap.containsKey(CLOUD_RESOURCE_REQUEST_DATA_KEY)) {
+        logData.add("requestData", (JsonObject) contextMap.get(CLOUD_RESOURCE_REQUEST_DATA_KEY));
+      }
     }
 
-    logger.info("CRL completed ");
-
-    logger.info("IN logResponse");
-    logger.info("The http response: " + loggingOptions.getHttpResponse().toString());
-    logger.info(String.valueOf(loggingOptions.getHttpResponse().getStatusCode()));
-    //        loggingOptions.getHttpResponse().
-    logger.info("The try count: " + loggingOptions.getTryCount());
-    //        logger.info("The context: " + loggingOptions.getContext().toString());
-    //        logger.info(loggingOptions.getContext().getValues().toString());
+    logger.info(
+        "CRL completed Azure request",
+        // Include logData for terra-common-lib logging to pick up and include in JSON output.
+        logData);
 
     return Mono.justOrEmpty(response);
   }
