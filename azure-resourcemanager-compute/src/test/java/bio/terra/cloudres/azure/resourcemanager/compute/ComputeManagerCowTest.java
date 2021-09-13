@@ -9,7 +9,6 @@ import bio.terra.cloudres.azure.resourcemanager.resources.Defaults;
 import com.azure.core.management.Region;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
@@ -84,7 +83,6 @@ public class ComputeManagerCowTest {
                 new PublicIpRequestData(
                     ComputeManagerIntegrationUtils.getReusableResourceGroup(),
                     name,
-                    Region.US_EAST,
-                    Optional.empty())));
+                    Region.US_EAST)));
   }
 }

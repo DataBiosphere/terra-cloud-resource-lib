@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 public class AzureResponseLogger implements HttpResponseLogger {
   private final ClientConfig clientConfig;
 
-  public AzureResponseLogger(ClientConfig clientConfig) {
+  AzureResponseLogger(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
   }
 
