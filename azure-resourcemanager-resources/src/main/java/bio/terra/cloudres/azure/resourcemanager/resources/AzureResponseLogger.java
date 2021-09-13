@@ -1,10 +1,8 @@
 package bio.terra.cloudres.azure.resourcemanager.resources;
 
-import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_OPERATION_CONTEXT_KEY;
 import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_RESOURCE_REQUEST_DATA_KEY;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import com.azure.core.http.HttpRequest;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.policy.HttpResponseLogger;
@@ -13,16 +11,13 @@ import com.azure.core.util.Context;
 import com.azure.core.util.logging.ClientLogger;
 import com.google.gson.JsonObject;
 import java.time.Duration;
-import java.util.Map;
 import reactor.core.publisher.Mono;
 
 /**
- * Logs a debug message indicating the completion of a CRL event or that an exception occurred.
+ * Intercepts Azure HTTP responses and logs a debug message indicating the completion of a CRL event
+ * or that an exception occurred.
  *
  * <p>A structured JsonObject is included in the logging arguments.
- *
- * <p>Plugs into Azure Resource Manager via HttpLogOptions. The Azure SDK will invoke this logger
- * when an HTTP request is completed.
  */
 public class AzureResponseLogger implements HttpResponseLogger {
   private final ClientConfig clientConfig;
@@ -53,17 +48,14 @@ public class AzureResponseLogger implements HttpResponseLogger {
 
     final Context context = loggingOptions.getContext();
     if (context != null) {
-      final Map<Object, Object> contextMap = context.getValues();
-      if (contextMap.containsKey(CLOUD_OPERATION_CONTEXT_KEY)) {
-        CloudOperation cloudOperation =
-            (CloudOperation) contextMap.get(CLOUD_OPERATION_CONTEXT_KEY);
-        logData.addProperty("operation", cloudOperation.name());
-      }
-      if (contextMap.containsKey(CLOUD_RESOURCE_REQUEST_DATA_KEY)) {
-        AzureRequestData requestData =
-            (AzureRequestData) contextMap.get(CLOUD_RESOURCE_REQUEST_DATA_KEY);
-        logData.add("requestData", requestData.getRequestData());
-      }
+      context
+          .getData(CLOUD_RESOURCE_REQUEST_DATA_KEY)
+          .ifPresent(
+              data -> {
+                AbstractRequestData requestData = (AbstractRequestData) data;
+                logData.addProperty("operation", requestData.cloudOperation().name());
+                logData.add("requestData", requestData.serialize());
+              });
     }
 
     logger.info(

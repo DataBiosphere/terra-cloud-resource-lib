@@ -1,22 +1,24 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
-import bio.terra.cloudres.azure.resourcemanager.resources.AzureRequestData;
+import bio.terra.cloudres.azure.resourcemanager.resources.AbstractRequestData;
 import com.azure.core.management.Region;
 import com.google.gson.JsonObject;
 
-public class PublicIpRequestData extends AzureRequestData {
+/** Data for an Azure IP creation request. */
+public class CreatePublicIpRequestData extends AbstractRequestData {
   private final String resourceGroupName;
   private final String name;
   private final Region region;
 
-  protected PublicIpRequestData(String resourceGroupName, String name, Region region) {
+  public CreatePublicIpRequestData(String resourceGroupName, String name, Region region) {
+    super(ComputeManagerOperation.AZURE_CREATE_PUBLIC_IP);
     this.resourceGroupName = resourceGroupName;
     this.name = name;
     this.region = region;
   }
 
   @Override
-  public JsonObject getRequestData() {
+  public JsonObject serialize() {
     JsonObject requestData = new JsonObject();
     requestData.addProperty("resourceGroupName", resourceGroupName);
     requestData.addProperty("name", name);

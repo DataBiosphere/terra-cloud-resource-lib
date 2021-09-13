@@ -13,9 +13,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Tag("integration")
 public class ComputeManagerCowTest {
+  private static final Logger logger = LoggerFactory.getLogger(ComputeManagerCowTest.class);
   private static final ComputeManagerCow computeManagerCow = defaultComputeManagerCow();
 
   @Test
@@ -31,6 +34,7 @@ public class ComputeManagerCowTest {
             .networkManager()
             .publicIpAddresses()
             .getByResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup(), name);
+    logger.info("GOT IP " + getResponse.ipAddress());
     assertEquals(name, getResponse.name());
     assertEquals(createResponse.fqdn(), getResponse.fqdn());
     assertEquals(createResponse.ipAddress(), getResponse.ipAddress());
@@ -66,7 +70,7 @@ public class ComputeManagerCowTest {
     assertEquals(404, e.getResponse().getStatusCode());
   }
 
-  // TODO add more tests building up to VM cration
+  // TODO add more tests building up to VM creation
 
   private static PublicIpAddress createPublicIp(String name) {
     return computeManagerCow
@@ -79,8 +83,7 @@ public class ComputeManagerCowTest {
         .withDynamicIP()
         .create(
             Defaults.buildContext(
-                ComputeManagerOperation.AZURE_CREATE_PUBLIC_IP,
-                new PublicIpRequestData(
+                new CreatePublicIpRequestData(
                     ComputeManagerIntegrationUtils.getReusableResourceGroup(),
                     name,
                     Region.US_EAST)));
