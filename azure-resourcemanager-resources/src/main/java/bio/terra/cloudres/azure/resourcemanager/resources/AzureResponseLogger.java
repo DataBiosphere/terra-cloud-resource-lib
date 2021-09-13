@@ -4,6 +4,7 @@ import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_
 import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_RESOURCE_REQUEST_DATA_KEY;
 
 import bio.terra.cloudres.common.ClientConfig;
+import bio.terra.cloudres.common.CloudOperation;
 import com.azure.core.http.HttpRequest;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.policy.HttpResponseLogger;
@@ -54,7 +55,9 @@ public class AzureResponseLogger implements HttpResponseLogger {
     if (context != null) {
       final Map<Object, Object> contextMap = context.getValues();
       if (contextMap.containsKey(CLOUD_OPERATION_CONTEXT_KEY)) {
-        logData.addProperty("operation", (String) contextMap.get(CLOUD_OPERATION_CONTEXT_KEY));
+        CloudOperation cloudOperation =
+            (CloudOperation) contextMap.get(CLOUD_OPERATION_CONTEXT_KEY);
+        logData.addProperty("operation", cloudOperation.name());
       }
       if (contextMap.containsKey(CLOUD_RESOURCE_REQUEST_DATA_KEY)) {
         AzureRequestData requestData =
