@@ -1,24 +1,28 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import bio.terra.cloudres.azure.resourcemanager.resources.AzureIntegrationUtils;
 import bio.terra.cloudres.azure.resourcemanager.resources.Defaults;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.azure.core.management.Region;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @Tag("integration")
+// Note: disabled because we have not yet added Azure test environment setup to vault.
+@Disabled
 public class ComputeManagerCowTest {
   private static final Logger logger = LoggerFactory.getLogger(ComputeManagerCowTest.class);
   private static final ComputeManagerCow computeManagerCow =
