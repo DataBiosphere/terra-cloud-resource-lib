@@ -353,7 +353,17 @@ public class ComputeManagerCowTest {
             .withSsh(sshKey)
             .withExistingDataDisk(disk)
             .withSize(VirtualMachineSizeTypes.fromString("Standard_D2a_v4"))
-            .create();
+            .create(Defaults.buildContext(
+                    ComputeManagerOperation.AZURE_CREATE_VM,
+                    new VMRequestData(
+                            ComputeManagerIntegrationUtils.getReusableResourceGroup(),
+                            name,
+                            DEFAULT_REGION,
+                            network,
+                            subnetName,
+                            ip,
+                            disk)
+              ));
 
     return vm;
   }
