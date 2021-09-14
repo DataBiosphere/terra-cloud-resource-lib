@@ -7,15 +7,15 @@ import com.azure.core.http.HttpRequest;
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.policy.HttpResponseLogger;
 import com.azure.core.http.policy.HttpResponseLoggingContext;
-import com.azure.core.util.Context;
 import com.azure.core.util.logging.ClientLogger;
 import com.google.gson.JsonObject;
 import java.time.Duration;
+import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 /**
- * Intercepts Azure HTTP responses and logs a debug message indicating the completion of a CRL event
- * or that an exception occurred.
+ * Intercepts Azure HTTP responses and logs a message indicating the completion of a CRL event or
+ * that an exception occurred.
  *
  * <p>A structured JsonObject is included in the logging arguments to plug into Terra Common
  * Logging. See:
@@ -48,17 +48,14 @@ public class AzureResponseLogger implements HttpResponseLogger {
     logData.addProperty("requestMethod", request.getHttpMethod().toString());
     logData.addProperty("requestUrl", request.getUrl().toString());
 
-    final Context context = loggingOptions.getContext();
-    if (context != null) {
-      context
-          .getData(CLOUD_RESOURCE_REQUEST_DATA_KEY)
-          .ifPresent(
-              data -> {
-                AbstractRequestData requestData = (AbstractRequestData) data;
-                logData.addProperty("operation", requestData.cloudOperation().name());
-                logData.add("requestData", requestData.serialize());
-              });
-    }
+    Optional.ofNullable(loggingOptions.getContext())
+        .flatMap(c -> c.getData(CLOUD_RESOURCE_REQUEST_DATA_KEY))
+        .ifPresent(
+            data -> {
+              AbstractRequestData requestData = (AbstractRequestData) data;
+              logData.addProperty("operation", requestData.cloudOperation().name());
+              logData.add("requestData", requestData.serialize());
+            });
 
     logger.info(
         "CRL completed Azure request",

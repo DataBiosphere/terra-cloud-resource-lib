@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/** Utilities for Azure integration tests. */
 public class AzureIntegrationUtils {
   /** Path to Azure properties file. */
   private static final String AZURE_PROPERTIES_PATH = "integration_azure_env.properties";
@@ -97,7 +98,7 @@ public class AzureIntegrationUtils {
       properties.load(in);
 
       final String resourceGroupName =
-          properties.getProperty(AZURE_PROPERTY_PREFIX, ".resourceGroupName");
+          properties.getProperty(AZURE_PROPERTY_PREFIX + ".resourceGroupName");
       if (resourceGroupName == null) {
         throw new RuntimeException(
             "Unable to read Azure resource group from " + AZURE_PROPERTIES_PATH);

@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * An abstract representation of data passed to Azure Resource Manager requests.
  *
- * <p><Contains functionality for serializing request data for structured logging; and tracking
+ * <p>Contains functionality for serializing request data for structured logging; and tracking
  * resource creations for clean-up.
  */
 public abstract class AbstractRequestData {

@@ -5,7 +5,10 @@ import bio.terra.cloudres.common.CloudOperation;
 import com.azure.core.management.Region;
 import com.google.gson.JsonObject;
 
-/** Extends {@link AbstractRequestData} to contain a resource name, region, and resource group. */
+/**
+ * Extends {@link AbstractRequestData} to add common fields for working with the Compute Manager
+ * API.
+ */
 public abstract class BaseRequestData extends AbstractRequestData {
   protected final String name;
   protected final Region region;

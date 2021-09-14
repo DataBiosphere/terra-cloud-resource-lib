@@ -19,14 +19,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link ComputeManagerCow}. Includes test cases for several resource types, building up
  * to creation of a VM.
+ *
+ * <p>The tests attempt to clean up after themselves, but also integrate with Janitor for resource
+ * clean-up.
  */
 @Tag("integration")
+// Note: temporarily disabled because we have not yet added Azure test environment setup to vault.
+@Disabled
 public class ComputeManagerCowTest {
   private static final ComputeManagerCow computeManagerCow =
       ComputeManagerCow.create(
@@ -337,6 +343,11 @@ public class ComputeManagerCowTest {
 
   private static VirtualMachine createVM(
       String name, Network network, String subnetName, PublicIpAddress ip, Disk disk) {
+    // Note: these are public credentials, taken from:
+    // https://github.com/Azure-Samples/network-java-manage-virtual-network/blob/master/src/main/java/com/azure/resourcemanager/network/samples/ManageVirtualNetwork.java
+    final String userName = "tirekicker";
+    final String sshKey =
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCfSPC2K7LZcFKEO+/t3dzmQYtrJFZNxOsbVgOVKietqHyvmYGHEC0J2wPdAqQ/63g/hhAEFRoyehM+rbeDri4txB3YFfnOK58jqdkyXzupWqXzOrlKY4Wz9SKjjN765+dqUITjKRIaAip1Ri137szRg71WnrmdP3SphTRlCx1Bk2nXqWPsclbRDCiZeF8QOTi4JqbmJyK5+0UqhqYRduun8ylAwKKQJ1NJt85sYIHn9f1Rfr6Tq2zS0wZ7DHbZL+zB5rSlAr8QyUdg/GQD+cmSs6LvPJKL78d6hMGk84ARtFo4A79ovwX/Fj01znDQkU6nJildfkaolH2rWFG/qttD azjava@javalib.com";
     return computeManagerCow
         .computeManager()
         .virtualMachines()
@@ -348,8 +359,8 @@ public class ComputeManagerCowTest {
         .withPrimaryPrivateIPAddressDynamic()
         .withNewPrimaryPublicIPAddress(ip.ipAddress())
         .withPopularLinuxImage(KnownLinuxVirtualMachineImage.UBUNTU_SERVER_16_04_LTS)
-        .withRootUsername("tirekicker")
-        .withSsh("ssh-rsa mysshkey")
+        .withRootUsername(userName)
+        .withSsh(sshKey)
         .withExistingDataDisk(disk)
         .withTag("crl.integration", "true")
         .withSize(VirtualMachineSizeTypes.fromString("Standard_D2a_v4"))
