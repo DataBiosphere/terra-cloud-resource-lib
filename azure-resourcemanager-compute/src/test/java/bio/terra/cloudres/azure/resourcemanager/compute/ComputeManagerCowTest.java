@@ -103,6 +103,7 @@ public class ComputeManagerCowTest {
             computeManagerCow.computeManager().disks()
                     .listByResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup())
                     .stream();
+
     // There may be other disks from other tests.
     assertThat(listResponse.map(Disk::name).collect(Collectors.toList()),
             Matchers.hasItem(name));
@@ -227,7 +228,7 @@ public class ComputeManagerCowTest {
     assertThat(listResponse.map(VirtualMachine::name).collect(Collectors.toList()),
             Matchers.hasItem(vmName));
 
-    // Delete Network
+    // Delete VM
     computeManagerCow
             .computeManager()
             .virtualMachines()

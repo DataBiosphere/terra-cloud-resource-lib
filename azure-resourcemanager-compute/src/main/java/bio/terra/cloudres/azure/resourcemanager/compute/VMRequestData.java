@@ -29,6 +29,5 @@ public class VMRequestData extends BaseRequestData {
         requestData.addProperty("ip", ip.ipAddress());
         requestData.addProperty("disk", disk.name());
         return requestData;
-
     }
 }
