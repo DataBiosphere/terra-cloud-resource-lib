@@ -6,9 +6,9 @@ plugins {
 
 dependencies {
     api project(':common')
-    api project(':azure-resourcemanager-resources')
+    api project(':azure-resourcemanager-common')
 
     implementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.7.0'
 
-    testImplementation(testFixtures(project(':azure-resourcemanager-resources')))
+    testImplementation(testFixtures(project(':azure-resourcemanager-common')))
 }

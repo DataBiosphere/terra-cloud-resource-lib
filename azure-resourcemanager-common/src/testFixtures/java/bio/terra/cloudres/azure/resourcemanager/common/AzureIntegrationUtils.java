@@ -1,4 +1,4 @@
-package bio.terra.cloudres.azure.resourcemanager.resources;
+package bio.terra.cloudres.azure.resourcemanager.common;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;

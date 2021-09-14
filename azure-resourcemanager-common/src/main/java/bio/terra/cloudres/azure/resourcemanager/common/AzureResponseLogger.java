@@ -1,6 +1,6 @@
-package bio.terra.cloudres.azure.resourcemanager.resources;
+package bio.terra.cloudres.azure.resourcemanager.common;
 
-import static bio.terra.cloudres.azure.resourcemanager.resources.Defaults.CLOUD_RESOURCE_REQUEST_DATA_KEY;
+import static bio.terra.cloudres.azure.resourcemanager.common.Defaults.CLOUD_RESOURCE_REQUEST_DATA_KEY;
 
 import bio.terra.cloudres.common.ClientConfig;
 import com.azure.core.http.HttpRequest;

@@ -6,6 +6,7 @@ import bio.terra.cloudres.common.CloudOperation;
 public enum ComputeManagerOperation implements CloudOperation {
   AZURE_CREATE_PUBLIC_IP,
   AZURE_CREATE_DISK,
+  AZURE_CREATE_NETWORK_SECURITY_GROUP,
   AZURE_CREATE_NETWORK,
   AZURE_CREATE_VM
 }

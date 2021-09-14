@@ -1,6 +1,6 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
-import bio.terra.cloudres.azure.resourcemanager.resources.Defaults;
+import bio.terra.cloudres.azure.resourcemanager.common.Defaults;
 import bio.terra.cloudres.common.ClientConfig;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;

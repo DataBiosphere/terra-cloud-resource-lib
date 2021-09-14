@@ -1,4 +1,4 @@
-package bio.terra.cloudres.azure.resourcemanager.resources;
+package bio.terra.cloudres.azure.resourcemanager.common;
 
 import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.janitor.model.CloudResourceUid;
