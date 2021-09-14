@@ -84,6 +84,54 @@ components:
         ipName:
           type: string
           description: The user-provided name to identify the IP.
+    AzureDisk:
+      type: object
+      required:
+        - resourceGroupName
+        - diskName
+      properties:
+        resourceGroupName:
+          type: string
+          description: Name of the resource group.
+        diskName:
+          type: string
+          description: The user-provided name to identify the disk.
+    AzureNetwork:
+      type: object
+      required:
+        - resourceGroupName
+        - networkName
+      properties:
+        resourceGroupName:
+          type: string
+          description: Name of the resource group.
+        networkName:
+          type: string
+          description: The user-provided name to identify the network.
+    AzureNetworkSecurityGroup:
+      type: object
+      required:
+        - resourceGroupName
+        - networkSecurityGroupName
+      properties:
+        resourceGroupName:
+          type: string
+          description: Name of the resource group.
+        networkSecurityGroupName:
+          type: string
+          description: The user-provided name to identify the network security group.
+    AzureVirtualMachine:
+      type: object
+      required:
+        - resourceGroupName
+        - vmName
+      properties:
+        resourceGroupName:
+          type: string
+          description: Name of the resource group.
+        vmName:
+          type: string
+          description: The user-provided name to identify the VM.
     # A cloud resource unique identifier. Each CloudResourceUid represents exactly one cloud resource.
     # We are not doing polymorphism at this moment because of lack of support in swagger-codegen or openApiGenerator
     # Now CloudResourceUid contains all possible cloud resource types, and we will assume there is only one being set
@@ -105,3 +153,11 @@ components:
           $ref: '#/components/schemas/GoogleProjectUid'
         azurePublicIp:
           $ref: '#/components/schemas/AzurePublicIp'
+        azureDisk:
+          $ref: '#/components/schemas/AzureDisk'
+        azureNetwork:
+          $ref: '#/components/schemas/AzureNetwork'
+        azureNetworkSecurityGroup:
+          $ref: '#/components/schemas/AzureNetworkSecurityGroup'
+        azureVirtualMachine:
+          $ref: '#/components/schemas/AzureVirtualMachine'
