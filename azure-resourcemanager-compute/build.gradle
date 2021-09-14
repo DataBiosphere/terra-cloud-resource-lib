@@ -8,7 +8,6 @@ dependencies {
     api project(':common')
     api project(':azure-resourcemanager-resources')
 
-    // https://mvnrepository.com/artifact/com.azure.resourcemanager/azure-resourcemanager-compute
     implementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.7.0'
 
     testImplementation(testFixtures(project(':azure-resourcemanager-resources')))

@@ -17,7 +17,9 @@ import reactor.core.publisher.Mono;
  * Intercepts Azure HTTP responses and logs a debug message indicating the completion of a CRL event
  * or that an exception occurred.
  *
- * <p>A structured JsonObject is included in the logging arguments.
+ * <p>A structured JsonObject is included in the logging arguments to plug into Terra Common
+ * Logging. See:
+ * https://github.com/DataBiosphere/terra-common-lib/tree/develop/src/main/java/bio/terra/common/logging
  */
 public class AzureResponseLogger implements HttpResponseLogger {
   private final ClientConfig clientConfig;

@@ -6,7 +6,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.compute.ComputeManager;
 
-/** A Cloud Object Wrapper (COW) for Azure Resource Manager library: {@link ComputeManager} */
+/** A Cloud Object Wrapper (COW) for Azure {@link ComputeManager} library. */
 public class ComputeManagerCow {
   private final ClientConfig clientConfig;
   private final ComputeManager computeManager;
@@ -18,8 +18,9 @@ public class ComputeManagerCow {
 
   /**
    * Creates a {@link ComputeManagerCow}.
-   * @param clientConfig client configuration object
-   * @param credential Azure credential object
+   *
+   * @param clientConfig client configuration
+   * @param credential Azure credential
    * @param profile Azure profile for the client
    * @return {@link ComputeManagerCow} instance.
    */
@@ -32,9 +33,7 @@ public class ComputeManagerCow {
             .authenticate(credential, profile));
   }
 
-  /**
-   * Returns the underlying {@link ComputeManager} object for making API calls.
-   */
+  /** Returns the underlying {@link ComputeManager} object for making API calls. */
   public ComputeManager computeManager() {
     return computeManager;
   }

@@ -32,4 +32,5 @@ integration.azure.admin.clientSecret=
 integration.azure.admin.tenantId=
 integration.azure.user.tenantId=
 integration.azure.user.subscriptionId=
+integration.azure.resourceGroupName=
 EOF

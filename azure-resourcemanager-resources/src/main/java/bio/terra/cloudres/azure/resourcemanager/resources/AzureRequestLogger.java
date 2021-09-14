@@ -10,7 +10,7 @@ import com.azure.core.util.Context;
 import com.azure.core.util.logging.ClientLogger;
 import reactor.core.publisher.Mono;
 
-/** Intercepts Azure HTTP requests to record created cloud resources for cleanup. */
+/** Intercepts Azure HTTP requests to record cloud resource creations for cleanup. */
 public class AzureRequestLogger implements HttpRequestLogger {
   private final ClientConfig clientConfig;
 

@@ -6,7 +6,12 @@ import bio.terra.janitor.model.ResourceMetadata;
 import com.google.gson.JsonObject;
 import java.util.Optional;
 
-/** An abstract data object for an Azure cloud request. */
+/**
+ * An abstract representation of data passed to Azure Resource Manager requests.
+ *
+ * <p><Contains functionality for serializing request data for structured logging; and tracking
+ * resource creations for clean-up.
+ */
 public abstract class AbstractRequestData {
   private final CloudOperation cloudOperation;
 

@@ -1,25 +1,33 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
-import static bio.terra.cloudres.azure.resourcemanager.compute.ComputeManagerIntegrationUtils.defaultComputeManagerCow;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import bio.terra.cloudres.azure.resourcemanager.resources.AzureIntegrationUtils;
 import bio.terra.cloudres.azure.resourcemanager.resources.Defaults;
+import bio.terra.cloudres.testing.IntegrationUtils;
 import com.azure.core.management.Region;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Tag("integration")
 public class ComputeManagerCowTest {
   private static final Logger logger = LoggerFactory.getLogger(ComputeManagerCowTest.class);
-  private static final ComputeManagerCow computeManagerCow = defaultComputeManagerCow();
+  private static final ComputeManagerCow computeManagerCow =
+      ComputeManagerCow.create(
+          IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+          AzureIntegrationUtils.getAdminAzureCredentialsOrDie(),
+          AzureIntegrationUtils.getUserAzureProfileOrDie());
+
+  private static final String resourceGroupName = AzureIntegrationUtils.getResuableResourceGroup();
 
   @Test
   public void createListDeletePublicIp() {
@@ -33,7 +41,7 @@ public class ComputeManagerCowTest {
             .computeManager()
             .networkManager()
             .publicIpAddresses()
-            .getByResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup(), name);
+            .getByResourceGroup(resourceGroupName, name);
     logger.info("GOT IP " + getResponse.ipAddress());
     assertEquals(name, getResponse.name());
     assertEquals(createResponse.fqdn(), getResponse.fqdn());
@@ -42,8 +50,7 @@ public class ComputeManagerCowTest {
     // Verify list response
     Stream<PublicIpAddress> listResponse =
         computeManagerCow.computeManager().networkManager().publicIpAddresses()
-            .listByResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup())
-            .stream();
+            .listByResourceGroup(resourceGroupName).stream();
     // There may be other public IPs from other tests.
     assertThat(
         listResponse.map(PublicIpAddress::name).collect(Collectors.toList()),
@@ -54,7 +61,7 @@ public class ComputeManagerCowTest {
         .computeManager()
         .networkManager()
         .publicIpAddresses()
-        .deleteByResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup(), name);
+        .deleteByResourceGroup(resourceGroupName, name);
 
     // Verify get response throws 404
     ManagementException e =
@@ -65,8 +72,7 @@ public class ComputeManagerCowTest {
                     .computeManager()
                     .networkManager()
                     .publicIpAddresses()
-                    .getByResourceGroup(
-                        ComputeManagerIntegrationUtils.getReusableResourceGroup(), name));
+                    .getByResourceGroup(resourceGroupName, name));
     assertEquals(404, e.getResponse().getStatusCode());
   }
 
@@ -79,13 +85,10 @@ public class ComputeManagerCowTest {
         .publicIpAddresses()
         .define(name)
         .withRegion(Region.US_EAST)
-        .withExistingResourceGroup(ComputeManagerIntegrationUtils.getReusableResourceGroup())
+        .withExistingResourceGroup(resourceGroupName)
         .withDynamicIP()
         .create(
             Defaults.buildContext(
-                new CreatePublicIpRequestData(
-                    ComputeManagerIntegrationUtils.getReusableResourceGroup(),
-                    name,
-                    Region.US_EAST)));
+                new CreatePublicIpRequestData(resourceGroupName, name, Region.US_EAST)));
   }
 }

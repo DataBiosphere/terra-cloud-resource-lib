@@ -12,12 +12,13 @@ public class AzureIntegrationUtils {
   /** Path to Azure properties file. */
   private static final String AZURE_PROPERTIES_PATH = "integration_azure_env.properties";
 
+  /** Property prefix for properties in {@link #AZURE_PROPERTIES_PATH}. */
   private static final String AZURE_PROPERTY_PREFIX = "integration.azure";
 
   /**
    * Gets an Azure TokenCredential object for an Azure admin account. This account has the roles
    * needed to operate the CRL APIs in the integration test project, e.g. create and delete
-   * resources
+   * resources.
    *
    * @return TokenCredential
    */
@@ -78,6 +79,30 @@ public class AzureIntegrationUtils {
             "Unable to read Azure user subscription id from " + AZURE_PROPERTIES_PATH);
       }
       return new AzureProfile(tenantId, subscriptionId, AzureEnvironment.AZURE);
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Unable to load Azure properties file from " + AZURE_PROPERTIES_PATH, e);
+    }
+  }
+
+  /**
+   * Gets a resource group in which to create resources.
+   *
+   * @return resource group name.
+   */
+  public static String getResuableResourceGroup() {
+    try (InputStream in =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(AZURE_PROPERTIES_PATH)) {
+      Properties properties = new Properties();
+      properties.load(in);
+
+      final String resourceGroupName =
+          properties.getProperty(AZURE_PROPERTY_PREFIX, ".resourceGroupName");
+      if (resourceGroupName == null) {
+        throw new RuntimeException(
+            "Unable to read Azure resource group from " + AZURE_PROPERTIES_PATH);
+      }
+      return resourceGroupName;
     } catch (Exception e) {
       throw new RuntimeException(
           "Unable to load Azure properties file from " + AZURE_PROPERTIES_PATH, e);

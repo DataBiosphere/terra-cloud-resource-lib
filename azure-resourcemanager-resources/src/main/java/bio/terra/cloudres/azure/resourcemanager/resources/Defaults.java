@@ -6,6 +6,7 @@ import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.core.util.Context;
 import java.util.Map;
 
+/** Provides defaults for working with the Azure Resource Manager API. */
 public class Defaults {
   private Defaults() {}
 
