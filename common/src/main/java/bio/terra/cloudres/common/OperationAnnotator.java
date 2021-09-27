@@ -9,7 +9,10 @@ import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.opencensus.contrib.http.util.HttpTraceAttributeConstants;
-import io.opencensus.trace.*;
+import io.opencensus.trace.AttributeValue;
+import io.opencensus.trace.Span;
+import io.opencensus.trace.Tracer;
+import io.opencensus.trace.Tracing;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -53,7 +56,7 @@ public class OperationAnnotator {
   }
 
   /**
-   * Executes the CowOperation and allows for checked exceptions..
+   * Executes the CowOperation and allows for checked exceptions.
    *
    * @param cloudOperation: the {@link CloudOperation} to operate.
    * @param cowExecute: how to execute this cloud operation
@@ -64,37 +67,58 @@ public class OperationAnnotator {
       CloudOperation cloudOperation, CowCheckedExecute<R, E> cowExecute, CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
+    OptionalInt httpStatusCode = OptionalInt.empty();
     Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
-
-    // Record the Cloud API usage.
-    recordApiCount(cloudOperation);
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
       R response = cowExecute.execute();
-      recordLatency(stopwatch.stop().elapsed(), cloudOperation);
       return response;
     } catch (Exception e) {
       // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
       // different scenarios.
-      recordLatency(stopwatch.stop().elapsed(), cloudOperation);
-      OptionalInt httpErrorCode = getHttpErrorCode(e);
-      tracer
-          .getCurrentSpan()
-          .putAttribute(
-              HttpTraceAttributeConstants.HTTP_STATUS_CODE,
-              AttributeValue.longAttributeValue(httpErrorCode.orElse(-1)));
-      recordErrors(getHttpErrorCode(e), cloudOperation);
+      httpStatusCode = getHttpErrorCode(e);
       executionException = Optional.of(e);
       throw e;
     } finally {
-      logEvent(
-          cloudOperation, cowSerialize.serializeRequest(), stopwatch.elapsed(), executionException);
-      // We manually manage the span so that the expected span is still present in catch and
-      // finally.
-      // See warning on SpanBuilder#startScopedSpan.
+      recordOperation(
+          OperationData.builder()
+              .setCloudOperation(cloudOperation)
+              .setDuration(stopwatch.elapsed())
+              .setTryCount(OptionalInt.empty())
+              .setExecutionException(executionException)
+              .setHttpStatusCode(httpStatusCode)
+              .setRequestData(cowSerialize.serializeRequest())
+              .build());
+
       span.end();
     }
+  }
+
+  /**
+   * Records log, tracing, and metric data associated with a cloud operation.
+   *
+   * @param operationData the {@link OperationData} to record.
+   */
+  public void recordOperation(OperationData operationData) {
+    // Record the Cloud API usage as a metric
+    recordApiCount(operationData.cloudOperation());
+
+    // Record the latency as a metric
+    recordLatency(operationData.duration(), operationData.cloudOperation());
+
+    // Record errors as a metric
+    recordErrors(operationData.httpStatusCode(), operationData.cloudOperation());
+
+    // Trace the http status code
+    tracer
+        .getCurrentSpan()
+        .putAttribute(
+            HttpTraceAttributeConstants.HTTP_STATUS_CODE,
+            AttributeValue.longAttributeValue(operationData.httpStatusCode().orElse(-1)));
+
+    // Log the event
+    logEvent(operationData);
   }
 
   private void recordApiCount(CloudOperation operation) {
@@ -119,37 +143,37 @@ public class OperationAnnotator {
    * <p>If an exception is present, it will also be included as a logging argument. SLF4J should
    * recognize this argument and include a stacktrace in the resulting error log message.
    *
-   * @param operation the cloud operation to log.
-   * @param requestData data included in the cloud operation request
-   * @param duration the duration of the CRL event
-   * @param executionException Optional, only included if an error occurred.
+   * @param operationData the {@link OperationData} associated with a cloud operation.
    */
   @VisibleForTesting
-  void logEvent(
-      CloudOperation operation,
-      JsonObject requestData,
-      Duration duration,
-      Optional<Exception> executionException) {
+  void logEvent(OperationData operationData) {
     JsonObject logData = new JsonObject();
     logData.addProperty("clientName", clientConfig.getClientName());
-    logData.addProperty("durationMs", duration.toMillis());
-    executionException.ifPresent(e -> logData.add("exception", createExceptionEntry(e)));
-    logData.addProperty("operation", operation.name());
-    logData.add("requestData", requestData);
+    logData.addProperty("durationMs", operationData.duration().toMillis());
+    operationData.httpStatusCode().ifPresent(s -> logData.addProperty("httpStatusCode", s));
+    operationData.tryCount().ifPresent(c -> logData.addProperty("tryCount", c));
+    operationData
+        .executionException()
+        .ifPresent(e -> logData.add("exception", createExceptionEntry(e)));
+    logData.addProperty("operation", operationData.cloudOperation().name());
+    logData.add("requestData", operationData.requestData());
 
-    if (executionException.isPresent()) {
-      OptionalInt httpErrorCode = getHttpErrorCode(executionException.get());
+    if (operationData.executionException().isPresent()) {
       logger.debug(
           String.format(
               "CRL exception in %s (HTTP code %s, %s)",
-              operation.name(), httpErrorCode.orElse(-1), prettyPrintDuration(duration)),
+              operationData.cloudOperation().name(),
+              operationData.httpStatusCode().orElse(-1),
+              prettyPrintDuration(operationData.duration())),
           // Include logData for terra-common-lib logging to pick up and include in JSON output.
           logData,
           // Include the exception, which slf4j will append to the formatted log message.
-          executionException.get());
+          operationData.executionException().get());
     } else {
       logger.debug(
-          String.format("CRL completed %s (%s)", operation.name(), prettyPrintDuration(duration)),
+          String.format(
+              "CRL completed %s (%s)",
+              operationData.cloudOperation().name(), prettyPrintDuration(operationData.duration())),
           // Include logData for terra-common-lib logging to pick up and include in JSON output.
           logData);
     }

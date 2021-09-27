@@ -4,6 +4,8 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+/common/src/testFixtures/resources/*
+/azure-resourcemanager-common/src/testFixtures/resources/*
 
 ### STS ###
 .apt_generated

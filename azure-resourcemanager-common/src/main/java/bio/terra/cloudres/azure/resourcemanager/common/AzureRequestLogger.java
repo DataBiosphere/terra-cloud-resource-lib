@@ -27,7 +27,7 @@ public class AzureRequestLogger implements HttpRequestLogger {
         .flatMap(c -> c.getData(CLOUD_RESOURCE_REQUEST_DATA_KEY))
         .ifPresent(
             data -> {
-              AbstractRequestData requestData = (AbstractRequestData) data;
+              ResourceManagerRequestData requestData = (ResourceManagerRequestData) data;
               requestData
                   .resourceUidCreation()
                   .ifPresent(

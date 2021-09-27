@@ -1,24 +1,48 @@
 package bio.terra.cloudres.azure.resourcemanager.compute.data;
 
 import bio.terra.cloudres.azure.resourcemanager.compute.ComputeManagerOperation;
-import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.cloudres.common.CloudOperation;
 import com.azure.core.management.Region;
-import java.util.Optional;
+import com.google.auto.value.AutoValue;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.util.List;
 
 /** Network security group creation request data. */
-public class CreateNetworkSecurityGroupRequestData extends BaseRequestData {
-  public CreateNetworkSecurityGroupRequestData(
-      String resourceGroupName, String name, Region region) {
-    super(
-        ComputeManagerOperation.AZURE_CREATE_NETWORK_SECURITY_GROUP,
-        resourceGroupName,
-        name,
-        region);
+@AutoValue
+public abstract class CreateNetworkSecurityGroupRequestData extends BaseComputeRequestData {
+  /** Names of the security rules associated with this network security group. */
+  public abstract List<String> rules();
+
+  @Override
+  public final CloudOperation cloudOperation() {
+    return ComputeManagerOperation.AZURE_CREATE_NETWORK_SECURITY_GROUP;
+  }
+
+  public static CreateNetworkSecurityGroupRequestData.Builder builder() {
+    return new AutoValue_CreateNetworkSecurityGroupRequestData.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract CreateNetworkSecurityGroupRequestData.Builder setName(String value);
+
+    public abstract CreateNetworkSecurityGroupRequestData.Builder setRegion(Region value);
+
+    public abstract CreateNetworkSecurityGroupRequestData.Builder setResourceGroupName(
+        String value);
+
+    public abstract CreateNetworkSecurityGroupRequestData.Builder setRules(List<String> rules);
+
+    public abstract CreateNetworkSecurityGroupRequestData build();
   }
 
   @Override
-  public Optional<CloudResourceUid> resourceUidCreation() {
-    // TODO: populate this when the CloudResourceUid Janitor model is regenerated
-    return Optional.empty();
+  public JsonObject serialize() {
+    JsonObject requestData = super.serialize();
+    JsonArray rules = new JsonArray();
+    rules().forEach(rules::add);
+    requestData.add("rules", rules);
+    return requestData;
   }
 }

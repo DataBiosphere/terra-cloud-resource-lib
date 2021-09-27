@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import io.opencensus.stats.AggregationData;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
@@ -138,10 +139,13 @@ public class OperationAnnotatorTest {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
 
     operationAnnotator.logEvent(
-        StubCloudOperation.TEST_OPERATION,
-        PROJECT_REQUEST,
-        Duration.ofMillis(2345),
-        Optional.empty());
+        OperationData.builder()
+            .setCloudOperation(StubCloudOperation.TEST_OPERATION)
+            .setRequestData(PROJECT_REQUEST)
+            .setDuration(Duration.ofMillis(2345))
+            .setExecutionException(Optional.empty())
+            .setHttpStatusCode(OptionalInt.empty())
+            .build());
 
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
@@ -161,10 +165,13 @@ public class OperationAnnotatorTest {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
 
     operationAnnotator.logEvent(
-        StubCloudOperation.TEST_OPERATION,
-        PROJECT_REQUEST,
-        Duration.ofMillis(2345),
-        Optional.of(RM_EXCEPTION));
+        OperationData.builder()
+            .setCloudOperation(StubCloudOperation.TEST_OPERATION)
+            .setRequestData(PROJECT_REQUEST)
+            .setDuration(Duration.ofMillis(2345))
+            .setExecutionException(Optional.of(RM_EXCEPTION))
+            .setHttpStatusCode(OptionalInt.of(404))
+            .build());
 
     verify(mockLogger)
         .debug(

@@ -4,6 +4,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -29,22 +30,21 @@ public class AzureIntegrationUtils {
       Properties properties = new Properties();
       properties.load(in);
 
-      final String clientId = properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.clientId");
-      if (clientId == null) {
-        throw new RuntimeException(
-            "Unable to read Azure admin client id from " + AZURE_PROPERTIES_PATH);
-      }
+      final String clientId =
+          Preconditions.checkNotNull(
+              properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.clientId"),
+              "Unable to read Azure admin client id from " + AZURE_PROPERTIES_PATH);
+
       final String clientSecret =
-          properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.clientSecret");
-      if (clientSecret == null) {
-        throw new RuntimeException(
-            "Unable to read Azure admin application secret from " + AZURE_PROPERTIES_PATH);
-      }
-      final String tenantId = properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.tenantId");
-      if (tenantId == null) {
-        throw new RuntimeException(
-            "Unable to read Azure admin tenant id from " + AZURE_PROPERTIES_PATH);
-      }
+          Preconditions.checkNotNull(
+              properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.clientSecret"),
+              "Unable to read Azure admin application secret from " + AZURE_PROPERTIES_PATH);
+
+      final String tenantId =
+          Preconditions.checkNotNull(
+              properties.getProperty(AZURE_PROPERTY_PREFIX + ".admin.tenantId"),
+              "Unable to read Azure admin tenant id from " + AZURE_PROPERTIES_PATH);
+
       return new ClientSecretCredentialBuilder()
           .clientId(clientId)
           .clientSecret(clientSecret)
@@ -68,17 +68,15 @@ public class AzureIntegrationUtils {
       Properties properties = new Properties();
       properties.load(in);
 
-      final String tenantId = properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.tenantId");
-      if (tenantId == null) {
-        throw new RuntimeException(
-            "Unable to read Azure user tenant id from " + AZURE_PROPERTIES_PATH);
-      }
+      final String tenantId =
+          Preconditions.checkNotNull(
+              properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.tenantId"),
+              "Unable to read Azure user tenant id from " + AZURE_PROPERTIES_PATH);
       final String subscriptionId =
-          properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.subscriptionId");
-      if (subscriptionId == null) {
-        throw new RuntimeException(
-            "Unable to read Azure user subscription id from " + AZURE_PROPERTIES_PATH);
-      }
+          Preconditions.checkNotNull(
+              properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.subscriptionId"),
+              "Unable to read Azure user subscription id from " + AZURE_PROPERTIES_PATH);
+
       return new AzureProfile(tenantId, subscriptionId, AzureEnvironment.AZURE);
     } catch (Exception e) {
       throw new RuntimeException(
@@ -97,13 +95,10 @@ public class AzureIntegrationUtils {
       Properties properties = new Properties();
       properties.load(in);
 
-      final String resourceGroupName =
-          properties.getProperty(AZURE_PROPERTY_PREFIX + ".resourceGroupName");
-      if (resourceGroupName == null) {
-        throw new RuntimeException(
-            "Unable to read Azure resource group from " + AZURE_PROPERTIES_PATH);
-      }
-      return resourceGroupName;
+      return Preconditions.checkNotNull(
+          properties.getProperty(AZURE_PROPERTY_PREFIX + ".resourceGroupName"),
+          "Unable to read Azure resource group from " + AZURE_PROPERTIES_PATH);
+
     } catch (Exception e) {
       throw new RuntimeException(
           "Unable to load Azure properties file from " + AZURE_PROPERTIES_PATH, e);

@@ -1,30 +1,43 @@
 package bio.terra.cloudres.azure.resourcemanager.compute.data;
 
 import bio.terra.cloudres.azure.resourcemanager.compute.ComputeManagerOperation;
-import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.cloudres.common.CloudOperation;
 import com.azure.core.management.Region;
+import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
-import java.util.Optional;
 
 /** Disk creation request data. */
-public class CreateDiskRequestData extends BaseRequestData {
-  private final int size;
-
-  public CreateDiskRequestData(String resourceGroupName, String name, Region region, int size) {
-    super(ComputeManagerOperation.AZURE_CREATE_DISK, resourceGroupName, name, region);
-    this.size = size;
-  }
+@AutoValue
+public abstract class CreateDiskRequestData extends BaseComputeRequestData {
+  /** The size of the disk in GB. */
+  public abstract int size();
 
   @Override
-  public Optional<CloudResourceUid> resourceUidCreation() {
-    // TODO: populate this when the CloudResourceUid Janitor model is regenerated
-    return Optional.empty();
+  public final CloudOperation cloudOperation() {
+    return ComputeManagerOperation.AZURE_CREATE_DISK;
+  }
+
+  public static Builder builder() {
+    return new AutoValue_CreateDiskRequestData.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setName(String value);
+
+    public abstract Builder setRegion(Region value);
+
+    public abstract Builder setResourceGroupName(String value);
+
+    public abstract Builder setSize(int value);
+
+    public abstract CreateDiskRequestData build();
   }
 
   @Override
   public JsonObject serialize() {
     JsonObject requestData = super.serialize();
-    requestData.addProperty("size", size);
+    requestData.addProperty("size", size());
     return requestData;
   }
 }

@@ -75,9 +75,17 @@ components:
     AzurePublicIp:
       type: object
       required:
+        - tenantId
+        - subscriptionId
         - resourceGroupName
         - ipName
       properties:
+        tenantId:
+          type: string
+          description: The tenant ID.
+        subscriptionId:
+          type: string
+          description: The subscription ID.
         resourceGroupName:
           type: string
           description: Name of the resource group.
@@ -87,9 +95,17 @@ components:
     AzureDisk:
       type: object
       required:
+        - tenantId
+        - subscriptionId
         - resourceGroupName
         - diskName
       properties:
+        tenantId:
+          type: string
+          description: The tenant ID.
+        subscriptionId:
+          type: string
+          description: The subscription ID.
         resourceGroupName:
           type: string
           description: Name of the resource group.
@@ -99,9 +115,17 @@ components:
     AzureNetwork:
       type: object
       required:
+        - tenantId
+        - subscriptionId
         - resourceGroupName
         - networkName
       properties:
+        tenantId:
+          type: string
+          description: The tenant ID.
+        subscriptionId:
+          type: string
+          description: The subscription ID.
         resourceGroupName:
           type: string
           description: Name of the resource group.
@@ -111,9 +135,17 @@ components:
     AzureNetworkSecurityGroup:
       type: object
       required:
+        - tenantId
+        - subscriptionId
         - resourceGroupName
         - networkSecurityGroupName
       properties:
+        tenantId:
+          type: string
+          description: The tenant ID.
+        subscriptionId:
+          type: string
+          description: The subscription ID.
         resourceGroupName:
           type: string
           description: Name of the resource group.
@@ -123,9 +155,17 @@ components:
     AzureVirtualMachine:
       type: object
       required:
+        - tenantId
+        - subscriptionId
         - resourceGroupName
         - vmName
       properties:
+        tenantId:
+          type: string
+          description: The tenant ID.
+        subscriptionId:
+          type: string
+          description: The subscription ID.
         resourceGroupName:
           type: string
           description: Name of the resource group.

@@ -1,49 +1,71 @@
 package bio.terra.cloudres.azure.resourcemanager.compute.data;
 
 import bio.terra.cloudres.azure.resourcemanager.compute.ComputeManagerOperation;
-import bio.terra.janitor.model.CloudResourceUid;
+import bio.terra.cloudres.common.CloudOperation;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
+import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
-import java.util.Optional;
 
 /** Virtual machine creation request data. */
-public class CreateVirtualMachineRequestData extends BaseRequestData {
-  private final Network network;
-  private final String subnetName;
-  private final PublicIpAddress ip;
-  private final Disk disk;
+@AutoValue
+public abstract class CreateVirtualMachineRequestData extends BaseComputeRequestData {
+  /** Network associated with the virtual machine's primary network interface. */
+  public abstract Network network();
 
-  public CreateVirtualMachineRequestData(
-      String resourceGroupName,
-      String name,
-      Region region,
-      Network network,
-      String subnetName,
-      PublicIpAddress ip,
-      Disk disk) {
-    super(ComputeManagerOperation.AZURE_CREATE_VM, resourceGroupName, name, region);
-    this.network = network;
-    this.subnetName = subnetName;
-    this.ip = ip;
-    this.disk = disk;
-  }
+  /** Subnet associated with the virtual machine's primary network interface. */
+  public abstract String subnetName();
+
+  /** Public IP address associated with the VM. */
+  public abstract PublicIpAddress publicIpAddress();
+
+  /** Disk associated with the VM. */
+  public abstract Disk disk();
+
+  /** Virtual machine image name. */
+  public abstract String image();
 
   @Override
-  public Optional<CloudResourceUid> resourceUidCreation() {
-    // TODO: populate this when the CloudResourceUid Janitor model is regenerated
-    return Optional.empty();
+  public final CloudOperation cloudOperation() {
+    return ComputeManagerOperation.AZURE_CREATE_VM;
+  }
+
+  public static CreateVirtualMachineRequestData.Builder builder() {
+    return new AutoValue_CreateVirtualMachineRequestData.Builder();
+  }
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract CreateVirtualMachineRequestData.Builder setName(String value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setRegion(Region value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setResourceGroupName(String value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setNetwork(Network value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setSubnetName(String value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setPublicIpAddress(
+        PublicIpAddress value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setDisk(Disk value);
+
+    public abstract CreateVirtualMachineRequestData.Builder setImage(String value);
+
+    public abstract CreateVirtualMachineRequestData build();
   }
 
   @Override
   public JsonObject serialize() {
     JsonObject requestData = super.serialize();
-    requestData.addProperty("network", network.name());
-    requestData.addProperty("subnetName", subnetName);
-    requestData.addProperty("ip", ip.ipAddress());
-    requestData.addProperty("disk", disk.name());
+    requestData.addProperty("network", network().name());
+    requestData.addProperty("subnetName", subnetName());
+    requestData.addProperty("ip", publicIpAddress().ipAddress());
+    requestData.addProperty("disk", disk().name());
+    requestData.addProperty("image", image());
     return requestData;
   }
 }
