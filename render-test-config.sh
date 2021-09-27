@@ -13,8 +13,6 @@ SERVICE_ACCOUNT_ADMIN_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/r
 SERVICE_ACCOUNT_USER_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_user.json
 SERVICE_ACCOUNT_JANITOR_CLIENT_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_janitor_client.json
 
-mkdir -p "$(dirname $0)"/common/src/testFixtures/resources
-
 docker run --rm -e VAULT_TOKEN=$VAULT_TOKEN ${DSDE_TOOLBOX_DOCKER_IMAGE} \
             vault read -format json ${VAULT_SERVICE_ACCOUNT_ADMIN_PATH} \
             | jq -r .data > ${SERVICE_ACCOUNT_ADMIN_OUTPUT_FILE_PATH}
@@ -28,9 +26,6 @@ docker run --rm --cap-add IPC_LOCK \
 
 # TODO(RT): specify Azure secrets in vault
 AZURE_PROPERTIES_OUTPUT_FILE_PATH="$(dirname $0)"/azure-resourcemanager-common/src/testFixtures/resources/integration_azure_env.properties
-
-mkdir -p "$(dirname $0)"/azure-resourcemanager-common/src/testFixtures/resources
-
 cat > ${AZURE_PROPERTIES_OUTPUT_FILE_PATH} <<EOF
 integration.azure.admin.clientId=
 integration.azure.admin.clientSecret=
