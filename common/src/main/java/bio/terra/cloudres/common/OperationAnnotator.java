@@ -91,6 +91,9 @@ public class OperationAnnotator {
               .setRequestData(cowSerialize.serializeRequest())
               .build());
 
+      // We manually manage the span so that the expected span is still present in catch and
+      // finally.
+      // See warning on SpanBuilder#startScopedSpan.
       span.end();
     }
   }
