@@ -13,6 +13,7 @@ import com.azure.core.http.policy.HttpResponseLogger;
 import com.azure.core.http.policy.HttpResponseLoggingContext;
 import com.azure.core.util.CoreUtils;
 import com.azure.core.util.logging.ClientLogger;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.gson.JsonObject;
 import java.io.ByteArrayOutputStream;
@@ -42,6 +43,11 @@ public class AzureResponseLogger implements HttpResponseLogger {
   AzureResponseLogger(ClientConfig clientConfig) {
     // Note we use our own Logger instead of the ClientLogger wrapper that Azure provides.
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
+  }
+
+  @VisibleForTesting
+  AzureResponseLogger(OperationAnnotator operationAnnotator) {
+    this.operationAnnotator = operationAnnotator;
   }
 
   @Override
@@ -86,7 +92,7 @@ public class AzureResponseLogger implements HttpResponseLogger {
             .setCloudOperation(
                 requestData
                     .map(ResourceManagerRequestData::cloudOperation)
-                    .orElse(ResourceManagerOperation.AZURE_RESOURCE_MANAGER_OPERATION))
+                    .orElse(ResourceManagerOperation.AZURE_RESOURCE_MANAGER_UNKNOWN_OPERATION))
             .setRequestData(requestDataJson)
             .build();
 
@@ -110,9 +116,8 @@ public class AzureResponseLogger implements HttpResponseLogger {
       return;
     }
 
-    // The body is logged if the Content-Type is not "application/octet-stream" and the body isn't
-    // empty
-    // and is less than 16KB in size.
+    // The body is logged if the Content-Type is not "application/octet-stream" and the
+    // body isn't empty and is less than 16KB in size.
     String contentTypeHeader = headers.getValue("Content-Type");
     if (!ContentType.APPLICATION_OCTET_STREAM.equalsIgnoreCase(contentTypeHeader)
         && contentLength != 0

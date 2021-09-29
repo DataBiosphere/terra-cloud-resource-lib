@@ -60,7 +60,7 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
 
   @Override
   public JsonObject serialize() {
-    JsonObject requestData = super.serialize();
+    JsonObject requestData = super.serializeCommon();
     requestData.addProperty("network", network().name());
     requestData.addProperty("subnetName", subnetName());
     requestData.addProperty("ip", publicIpAddress().ipAddress());

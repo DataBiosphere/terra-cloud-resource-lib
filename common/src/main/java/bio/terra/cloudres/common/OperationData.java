@@ -35,9 +35,15 @@ public abstract class OperationData {
   public abstract static class Builder {
     public abstract Builder setDuration(Duration duration);
 
+    public abstract Builder setTryCount(int tryCount);
+
     public abstract Builder setTryCount(OptionalInt tryCount);
 
+    public abstract Builder setExecutionException(Exception executionException);
+
     public abstract Builder setExecutionException(Optional<Exception> executionException);
+
+    public abstract Builder setHttpStatusCode(int httpStatusCode);
 
     public abstract Builder setHttpStatusCode(OptionalInt httpStatusCode);
 

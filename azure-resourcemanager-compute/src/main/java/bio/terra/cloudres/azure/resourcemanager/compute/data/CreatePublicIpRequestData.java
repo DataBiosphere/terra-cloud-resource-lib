@@ -39,7 +39,7 @@ public abstract class CreatePublicIpRequestData extends BaseComputeRequestData {
 
   @Override
   public JsonObject serialize() {
-    JsonObject requestData = super.serialize();
+    JsonObject requestData = super.serializeCommon();
     requestData.addProperty("ipAllocationMethod", ipAllocationMethod().toString());
     return requestData;
   }

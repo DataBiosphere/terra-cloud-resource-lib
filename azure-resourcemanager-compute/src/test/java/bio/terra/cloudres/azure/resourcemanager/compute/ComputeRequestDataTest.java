@@ -49,7 +49,9 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_NETWORK, createNetwork.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-network\",\"region\":\"eastus\",\"addressSpaceCidr\":\"192.168.0.0/16\",\"subnetName\":\"my-subnet\",\"addressPrefix\":\"192.168.1.0/24\",\"networkSecurityGroupName\":\"my-nsg\"}",
+        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-network\",\"region\":\"eastus\","
+            + "\"addressSpaceCidr\":\"192.168.0.0/16\",\"subnetName\":\"my-subnet\","
+            + "\"addressPrefix\":\"192.168.1.0/24\",\"networkSecurityGroupName\":\"my-nsg\"}",
         createNetwork.serialize().toString());
   }
 
@@ -67,7 +69,8 @@ public class ComputeRequestDataTest {
         ComputeManagerOperation.AZURE_CREATE_NETWORK_SECURITY_GROUP,
         createNetworkSecurityGroup.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-nsg\",\"region\":\"eastus\",\"rules\":[\"rule1\",\"rule2\"]}",
+        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-nsg\",\"region\":\"eastus\","
+            + "\"rules\":[\"rule1\",\"rule2\"]}",
         createNetworkSecurityGroup.serialize().toString());
   }
 
@@ -83,7 +86,8 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_PUBLIC_IP, createPublicIp.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-ip\",\"region\":\"eastus\",\"ipAllocationMethod\":\"Dynamic\"}",
+        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-ip\",\"region\":\"eastus\","
+            + "\"ipAllocationMethod\":\"Dynamic\"}",
         createPublicIp.serialize().toString());
   }
 
@@ -103,7 +107,9 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_VM, createVirtualMachine.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-vm\",\"region\":\"eastus\",\"network\":\"my-network\",\"subnetName\":\"my-subnet\",\"ip\":null,\"disk\":\"my-disk\",\"image\":\"my-image\"}",
+        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-vm\",\"region\":\"eastus\","
+            + "\"network\":\"my-network\",\"subnetName\":\"my-subnet\",\"ip\":null,"
+            + "\"disk\":\"my-disk\",\"image\":\"my-image\"}",
         createVirtualMachine.serialize().toString());
   }
 

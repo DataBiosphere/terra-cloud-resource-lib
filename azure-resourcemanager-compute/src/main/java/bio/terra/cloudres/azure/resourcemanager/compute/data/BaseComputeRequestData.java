@@ -18,8 +18,11 @@ public abstract class BaseComputeRequestData implements ResourceManagerRequestDa
   /** The resource group of the resource. */
   public abstract String resourceGroupName();
 
-  @Override
-  public JsonObject serialize() {
+  /**
+   * Serializes this object to JSON. Not overriding {@link ResourceManagerRequestData#serialize()}
+   * to ensure subclasses implement their own serialize method.
+   */
+  protected JsonObject serializeCommon() {
     JsonObject requestData = new JsonObject();
     requestData.addProperty("resourceGroupName", resourceGroupName());
     requestData.addProperty("name", name());

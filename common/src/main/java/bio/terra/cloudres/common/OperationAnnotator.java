@@ -85,7 +85,6 @@ public class OperationAnnotator {
           OperationData.builder()
               .setCloudOperation(cloudOperation)
               .setDuration(stopwatch.elapsed())
-              .setTryCount(OptionalInt.empty())
               .setExecutionException(executionException)
               .setHttpStatusCode(httpStatusCode)
               .setRequestData(cowSerialize.serializeRequest())
@@ -99,7 +98,12 @@ public class OperationAnnotator {
   }
 
   /**
-   * Records log, tracing, and metric data associated with a cloud operation.
+   * Records the information captured in {@link OperationData} via logs, tracing and metrics.
+   *
+   * <p>This method should be used to capture the result of an already-executed cloud operation.
+   * {@link #executeCowOperation(CloudOperation, CowExecute, CowSerialize)} or {@link
+   * #executeCheckedCowOperation(CloudOperation, CowCheckedExecute, CowSerialize)} should be used to
+   * actually execute the operation and record resulting data.
    *
    * @param operationData the {@link OperationData} to record.
    */
@@ -137,7 +141,8 @@ public class OperationAnnotator {
   }
 
   /**
-   * Logs a debug message indicating the completion of a CRL event or that an exception occurred.
+   * Logs the information captured in {@link OperationData} indicating the completion of a CRL event
+   * or that an exception occurred.
    *
    * <p>A structured JsonObject is included in the logging arguments; this payload will not affect
    * human-readable logging output, but will be included in JSON-formatted output for services which

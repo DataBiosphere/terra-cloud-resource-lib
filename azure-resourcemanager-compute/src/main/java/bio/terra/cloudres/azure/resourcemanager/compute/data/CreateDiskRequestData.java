@@ -36,7 +36,7 @@ public abstract class CreateDiskRequestData extends BaseComputeRequestData {
 
   @Override
   public JsonObject serialize() {
-    JsonObject requestData = super.serialize();
+    JsonObject requestData = super.serializeCommon();
     requestData.addProperty("size", size());
     return requestData;
   }

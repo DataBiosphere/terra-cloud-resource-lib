@@ -8,5 +8,5 @@ import bio.terra.cloudres.common.CloudOperation;
  * <p>This is used as a generic fallback; in practice, a more specific value should be used.
  */
 public enum ResourceManagerOperation implements CloudOperation {
-  AZURE_RESOURCE_MANAGER_OPERATION
+  AZURE_RESOURCE_MANAGER_UNKNOWN_OPERATION
 }

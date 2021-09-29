@@ -39,7 +39,7 @@ public abstract class CreateNetworkSecurityGroupRequestData extends BaseComputeR
 
   @Override
   public JsonObject serialize() {
-    JsonObject requestData = super.serialize();
+    JsonObject requestData = super.serializeCommon();
     JsonArray rules = new JsonArray();
     rules().forEach(rules::add);
     requestData.add("rules", rules);

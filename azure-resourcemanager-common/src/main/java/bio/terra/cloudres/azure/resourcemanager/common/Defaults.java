@@ -12,7 +12,31 @@ public class Defaults {
 
   static final String CLOUD_RESOURCE_REQUEST_DATA_KEY = "crlRequestData";
 
-  /** Builds a standard {@link Context} object for calling Azure Resource Manager APIs. */
+  /**
+   * Builds a standard {@link Context} object for passing {@link ResourceManagerRequestData} to
+   * Azure Resource Manager APIs. This should be used to enrich structured logging, and track
+   * resource creations for clean-up.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   *     computeManager
+   *         .networkManager()
+   *         .publicIpAddresses()
+   *         .define(name)
+   *         .withRegion(region)
+   *         .withExistingResourceGroup(resourceGroupName)
+   *         .withDynamicIP()
+   *         .create(
+   *             Defaults.buildContext(
+   *                 CreatePublicIpRequestData.builder()
+   *                     .setResourceGroupName(resourceGroupName)
+   *                     .setName(name)
+   *                     .setRegion(region)
+   *                     .setIpAllocationMethod(IpAllocationMethod.DYNAMIC)
+   *                     .build()));
+   * </pre>
+   */
   public static Context buildContext(ResourceManagerRequestData requestData) {
     return new Context(CLOUD_RESOURCE_REQUEST_DATA_KEY, requestData);
   }
@@ -35,7 +59,7 @@ public class Defaults {
       ClientConfig clientConfig, AzureConfigurable<T> configurable) {
     return configurable.withLogOptions(
         new HttpLogOptions()
-            .setRequestLogger(new AzureRequestLogger(clientConfig))
+            .setRequestLogger(new AzureResourceCleanupRecorder(clientConfig))
             .setResponseLogger(new AzureResponseLogger(clientConfig))
             // Since we are providing our own loggers this value isn't actually used; however it
             // does need to be set to a value other than NONE for the loggers to fire.

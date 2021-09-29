@@ -72,13 +72,12 @@ components:
       properties:
         projectId:
           type: string
-    AzurePublicIp:
+    AzureResourceGroup:
       type: object
       required:
         - tenantId
         - subscriptionId
         - resourceGroupName
-        - ipName
       properties:
         tenantId:
           type: string
@@ -89,86 +88,58 @@ components:
         resourceGroupName:
           type: string
           description: Name of the resource group.
+    AzurePublicIp:
+      type: object
+      required:
+        - resourceGroup
+        - ipName
+      properties:
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
         ipName:
           type: string
           description: The user-provided name to identify the IP.
     AzureDisk:
       type: object
       required:
-        - tenantId
-        - subscriptionId
-        - resourceGroupName
+        - resourceGroup
         - diskName
       properties:
-        tenantId:
-          type: string
-          description: The tenant ID.
-        subscriptionId:
-          type: string
-          description: The subscription ID.
-        resourceGroupName:
-          type: string
-          description: Name of the resource group.
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
         diskName:
           type: string
           description: The user-provided name to identify the disk.
     AzureNetwork:
       type: object
       required:
-        - tenantId
-        - subscriptionId
-        - resourceGroupName
+        - resourceGroup
         - networkName
       properties:
-        tenantId:
-          type: string
-          description: The tenant ID.
-        subscriptionId:
-          type: string
-          description: The subscription ID.
-        resourceGroupName:
-          type: string
-          description: Name of the resource group.
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
         networkName:
           type: string
           description: The user-provided name to identify the network.
     AzureNetworkSecurityGroup:
       type: object
       required:
-        - tenantId
-        - subscriptionId
-        - resourceGroupName
+        - resourceGroup
         - networkSecurityGroupName
       properties:
-        tenantId:
-          type: string
-          description: The tenant ID.
-        subscriptionId:
-          type: string
-          description: The subscription ID.
-        resourceGroupName:
-          type: string
-          description: Name of the resource group.
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
         networkSecurityGroupName:
           type: string
           description: The user-provided name to identify the network security group.
     AzureVirtualMachine:
       type: object
       required:
-        - tenantId
-        - subscriptionId
-        - resourceGroupName
+        - resourceGroup
         - vmName
       properties:
-        tenantId:
-          type: string
-          description: The tenant ID.
-        subscriptionId:
-          type: string
-          description: The subscription ID.
-        resourceGroupName:
-          type: string
-          description: Name of the resource group.
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
         vmName:
           type: string
           description: The user-provided name to identify the VM.

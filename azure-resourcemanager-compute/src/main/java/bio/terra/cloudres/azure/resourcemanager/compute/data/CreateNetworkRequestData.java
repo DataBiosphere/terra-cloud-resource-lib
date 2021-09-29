@@ -53,7 +53,7 @@ public abstract class CreateNetworkRequestData extends BaseComputeRequestData {
 
   @Override
   public JsonObject serialize() {
-    JsonObject requestData = super.serialize();
+    JsonObject requestData = super.serializeCommon();
     requestData.addProperty("addressSpaceCidr", addressSpaceCidr());
     requestData.addProperty("subnetName", subnetName());
     requestData.addProperty("addressPrefix", addressPrefix());

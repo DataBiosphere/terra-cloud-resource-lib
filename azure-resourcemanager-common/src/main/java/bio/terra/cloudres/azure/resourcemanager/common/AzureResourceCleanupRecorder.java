@@ -12,14 +12,15 @@ import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 /**
- * Intercepts Azure HTTP requests to record cloud resource creations for cleanup.
+ * Intercepts Azure cloud resource creations to record them for cleanup.
  *
- * <p>This is a no-op if the HTTP request is not a cloud resource creation.
+ * <p>Implemented as a {@link HttpRequestLogger} to record created resources as soon as the request
+ * is made. This is a no-op if the HTTP request is not a cloud resource creation.
  */
-public class AzureRequestLogger implements HttpRequestLogger {
+public class AzureResourceCleanupRecorder implements HttpRequestLogger {
   private final ClientConfig clientConfig;
 
-  AzureRequestLogger(ClientConfig clientConfig) {
+  AzureResourceCleanupRecorder(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
   }
 
