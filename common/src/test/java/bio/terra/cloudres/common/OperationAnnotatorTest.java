@@ -137,8 +137,8 @@ public class OperationAnnotatorTest {
     // Assert cloud api count increase by 1
     assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
 
-    // Assert error count increase by 1
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
+    // No 404 error
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
   }
 
   @Test
