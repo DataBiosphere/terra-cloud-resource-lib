@@ -227,7 +227,7 @@ public class OperationAnnotatorTest {
         OperationData.builder()
             .setCloudOperation(StubCloudOperation.TEST_OPERATION)
             .setRequestData(PROJECT_REQUEST)
-            .setDuration(Duration.ofMillis(1100))
+            .setDuration(Duration.ofMillis(8100))
             .setExecutionException(RM_EXCEPTION)
             .setHttpStatusCode(404)
             .build());
@@ -240,14 +240,14 @@ public class OperationAnnotatorTest {
     // Assert error count increase by 1
     assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
 
-    // This rely on the latency DistributionData defined in {@link MetricHelper} where 1s - 2s are
+    // This rely on the latency DistributionData defined in {@link MetricHelper} where 8s - 16s are
     // in the same bucket.
-    // This would expect the latency falls into the 1s-2s bucket(23rd).
+    // This would expect the latency falls into the 8s-16s bucket(26th).
     AggregationData.DistributionData data =
         (AggregationData.DistributionData)
             MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
 
-    assertEquals(data.getBucketCounts().get(22).longValue(), 1);
+    assertEquals(data.getBucketCounts().get(25).longValue(), 1);
 
     // Verify logger was invoked with an exception
     verify(mockLogger, times(1)).debug(anyString(), any(JsonObject.class), any(Exception.class));
