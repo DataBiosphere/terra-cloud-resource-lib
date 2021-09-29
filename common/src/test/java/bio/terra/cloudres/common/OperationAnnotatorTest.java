@@ -119,6 +119,9 @@ public class OperationAnnotatorTest {
 
   @Test
   public void testExecuteGoogleCloudCall_withCheckedException() throws Exception {
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+
     Assert.assertThrows(
         InterruptedException.class,
         () ->
@@ -128,6 +131,14 @@ public class OperationAnnotatorTest {
                   throw new InterruptedException(ERROR_MESSAGE);
                 },
                 SERIALIZE));
+
+    sleepForSpansExport();
+
+    // Assert cloud api count increase by 1
+    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
+
+    // Assert error count increase by 1
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
   }
 
   @Test
