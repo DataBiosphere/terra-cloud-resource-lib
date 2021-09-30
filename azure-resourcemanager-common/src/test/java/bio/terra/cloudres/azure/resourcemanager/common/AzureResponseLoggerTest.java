@@ -8,11 +8,14 @@ import static org.mockito.Mockito.verify;
 
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.OperationData;
+import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.resources.ResourceManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.google.gson.JsonPrimitive;
 import java.util.List;
+import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
@@ -53,7 +56,10 @@ public class AzureResponseLoggerTest {
     assertEquals(
         ResourceManagerOperation.AZURE_RESOURCE_MANAGER_UNKNOWN_OPERATION,
         operationData.cloudOperation());
-    assertEquals("{}", operationData.requestData().getAsString());
+    assertThat(
+        operationData.requestData().entrySet(),
+        Matchers.hasItem(Map.entry("requestMethod", new JsonPrimitive("GET"))));
+    assertThat(operationData.requestData().keySet(), Matchers.hasItem("requestUrl"));
 
     // For good measure verify the Azure response contains our test resource group
     assertThat(
@@ -65,7 +71,9 @@ public class AzureResponseLoggerTest {
     AzureProfile profile = AzureIntegrationUtils.getUserAzureProfileOrDie();
     return ResourceManager.configure()
         .withLogOptions(
-            new HttpLogOptions().setResponseLogger(new AzureResponseLogger(mockOperationAnnotator)))
+            new HttpLogOptions()
+                .setResponseLogger(new AzureResponseLogger(mockOperationAnnotator))
+                .setLogLevel(HttpLogDetailLevel.BASIC))
         .authenticate(AzureIntegrationUtils.getAdminAzureCredentialsOrDie(), profile)
         .withSubscription(profile.getSubscriptionId());
   }
