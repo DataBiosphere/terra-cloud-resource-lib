@@ -146,7 +146,9 @@ Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadins
 #### google-storage
 Wraps [Google Cloud Storage API](https://cloud.google.com/storage/docs/apis).  
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-storage).
-
+#### azure-resourcemanager-compute
+Wraps [Azure Compute API](https://docs.microsoft.com/en-us/rest/api/compute/).
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/azure-resourcemanager-compute).
 #### cloud-resource-schema
 The general schema for how cloud resources are presented in CRL.   
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/cloud-resource-schema).

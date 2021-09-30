@@ -23,3 +23,14 @@ docker run --rm --cap-add IPC_LOCK \
             -e VAULT_TOKEN=$VAULT_TOKEN ${DSDE_TOOLBOX_DOCKER_IMAGE} \
             vault read -format json ${VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH} \
             | jq -r .data.key | base64 -d > ${SERVICE_ACCOUNT_JANITOR_CLIENT_OUTPUT_FILE_PATH}
+
+# TODO(IA-2938): specify Azure secrets in vault
+AZURE_PROPERTIES_OUTPUT_FILE_PATH="$(dirname $0)"/azure-resourcemanager-common/src/testFixtures/resources/integration_azure_env.properties
+cat > ${AZURE_PROPERTIES_OUTPUT_FILE_PATH} <<EOF
+integration.azure.admin.clientId=
+integration.azure.admin.clientSecret=
+integration.azure.admin.tenantId=
+integration.azure.user.tenantId=
+integration.azure.user.subscriptionId=
+integration.azure.resourceGroupName=
+EOF

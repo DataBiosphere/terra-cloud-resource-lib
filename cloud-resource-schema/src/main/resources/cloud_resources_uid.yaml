@@ -72,6 +72,77 @@ components:
       properties:
         projectId:
           type: string
+    AzureResourceGroup:
+      type: object
+      required:
+        - tenantId
+        - subscriptionId
+        - resourceGroupName
+      properties:
+        tenantId:
+          type: string
+          description: The tenant ID.
+        subscriptionId:
+          type: string
+          description: The subscription ID.
+        resourceGroupName:
+          type: string
+          description: Name of the resource group.
+    AzurePublicIp:
+      type: object
+      required:
+        - resourceGroup
+        - ipName
+      properties:
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
+        ipName:
+          type: string
+          description: The user-provided name to identify the IP.
+    AzureDisk:
+      type: object
+      required:
+        - resourceGroup
+        - diskName
+      properties:
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
+        diskName:
+          type: string
+          description: The user-provided name to identify the disk.
+    AzureNetwork:
+      type: object
+      required:
+        - resourceGroup
+        - networkName
+      properties:
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
+        networkName:
+          type: string
+          description: The user-provided name to identify the network.
+    AzureNetworkSecurityGroup:
+      type: object
+      required:
+        - resourceGroup
+        - networkSecurityGroupName
+      properties:
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
+        networkSecurityGroupName:
+          type: string
+          description: The user-provided name to identify the network security group.
+    AzureVirtualMachine:
+      type: object
+      required:
+        - resourceGroup
+        - vmName
+      properties:
+        resourceGroup:
+          $ref: '#/components/schemas/AzureResourceGroup'
+        vmName:
+          type: string
+          description: The user-provided name to identify the VM.
     # A cloud resource unique identifier. Each CloudResourceUid represents exactly one cloud resource.
     # We are not doing polymorphism at this moment because of lack of support in swagger-codegen or openApiGenerator
     # Now CloudResourceUid contains all possible cloud resource types, and we will assume there is only one being set
@@ -91,3 +162,13 @@ components:
           $ref: '#/components/schemas/GoogleBucketUid'
         googleProjectUid:
           $ref: '#/components/schemas/GoogleProjectUid'
+        azurePublicIp:
+          $ref: '#/components/schemas/AzurePublicIp'
+        azureDisk:
+          $ref: '#/components/schemas/AzureDisk'
+        azureNetwork:
+          $ref: '#/components/schemas/AzureNetwork'
+        azureNetworkSecurityGroup:
+          $ref: '#/components/schemas/AzureNetworkSecurityGroup'
+        azureVirtualMachine:
+          $ref: '#/components/schemas/AzureVirtualMachine'
