@@ -117,9 +117,23 @@ public class CloudComputeCowTest {
 
     CloudComputeCow cloudComputeCow = defaultCompute();
 
+    // Create parent network
+    String netWorkName = randomNetworkName();
+    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
+    Operation networkOperation = cloudComputeCow.networks().insert(projectId, network).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, networkOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
+    network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
+
     String firewallName = "allow-internal";
     Firewall.Allowed allowed = new Firewall.Allowed().setIPProtocol("icmp");
-    Firewall firewall = new Firewall().setName(firewallName).setAllowed(ImmutableList.of(allowed));
+    Firewall firewall =
+        new Firewall()
+            .setName(firewallName)
+            .setAllowed(ImmutableList.of(allowed))
+            .setNetwork(netWorkName);
     Operation operation = cloudComputeCow.firewalls().insert(projectId, firewall).execute();
     OperationTestUtils.pollAndAssertSuccess(
         cloudComputeCow.globalOperations().operationCow(projectId, operation),
@@ -150,11 +164,25 @@ public class CloudComputeCowTest {
 
     CloudComputeCow cloudComputeCow = defaultCompute();
 
+    // Create parent network
+    String netWorkName = randomNetworkName();
+    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
+    Operation networkOperation = cloudComputeCow.networks().insert(projectId, network).execute();
+    OperationTestUtils.pollAndAssertSuccess(
+        cloudComputeCow.globalOperations().operationCow(projectId, networkOperation),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(100));
+    network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
+
     String routeName = "private-google-access-route";
     String destRange = "199.36.153.4/30";
     String nextHopGateway = "projects/" + projectId + "/global/gateways/default-internet-gateway";
     Route route =
-        new Route().setName(routeName).setDestRange(destRange).setNextHopGateway(nextHopGateway);
+        new Route()
+            .setName(routeName)
+            .setDestRange(destRange)
+            .setNextHopGateway(nextHopGateway)
+            .setNetwork(netWorkName);
     Operation operation = cloudComputeCow.routes().insert(projectId, route).execute();
     OperationTestUtils.pollAndAssertSuccess(
         cloudComputeCow.globalOperations().operationCow(projectId, operation),
