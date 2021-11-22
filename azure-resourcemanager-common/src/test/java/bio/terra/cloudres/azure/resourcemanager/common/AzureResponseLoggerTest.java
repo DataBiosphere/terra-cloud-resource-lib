@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,8 +29,6 @@ import org.mockito.Mock;
  * calls.
  */
 @Tag("integration")
-// Note: temporarily disabled because we have not yet added Azure test environment setup to vault.
-@Disabled
 public class AzureResponseLoggerTest {
 
   @Mock private OperationAnnotator mockOperationAnnotator = mock(OperationAnnotator.class);
@@ -64,11 +61,11 @@ public class AzureResponseLoggerTest {
     // For good measure verify the Azure response contains our test resource group
     assertThat(
         resourceGroups.stream().map(ResourceGroup::name).collect(Collectors.toList()),
-        Matchers.hasItem(AzureIntegrationUtils.getResuableResourceGroup()));
+        Matchers.hasItem(AzureIntegrationUtils.DEFAULT_AZURE_RESOURCE_GROUP));
   }
 
   private ResourceManager setUpResourceManager() {
-    AzureProfile profile = AzureIntegrationUtils.getUserAzureProfileOrDie();
+    AzureProfile profile = AzureIntegrationUtils.DEFAULT_AZURE_PROFILE;
     return ResourceManager.configure()
         .withLogOptions(
             new HttpLogOptions()
