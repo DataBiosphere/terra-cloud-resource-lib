@@ -133,7 +133,7 @@ public class CloudComputeCowTest {
         new Firewall()
             .setName(firewallName)
             .setAllowed(ImmutableList.of(allowed))
-            .setNetwork(netWorkName);
+            .setNetwork(network.getSelfLink());
     Operation operation = cloudComputeCow.firewalls().insert(projectId, firewall).execute();
     OperationTestUtils.pollAndAssertSuccess(
         cloudComputeCow.globalOperations().operationCow(projectId, operation),
@@ -182,7 +182,7 @@ public class CloudComputeCowTest {
             .setName(routeName)
             .setDestRange(destRange)
             .setNextHopGateway(nextHopGateway)
-            .setNetwork(netWorkName);
+            .setNetwork(network.getSelfLink());
     Operation operation = cloudComputeCow.routes().insert(projectId, route).execute();
     OperationTestUtils.pollAndAssertSuccess(
         cloudComputeCow.globalOperations().operationCow(projectId, operation),
