@@ -17,4 +17,5 @@ dependencies {
     testImplementation(testFixtures(project(':google-billing')))
     testImplementation(testFixtures(project(':google-cloudresourcemanager')))
     testImplementation(testFixtures(project(':google-serviceusage')))
+    testImplementation(testFixtures(project(':google-compute')))
 }

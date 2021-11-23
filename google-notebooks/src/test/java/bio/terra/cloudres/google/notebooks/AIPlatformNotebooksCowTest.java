@@ -8,11 +8,13 @@ import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
+import bio.terra.cloudres.google.compute.testing.NetworkUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
+import com.google.api.services.compute.model.Network;
 import com.google.api.services.notebooks.v1.model.Binding;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
@@ -38,12 +40,15 @@ public class AIPlatformNotebooksCowTest {
   /** A dynamically created Google Project to manipulate AI Notebooks within for testing. */
   private static Project reusableProject;
 
+  private static Network reusableNetwork;
+
   @BeforeAll
   public static void createReusableProject() throws Exception {
     reusableProject = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
     ServiceUsageUtils.enableServices(
         reusableProject.getProjectId(), ImmutableList.of("notebooks.googleapis.com"));
+    reusableNetwork = NetworkUtils.exceuteCreateNetwork(reusableProject.getProjectId(), true);
   }
 
   private static AIPlatformNotebooksCow defaultNotebooksCow() {
@@ -83,7 +88,9 @@ public class AIPlatformNotebooksCowTest {
         .setVmImage(
             new VmImage().setProject("deeplearning-platform-release").setImageFamily("common-cpu"))
         // The machine type to used is required.
-        .setMachineType("e2-standard-2");
+        .setMachineType("e2-standard-2")
+        // The default network does not exist in Broad projects, so network is required.
+        .setNetwork(reusableNetwork.getSelfLink());
   }
 
   @Test
@@ -182,7 +189,10 @@ public class AIPlatformNotebooksCowTest {
     assertEquals(
         "{\"projectId\":\"my-project\",\"locations\":\"us-east1-b\","
             + "\"instanceId\":\"my-id\","
-            + "\"instance\":{\"machineType\":\"e2-standard-2\",\"vmImage\":{\"imageFamily\":\"common-cpu\",\"project\":\"deeplearning-platform-release\"}}}",
+            + "\"instance\":{\"machineType\":\"e2-standard-2\",\"network\":\""
+            + reusableNetwork.getSelfLink()
+            + "\","
+            + "\"vmImage\":{\"imageFamily\":\"common-cpu\",\"project\":\"deeplearning-platform-release\"}}}",
         notebooks
             .instances()
             .create(

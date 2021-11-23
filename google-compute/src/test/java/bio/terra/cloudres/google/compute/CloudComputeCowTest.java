@@ -1,5 +1,7 @@
 package bio.terra.cloudres.google.compute;
 
+import static bio.terra.cloudres.google.compute.testing.NetworkUtils.exceuteCreateNetwork;
+import static bio.terra.cloudres.google.compute.testing.NetworkUtils.randomNetworkName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -77,14 +79,7 @@ public class CloudComputeCowTest {
     CloudComputeCow cloudComputeCow = defaultCompute();
 
     // Create parent network
-    String netWorkName = randomNetworkName();
-    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
-    Operation operation = cloudComputeCow.networks().insert(projectId, network).execute();
-    OperationTestUtils.pollAndAssertSuccess(
-        cloudComputeCow.globalOperations().operationCow(projectId, operation),
-        Duration.ofSeconds(5),
-        Duration.ofSeconds(100));
-    network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
+    Network network = exceuteCreateNetwork(projectId, false);
 
     String subnetWorkName = randomNetworkName();
     Subnetwork subnetwork =
@@ -118,14 +113,7 @@ public class CloudComputeCowTest {
     CloudComputeCow cloudComputeCow = defaultCompute();
 
     // Create parent network
-    String netWorkName = randomNetworkName();
-    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
-    Operation networkOperation = cloudComputeCow.networks().insert(projectId, network).execute();
-    OperationTestUtils.pollAndAssertSuccess(
-        cloudComputeCow.globalOperations().operationCow(projectId, networkOperation),
-        Duration.ofSeconds(5),
-        Duration.ofSeconds(100));
-    network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
+    Network network = exceuteCreateNetwork(projectId, false);
 
     String firewallName = "allow-internal";
     Firewall.Allowed allowed = new Firewall.Allowed().setIPProtocol("icmp");
@@ -165,14 +153,7 @@ public class CloudComputeCowTest {
     CloudComputeCow cloudComputeCow = defaultCompute();
 
     // Create parent network
-    String netWorkName = randomNetworkName();
-    Network network = new Network().setName(netWorkName).setAutoCreateSubnetworks(false);
-    Operation networkOperation = cloudComputeCow.networks().insert(projectId, network).execute();
-    OperationTestUtils.pollAndAssertSuccess(
-        cloudComputeCow.globalOperations().operationCow(projectId, networkOperation),
-        Duration.ofSeconds(5),
-        Duration.ofSeconds(100));
-    network = cloudComputeCow.networks().get(projectId, netWorkName).execute();
+    Network network = exceuteCreateNetwork(projectId, false);
 
     String routeName = "private-google-access-route";
     String destRange = "199.36.153.4/30";
@@ -206,14 +187,7 @@ public class CloudComputeCowTest {
     final String region = "us-west1";
 
     // Create parent network
-    final String networkName = randomNetworkName();
-    final Network network = new Network().setName(networkName).setAutoCreateSubnetworks(false);
-    final Operation insertNetworkOperation =
-        cloudComputeCow.networks().insert(projectId, network).execute();
-    OperationTestUtils.pollAndAssertSuccess(
-        cloudComputeCow.globalOperations().operationCow(projectId, insertNetworkOperation),
-        Duration.ofSeconds(5),
-        Duration.ofSeconds(100));
+    Network network = exceuteCreateNetwork(projectId, false);
 
     final String routerName = randomRouterName();
     final String gatewayName = randomGatewayName();
@@ -226,7 +200,7 @@ public class CloudComputeCowTest {
         new Router()
             .setName(routerName)
             .setRegion(region)
-            .setNetwork(networkName(projectId, networkName))
+            .setNetwork(networkName(projectId, network.getName()))
             .setNats(ImmutableList.of(nat));
     final Operation insertRouterOperation =
         cloudComputeCow.routers().insert(projectId, region, router).execute();
@@ -240,7 +214,7 @@ public class CloudComputeCowTest {
 
     assertEquals(routerName, createdRouter.getName());
     assertEquals(regionName(projectId, region), createdRouter.getRegion());
-    assertEquals(networkName(projectId, networkName), createdRouter.getNetwork());
+    assertEquals(networkName(projectId, network.getName()), createdRouter.getNetwork());
 
     final List<RouterNat> nats = createdRouter.getNats();
     assertEquals(nats.size(), 1);
@@ -262,7 +236,7 @@ public class CloudComputeCowTest {
     assertEquals(404, deleteRouterException.getStatusCode());
 
     final Operation deleteNetworkOperation =
-        cloudComputeCow.networks().delete(projectId, networkName).execute();
+        cloudComputeCow.networks().delete(projectId, network.getName()).execute();
     OperationTestUtils.pollAndAssertSuccess(
         cloudComputeCow.globalOperations().operationCow(projectId, deleteNetworkOperation),
         Duration.ofSeconds(5),
@@ -270,7 +244,7 @@ public class CloudComputeCowTest {
     final GoogleJsonResponseException deleteNetworkException =
         assertThrows(
             GoogleJsonResponseException.class,
-            () -> cloudComputeCow.networks().get(projectId, networkName).execute());
+            () -> cloudComputeCow.networks().get(projectId, network.getName()).execute());
     assertEquals(404, deleteNetworkException.getStatusCode());
   }
 
@@ -445,11 +419,6 @@ public class CloudComputeCowTest {
     CloudBillingUtils.setDefaultProjectBilling(project.getProjectId());
     ServiceUsageUtils.enableServices(project.getProjectId(), ImmutableList.of(COMPUTE_SERVICE_ID));
     return project;
-  }
-
-  public static String randomNetworkName() {
-    // Network name ids must start with a letter and be no more than 30 characters long.
-    return "n" + IntegrationUtils.randomName().substring(0, 29);
   }
 
   public static String randomRouterName() {
