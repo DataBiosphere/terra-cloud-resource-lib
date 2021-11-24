@@ -25,14 +25,17 @@ public abstract class CreateNetworkSecurityGroupRequestData extends BaseComputeR
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract CreateNetworkSecurityGroupRequestData.Builder setName(String value);
+    public abstract Builder setName(String value);
 
-    public abstract CreateNetworkSecurityGroupRequestData.Builder setRegion(Region value);
+    public abstract Builder setRegion(Region value);
 
-    public abstract CreateNetworkSecurityGroupRequestData.Builder setResourceGroupName(
-        String value);
+    public abstract Builder setTenantId(String value);
 
-    public abstract CreateNetworkSecurityGroupRequestData.Builder setRules(List<String> rules);
+    public abstract Builder setSubscriptionId(String value);
+
+    public abstract Builder setResourceGroupName(String value);
+
+    public abstract Builder setRules(List<String> rules);
 
     public abstract CreateNetworkSecurityGroupRequestData build();
   }

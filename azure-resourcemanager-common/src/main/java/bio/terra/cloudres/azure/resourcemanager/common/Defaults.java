@@ -30,6 +30,8 @@ public class Defaults {
    *         .create(
    *             Defaults.buildContext(
    *                 CreatePublicIpRequestData.builder()
+   *                     .setTenantId(tenantId)
+   *                     .setSubscriptionId(subscriptionId)
    *                     .setResourceGroupName(resourceGroupName)
    *                     .setName(name)
    *                     .setRegion(region)

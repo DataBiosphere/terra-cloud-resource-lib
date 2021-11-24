@@ -18,13 +18,13 @@ public class AzureIntegrationUtils {
   private static final String AZURE_PROPERTY_PREFIX = "integration.azure";
 
   // 8201533_Interactive Analysis Playground
-  static final AzureProfile DEFAULT_AZURE_PROFILE =
+  public static final AzureProfile DEFAULT_AZURE_PROFILE =
       new AzureProfile(
           "0cb7a640-45a2-4ed6-be9f-63519f86e04b",
           "3efc5bdf-be0e-44e7-b1d7-c08931e3c16c",
           AzureEnvironment.AZURE);
 
-  static final String DEFAULT_AZURE_RESOURCE_GROUP = "mrg-terra-integration-test-20211118";
+  public static final String DEFAULT_AZURE_RESOURCE_GROUP = "mrg-terra-integration-test-20211118";
 
   /**
    * Gets an Azure TokenCredential object for an Azure admin account. This account has the roles
