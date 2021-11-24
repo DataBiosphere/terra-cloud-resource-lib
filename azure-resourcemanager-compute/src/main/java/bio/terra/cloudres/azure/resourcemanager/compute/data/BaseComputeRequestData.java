@@ -15,6 +15,12 @@ public abstract class BaseComputeRequestData implements ResourceManagerRequestDa
   /** The region of the resource. */
   public abstract Region region();
 
+  /** The tenant of the resource. */
+  public abstract String tenantId();
+
+  /** The subscription of the resource. */
+  public abstract String subscriptionId();
+
   /** The resource group of the resource. */
   public abstract String resourceGroupName();
 
@@ -24,6 +30,8 @@ public abstract class BaseComputeRequestData implements ResourceManagerRequestDa
    */
   protected JsonObject serializeCommon() {
     JsonObject requestData = new JsonObject();
+    requestData.addProperty("tenantId", tenantId());
+    requestData.addProperty("subscriptionId", subscriptionId());
     requestData.addProperty("resourceGroupName", resourceGroupName());
     requestData.addProperty("name", name());
     requestData.addProperty("region", region().name());

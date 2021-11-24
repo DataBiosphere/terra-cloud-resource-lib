@@ -17,6 +17,15 @@ public class AzureIntegrationUtils {
   /** Property prefix for properties in {@link #AZURE_PROPERTIES_PATH}. */
   private static final String AZURE_PROPERTY_PREFIX = "integration.azure";
 
+  // 8201533_Interactive Analysis Playground
+  public static final AzureProfile DEFAULT_AZURE_PROFILE =
+      new AzureProfile(
+          "0cb7a640-45a2-4ed6-be9f-63519f86e04b",
+          "3efc5bdf-be0e-44e7-b1d7-c08931e3c16c",
+          AzureEnvironment.AZURE);
+
+  public static final String DEFAULT_AZURE_RESOURCE_GROUP = "mrg-terra-integration-test-20211118";
+
   /**
    * Gets an Azure TokenCredential object for an Azure admin account. This account has the roles
    * needed to operate the CRL APIs in the integration test project, e.g. create and delete
@@ -52,54 +61,6 @@ public class AzureIntegrationUtils {
           .build();
 
     } catch (IOException e) {
-      throw new RuntimeException(
-          "Unable to load Azure properties file from " + AZURE_PROPERTIES_PATH, e);
-    }
-  }
-
-  /**
-   * Gets an AzureProfile object for a non-admin client.
-   *
-   * @return AzureProfile
-   */
-  public static AzureProfile getUserAzureProfileOrDie() {
-    try (InputStream in =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(AZURE_PROPERTIES_PATH)) {
-      Properties properties = new Properties();
-      properties.load(in);
-
-      final String tenantId =
-          Preconditions.checkNotNull(
-              properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.tenantId"),
-              "Unable to read Azure user tenant id from " + AZURE_PROPERTIES_PATH);
-      final String subscriptionId =
-          Preconditions.checkNotNull(
-              properties.getProperty(AZURE_PROPERTY_PREFIX + ".user.subscriptionId"),
-              "Unable to read Azure user subscription id from " + AZURE_PROPERTIES_PATH);
-
-      return new AzureProfile(tenantId, subscriptionId, AzureEnvironment.AZURE);
-    } catch (Exception e) {
-      throw new RuntimeException(
-          "Unable to load Azure properties file from " + AZURE_PROPERTIES_PATH, e);
-    }
-  }
-
-  /**
-   * Gets a resource group in which to create resources.
-   *
-   * @return resource group name.
-   */
-  public static String getResuableResourceGroup() {
-    try (InputStream in =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(AZURE_PROPERTIES_PATH)) {
-      Properties properties = new Properties();
-      properties.load(in);
-
-      return Preconditions.checkNotNull(
-          properties.getProperty(AZURE_PROPERTY_PREFIX + ".resourceGroupName"),
-          "Unable to read Azure resource group from " + AZURE_PROPERTIES_PATH);
-
-    } catch (Exception e) {
       throw new RuntimeException(
           "Unable to load Azure properties file from " + AZURE_PROPERTIES_PATH, e);
     }

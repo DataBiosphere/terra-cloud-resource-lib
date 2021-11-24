@@ -9,9 +9,12 @@ DSDE_TOOLBOX_DOCKER_IMAGE=broadinstitute/dsde-toolbox:consul-0.20.0
 VAULT_SERVICE_ACCOUNT_ADMIN_PATH=secret/dsde/terra/crl-test/default/service-account-admin.json
 VAULT_SERVICE_ACCOUNT_USER_PATH=secret/dsde/terra/crl-test/default/service-account-user.json
 VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH=secret/dsde/terra/kernel/integration/tools/crl_janitor/client-sa
+VAULT_AZURE_MANAGED_APP_CLIENT_PATH=secret/dsde/terra/kernel/integration/tools/crl_janitor/azure-managed-app-client
 SERVICE_ACCOUNT_ADMIN_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_admin.json
 SERVICE_ACCOUNT_USER_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_user.json
 SERVICE_ACCOUNT_JANITOR_CLIENT_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_janitor_client.json
+AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH="$(dirname $0)"/azure-resourcemanager-common/src/testFixtures/resources/integration_azure_managed_app_client.json
+AZURE_PROPERTIES_OUTPUT_FILE_PATH="$(dirname $0)"/azure-resourcemanager-common/src/testFixtures/resources/integration_azure_env.properties
 
 docker run --rm -e VAULT_TOKEN=$VAULT_TOKEN ${DSDE_TOOLBOX_DOCKER_IMAGE} \
             vault read -format json ${VAULT_SERVICE_ACCOUNT_ADMIN_PATH} \
@@ -23,14 +26,16 @@ docker run --rm --cap-add IPC_LOCK \
             -e VAULT_TOKEN=$VAULT_TOKEN ${DSDE_TOOLBOX_DOCKER_IMAGE} \
             vault read -format json ${VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH} \
             | jq -r .data.key | base64 -d > ${SERVICE_ACCOUNT_JANITOR_CLIENT_OUTPUT_FILE_PATH}
+docker run --rm --cap-add IPC_LOCK \
+            -e VAULT_TOKEN=$VAULT_TOKEN ${DSDE_TOOLBOX_DOCKER_IMAGE} \
+            vault read -format json ${VAULT_AZURE_MANAGED_APP_CLIENT_PATH} \
+            | jq -r .data > ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH}
 
-# TODO(IA-2938): specify Azure secrets in vault
-AZURE_PROPERTIES_OUTPUT_FILE_PATH="$(dirname $0)"/azure-resourcemanager-common/src/testFixtures/resources/integration_azure_env.properties
+AZURE_MANAGED_APP_CLIENT_ID=$(jq -r .client_id ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
+AZURE_MANAGED_APP_CLIENT_SECRET=$(jq -r .client_secret ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
+AZURE_MANAGED_APP_TENANT_ID=$(jq -r .tenant_id ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
 cat > ${AZURE_PROPERTIES_OUTPUT_FILE_PATH} <<EOF
-integration.azure.admin.clientId=
-integration.azure.admin.clientSecret=
-integration.azure.admin.tenantId=
-integration.azure.user.tenantId=
-integration.azure.user.subscriptionId=
-integration.azure.resourceGroupName=
+integration.azure.admin.clientId=${AZURE_MANAGED_APP_CLIENT_ID}
+integration.azure.admin.clientSecret=${AZURE_MANAGED_APP_CLIENT_SECRET}
+integration.azure.admin.tenantId=${AZURE_MANAGED_APP_TENANT_ID}
 EOF

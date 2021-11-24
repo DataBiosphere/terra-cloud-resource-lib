@@ -2,10 +2,14 @@ package bio.terra.cloudres.azure.resourcemanager.compute.data;
 
 import bio.terra.cloudres.azure.resourcemanager.compute.ComputeManagerOperation;
 import bio.terra.cloudres.common.CloudOperation;
+import bio.terra.janitor.model.AzureNetwork;
+import bio.terra.janitor.model.AzureResourceGroup;
+import bio.terra.janitor.model.CloudResourceUid;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
+import java.util.Optional;
 
 /** Network creation request data. */
 @AutoValue
@@ -27,26 +31,43 @@ public abstract class CreateNetworkRequestData extends BaseComputeRequestData {
     return ComputeManagerOperation.AZURE_CREATE_NETWORK;
   }
 
+  @Override
+  public final Optional<CloudResourceUid> resourceUidCreation() {
+    return Optional.of(
+        new CloudResourceUid()
+            .azureNetwork(
+                new AzureNetwork()
+                    .resourceGroup(
+                        new AzureResourceGroup()
+                            .tenantId(tenantId())
+                            .subscriptionId(subscriptionId())
+                            .resourceGroupName(resourceGroupName()))
+                    .networkName(name())));
+  }
+
   public static CreateNetworkRequestData.Builder builder() {
     return new AutoValue_CreateNetworkRequestData.Builder();
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract CreateNetworkRequestData.Builder setName(String value);
+    public abstract Builder setName(String value);
 
-    public abstract CreateNetworkRequestData.Builder setRegion(Region value);
+    public abstract Builder setRegion(Region value);
 
-    public abstract CreateNetworkRequestData.Builder setResourceGroupName(String value);
+    public abstract Builder setTenantId(String value);
 
-    public abstract CreateNetworkRequestData.Builder setAddressSpaceCidr(String value);
+    public abstract Builder setSubscriptionId(String value);
 
-    public abstract CreateNetworkRequestData.Builder setSubnetName(String value);
+    public abstract Builder setResourceGroupName(String value);
 
-    public abstract CreateNetworkRequestData.Builder setAddressPrefix(String value);
+    public abstract Builder setAddressSpaceCidr(String value);
 
-    public abstract CreateNetworkRequestData.Builder setNetworkSecurityGroup(
-        NetworkSecurityGroup value);
+    public abstract Builder setSubnetName(String value);
+
+    public abstract Builder setAddressPrefix(String value);
+
+    public abstract Builder setNetworkSecurityGroup(NetworkSecurityGroup value);
 
     public abstract CreateNetworkRequestData build();
   }

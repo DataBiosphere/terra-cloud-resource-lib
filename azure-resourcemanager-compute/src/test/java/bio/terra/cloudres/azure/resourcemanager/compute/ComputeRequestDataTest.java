@@ -23,6 +23,8 @@ public class ComputeRequestDataTest {
     CreateDiskRequestData createDisk =
         CreateDiskRequestData.builder()
             .setName("my-disk")
+            .setTenantId("my-tenant")
+            .setSubscriptionId("my-sub")
             .setResourceGroupName("my-rg")
             .setRegion(Region.US_EAST)
             .setSize(500)
@@ -30,7 +32,7 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_DISK, createDisk.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-disk\",\"region\":\"eastus\",\"size\":500}",
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\",\"name\":\"my-disk\",\"region\":\"eastus\",\"size\":500}",
         createDisk.serialize().toString());
   }
 
@@ -39,6 +41,8 @@ public class ComputeRequestDataTest {
     CreateNetworkRequestData createNetwork =
         CreateNetworkRequestData.builder()
             .setName("my-network")
+            .setTenantId("my-tenant")
+            .setSubscriptionId("my-sub")
             .setResourceGroupName("my-rg")
             .setRegion(Region.US_EAST)
             .setAddressSpaceCidr("192.168.0.0/16")
@@ -49,7 +53,8 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_NETWORK, createNetwork.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-network\",\"region\":\"eastus\","
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\","
+            + "\"name\":\"my-network\",\"region\":\"eastus\","
             + "\"addressSpaceCidr\":\"192.168.0.0/16\",\"subnetName\":\"my-subnet\","
             + "\"addressPrefix\":\"192.168.1.0/24\",\"networkSecurityGroupName\":\"my-nsg\"}",
         createNetwork.serialize().toString());
@@ -60,6 +65,8 @@ public class ComputeRequestDataTest {
     CreateNetworkSecurityGroupRequestData createNetworkSecurityGroup =
         CreateNetworkSecurityGroupRequestData.builder()
             .setName("my-nsg")
+            .setTenantId("my-tenant")
+            .setSubscriptionId("my-sub")
             .setResourceGroupName("my-rg")
             .setRegion(Region.US_EAST)
             .setRules(ImmutableList.of("rule1", "rule2"))
@@ -69,7 +76,8 @@ public class ComputeRequestDataTest {
         ComputeManagerOperation.AZURE_CREATE_NETWORK_SECURITY_GROUP,
         createNetworkSecurityGroup.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-nsg\",\"region\":\"eastus\","
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\","
+            + "\"name\":\"my-nsg\",\"region\":\"eastus\","
             + "\"rules\":[\"rule1\",\"rule2\"]}",
         createNetworkSecurityGroup.serialize().toString());
   }
@@ -79,6 +87,8 @@ public class ComputeRequestDataTest {
     CreatePublicIpRequestData createPublicIp =
         CreatePublicIpRequestData.builder()
             .setName("my-ip")
+            .setTenantId("my-tenant")
+            .setSubscriptionId("my-sub")
             .setResourceGroupName("my-rg")
             .setRegion(Region.US_EAST)
             .setIpAllocationMethod(IpAllocationMethod.DYNAMIC)
@@ -86,7 +96,8 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_PUBLIC_IP, createPublicIp.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-ip\",\"region\":\"eastus\","
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\","
+            + "\"name\":\"my-ip\",\"region\":\"eastus\","
             + "\"ipAllocationMethod\":\"Dynamic\"}",
         createPublicIp.serialize().toString());
   }
@@ -95,6 +106,8 @@ public class ComputeRequestDataTest {
   public void serializeCreateVirtualMachine() {
     CreateVirtualMachineRequestData createVirtualMachine =
         CreateVirtualMachineRequestData.builder()
+            .setTenantId("my-tenant")
+            .setSubscriptionId("my-sub")
             .setResourceGroupName("my-rg")
             .setRegion(Region.US_EAST)
             .setName("my-vm")
@@ -107,7 +120,8 @@ public class ComputeRequestDataTest {
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_VM, createVirtualMachine.cloudOperation());
     assertEquals(
-        "{\"resourceGroupName\":\"my-rg\",\"name\":\"my-vm\",\"region\":\"eastus\","
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\","
+            + "\"name\":\"my-vm\",\"region\":\"eastus\","
             + "\"network\":\"my-network\",\"subnetName\":\"my-subnet\",\"ip\":null,"
             + "\"disk\":\"my-disk\",\"image\":\"my-image\"}",
         createVirtualMachine.serialize().toString());
