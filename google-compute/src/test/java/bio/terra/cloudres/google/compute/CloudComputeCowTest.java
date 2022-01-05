@@ -316,18 +316,35 @@ public class CloudComputeCowTest {
   @Test
   public void subnetworkListSerialize() throws Exception {
     CloudComputeCow.Subnetworks.List list =
+            defaultCompute()
+                    .subnetworks()
+                    .list("project-id", "us-west1")
+                    .setFilter("my-filter")
+                    .setMaxResults(42L)
+                    .setOrderBy("order-by")
+                    .setPageToken("page-token");
+
+    assertEquals(
+            "{\"project_id\":\"project-id\",\"region\":\"us-west1\","
+                    + "\"filter\":\"my-filter\",\"max_results\":42,\"order_by\":\"order-by\","
+                    + "\"page_token\":\"page-token\"}",
+            list.serialize().toString());
+  }
+
+  @Test
+  public void subnetworkAggregatedListSerialize() throws Exception {
+    CloudComputeCow.Subnetworks.AggregatedList list =
         defaultCompute()
             .subnetworks()
-            .list("project-id", "us-west1")
+            .aggregatedList("project-id")
             .setFilter("my-filter")
             .setMaxResults(42L)
             .setOrderBy("order-by")
             .setPageToken("page-token");
 
-    assertEquals(
-        "{\"project_id\":\"project-id\",\"region\":\"us-west1\","
-            + "\"filter\":\"my-filter\",\"max_results\":42,\"order_by\":\"order-by\","
-            + "\"page_token\":\"page-token\"}",
+        assertEquals(
+        "{\"project_id\":\"project-id\",\"max_results\":42,\"page_token\":\"page-token\","
+            + "\"filter\":\"my-filter\",\"order_by\":\"order-by\"}",
         list.serialize().toString());
   }
 
