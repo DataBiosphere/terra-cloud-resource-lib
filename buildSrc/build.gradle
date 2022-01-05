@@ -11,12 +11,14 @@ plugins {
   id 'groovy-gradle-plugin'
 }
 
+// Specify repositories for plugins used in buildSrc/src/*.gradle.
 repositories {
   maven {
       url "https://plugins.gradle.org/m2/"
   }
 }
 
+// Specify versions for plugins used in buildSrc/src/*.gradle.
 dependencies {
     implementation group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '3.27.2'
 }
