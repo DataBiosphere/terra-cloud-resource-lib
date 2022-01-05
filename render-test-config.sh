@@ -9,7 +9,7 @@ DSDE_TOOLBOX_DOCKER_IMAGE=broadinstitute/dsde-toolbox:consul-0.20.0
 VAULT_SERVICE_ACCOUNT_ADMIN_PATH=secret/dsde/terra/crl-test/default/service-account-admin.json
 VAULT_SERVICE_ACCOUNT_USER_PATH=secret/dsde/terra/crl-test/default/service-account-user.json
 VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH=secret/dsde/terra/kernel/integration/tools/crl_janitor/client-sa
-VAULT_AZURE_MANAGED_APP_CLIENT_PATH=secret/dsde/terra/kernel/integration/tools/crl_janitor/azure-managed-app-client
+VAULT_AZURE_MANAGED_APP_CLIENT_PATH=secret/dsde/terra/azure/common/managed-app-publisher
 SERVICE_ACCOUNT_ADMIN_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_admin.json
 SERVICE_ACCOUNT_USER_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_user.json
 SERVICE_ACCOUNT_JANITOR_CLIENT_OUTPUT_FILE_PATH="$(dirname $0)"/common/src/testFixtures/resources/integration_service_account_janitor_client.json
@@ -31,9 +31,9 @@ docker run --rm --cap-add IPC_LOCK \
             vault read -format json ${VAULT_AZURE_MANAGED_APP_CLIENT_PATH} \
             | jq -r .data > ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH}
 
-AZURE_MANAGED_APP_CLIENT_ID=$(jq -r .client_id ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
-AZURE_MANAGED_APP_CLIENT_SECRET=$(jq -r .client_secret ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
-AZURE_MANAGED_APP_TENANT_ID=$(jq -r .tenant_id ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
+AZURE_MANAGED_APP_CLIENT_ID=$(jq -r '."client-id"' ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
+AZURE_MANAGED_APP_CLIENT_SECRET=$(jq -r '."client-secret"' ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
+AZURE_MANAGED_APP_TENANT_ID=$(jq -r '."tenant-id"' ${AZURE_MANAGED_APP_CLIENT_OUTPUT_FILE_PATH})
 cat > ${AZURE_PROPERTIES_OUTPUT_FILE_PATH} <<EOF
 integration.azure.admin.clientId=${AZURE_MANAGED_APP_CLIENT_ID}
 integration.azure.admin.clientSecret=${AZURE_MANAGED_APP_CLIENT_SECRET}
