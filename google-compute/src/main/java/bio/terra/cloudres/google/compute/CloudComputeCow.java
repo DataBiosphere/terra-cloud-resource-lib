@@ -268,6 +268,62 @@ public class CloudComputeCow {
         return result;
       }
     }
+
+    /** See {@link Compute.Subnetworks#aggregatedList(String)}. */
+    public AggregatedList aggregatedList(String project) throws IOException {
+      return new AggregatedList(subnetworks.aggregatedList(project));
+    }
+
+    /** See {@link Compute.Subnetworks.AggregatedList}. */
+    public class AggregatedList extends AbstractRequestCow<SubnetworkAggregatedList> {
+      private final Compute.Subnetworks.AggregatedList list;
+
+      public AggregatedList(Compute.Subnetworks.AggregatedList list) {
+        super(CloudComputeOperation.GOOGLE_AGGREGATED_LIST_SUBNETWORK, clientConfig, operationAnnotator, list);
+        this.list = list;
+      }
+
+      /** See {@link Compute.Subnetworks.AggregatedList#setProject(String)}. */
+      public AggregatedList setProject(String project) {
+        this.list.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.AggregatedList#setMaxResults(Long)}. */
+      public AggregatedList setMaxResults(Long maxResults) {
+        this.list.setMaxResults(maxResults);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.AggregatedList#setPageToken(String)}. */
+      public AggregatedList setPageToken(String pageToken) {
+        this.list.setPageToken(pageToken);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.AggregatedList#setFilter(String)}. */
+      public AggregatedList setFilter(String filter) {
+        this.list.setFilter(filter);
+        return this;
+      }
+
+      /** See {@link Compute.Subnetworks.AggregatedList#setOrderBy(String)}. */
+      public AggregatedList setOrderBy(String orderBy) {
+        this.list.setOrderBy(orderBy);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", list.getProject());
+        result.addProperty("max_results", list.getMaxResults());
+        result.addProperty("page_token", list.getPageToken());
+        result.addProperty("filter", list.getFilter());
+        result.addProperty("order_by", list.getOrderBy());
+        return result;
+      }
+    }
   }
 
   public Firewalls firewalls() {
