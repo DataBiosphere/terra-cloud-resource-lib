@@ -89,9 +89,11 @@ Broad employees can get the credentials from Vault with:
 Then actually run the tests with:
 ```
 ./gradlew integrationTest
+```
 
-# Run a single test
-/gradlew :google-bigquery:integrationTest --tests BigQueryCowTest.listDataset
+Run a single test:
+```
+./gradlew :google-bigquery:integrationTest --tests BigQueryCowTest.listDataset
 ```
 
 TODO: Make this easier, consider making credentials path configurable.

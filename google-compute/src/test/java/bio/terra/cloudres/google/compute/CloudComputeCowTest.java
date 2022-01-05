@@ -5,7 +5,6 @@ import static bio.terra.cloudres.google.compute.testing.NetworkUtils.randomNetwo
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
@@ -24,8 +23,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Tag("integration")
 public class CloudComputeCowTest {
@@ -75,7 +72,7 @@ public class CloudComputeCowTest {
   }
 
   @Test
-  public void createAndGetListAndAggregatedListSubnetwork() throws Exception {
+  public void createAndGetAndListAndAggregatedListSubnetwork() throws Exception {
     String projectId = reusableProject.getProjectId();
     String region = "us-west1";
     String ipCidrRange = "10.130.0.0/20";
@@ -108,7 +105,8 @@ public class CloudComputeCowTest {
     SubnetworkList subnetworkList = cloudComputeCow.subnetworks().list(projectId, region).execute();
     assertThat(subnetworkList.getItems().size(), Matchers.greaterThan(0));
 
-    SubnetworkAggregatedList subnetworkAggregatedList =cloudComputeCow.subnetworks().aggregatedList(projectId).execute();
+    SubnetworkAggregatedList subnetworkAggregatedList =
+        cloudComputeCow.subnetworks().aggregatedList(projectId).execute();
     assertThat(subnetworkAggregatedList.getItems().size(), Matchers.greaterThan(0));
   }
 
@@ -316,19 +314,19 @@ public class CloudComputeCowTest {
   @Test
   public void subnetworkListSerialize() throws Exception {
     CloudComputeCow.Subnetworks.List list =
-            defaultCompute()
-                    .subnetworks()
-                    .list("project-id", "us-west1")
-                    .setFilter("my-filter")
-                    .setMaxResults(42L)
-                    .setOrderBy("order-by")
-                    .setPageToken("page-token");
+        defaultCompute()
+            .subnetworks()
+            .list("project-id", "us-west1")
+            .setFilter("my-filter")
+            .setMaxResults(42L)
+            .setOrderBy("order-by")
+            .setPageToken("page-token");
 
     assertEquals(
-            "{\"project_id\":\"project-id\",\"region\":\"us-west1\","
-                    + "\"filter\":\"my-filter\",\"max_results\":42,\"order_by\":\"order-by\","
-                    + "\"page_token\":\"page-token\"}",
-            list.serialize().toString());
+        "{\"project_id\":\"project-id\",\"region\":\"us-west1\","
+            + "\"filter\":\"my-filter\",\"max_results\":42,\"order_by\":\"order-by\","
+            + "\"page_token\":\"page-token\"}",
+        list.serialize().toString());
   }
 
   @Test
@@ -342,7 +340,7 @@ public class CloudComputeCowTest {
             .setOrderBy("order-by")
             .setPageToken("page-token");
 
-        assertEquals(
+    assertEquals(
         "{\"project_id\":\"project-id\",\"max_results\":42,\"page_token\":\"page-token\","
             + "\"filter\":\"my-filter\",\"order_by\":\"order-by\"}",
         list.serialize().toString());

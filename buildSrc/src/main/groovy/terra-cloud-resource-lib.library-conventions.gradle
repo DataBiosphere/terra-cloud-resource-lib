@@ -86,7 +86,7 @@ spotless {
     }
 }
 
-build.dependsOn spotlessApply
+compileJava.dependsOn spotlessApply
 
 // Modify the standard :test task to only include unit-tagged tests.
 test {

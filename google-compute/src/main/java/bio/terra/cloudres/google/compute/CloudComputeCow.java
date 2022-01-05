@@ -279,7 +279,11 @@ public class CloudComputeCow {
       private final Compute.Subnetworks.AggregatedList list;
 
       public AggregatedList(Compute.Subnetworks.AggregatedList list) {
-        super(CloudComputeOperation.GOOGLE_AGGREGATED_LIST_SUBNETWORK, clientConfig, operationAnnotator, list);
+        super(
+            CloudComputeOperation.GOOGLE_AGGREGATED_LIST_SUBNETWORK,
+            clientConfig,
+            operationAnnotator,
+            list);
         this.list = list;
       }
 
