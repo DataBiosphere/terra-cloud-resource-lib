@@ -4,6 +4,7 @@ import bio.terra.cloudres.common.CloudOperation;
 
 /** {@link CloudOperation} for using Google Compute API. */
 public enum CloudComputeOperation implements CloudOperation {
+  GOOGLE_AGGREGATED_LIST_SUBNETWORK,
   GOOGLE_COMPUTE_GLOBAL_OPERATION_GET,
   GOOGLE_COMPUTE_REGION_OPERATION_GET,
   GOOGLE_INSERT_FIREWALL,

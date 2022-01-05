@@ -102,6 +102,9 @@ task integrationTest(type: Test) {
         includeTags "integration"
     }
     shouldRunAfter test
+    // Force tests to always be re-run, since integration tests involve communicating with external
+    // resources.
+    outputs.upToDateWhen { false }
 }
 
 java {

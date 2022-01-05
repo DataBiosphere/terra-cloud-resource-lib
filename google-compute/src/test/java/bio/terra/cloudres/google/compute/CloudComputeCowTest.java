@@ -72,7 +72,7 @@ public class CloudComputeCowTest {
   }
 
   @Test
-  public void createAndGetAndListSubnetwork() throws Exception {
+  public void createAndGetAndListAndAggregatedListSubnetwork() throws Exception {
     String projectId = reusableProject.getProjectId();
     String region = "us-west1";
     String ipCidrRange = "10.130.0.0/20";
@@ -104,6 +104,10 @@ public class CloudComputeCowTest {
 
     SubnetworkList subnetworkList = cloudComputeCow.subnetworks().list(projectId, region).execute();
     assertThat(subnetworkList.getItems().size(), Matchers.greaterThan(0));
+
+    SubnetworkAggregatedList subnetworkAggregatedList =
+        cloudComputeCow.subnetworks().aggregatedList(projectId).execute();
+    assertThat(subnetworkAggregatedList.getItems().size(), Matchers.greaterThan(0));
   }
 
   @Test
@@ -322,6 +326,23 @@ public class CloudComputeCowTest {
         "{\"project_id\":\"project-id\",\"region\":\"us-west1\","
             + "\"filter\":\"my-filter\",\"max_results\":42,\"order_by\":\"order-by\","
             + "\"page_token\":\"page-token\"}",
+        list.serialize().toString());
+  }
+
+  @Test
+  public void subnetworkAggregatedListSerialize() throws Exception {
+    CloudComputeCow.Subnetworks.AggregatedList list =
+        defaultCompute()
+            .subnetworks()
+            .aggregatedList("project-id")
+            .setFilter("my-filter")
+            .setMaxResults(42L)
+            .setOrderBy("order-by")
+            .setPageToken("page-token");
+
+    assertEquals(
+        "{\"project_id\":\"project-id\",\"max_results\":42,\"page_token\":\"page-token\","
+            + "\"filter\":\"my-filter\",\"order_by\":\"order-by\"}",
         list.serialize().toString());
   }
 
