@@ -110,7 +110,12 @@ public class BigQueryCowTest {
     Dataset dataset1 = createDataset();
     Dataset dataset2 = createDataset();
 
-    DatasetList fetchedDatasets = bigQueryCow.datasets().list(projectId).execute();
+    // By default, Datasets.List returns 50 results. There may be more than 50 datasets, so increase
+    // maxResults to make
+    // sure we get all datasets.
+    DatasetList fetchedDatasets =
+        bigQueryCow.datasets().list(projectId).setMaxResults(1000L).execute();
+
     // Because this project has been used for testing before, it may have other datasets lying
     // around waiting for cleanup.
     assertTrue(fetchedDatasets.getDatasets().size() >= 2);

@@ -203,6 +203,12 @@ public class BigQueryCow {
         this.list = list;
       }
 
+      /** See {@link Bigquery.Datasets.List#setMaxResults(Long)} */
+      public List setMaxResults(Long maxResults) {
+        this.list.setMaxResults(maxResults);
+        return this;
+      }
+
       public String getProjectId() {
         return list.getProjectId();
       }
@@ -211,6 +217,7 @@ public class BigQueryCow {
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
         result.addProperty("projectId", getProjectId());
+        result.addProperty("maxResults", list.getMaxResults());
         return result;
       }
     }
