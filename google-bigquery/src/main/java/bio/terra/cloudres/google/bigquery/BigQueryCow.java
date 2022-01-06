@@ -203,7 +203,7 @@ public class BigQueryCow {
         this.list = list;
       }
 
-      /** See {@link BigQuery.Datasets.List#setMaxResults(Long)}. */
+      /** See {@link Bigquery.Datasets.List#setMaxResults(Long)} */
       public List setMaxResults(Long maxResults) {
         this.list.setMaxResults(maxResults);
         return this;
