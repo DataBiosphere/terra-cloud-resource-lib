@@ -112,7 +112,8 @@ The version number of each sub-project is handled manually with a three-step pro
 2. Update the version(s) of the sub-project(s) in the platform definition to match the version(s) set in step 1, and
    bump platform version accordingly (any minor/major change should also result in minor/major change for platform).
 3. Merge to the main branch, and then create a new GitHub release. The publish.yml action will run on the tagged
-   release, pushing new packages to Artifactory.
+   release, pushing new packages to Artifactory. (The overall GitHub workflow will fail because Broad removed delete
+   permission. Just make sure the artifacts you need have been published.)
 
 ## Adding a new package
 Cloud API client libraries are wrapped in separate CRL packages to allow clients to only include the libraries that they
