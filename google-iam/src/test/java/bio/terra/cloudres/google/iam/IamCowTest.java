@@ -2,7 +2,9 @@ package bio.terra.cloudres.google.iam;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
@@ -63,18 +65,23 @@ public class IamCowTest {
             .build();
     // Retry a lot of times. It apparently takes a lot of time for GCP to be ready to get a service
     // account that was just created.
+    ServiceAccount retrievedServiceAccount = null;
+    List<ServiceAccount> retrieveServiceAccountList = null;
     for (int retryNum = 0; retryNum < 20; retryNum++) {
       try {
-        serviceAccounts.get(serviceAccountName).execute();
-        break;
+        retrievedServiceAccount = serviceAccounts.get(serviceAccountName).execute();
+        retrieveServiceAccountList = serviceAccounts.list(projectName).execute().getAccounts();
+        if (retrievedServiceAccount != null && retrieveServiceAccountList != null) {
+          break;
+        }
+        Thread.sleep(3000);
       } catch (GoogleJsonResponseException e) {
         assertEquals(404, e.getStatusCode());
         Thread.sleep(3000);
       }
     }
-    assertEquals(serviceAccount, serviceAccounts.get(serviceAccountName).execute());
-    List<ServiceAccount> listResult = serviceAccounts.list(projectName).execute().getAccounts();
-    assertThat(listResult, Matchers.contains(serviceAccount));
+    assertEquals(serviceAccount, retrievedServiceAccount);
+    assertThat(retrieveServiceAccountList, Matchers.contains(serviceAccount));
 
     serviceAccounts.delete(serviceAccountName).execute();
 
