@@ -1,10 +1,18 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import bio.terra.cloudres.azure.resourcemanager.compute.data.*;
+import bio.terra.cloudres.azure.resourcemanager.compute.data.BaseComputeRequestData;
+import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateDiskRequestData;
+import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateNetworkRequestData;
+import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateNetworkSecurityGroupRequestData;
+import bio.terra.cloudres.azure.resourcemanager.compute.data.CreatePublicIpRequestData;
+import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateVirtualMachineRequestData;
+import bio.terra.janitor.model.AzureDisk;
+import bio.terra.janitor.model.AzureNetwork;
+import bio.terra.janitor.model.AzureNetworkSecurityGroup;
+import bio.terra.janitor.model.AzurePublicIp;
+import bio.terra.janitor.model.AzureResourceGroup;
+import bio.terra.janitor.model.AzureVirtualMachine;
+import bio.terra.janitor.model.CloudResourceUid;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.network.models.IpAllocationMethod;
@@ -14,6 +22,12 @@ import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Tag("unit")
 public class ComputeRequestDataTest {
@@ -34,6 +48,14 @@ public class ComputeRequestDataTest {
     assertEquals(
         "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\",\"name\":\"my-disk\",\"region\":\"eastus\",\"size\":500}",
         createDisk.serialize().toString());
+    assertEquals(
+        Optional.of(
+            new CloudResourceUid()
+                .azureDisk(
+                    new AzureDisk()
+                        .resourceGroup(azureResourceGroup(createDisk))
+                        .diskName("my-disk"))),
+        createDisk.resourceUidCreation());
   }
 
   @Test
@@ -58,6 +80,14 @@ public class ComputeRequestDataTest {
             + "\"addressSpaceCidr\":\"192.168.0.0/16\",\"subnetName\":\"my-subnet\","
             + "\"addressPrefix\":\"192.168.1.0/24\",\"networkSecurityGroupName\":\"my-nsg\"}",
         createNetwork.serialize().toString());
+    assertEquals(
+        Optional.of(
+            new CloudResourceUid()
+                .azureNetwork(
+                    new AzureNetwork()
+                        .resourceGroup(azureResourceGroup(createNetwork))
+                        .networkName("my-network"))),
+        createNetwork.resourceUidCreation());
   }
 
   @Test
@@ -80,6 +110,14 @@ public class ComputeRequestDataTest {
             + "\"name\":\"my-nsg\",\"region\":\"eastus\","
             + "\"rules\":[\"rule1\",\"rule2\"]}",
         createNetworkSecurityGroup.serialize().toString());
+    assertEquals(
+        Optional.of(
+            new CloudResourceUid()
+                .azureNetworkSecurityGroup(
+                    new AzureNetworkSecurityGroup()
+                        .resourceGroup(azureResourceGroup(createNetworkSecurityGroup))
+                        .networkSecurityGroupName("my-nsg"))),
+        createNetworkSecurityGroup.resourceUidCreation());
   }
 
   @Test
@@ -100,6 +138,14 @@ public class ComputeRequestDataTest {
             + "\"name\":\"my-ip\",\"region\":\"eastus\","
             + "\"ipAllocationMethod\":\"Dynamic\"}",
         createPublicIp.serialize().toString());
+    assertEquals(
+        Optional.of(
+            new CloudResourceUid()
+                .azurePublicIp(
+                    new AzurePublicIp()
+                        .resourceGroup(azureResourceGroup(createPublicIp))
+                        .ipName("my-ip"))),
+        createPublicIp.resourceUidCreation());
   }
 
   @Test
@@ -125,6 +171,14 @@ public class ComputeRequestDataTest {
             + "\"network\":\"my-network\",\"subnetName\":\"my-subnet\",\"ip\":null,"
             + "\"disk\":\"my-disk\",\"image\":\"my-image\"}",
         createVirtualMachine.serialize().toString());
+    assertEquals(
+        Optional.of(
+            new CloudResourceUid()
+                .azureVirtualMachine(
+                    new AzureVirtualMachine()
+                        .resourceGroup(azureResourceGroup(createVirtualMachine))
+                        .vmName("my-vm"))),
+        createVirtualMachine.resourceUidCreation());
   }
 
   private static PublicIpAddress mockPublicIpAddress() {
@@ -149,5 +203,12 @@ public class ComputeRequestDataTest {
     NetworkSecurityGroup mock = mock(NetworkSecurityGroup.class);
     when(mock.name()).thenReturn("my-nsg");
     return mock;
+  }
+
+  private AzureResourceGroup azureResourceGroup(BaseComputeRequestData requestData) {
+    return new AzureResourceGroup()
+        .tenantId(requestData.tenantId())
+        .subscriptionId(requestData.subscriptionId())
+        .resourceGroupName(requestData.resourceGroupName());
   }
 }
