@@ -8,7 +8,7 @@ dependencies {
     api project(':common')
     api project(':azure-resourcemanager-common')
 
-    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.7.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.10.0'
 
     testImplementation(testFixtures(project(':azure-resourcemanager-common')))
 }

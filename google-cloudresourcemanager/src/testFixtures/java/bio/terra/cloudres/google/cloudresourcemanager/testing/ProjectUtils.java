@@ -34,7 +34,7 @@ public class ProjectUtils {
     Operation operation = getManagerCow().projects().create(project).execute();
     OperationCow<Operation> operationCow = managerCow.operations().operationCow(operation);
     OperationTestUtils.pollAndAssertSuccess(
-        operationCow, Duration.ofSeconds(5), Duration.ofSeconds(30));
+        operationCow, Duration.ofSeconds(5), Duration.ofSeconds(60));
     return managerCow.projects().get(project.getProjectId()).execute();
   }
 
