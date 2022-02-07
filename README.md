@@ -63,7 +63,11 @@ adding or updating a dependency requires telling Gradle to save the change. If y
 that mention "dependency lock state" after changing a dep, you need to do this step.
 
 ```sh
-./gradlew dependencies --write-locks
+./gradlew :{subProjectName}:dependencies --write-locks
+```
+For example:
+```sh
+./gradlew :google-bigquery:dependencies --write-locks
 ```
 
 ## Testing
