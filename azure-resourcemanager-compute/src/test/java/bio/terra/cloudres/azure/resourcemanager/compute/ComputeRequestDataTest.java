@@ -1,5 +1,9 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import bio.terra.cloudres.azure.resourcemanager.compute.data.BaseComputeRequestData;
 import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateDiskRequestData;
 import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateNetworkRequestData;
@@ -20,14 +24,9 @@ import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.google.common.collect.ImmutableList;
+import java.util.Optional;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @Tag("unit")
 public class ComputeRequestDataTest {
