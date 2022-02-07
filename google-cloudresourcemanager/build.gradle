@@ -7,7 +7,6 @@ plugins {
 dependencies {
     api project(':common')
     api project(':google-api-services-common')
-    implementation project(':cloud-resource-schema')
 
     api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20210411-1.31.0'
 

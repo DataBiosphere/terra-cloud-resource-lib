@@ -6,7 +6,6 @@ plugins {
 
 dependencies {
     api project(':common')
-    implementation project(':cloud-resource-schema')
 
     api group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.108.0'
 }
