@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 public class AzureResourceCleanupRecorder implements HttpRequestLogger {
   private final ClientConfig clientConfig;
 
-  AzureResourceCleanupRecorder(ClientConfig clientConfig) {
+  public AzureResourceCleanupRecorder(ClientConfig clientConfig) {
     this.clientConfig = clientConfig;
   }
 
