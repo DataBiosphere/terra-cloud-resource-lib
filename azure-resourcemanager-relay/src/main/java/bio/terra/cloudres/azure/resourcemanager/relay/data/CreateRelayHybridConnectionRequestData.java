@@ -3,9 +3,15 @@ package bio.terra.cloudres.azure.resourcemanager.relay.data;
 import bio.terra.cloudres.azure.resourcemanager.common.ResourceManagerRequestData;
 import bio.terra.cloudres.azure.resourcemanager.relay.RelayManagerOperation;
 import bio.terra.cloudres.common.CloudOperation;
+import bio.terra.janitor.model.AzureRelay;
+import bio.terra.janitor.model.AzureRelayHybridConnection;
+import bio.terra.janitor.model.AzureResourceGroup;
+import bio.terra.janitor.model.CloudResourceUid;
 import com.azure.core.management.Region;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
+
+import java.util.Optional;
 
 /**
  * Extends {@link ResourceManagerRequestData} to add common fields for working with the Compute
@@ -17,6 +23,20 @@ public abstract class CreateRelayHybridConnectionRequestData extends BaseRelayRe
   @Override
   public final CloudOperation cloudOperation() {
     return RelayManagerOperation.AZURE_CREATE_RELAY_HYBRID_CONNNECTION;
+  }
+
+  @Override
+  public final Optional<CloudResourceUid> resourceUidCreation() {
+    return Optional.of(
+            new CloudResourceUid()
+                    .azureRelayHybridConnection(
+                            new AzureRelayHybridConnection()
+                                    .resourceGroup(
+                                            new AzureResourceGroup()
+                                                    .tenantId(tenantId())
+                                                    .subscriptionId(subscriptionId())
+                                                    .resourceGroupName(resourceGroupName()))
+                                    .hybridConnectionName(name())));
   }
 
   public static CreateRelayHybridConnectionRequestData.Builder builder() {

@@ -1,7 +1,8 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
-bio.terra:terra-resource-janitor-client:0.5.0-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+bio.terra:terra-resource-janitor-client:0.6.1-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-annotations:2.11.0=compileClasspath,testCompileClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.12.3=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.12.3=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-databind:2.12.3=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
@@ -64,6 +65,7 @@ io.opencensus:opencensus-impl-core:0.28.3=runtimeClasspath,testFixturesRuntimeCl
 io.opencensus:opencensus-impl:0.28.3=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 io.perfmark:perfmark-api:0.23.0=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 io.swagger.core.v3:swagger-annotations:2.1.5=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+io.swagger:swagger-annotations:1.6.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 jakarta.activation:jakarta.activation-api:1.2.1=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 jakarta.annotation:jakarta.annotation-api:1.3.5=runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 jakarta.ws.rs:jakarta.ws.rs-api:2.1.6=runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath

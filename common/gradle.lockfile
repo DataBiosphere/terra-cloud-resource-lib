@@ -1,7 +1,7 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
-bio.terra:terra-resource-janitor-client:0.5.0-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+bio.terra:terra-resource-janitor-client:0.6.1-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-annotations:2.12.3=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.12.3=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-databind:2.12.3=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
