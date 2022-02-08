@@ -39,6 +39,7 @@ artifactory {
                     'google-storage',
                     'platform',
                     'azure-resourcemanager-common',
+                    'azure-resourcemanager-relay',
                     'azure-resourcemanager-compute')
         }
     }
