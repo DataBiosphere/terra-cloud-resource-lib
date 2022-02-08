@@ -26,7 +26,6 @@ artifactory {
         }
         defaults {
             publications(
-                    'cloud-resource-schema',
                     'common',
                     'google-api-services-common',
                     'google-bigquery',
