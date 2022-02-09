@@ -159,6 +159,9 @@ Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadins
 #### azure-resourcemanager-compute
 Wraps [Azure Compute API](https://docs.microsoft.com/en-us/rest/api/compute/).
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/azure-resourcemanager-compute).
+#### azure-resourcemanager-relay
+Wraps [Azure Relay API](https://docs.microsoft.com/en-us/rest/api/relay/).
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/azure-resourcemanager-relay).
 #### cloud-resource-schema
 The general schema for how cloud resources are presented in CRL.   
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/cloud-resource-schema).

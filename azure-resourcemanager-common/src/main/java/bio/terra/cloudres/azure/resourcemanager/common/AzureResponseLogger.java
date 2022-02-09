@@ -40,7 +40,7 @@ public class AzureResponseLogger implements HttpResponseLogger {
 
   private final OperationAnnotator operationAnnotator;
 
-  AzureResponseLogger(ClientConfig clientConfig) {
+  public AzureResponseLogger(ClientConfig clientConfig) {
     // Note we use our own Logger instead of the ClientLogger wrapper that Azure provides.
     this.operationAnnotator = new OperationAnnotator(clientConfig, logger);
   }
