@@ -14,7 +14,7 @@ public class Defaults {
      * <p>Example usage:
      *
      * <pre>
-     *    crlConfigure(clientConfig, ComputeManager.configure())
+     *    crlConfigure(clientConfig, RelayManager.configure())
      *        .authenticate(tokenCredential, azureProfile);
      * </pre>
      *
