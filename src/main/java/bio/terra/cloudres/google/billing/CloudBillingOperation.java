@@ -6,4 +6,5 @@ import bio.terra.cloudres.common.CloudOperation;
 public enum CloudBillingOperation implements CloudOperation {
   GOOGLE_GET_PROJECT_BILLING,
   GOOGLE_UPDATE_PROJECT_BILLING,
+  GOOGLE_TEST_IAM_PERMISSIONS
 }
