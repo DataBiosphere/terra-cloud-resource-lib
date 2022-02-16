@@ -8,7 +8,7 @@ dependencies {
     api project(':common')
     api project(':google-api-services-common')
 
-    api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1-rev20200821-1.30.10'
+    api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1beta1-rev20210806-1.32.1'
 
     testFixturesImplementation(testFixtures(project(':google-api-services-common')))
     testFixturesImplementation(testFixtures(project(':common')))

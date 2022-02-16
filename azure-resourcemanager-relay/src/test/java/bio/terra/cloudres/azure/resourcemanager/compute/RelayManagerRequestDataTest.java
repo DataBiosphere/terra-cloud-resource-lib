@@ -1,12 +1,12 @@
 package bio.terra.cloudres.azure.resourcemanager.compute;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import bio.terra.cloudres.azure.resourcemanager.relay.RelayManagerOperation;
 import bio.terra.cloudres.azure.resourcemanager.relay.data.CreateRelayRequestData;
 import com.azure.core.management.Region;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("unit")
 public class RelayManagerRequestDataTest {
@@ -14,7 +14,7 @@ public class RelayManagerRequestDataTest {
   @Test
   public void serializeCreateAzureRelay() {
     CreateRelayRequestData create =
-            CreateRelayRequestData.builder()
+        CreateRelayRequestData.builder()
             .setName("my-relay")
             .setTenantId("my-tenant")
             .setSubscriptionId("my-sub")
@@ -31,7 +31,7 @@ public class RelayManagerRequestDataTest {
   @Test
   public void serializeCreateAzureRelayHybridConnection() {
     CreateRelayRequestData create =
-            CreateRelayRequestData.builder()
+        CreateRelayRequestData.builder()
             .setName("my-relay-hc")
             .setTenantId("my-tenant")
             .setSubscriptionId("my-sub")

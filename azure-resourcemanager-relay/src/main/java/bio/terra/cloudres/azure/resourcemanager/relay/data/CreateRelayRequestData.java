@@ -9,7 +9,6 @@ import bio.terra.janitor.model.CloudResourceUid;
 import com.azure.core.management.Region;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
-
 import java.util.Optional;
 
 /**
@@ -27,15 +26,15 @@ public abstract class CreateRelayRequestData extends BaseRelayRequestData {
   @Override
   public final Optional<CloudResourceUid> resourceUidCreation() {
     return Optional.of(
-            new CloudResourceUid()
-                    .azureRelay(
-                            new AzureRelay()
-                                    .resourceGroup(
-                                            new AzureResourceGroup()
-                                                    .tenantId(tenantId())
-                                                    .subscriptionId(subscriptionId())
-                                                    .resourceGroupName(resourceGroupName()))
-                                    .relayName(name())));
+        new CloudResourceUid()
+            .azureRelay(
+                new AzureRelay()
+                    .resourceGroup(
+                        new AzureResourceGroup()
+                            .tenantId(tenantId())
+                            .subscriptionId(subscriptionId())
+                            .resourceGroupName(resourceGroupName()))
+                    .relayName(name())));
   }
 
   public static Builder builder() {
