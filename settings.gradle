@@ -3,7 +3,7 @@ include 'cloud-resource-schema', 'common', 'google-api-services-common', 'google
         'google-billing', 'google-cloudresourcemanager', 'google-compute', 'google-dns',
         'google-iam', 'google-notebooks', 'google-serviceusage','google-storage',
         'platform', 'azure-resourcemanager-common', 'azure-resourcemanager-compute',
-        'azure-resourcemanager-relay'
+        'azure-resourcemanager-containerinstance', 'azure-resourcemanager-relay'
 
 enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
 
