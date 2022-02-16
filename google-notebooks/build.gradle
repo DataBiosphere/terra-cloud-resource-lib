@@ -8,7 +8,7 @@ dependencies {
     api project(':common')
     api project(':google-api-services-common')
 
-    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20201110-1.30.10'
+    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220125-1.32.1'
 
     testFixturesImplementation(testFixtures(project(':common')))
     testImplementation project(':google-cloudresourcemanager')
