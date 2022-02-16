@@ -37,7 +37,7 @@ configurations {
 
 dependencies {
     ext {
-        janitorclient = '0.6.1-SNAPSHOT'
+        janitorclient = '0.7.0-SNAPSHOT'
     }
     // Google dependencies - make sure we are using -jre and not android and use common bom
     constraints {
