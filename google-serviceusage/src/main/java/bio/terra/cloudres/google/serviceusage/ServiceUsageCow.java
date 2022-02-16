@@ -76,7 +76,7 @@ public class ServiceUsageCow {
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics#limits()}. */
       public Limits limits() {
-        return new Services(serviceUsage.services().consumerQuotaMetrics().limits();
+        return new Services(consumerQuotaMetrics.limits();
       }
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits}. */
@@ -117,19 +117,18 @@ public class ServiceUsageCow {
 
         /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits#consumerOverrides()}. */
         public ConsumerOverrides consumerOverrides() {
-          return new Services(serviceUsage.services().consumerQuotaMetrics().limits().consumerOverrides();
+          return new Services(limits.consumerOverrides();
         }
 
         public class ConsumerOverrides {
-          private final ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.ConsumerOverrides consumerOverrides;
+          private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides consumerOverrides;
           private ConsumerOverrides(ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.ConsumerOverrides consumerOverrides) {
             this.consumerOverrides = consumerOverrides;
           }
 
-
-          /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits#cCnsumerOverrides#create(String, Content)} ()}. */
+          /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides#create(String, Content)} ()}. */
           public Create create(String parent, Content content) {
-            return new Services(serviceUsage.services().consumerQuotaMetrics().limits().consumerOverrides().create(parent, content);
+            return new Create(consumerOverrides.create(parent, content);
           }
 
           public class Create extends AbstractRequestCow<Operation>{
@@ -156,10 +155,14 @@ public class ServiceUsageCow {
               return result;
             }
           }
+
+          public Patch patch(String parent, Content content) {
+
+          }
+          public class Patch {
+
+          }
         }
-
-
-
       }
 
     }
