@@ -9,7 +9,10 @@ import com.google.cloud.billing.v1.CloudBillingSettings;
 import com.google.cloud.billing.v1.ProjectBillingInfo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.iam.v1.TestIamPermissionsRequest;
+import com.google.iam.v1.TestIamPermissionsResponse;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +61,14 @@ public class CloudBillingClientCow implements AutoCloseable {
         () -> serialize(name, projectBillingInfo));
   }
 
+  /** See {@link CloudBillingClient#testIamPermissions(TestIamPermissionsRequest)} */
+  public TestIamPermissionsResponse testIamPermissions(TestIamPermissionsRequest request) {
+    return operationAnnotator.executeCowOperation(
+        CloudBillingOperation.GOOGLE_TEST_IAM_PERMISSIONS,
+        () -> billing.testIamPermissions(request),
+        () -> serializeTestIamPermissions(request));
+  }
+
   @VisibleForTesting
   static JsonObject serializeProjectName(String name) {
     JsonObject result = new JsonObject();
@@ -69,6 +80,16 @@ public class CloudBillingClientCow implements AutoCloseable {
   static JsonObject serialize(String projectName, ProjectBillingInfo projectBillingInfo) {
     JsonObject result = serializeProjectName(projectName);
     result.add("project_billing_info", new Gson().toJsonTree(projectBillingInfo));
+    return result;
+  }
+
+  @VisibleForTesting
+  static JsonObject serializeTestIamPermissions(TestIamPermissionsRequest request) {
+    JsonObject result = new JsonObject();
+    result.addProperty("resource", request.getResource());
+    JsonArray permissions = new JsonArray();
+    request.getPermissionsList().forEach(permissions::add);
+    result.add("permissions", permissions);
     return result;
   }
 
