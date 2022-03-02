@@ -8,10 +8,11 @@ import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
-import com.google.api.services.serviceusage.v1.model.BatchEnableServicesRequest;
-import com.google.api.services.serviceusage.v1.model.GoogleApiServiceusageV1Service;
-import com.google.api.services.serviceusage.v1.model.ListServicesResponse;
-import com.google.api.services.serviceusage.v1.model.Operation;
+import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
+import com.google.api.services.serviceusage.v1beta1.model.GoogleApiServiceusageV1Service;
+import com.google.api.services.serviceusage.v1beta1.model.ListServicesResponse;
+import com.google.api.services.serviceusage.v1beta1.model.Operation;
+import com.google.api.services.serviceusage.v1beta1.model.Service;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -62,7 +63,7 @@ public class ServiceUsageCowTest {
         serviceUsage.services().list(projectName).setFilter(ENABLED_FILTER).execute();
     List<String> services2 =
         response2.getServices().stream()
-            .map(GoogleApiServiceusageV1Service::getName)
+            .map(Service::getName)
             .collect(Collectors.toList());
     assertThat(services2, Matchers.hasItem(storageServiceName));
   }

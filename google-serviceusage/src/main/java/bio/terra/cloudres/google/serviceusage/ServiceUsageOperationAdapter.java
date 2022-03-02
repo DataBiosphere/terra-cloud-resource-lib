@@ -1,8 +1,8 @@
 package bio.terra.cloudres.google.serviceusage;
 
 import bio.terra.cloudres.google.api.services.common.OperationCow;
-import com.google.api.services.serviceusage.v1.model.Operation;
-import com.google.api.services.serviceusage.v1.model.Status;
+import com.google.api.services.serviceusage.v1beta1.model.Operation;
+import com.google.api.services.serviceusage.v1beta1.model.Status;
 import java.util.List;
 import java.util.Map;
 

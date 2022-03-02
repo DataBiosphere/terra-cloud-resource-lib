@@ -5,14 +5,10 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
-import bio.terra.cloudres.google.notebooks.InstanceName;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsage;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsageScopes;
 import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
+import com.google.api.services.serviceusage.v1beta1.model.ConsumerQuotaLimit;
 import com.google.api.services.serviceusage.v1beta1.model.ListServicesResponse;
 import com.google.api.services.serviceusage.v1beta1.model.QuotaOverride;
 import com.google.api.services.serviceusage.v1beta1.model.Operation;
@@ -22,7 +18,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import javax.swing.text.AbstractDocument.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +77,7 @@ public class ServiceUsageCow {
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics#limits()}. */
       public Limits limits() {
-        return new Services(serviceUsage.services()).consumerQuotaMetrics().limits();
+        return consumerQuotaMetrics().limits();
       }
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits}. */
@@ -93,16 +88,12 @@ public class ServiceUsageCow {
         }
 
         /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits#get(String)}. */
-        public Get get(String name) {
-          try {
-            return new Get(serviceUsage.services().consumerQuotaMetrics().limits().get(name));
-          } catch (IOException e) {
-            throw new RuntimeException("Unable to get get.");
-          }
+        public Get get(String name) throws IOException {
+          return new Get(serviceUsage.services().consumerQuotaMetrics().limits().get(name));
         }
 
         /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get}. */
-        public class Get extends AbstractRequestCow<Limits> {
+        public class Get extends AbstractRequestCow<ConsumerQuotaLimit> {
           private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get get;
           private Get(ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get get) {
             super(
@@ -119,9 +110,9 @@ public class ServiceUsageCow {
 
           @Override
           protected JsonObject serialize() {
-//            JsonObject result = new JsonObject();
-//            InstanceName.fromNameFormat(get.getName()).addProperties(result);
-//            return result;
+            JsonObject result = new JsonObject();
+            result.add("get", new Gson().toJsonTree(get));
+            return result;
           }
         }
 
@@ -152,7 +143,7 @@ public class ServiceUsageCow {
             public Create(
                     ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create, String parent, QuotaOverride content) {
               super(
-                      ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWITE_CREATE,
+                      ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_CREATE,
                       clientConfig,
                       operationAnnotator,
                       create);
@@ -170,12 +161,12 @@ public class ServiceUsageCow {
             }
           }
 
-          public Patch patch(String parent, Content content) {
-
-          }
-          public class Patch {
-
-          }
+//          public Patch patch(String parent, Content content) {
+//
+//          }
+//          public class Patch {
+//
+//          }
         }
       }
 
