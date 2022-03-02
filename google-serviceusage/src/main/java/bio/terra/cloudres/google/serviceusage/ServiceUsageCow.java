@@ -5,8 +5,12 @@ import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
+import bio.terra.cloudres.google.notebooks.InstanceName;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsage;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsageScopes;
 import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
 import com.google.api.services.serviceusage.v1beta1.model.ListServicesResponse;
@@ -18,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import javax.swing.text.AbstractDocument.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,37 +69,42 @@ public class ServiceUsageCow {
 
     /** See {@link ServiceUsage.Services#consumerQuotaMetrics()}. */
     public ConsumerQuotaMetrics consumerQuotaMetrics() {
-      return new Services(serviceUsage.services().consumerQuotaMetrics();
+      return new Services(services).consumerQuotaMetrics();
     }
 
     /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics}. */
     public class ConsumerQuotaMetrics {
       private final ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics;
+
       private ConsumerQuotaMetrics(ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics) {
         this.consumerQuotaMetrics = consumerQuotaMetrics;
       }
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics#limits()}. */
       public Limits limits() {
-        return new Services(consumerQuotaMetrics.limits();
+        return new Services(serviceUsage.services()).consumerQuotaMetrics().limits();
       }
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits}. */
       public class Limits {
         private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits limits;
-        private Limits(ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits limits) {
+        private Limits(ServiceUsage.Services.ConsumerQuotaMetrics.Limits limits) {
           this.limits = limits;
         }
 
         /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits#get(String)}. */
         public Get get(String name) {
-          return new Get(name);
+          try {
+            return new Get(serviceUsage.services().consumerQuotaMetrics().limits().get(name));
+          } catch (IOException e) {
+            throw new RuntimeException("Unable to get get.");
+          }
         }
 
         /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get}. */
-        public class Get extends AbstractRequestCow<ConsumerQuotaMetrics> {
-          private final ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.Get get;
-          private Get(ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.Get get) {
+        public class Get extends AbstractRequestCow<Limits> {
+          private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get get;
+          private Get(ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get get) {
             super(
                     ServiceUsageOperation.GOOGLE_BATCH_ENABLE_SERVICES,
                     clientConfig,
@@ -109,40 +119,44 @@ public class ServiceUsageCow {
 
           @Override
           protected JsonObject serialize() {
-            JsonObject result = new JsonObject();
-            InstanceName.fromNameFormat(get.getName()).addProperties(result);
-            return result;
+//            JsonObject result = new JsonObject();
+//            InstanceName.fromNameFormat(get.getName()).addProperties(result);
+//            return result;
           }
         }
 
         /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits#consumerOverrides()}. */
         public ConsumerOverrides consumerOverrides() {
-          return new Services(limits.consumerOverrides();
+          return new ConsumerOverrides(serviceUsage
+              .services()
+              .consumerQuotaMetrics()
+              .limits()
+              .consumerOverrides());
         }
 
         public class ConsumerOverrides {
           private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides consumerOverrides;
-          private ConsumerOverrides(ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.ConsumerOverrides consumerOverrides) {
+          private ConsumerOverrides(ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides consumerOverrides) {
             this.consumerOverrides = consumerOverrides;
           }
 
-          /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides#create(String, Content)} ()}. */
-          public Create create(String parent, Content content) {
-            return new Create(consumerOverrides.create(parent, content);
+          /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides#create(String, QuotaOverride)} ()}. */
+          public Create create(String parent, QuotaOverride content) throws IOException {
+            return new Create(consumerOverrides.create(parent, content), parent, content);
           }
 
           public class Create extends AbstractRequestCow<Operation>{
-            private final ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.ConsumerOverrides.Create create;
+            private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create;
             private final QuotaOverride content;
             private final String parent;
             public Create(
-                    ServiceUsage.Services.ConsumerQuotaMetrics consumerQuotaMetrics.Limits.ConsumerOverrides.Create create, String parent, QuotaOverride content) {
+                    ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create, String parent, QuotaOverride content) {
               super(
                       ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWITE_CREATE,
                       clientConfig,
                       operationAnnotator,
                       create);
-              this.batchEnable = batchEnable;
+              this.create = create;
               this.parent = parent;
               this.content = content;
             }
