@@ -62,9 +62,7 @@ public class ServiceUsageCowTest {
     ListServicesResponse response2 =
         serviceUsage.services().list(projectName).setFilter(ENABLED_FILTER).execute();
     List<String> services2 =
-        response2.getServices().stream()
-            .map(Service::getName)
-            .collect(Collectors.toList());
+        response2.getServices().stream().map(Service::getName).collect(Collectors.toList());
     assertThat(services2, Matchers.hasItem(storageServiceName));
   }
 
