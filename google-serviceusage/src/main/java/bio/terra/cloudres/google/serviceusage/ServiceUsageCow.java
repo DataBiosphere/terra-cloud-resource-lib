@@ -1,12 +1,10 @@
 package bio.terra.cloudres.google.serviceusage;
 
 import bio.terra.cloudres.common.ClientConfig;
-import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
-import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsage;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsageScopes;
 import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
@@ -175,25 +173,35 @@ public class ServiceUsageCow {
             }
           }
 
-          //          public Patch patch(String parent, Content content) {
+          /**
+           * See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Patch}
+           */
+          //          public class Patch extends AbstractRequestCow<Operation> {
+          //            private final
+          // ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Patch patch;
+          //            private final
+          // com.google.api.services.serviceusage.v1beta1.model.QuotaOverride content;
+          //            public
+          // Patch(ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Patch patch,
+          //                com.google.api.services.serviceusage.v1beta1.model.QuotaOverride
+          // content) {
+          //              super(
+          //                  ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_PATCH,
+          //                  clientConfig,
+          //                  operationAnnotator,
+          //                  patch);
+          //              this.patch = patch;
+          //              this.content = content;
+          //            }
           //
+          //            @Override
+          //            protected JsonObject serialize() {
+          //              var result = new JsonObject();
+          //              result.add("patch", new Gson().toJsonTree(patch));
+          //              result.add("content", new Gson().toJsonTree(content));
+          //              return result;
+          //            }
           //          }
-          public class Patch extends AbstractRequestCow<Operation> {
-
-            public Patch(
-                AbstractGoogleClientRequest<Operation> request) {
-              super(
-                  ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_PATCH,
-                  clientConfig,
-                  operationAnnotator,
-                  request);
-            }
-
-            @Override
-            protected JsonObject serialize() {
-              return null;
-            }
-          }
         }
       }
     }

@@ -423,7 +423,7 @@ public class AIPlatformNotebooksCow {
       return new Stop(instances.stop(name, new StopInstanceRequest()));
     }
 
-    /** {@link #stop(String)} override for {@link InstanceName}. */
+    /** {@link #stop(String)} overload for {@link InstanceName}. */
     public Stop stop(InstanceName instanceName) throws IOException {
       return stop(instanceName.formatName());
     }
