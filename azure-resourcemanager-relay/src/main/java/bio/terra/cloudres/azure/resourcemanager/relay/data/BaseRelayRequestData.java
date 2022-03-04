@@ -12,9 +12,6 @@ public abstract class BaseRelayRequestData implements ResourceManagerRequestData
   /** The name of the resource. */
   public abstract String name();
 
-  /** The region of the resource. */
-  public abstract Region region();
-
   /** The tenant of the resource. */
   public abstract String tenantId();
 
@@ -34,7 +31,6 @@ public abstract class BaseRelayRequestData implements ResourceManagerRequestData
     requestData.addProperty("subscriptionId", subscriptionId());
     requestData.addProperty("resourceGroupName", resourceGroupName());
     requestData.addProperty("name", name());
-    requestData.addProperty("region", region().name());
     return requestData;
   }
 }
