@@ -64,7 +64,7 @@ public class ServiceUsageCow {
 
     /** See {@link ServiceUsage.Services#consumerQuotaMetrics()}. */
     public ConsumerQuotaMetrics consumerQuotaMetrics() {
-      return new Services(services).consumerQuotaMetrics();
+      return new ConsumerQuotaMetrics(this.services.consumerQuotaMetrics());
     }
 
     /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics}. */
@@ -78,7 +78,7 @@ public class ServiceUsageCow {
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics#limits()}. */
       public Limits limits() {
-        return consumerQuotaMetrics().limits();
+        return new Limits(consumerQuotaMetrics.limits());
       }
 
       /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits}. */
@@ -170,6 +170,11 @@ public class ServiceUsageCow {
               result.addProperty("parent", parent);
               result.add("content", new Gson().toJsonTree(content));
               return result;
+            }
+
+            public ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create setForce(boolean force) {
+              this.create.setForce(force);
+              return create;
             }
           }
 
