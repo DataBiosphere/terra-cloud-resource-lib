@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +60,19 @@ public class DnsCow {
       this.managedZones = managedZones;
     }
 
-    /** See {@link Dns.ManagedZones#create(String, ManagedZone)}. */
+    /** See {@link Dns.ManagedZones#create(String, String, ManagedZone)}. */
+    public Create create(String projectId, @Nullable String location, ManagedZone managedZone)
+        throws IOException {
+      return new Create(
+          managedZones.create(projectId, location, managedZone), projectId, managedZone);
+    }
+
+    /**
+     * Overload for compatibility with previous two-argument version. See {@link
+     * Dns.ManagedZones#create(String, String, ManagedZone)}.
+     */
     public Create create(String projectId, ManagedZone managedZone) throws IOException {
-      return new Create(managedZones.create(projectId, managedZone), projectId, managedZone);
+      return create(projectId, "global", managedZone);
     }
 
     /** See {@link Dns.ManagedZones.Create}. */
@@ -84,9 +95,17 @@ public class DnsCow {
       }
     }
 
-    /** See {@link Dns.ManagedZones#get(String, String)}. */
+    /** See {@link Dns.ManagedZones#get(String, String, String)}. */
+    public Get get(String projectId, String location, String managedZoneId) throws IOException {
+      return new Get(managedZones.get(projectId, location, managedZoneId));
+    }
+
+    /**
+     * Two-argument overload to match previous version of the function See {@link
+     * Dns.ManagedZones#get(String, String, String)}
+     */
     public Get get(String projectId, String managedZoneId) throws IOException {
-      return new Get(managedZones.get(projectId, managedZoneId));
+      return get(projectId, "global", managedZoneId);
     }
 
     /** See {@link Dns.ManagedZones.Get} */
@@ -120,12 +139,20 @@ public class DnsCow {
       this.changes = changes;
     }
 
-    /** See {@link Dns.Changes#create(String, String, Change)}. */
-    public Create create(String projectId, String managedZoneName, Change change)
+    /** See {@link Dns.Changes#create(String, String, String, Change)}. */
+    public Create create(String projectId, String location, String managedZoneName, Change change)
         throws IOException {
-      return new Create(changes.create(projectId, managedZoneName, change), change);
+      return new Create(changes.create(projectId, location, managedZoneName, change), change);
     }
 
+    /**
+     * Two-argument overload to match existing usage. See {@link Dns.Changes#create(String, String,
+     * String, Change)}
+     */
+    public Create create(String projectId, String managedZoneName, Change change)
+        throws IOException {
+      return create(projectId, "global", managedZoneName, change);
+    }
     /** See {@link Dns.Changes.Create}. */
     public class Create extends AbstractRequestCow<Change> {
       private final Change change;
@@ -147,9 +174,15 @@ public class DnsCow {
       }
     }
 
-    /** See {@link Dns.Changes#get(String, String, String)}. */
+    /** See {@link Dns.Changes#get(String, String, String, String)}. */
+    public Get get(String projectId, String location, String managedZoneName, String changeId)
+        throws IOException {
+      return new Get(changes.get(projectId, location, managedZoneName, changeId));
+    }
+
+    /** See {@link Dns.Changes#get(String, String, String, String)}. */
     public Get get(String projectId, String managedZoneName, String changeId) throws IOException {
-      return new Get(changes.get(projectId, managedZoneName, changeId));
+      return get(projectId, "global", managedZoneName, changeId);
     }
 
     /** See {@link Dns.Changes.Get} */
@@ -184,9 +217,17 @@ public class DnsCow {
       this.resourceRecordSets = resourceRecordSets;
     }
 
-    /** See {@link Dns.ResourceRecordSets#list(String, String)}. */
+    /** See {@link Dns.ResourceRecordSets#list(String, String, String)}. */
+    public List list(String projectId, String location, String managedZoneName) throws IOException {
+      return new List(resourceRecordSets.list(projectId, location, managedZoneName));
+    }
+
+    /**
+     * Two-argument overload for legacy code See {@link Dns.ResourceRecordSets#list(String, String,
+     * String)}.
+     */
     public List list(String projectId, String managedZoneName) throws IOException {
-      return new List(resourceRecordSets.list(projectId, managedZoneName));
+      return list(projectId, "global", managedZoneName);
     }
 
     /** See {@link Dns.ResourceRecordSets.List} */

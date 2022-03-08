@@ -172,41 +172,12 @@ public class ServiceUsageCow {
               return result;
             }
 
-            public ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create setForce(boolean force) {
+            public ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create
+                setForce(boolean force) {
               this.create.setForce(force);
               return create;
             }
           }
-
-          /**
-           * See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Patch}
-           */
-          //          public class Patch extends AbstractRequestCow<Operation> {
-          //            private final
-          // ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Patch patch;
-          //            private final
-          // com.google.api.services.serviceusage.v1beta1.model.QuotaOverride content;
-          //            public
-          // Patch(ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Patch patch,
-          //                com.google.api.services.serviceusage.v1beta1.model.QuotaOverride
-          // content) {
-          //              super(
-          //                  ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_PATCH,
-          //                  clientConfig,
-          //                  operationAnnotator,
-          //                  patch);
-          //              this.patch = patch;
-          //              this.content = content;
-          //            }
-          //
-          //            @Override
-          //            protected JsonObject serialize() {
-          //              var result = new JsonObject();
-          //              result.add("patch", new Gson().toJsonTree(patch));
-          //              result.add("content", new Gson().toJsonTree(content));
-          //              return result;
-          //            }
-          //          }
         }
       }
     }
