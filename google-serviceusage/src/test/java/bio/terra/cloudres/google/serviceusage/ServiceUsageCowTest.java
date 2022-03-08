@@ -107,7 +107,11 @@ public class ServiceUsageCowTest {
             projectNumber);
 
     ServiceUsageCow.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create =
-        defaultServiceUsage().services().consumerQuotaMetrics().limits().consumerOverrides()
+        defaultServiceUsage()
+            .services()
+            .consumerQuotaMetrics()
+            .limits()
+            .consumerOverrides()
             .create(parent, buildQuotaOverride(projectNumber));
     assertNotNull(create);
   }

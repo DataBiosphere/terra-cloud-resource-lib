@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +24,10 @@ import org.slf4j.LoggerFactory;
  */
 public class DnsCow {
   private final Logger logger = LoggerFactory.getLogger(DnsCow.class);
+
+  // The doc says the location parameter has a default value of "global", but the parameter is
+  // required nonetheless.
+  private static final String DEFAULT_LOCATION = "global";
 
   private final ClientConfig clientConfig;
   private final OperationAnnotator operationAnnotator;
@@ -61,7 +64,7 @@ public class DnsCow {
     }
 
     /** See {@link Dns.ManagedZones#create(String, String, ManagedZone)}. */
-    public Create create(String projectId, @Nullable String location, ManagedZone managedZone)
+    public Create create(String projectId, String location, ManagedZone managedZone)
         throws IOException {
       return new Create(
           managedZones.create(projectId, location, managedZone), projectId, managedZone);
@@ -72,7 +75,7 @@ public class DnsCow {
      * Dns.ManagedZones#create(String, String, ManagedZone)}.
      */
     public Create create(String projectId, ManagedZone managedZone) throws IOException {
-      return create(projectId, "global", managedZone);
+      return create(projectId, DEFAULT_LOCATION, managedZone);
     }
 
     /** See {@link Dns.ManagedZones.Create}. */
@@ -105,7 +108,7 @@ public class DnsCow {
      * Dns.ManagedZones#get(String, String, String)}
      */
     public Get get(String projectId, String managedZoneId) throws IOException {
-      return get(projectId, "global", managedZoneId);
+      return get(projectId, DEFAULT_LOCATION, managedZoneId);
     }
 
     /** See {@link Dns.ManagedZones.Get} */
@@ -151,7 +154,7 @@ public class DnsCow {
      */
     public Create create(String projectId, String managedZoneName, Change change)
         throws IOException {
-      return create(projectId, "global", managedZoneName, change);
+      return create(projectId, DEFAULT_LOCATION, managedZoneName, change);
     }
     /** See {@link Dns.Changes.Create}. */
     public class Create extends AbstractRequestCow<Change> {
@@ -182,7 +185,7 @@ public class DnsCow {
 
     /** See {@link Dns.Changes#get(String, String, String, String)}. */
     public Get get(String projectId, String managedZoneName, String changeId) throws IOException {
-      return get(projectId, "global", managedZoneName, changeId);
+      return get(projectId, DEFAULT_LOCATION, managedZoneName, changeId);
     }
 
     /** See {@link Dns.Changes.Get} */
@@ -227,7 +230,7 @@ public class DnsCow {
      * String)}.
      */
     public List list(String projectId, String managedZoneName) throws IOException {
-      return list(projectId, "global", managedZoneName);
+      return list(projectId, DEFAULT_LOCATION, managedZoneName);
     }
 
     /** See {@link Dns.ResourceRecordSets.List} */
