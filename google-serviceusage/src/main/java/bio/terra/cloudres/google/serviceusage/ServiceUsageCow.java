@@ -1,14 +1,22 @@
 package bio.terra.cloudres.google.serviceusage;
 
 import bio.terra.cloudres.common.ClientConfig;
+import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
+import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsage;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides;
+import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.List;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsageScopes;
 import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
 import com.google.api.services.serviceusage.v1beta1.model.ConsumerQuotaLimit;
+import com.google.api.services.serviceusage.v1beta1.model.ListConsumerOverridesResponse;
 import com.google.api.services.serviceusage.v1beta1.model.ListServicesResponse;
 import com.google.api.services.serviceusage.v1beta1.model.Operation;
 import com.google.api.services.serviceusage.v1beta1.model.QuotaOverride;
@@ -172,10 +180,45 @@ public class ServiceUsageCow {
               return result;
             }
 
-            public ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create
+            public ServiceUsageCow.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create
                 setForce(boolean force) {
               this.create.setForce(force);
-              return create;
+              return this;
+            }
+          }
+
+          public List list(String parent) throws IOException {
+            return new List(
+                ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_LIST,
+                clientConfig,
+                operationAnnotator,
+                consumerOverrides.list(parent),
+                parent);
+          }
+
+          /**
+           * See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.List}
+           */
+          public class List extends AbstractRequestCow<ListConsumerOverridesResponse> {
+            private ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.List list;
+            private final String parent;
+
+            private List(
+                CloudOperation operation,
+                ClientConfig clientConfig,
+                OperationAnnotator operationAnnotator,
+                AbstractGoogleClientRequest<ListConsumerOverridesResponse> request,
+                String parent) {
+              super(operation, clientConfig, operationAnnotator, request);
+              this.parent = parent;
+            }
+
+            @Override
+            protected JsonObject serialize() {
+              var result = new JsonObject();
+              result.addProperty("parent", parent);
+              result.add("list", new Gson().toJsonTree(list));
+              return result;
             }
           }
         }

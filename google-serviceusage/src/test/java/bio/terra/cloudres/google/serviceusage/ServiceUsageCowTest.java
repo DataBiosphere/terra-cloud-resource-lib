@@ -10,6 +10,7 @@ import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
 import com.google.api.services.serviceusage.v1beta1.model.GoogleApiServiceusageV1Service;
+import com.google.api.services.serviceusage.v1beta1.model.ListConsumerOverridesResponse;
 import com.google.api.services.serviceusage.v1beta1.model.ListServicesResponse;
 import com.google.api.services.serviceusage.v1beta1.model.Operation;
 import com.google.api.services.serviceusage.v1beta1.model.QuotaOverride;
@@ -27,8 +28,12 @@ import org.junit.jupiter.api.Test;
 
 @Tag("integration")
 public class ServiceUsageCowTest {
+
+  public static final long OVERRIDE_VALUE_BYTES = 1_099_511_627_776L;
   private static final String STORAGE_SERVICE_ID = "storage-api.googleapis.com";
   private static final String ENABLED_FILTER = "state:ENABLED";
+  public static final String QUOTA_METRIC = "bigquery.googleapis.com/quota/query/usage";
+  public static final String QUOTA_UNIT = "1/d/{project}";
 
   private static ServiceUsageCow defaultServiceUsage()
       throws GeneralSecurityException, IOException {
@@ -98,37 +103,71 @@ public class ServiceUsageCowTest {
   }
 
   @Test
-  public void createConsumerQuotaOverride() throws Exception {
-    long projectNumber = 123456789L;
+  public void createListConsumerQuotaOverride() throws Exception {
+    Project project = ProjectUtils.executeCreateProject();
+    // name is of the form `projects/415104041262`
+    long projectNumber = Long.parseLong(project.getName().substring("projects/".length()));
+
     String parent =
         String.format(
             "projects/%d/services/bigquery.googleapis.com/consumerQuotaMetrics/"
                 + "bigquery.googleapis.com%%2Fquota%%2Fquery%%2Fusage/limits/%%2Fd%%2Fproject",
             projectNumber);
 
+    QuotaOverride content = buildQuotaOverride(projectNumber);
     ServiceUsageCow.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create =
         defaultServiceUsage()
             .services()
             .consumerQuotaMetrics()
             .limits()
             .consumerOverrides()
-            .create(parent, buildQuotaOverride(projectNumber));
+            .create(parent, content)
+            .setForce(true);
     assertNotNull(create);
+
+    OperationTestUtils.pollAndAssertSuccess(
+        defaultServiceUsage().operations().operationCow(create.execute()),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(60));
+
+    ServiceUsageCow.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.List list =
+        defaultServiceUsage()
+            .services()
+            .consumerQuotaMetrics()
+            .limits()
+            .consumerOverrides()
+            .list(parent);
+    ListConsumerOverridesResponse response = list.execute();
+    assertNotNull(response);
+    assertEquals(1, response.getOverrides().size());
+
+    QuotaOverride quotaOverride = response.getOverrides().get(0);
+    // returned name is of the form
+    // "projects/847486415500/services/bigquery.googleapis.com/consumerQuotaMetrics/bigquery.googleapis.com%2Fquota%2Fquery%2Fusage/limits/%2Fd%2Fproject/consumerOverrides/Cg1RdW90YU92ZXJyaWRl"
+    // content name is shorter:
+    // "projects/847486415500/services/bigquery.googleapis.com/consumerQuotaMetrics/bigquery.googleapis.com%2Fquota%2Fquery%2Fusage"
+    // Both of these are opaque and not to be relied on, but I can't help but think the fact that
+    // one is a prefix of the other
+    // is invariant.
+    assertTrue(quotaOverride.getName().contains(content.getName()));
+    assertEquals(OVERRIDE_VALUE_BYTES, quotaOverride.getOverrideValue());
+    assertTrue(null == quotaOverride.getDimensions() || quotaOverride.getDimensions().isEmpty());
+    assertNull(quotaOverride.getMetric()); // not returned for some reason
+    assertNull(quotaOverride.getUnit()); // not returned apparently
   }
 
   private QuotaOverride buildQuotaOverride(Long projectNumber) {
     var result = new QuotaOverride();
-    result.setMetric("bigquery.googleapis.com/quota/query/usage");
+    result.setMetric(QUOTA_METRIC);
     // fill in the project number for the quota limit name
     result.setName(
         String.format(
             "projects/%d/services/bigquery.googleapis.com/"
                 + "consumerQuotaMetrics/bigquery.googleapis.com%%2Fquota%%2Fquery%%2Fusage",
             projectNumber));
-    long TERABYTE_IN_BYTES = 1_099_511_627_776L;
-    result.setOverrideValue(40 * TERABYTE_IN_BYTES);
+    result.setOverrideValue(OVERRIDE_VALUE_BYTES);
     result.setDimensions(Collections.emptyMap());
-    result.setUnit("1/d/{project}"); // no substitution - literal {}s
+    result.setUnit(QUOTA_UNIT); // no substitution - literal {}s
     result.setAdminOverrideAncestor(null);
     return result;
   }
