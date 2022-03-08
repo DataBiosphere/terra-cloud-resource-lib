@@ -12,11 +12,13 @@ import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesReq
 import com.google.api.services.serviceusage.v1beta1.model.GoogleApiServiceusageV1Service;
 import com.google.api.services.serviceusage.v1beta1.model.ListServicesResponse;
 import com.google.api.services.serviceusage.v1beta1.model.Operation;
+import com.google.api.services.serviceusage.v1beta1.model.QuotaOverride;
 import com.google.api.services.serviceusage.v1beta1.model.Service;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
@@ -93,6 +95,37 @@ public class ServiceUsageCowTest {
         "{\"parent\":\"projects/my-project\","
             + "\"filter\":\"state:ENABLED\",\"fields\":\"my-fields\"}",
         list.serialize().toString());
+  }
+
+  @Test
+  public void createConsumerQuotaOverride() throws Exception {
+    long projectNumber = 123456789L;
+    String parent =
+        String.format(
+            "projects/%d/services/bigquery.googleapis.com/consumerQuotaMetrics/"
+                + "bigquery.googleapis.com%%2Fquota%%2Fquery%%2Fusage/limits/%%2Fd%%2Fproject",
+            projectNumber);
+
+    ServiceUsageCow.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create =
+        defaultServiceUsage().services().consumerQuotaMetrics().limits().consumerOverrides()
+            .create(parent, buildQuotaOverride(projectNumber));
+  }
+
+  private QuotaOverride buildQuotaOverride(Long projectNumber) {
+    var result = new QuotaOverride();
+    result.setMetric("bigquery.googleapis.com/quota/query/usage");
+    // fill in the project number for the quota limit name
+    result.setName(
+        String.format(
+            "projects/%d/services/bigquery.googleapis.com/"
+                + "consumerQuotaMetrics/bigquery.googleapis.com%%2Fquota%%2Fquery%%2Fusage",
+            projectNumber));
+    long TERABYTE_IN_BYTES = 1_099_511_627_776L;
+    result.setOverrideValue(40 * TERABYTE_IN_BYTES);
+    result.setDimensions(Collections.emptyMap());
+    result.setUnit("1/d/{project}"); // no substitution - literal {}s
+    result.setAdminOverrideAncestor(null);
+    return result;
   }
 
   private static String projectIdToName(String projectId) {
