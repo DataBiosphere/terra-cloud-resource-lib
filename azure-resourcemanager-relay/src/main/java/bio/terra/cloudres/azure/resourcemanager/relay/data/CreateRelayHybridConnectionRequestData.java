@@ -8,7 +8,6 @@ import bio.terra.janitor.model.AzureResourceGroup;
 import bio.terra.janitor.model.CloudResourceUid;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
-
 import java.util.Optional;
 
 /**
