@@ -18,6 +18,9 @@ import java.util.Optional;
 @AutoValue
 public abstract class CreateRelayRequestData extends BaseRelayRequestData {
 
+  /** The region of the resource. */
+  public abstract Region region();
+
   @Override
   public final CloudOperation cloudOperation() {
     return RelayManagerOperation.AZURE_CREATE_RELAY;
@@ -59,6 +62,7 @@ public abstract class CreateRelayRequestData extends BaseRelayRequestData {
   @Override
   public JsonObject serialize() {
     JsonObject requestData = super.serializeCommon();
+    requestData.addProperty("region", region().name());
     return requestData;
   }
 }

@@ -6,9 +6,9 @@ import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.janitor.model.AzureRelayHybridConnection;
 import bio.terra.janitor.model.AzureResourceGroup;
 import bio.terra.janitor.model.CloudResourceUid;
-import com.azure.core.management.Region;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
+
 import java.util.Optional;
 
 /**
@@ -44,8 +44,6 @@ public abstract class CreateRelayHybridConnectionRequestData extends BaseRelayRe
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract CreateRelayHybridConnectionRequestData.Builder setName(String value);
-
-    public abstract CreateRelayHybridConnectionRequestData.Builder setRegion(Region value);
 
     public abstract CreateRelayHybridConnectionRequestData.Builder setTenantId(String value);
 
