@@ -8,7 +8,7 @@ dependencies {
     api project(':common')
     api project(':google-api-services-common')
 
-    api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev316-1.25.0'
+    api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220217-1.32.1'
 
     testFixturesImplementation(testFixtures(project(':common')))
     testImplementation(testFixtures(project(':google-billing')))
