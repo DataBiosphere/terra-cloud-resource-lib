@@ -8,11 +8,6 @@ import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
 import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsage;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides;
-import com.google.api.services.serviceusage.v1beta1.ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.List;
 import com.google.api.services.serviceusage.v1beta1.ServiceUsageScopes;
 import com.google.api.services.serviceusage.v1beta1.model.BatchEnableServicesRequest;
 import com.google.api.services.serviceusage.v1beta1.model.ConsumerQuotaLimit;
@@ -108,7 +103,7 @@ public class ServiceUsageCow {
 
           private Get(ServiceUsage.Services.ConsumerQuotaMetrics.Limits.Get get) {
             super(
-                ServiceUsageOperation.GOOGLE_BATCH_ENABLE_SERVICES,
+                ServiceUsageOperation.GOOGLE_CONSUMER_QUOTA_METRICS_LIMITS_GET,
                 clientConfig,
                 operationAnnotator,
                 get);
@@ -133,6 +128,7 @@ public class ServiceUsageCow {
               serviceUsage.services().consumerQuotaMetrics().limits().consumerOverrides());
         }
 
+        /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides}*/
         public class ConsumerOverrides {
           private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides
               consumerOverrides;
@@ -163,7 +159,7 @@ public class ServiceUsageCow {
                 String parent,
                 QuotaOverride content) {
               super(
-                  ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_CREATE,
+                  ServiceUsageOperation.GOOGLE_CONSUMER_QUOTA_METRICS_LIMITS_GET,
                   clientConfig,
                   operationAnnotator,
                   create);
@@ -189,7 +185,7 @@ public class ServiceUsageCow {
 
           public List list(String parent) throws IOException {
             return new List(
-                ServiceUsageOperation.GOOGLE_SERVICE_USAGE_CUSTOMER_OVERWRITE_LIST,
+                ServiceUsageOperation.GOOGLE_CONSUMER_QUOTA_METRICS_LIMITS_LIST,
                 clientConfig,
                 operationAnnotator,
                 consumerOverrides.list(parent),

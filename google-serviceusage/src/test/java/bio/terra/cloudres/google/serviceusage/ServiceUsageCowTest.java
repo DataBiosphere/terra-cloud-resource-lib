@@ -33,7 +33,7 @@ public class ServiceUsageCowTest {
   private static final String STORAGE_SERVICE_ID = "storage-api.googleapis.com";
   private static final String ENABLED_FILTER = "state:ENABLED";
   public static final String QUOTA_METRIC = "bigquery.googleapis.com/quota/query/usage";
-  public static final String QUOTA_UNIT = "1/d/{project}";
+  public static final String QUOTA_UNIT = "1/d/{project}"; // no substitution - literal {}s
 
   private static ServiceUsageCow defaultServiceUsage()
       throws GeneralSecurityException, IOException {
@@ -114,14 +114,14 @@ public class ServiceUsageCowTest {
                 + "bigquery.googleapis.com%%2Fquota%%2Fquery%%2Fusage/limits/%%2Fd%%2Fproject",
             projectNumber);
 
-    QuotaOverride content = buildQuotaOverride(projectNumber);
+    QuotaOverride quotaOverrideForRequest = buildQuotaOverride(projectNumber);
     ServiceUsageCow.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides.Create create =
         defaultServiceUsage()
             .services()
             .consumerQuotaMetrics()
             .limits()
             .consumerOverrides()
-            .create(parent, content)
+            .create(parent, quotaOverrideForRequest)
             .setForce(true);
     assertNotNull(create);
 
@@ -141,19 +141,18 @@ public class ServiceUsageCowTest {
     assertNotNull(response);
     assertEquals(1, response.getOverrides().size());
 
-    QuotaOverride quotaOverride = response.getOverrides().get(0);
+    QuotaOverride quotaOverrideRetrieved = response.getOverrides().get(0);
     // returned name is of the form
     // "projects/847486415500/services/bigquery.googleapis.com/consumerQuotaMetrics/bigquery.googleapis.com%2Fquota%2Fquery%2Fusage/limits/%2Fd%2Fproject/consumerOverrides/Cg1RdW90YU92ZXJyaWRl"
     // content name is shorter:
     // "projects/847486415500/services/bigquery.googleapis.com/consumerQuotaMetrics/bigquery.googleapis.com%2Fquota%2Fquery%2Fusage"
     // Both of these are opaque and not to be relied on, but I can't help but think the fact that
-    // one is a prefix of the other
-    // is invariant.
-    assertTrue(quotaOverride.getName().contains(content.getName()));
-    assertEquals(OVERRIDE_VALUE_BYTES, quotaOverride.getOverrideValue());
-    assertTrue(null == quotaOverride.getDimensions() || quotaOverride.getDimensions().isEmpty());
-    assertNull(quotaOverride.getMetric()); // not returned for some reason
-    assertNull(quotaOverride.getUnit()); // not returned apparently
+    // one is a prefix of the other is invariant.
+    assertTrue(quotaOverrideRetrieved.getName().contains(quotaOverrideForRequest.getName()));
+    assertEquals(OVERRIDE_VALUE_BYTES, quotaOverrideRetrieved.getOverrideValue());
+    assertTrue(null == quotaOverrideRetrieved.getDimensions() || quotaOverrideRetrieved.getDimensions().isEmpty());
+    assertNull(quotaOverrideRetrieved.getMetric()); // not returned for some reason
+    assertNull(quotaOverrideRetrieved.getUnit()); // not returned apparently
   }
 
   private QuotaOverride buildQuotaOverride(Long projectNumber) {
@@ -166,9 +165,7 @@ public class ServiceUsageCowTest {
                 + "consumerQuotaMetrics/bigquery.googleapis.com%%2Fquota%%2Fquery%%2Fusage",
             projectNumber));
     result.setOverrideValue(OVERRIDE_VALUE_BYTES);
-    result.setDimensions(Collections.emptyMap());
-    result.setUnit(QUOTA_UNIT); // no substitution - literal {}s
-    result.setAdminOverrideAncestor(null);
+    result.setUnit(QUOTA_UNIT);
     return result;
   }
 

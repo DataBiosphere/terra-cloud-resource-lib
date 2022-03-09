@@ -23,7 +23,7 @@ dependencies {
     api group: 'bio.terra.cloud-resource-lib', name: 'azure-resourcemanager-common', version: '0.4.0'
     api group: 'bio.terra.cloud-resource-lib', name: 'azure-resourcemanager-compute', version: '0.3.0'
     api group: 'bio.terra.cloud-resource-lib', name: 'azure-resourcemanager-containerinstance', version: '0.1.0'
-    api group: 'bio.terra.cloud-resource-lib', name: 'azure-resourcemanager-relay', version: '0.2.0'
+    api group: 'bio.terra.cloud-resource-lib', name: 'azure-resourcemanager-relay', version: '0.3.0'
   }
 }
 
