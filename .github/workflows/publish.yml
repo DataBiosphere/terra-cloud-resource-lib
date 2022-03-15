@@ -2,6 +2,14 @@ name: Publish package to Artifactory
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      publications:
+        description: >
+          Comma-separated list of subprojects to be published. Each one should have its version bumped;
+          i.e. we can't publish already-published artifacts. `platform` should always be included.
+        type: string
+        required: true
 env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
   ARTIFACTORY_ACCOUNT_PATH: secret/dsp/accts/artifactory/dsdejenkins
@@ -62,3 +70,4 @@ jobs:
           ARTIFACTORY_USERNAME: ${{ steps.vault-secret-step.outputs.artifactory-username }}
           ARTIFACTORY_PASSWORD: ${{ steps.vault-secret-step.outputs.artifactory-password }}
           ARTIFACTORY_REPO_KEY: libs-release-local
+          ARTIFACTORY_PUBLICATIONS: ${{ github.event.inputs.publications }}

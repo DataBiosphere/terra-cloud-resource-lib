@@ -1,3 +1,5 @@
+import java.util.stream.Collectors
+
 plugins {
     id 'idea'
     id 'maven-publish'
@@ -8,11 +10,19 @@ plugins {
 def artifactory_repo_key = System.getenv("ARTIFACTORY_REPO_KEY") != null ? System.getenv("ARTIFACTORY_REPO_KEY") : 'libs-snapshot-local'
 def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
 def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
+def artifactory_publications = System.getenv('ARTIFACTORY_PUBLICATIONS') == null
+        ? null
+        : Arrays.stream(System.getenv('ARTIFACTORY_PASSWORD').split(","))
+            .map({s -> s.trim()})
+            .collect(Collectors.toList())
 
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.hasTask(artifactoryPublish) &&
-            (artifactory_username == null || artifactory_password == null)) {
-        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
+            (artifactory_username == null
+                    || artifactory_password == null
+                    || artifactory_publications == null)) {
+        throw new GradleException("Set env vars ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD,"
+                + " and ARTIFACTORY_PUBLICATIONS to publish")
     }
 }
 
@@ -25,23 +35,7 @@ artifactory {
             password = "${artifactory_password}"
         }
         defaults {
-            publications(
-                    'common',
-                    'google-api-services-common',
-                    'google-bigquery',
-                    'google-billing',
-                    'google-cloudresourcemanager',
-                    'google-compute',
-                    'google-dns',
-                    'google-iam',
-                    'google-notebooks',
-                    'google-serviceusage',
-                    'google-storage',
-                    'platform',
-                    'azure-resourcemanager-common',
-                    'azure-resourcemanager-compute',
-                    'azure-resourcemanager-containerinstance',
-                    'azure-resourcemanager-relay')
+            publications(artifactory_publications)
         }
     }
 }
