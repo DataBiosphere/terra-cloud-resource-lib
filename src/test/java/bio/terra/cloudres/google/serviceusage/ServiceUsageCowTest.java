@@ -149,7 +149,9 @@ public class ServiceUsageCowTest {
     // one is a prefix of the other is invariant.
     assertTrue(quotaOverrideRetrieved.getName().contains(quotaOverrideForRequest.getName()));
     assertEquals(OVERRIDE_VALUE_BYTES, quotaOverrideRetrieved.getOverrideValue());
-    assertTrue(null == quotaOverrideRetrieved.getDimensions() || quotaOverrideRetrieved.getDimensions().isEmpty());
+    assertTrue(
+        null == quotaOverrideRetrieved.getDimensions()
+            || quotaOverrideRetrieved.getDimensions().isEmpty());
     assertNull(quotaOverrideRetrieved.getMetric()); // not returned for some reason
     assertNull(quotaOverrideRetrieved.getUnit()); // not returned apparently
   }

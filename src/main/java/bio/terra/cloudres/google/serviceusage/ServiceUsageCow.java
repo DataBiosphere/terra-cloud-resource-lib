@@ -128,7 +128,7 @@ public class ServiceUsageCow {
               serviceUsage.services().consumerQuotaMetrics().limits().consumerOverrides());
         }
 
-        /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides}*/
+        /** See {@link ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides} */
         public class ConsumerOverrides {
           private final ServiceUsage.Services.ConsumerQuotaMetrics.Limits.ConsumerOverrides
               consumerOverrides;
