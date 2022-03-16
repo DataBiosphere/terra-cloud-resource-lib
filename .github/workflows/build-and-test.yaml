@@ -15,11 +15,11 @@ env:
   VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH: secret/dsde/terra/kernel/integration/tools/crl_janitor/client-sa
   VAULT_AZURE_MANAGED_APP_CLIENT_PATH: secret/dsde/terra/azure/common/managed-app-publisher
   # Where to store the retrieved service accounts credentials for Google integration tests.
-  SERVICE_ACCOUNT_ADMIN_FILE: common/src/testFixtures/resources/integration_service_account_admin.json
-  SERVICE_ACCOUNT_USER_FILE: common/src/testFixtures/resources/integration_service_account_user.json
-  SERVICE_ACCOUNT_JANITOR_CLIENT_FILE: common/src/testFixtures/resources/integration_service_account_janitor_client.json
-  AZURE_MANAGED_APP_CLIENT_FILE: azure-resourcemanager-common/src/testFixtures/resources/integration_azure_managed_app_client.json
-  AZURE_PROPERTIES_FILE: azure-resourcemanager-common/src/testFixtures/resources/integration_azure_env.properties
+  SERVICE_ACCOUNT_ADMIN_FILE: src/testFixtures/resources/integration_service_account_admin.json
+  SERVICE_ACCOUNT_USER_FILE: src/testFixtures/resources/integration_service_account_user.json
+  SERVICE_ACCOUNT_JANITOR_CLIENT_FILE: src/testFixtures/resources/integration_service_account_janitor_client.json
+  AZURE_MANAGED_APP_CLIENT_FILE: src/testFixtures/resources/integration_azure_managed_app_client.json
+  AZURE_PROPERTIES_FILE: src/testFixtures/resources/integration_azure_env.properties
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
