@@ -142,11 +142,11 @@ java {
 
 // Enforce that 'git secrets' is correctly installed and configured on the
 // current cloned git repo.
-//task minniekenny(type: Exec) {
-//    commandLine 'sh', file('../minnie-kenny.sh')
-//}
+task minniekenny(type: Exec) {
+    commandLine 'sh', file('minnie-kenny.sh')
+}
 
-//test.dependsOn minniekenny
+test.dependsOn minniekenny
 
 publishing {
     publications {
