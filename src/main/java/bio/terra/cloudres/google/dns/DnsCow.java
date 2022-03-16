@@ -25,9 +25,10 @@ import org.slf4j.LoggerFactory;
 public class DnsCow {
   private final Logger logger = LoggerFactory.getLogger(DnsCow.class);
 
-  /**The Javadoc for the methods taking a location parameter say it has a default value of "global",
-   *  but the parameter is required nonetheless. See for example
-   *  {@link com.google.api.services.dns.Dns.Changes#create(String, String, String, Change)}
+  /**
+   * The Javadoc for the methods taking a location parameter say it has a default value of "global",
+   * but the parameter is required nonetheless. See for example {@link
+   * com.google.api.services.dns.Dns.Changes#create(String, String, String, Change)}
    */
   private static final String DEFAULT_LOCATION = "global";
 
