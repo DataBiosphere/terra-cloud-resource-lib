@@ -93,6 +93,7 @@ dependencies {
     api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220224-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v2-rev20220217-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220217-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220125-1.32.1'
 
 }
 
