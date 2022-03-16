@@ -85,8 +85,9 @@ dependencies {
 
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.10.0'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-containerinstance', version: '2.3.0'
-
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-relay', version: '1.0.0-beta.1'
 }
+
 dependencyLocking {
     lockAllConfigurations() // see https://docs.gradle.org/current/userguide/dependency_locking.html
 }
