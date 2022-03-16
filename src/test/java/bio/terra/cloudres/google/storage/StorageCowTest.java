@@ -141,8 +141,7 @@ public class StorageCowTest {
     Identity expectedIdentity = Identity.serviceAccount(getTestUserEmailAddress());
     storageCow.setIamPolicy(
         bucketName,
-        originalPolicy
-            .toBuilder()
+        originalPolicy.toBuilder()
             .addIdentity(StorageRoles.objectCreator(), expectedIdentity)
             .build());
 

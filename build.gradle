@@ -94,7 +94,7 @@ dependencies {
     api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v2-rev20220217-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220217-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220125-1.32.1'
-
+    api group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.108.0'
 }
 
 dependencyLocking {
