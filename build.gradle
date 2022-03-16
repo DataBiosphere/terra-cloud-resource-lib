@@ -1,6 +1,9 @@
 plugins {
     id 'idea'
     id 'maven-publish'
+    // Use common Gradle settings for Java libraries defined in conventions plugin:
+    // /buildSrc/src/main/groovy/terra-cloud-resource-lib.library-conventions.gradle
+    id 'terra-cloud-resource-lib.library-conventions'
 
     id 'com.jfrog.artifactory' version '4.13.0'
 }
@@ -16,32 +19,23 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
 }
 
-artifactory {
-    publish {
-        contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
-        repository {
-            repoKey = "${artifactory_repo_key}"
-            username = "${artifactory_username}"
-            password = "${artifactory_password}"
-        }
-        defaults {
-            publications(
-                    'common',
-                    'google-api-services-common',
-                    'google-bigquery',
-                    'google-billing',
-                    'google-cloudresourcemanager',
-                    'google-compute',
-                    'google-dns',
-                    'google-iam',
-                    'google-notebooks',
-                    'google-serviceusage',
-                    'google-storage',
-                    'platform',
-                    'azure-resourcemanager-common',
-                    'azure-resourcemanager-compute',
-                    'azure-resourcemanager-containerinstance',
-                    'azure-resourcemanager-relay')
-        }
-    }
+dependencies {
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.12.3'
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
+    implementation group: 'com.google.cloud', name: 'google-cloud-pubsub'
+    implementation group: 'io.opencensus', name: 'opencensus-api', version: '0.28.3'
+    implementation group: 'io.opencensus', name: 'opencensus-impl', version: '0.28.3'
+
+    api group: 'com.azure', name: 'azure-identity', version: '1.4.3'
+    api group: 'com.azure', name: 'azure-core', version: '1.24.1'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.10.0'
+
+    testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
+    testFixturesImplementation group: 'com.azure', name: 'azure-core', version: '1.24.1'
+    testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.10.0'
+    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+
+    testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
+
 }

@@ -22,7 +22,7 @@ public abstract class OperationData {
   public abstract OptionalInt httpStatusCode();
 
   /** The {@link CloudOperation} performed. */
-  public abstract CloudOperation cloudOperation();
+  public abstract bio.terra.cloudres.common.CloudOperation cloudOperation();
 
   /** Serialized request data in JSON format. */
   public abstract JsonObject requestData();
@@ -47,7 +47,8 @@ public abstract class OperationData {
 
     public abstract Builder setHttpStatusCode(OptionalInt httpStatusCode);
 
-    public abstract Builder setCloudOperation(CloudOperation cloudOperation);
+    public abstract Builder setCloudOperation(
+        bio.terra.cloudres.common.CloudOperation cloudOperation);
 
     public abstract Builder setRequestData(JsonObject requestData);
 

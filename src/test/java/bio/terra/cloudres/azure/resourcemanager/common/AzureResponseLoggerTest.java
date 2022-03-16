@@ -3,8 +3,6 @@ package bio.terra.cloudres.azure.resourcemanager.common;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import bio.terra.cloudres.common.OperationAnnotator;
 import bio.terra.cloudres.common.OperationData;
@@ -18,11 +16,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 /**
  * Integration test which verifies invocation of {@link AzureResponseLogger} from real Azure cloud
@@ -31,7 +31,7 @@ import org.mockito.Mock;
 @Tag("integration")
 public class AzureResponseLoggerTest {
 
-  @Mock private OperationAnnotator mockOperationAnnotator = mock(OperationAnnotator.class);
+  @Mock private OperationAnnotator mockOperationAnnotator = Mockito.mock(OperationAnnotator.class);
 
   private ArgumentCaptor<OperationData> operationDataCaptor =
       ArgumentCaptor.forClass(OperationData.class);
@@ -43,7 +43,7 @@ public class AzureResponseLoggerTest {
         setUpResourceManager().resourceGroups().list().stream().collect(Collectors.toList());
 
     // Verify AzureResponseLogger was invoked
-    verify(mockOperationAnnotator).recordOperation(operationDataCaptor.capture());
+    Mockito.verify(mockOperationAnnotator).recordOperation(operationDataCaptor.capture());
 
     // Verify OperationData values
     OperationData operationData = operationDataCaptor.getValue();
@@ -59,7 +59,7 @@ public class AzureResponseLoggerTest {
     assertThat(operationData.requestData().keySet(), Matchers.hasItem("requestUrl"));
 
     // For good measure verify the Azure response contains our test resource group
-    assertThat(
+    MatcherAssert.assertThat(
         resourceGroups.stream().map(ResourceGroup::name).collect(Collectors.toList()),
         Matchers.hasItem(AzureIntegrationUtils.DEFAULT_AZURE_RESOURCE_GROUP));
   }

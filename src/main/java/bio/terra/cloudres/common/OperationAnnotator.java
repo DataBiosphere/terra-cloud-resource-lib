@@ -22,12 +22,12 @@ import org.slf4j.Logger;
 public class OperationAnnotator {
   private static final Tracer tracer = Tracing.getTracer();
 
-  private final ClientConfig clientConfig;
+  private final bio.terra.cloudres.common.ClientConfig clientConfig;
 
   /** We inject a Logger to allow how logs are made to be controlled by the COWs. */
   private final Logger logger;
 
-  public OperationAnnotator(ClientConfig clientConfig, Logger logger) {
+  public OperationAnnotator(bio.terra.cloudres.common.ClientConfig clientConfig, Logger logger) {
     this.clientConfig = clientConfig;
     this.logger = logger;
   }
@@ -41,7 +41,9 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R> R executeCowOperation(
-      CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
+      bio.terra.cloudres.common.CloudOperation cloudOperation,
+      CowExecute<R> cowExecute,
+      CowSerialize cowSerialize) {
     try {
       return executeCheckedCowOperation(
           cloudOperation,
@@ -64,7 +66,9 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R, E extends Exception> R executeCheckedCowOperation(
-      CloudOperation cloudOperation, CowCheckedExecute<R, E> cowExecute, CowSerialize cowSerialize)
+      bio.terra.cloudres.common.CloudOperation cloudOperation,
+      CowCheckedExecute<R, E> cowExecute,
+      CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
     OptionalInt httpStatusCode = OptionalInt.empty();
@@ -82,7 +86,7 @@ public class OperationAnnotator {
       throw e;
     } finally {
       recordOperation(
-          OperationData.builder()
+          bio.terra.cloudres.common.OperationData.builder()
               .setCloudOperation(cloudOperation)
               .setDuration(stopwatch.elapsed())
               .setExecutionException(executionException)
