@@ -114,6 +114,14 @@ spotless {
 
 build.dependsOn spotlessApply
 
+// for Gradle Build Scans
+if (hasProperty("buildScan")) {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+    }
+}
+
 // Modify the standard :test task to only include unit-tagged tests.
 test {
     useJUnitPlatform {
