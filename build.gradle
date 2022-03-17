@@ -100,8 +100,8 @@ dependencyLocking {
 }
 
 processTestResources {
-    // Include common/testFixtures/resources for integration test credentials.
-//    from("${project(':common:').projectDir}/testFixtures/resources")
+    // Include src/testFixtures/resources for integration test credentials.
+    from("$projectDir/src/testFixtures/resources")
 }
 
 // Linter
