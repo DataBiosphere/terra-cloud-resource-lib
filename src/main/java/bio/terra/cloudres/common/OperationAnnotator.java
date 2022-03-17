@@ -41,9 +41,7 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R> R executeCowOperation(
-      CloudOperation cloudOperation,
-      CowExecute<R> cowExecute,
-      CowSerialize cowSerialize) {
+      CloudOperation cloudOperation, CowExecute<R> cowExecute, CowSerialize cowSerialize) {
     try {
       return executeCheckedCowOperation(
           cloudOperation,
@@ -66,9 +64,7 @@ public class OperationAnnotator {
    * @return the result of executing the {@code cowOperation}
    */
   public <R, E extends Exception> R executeCheckedCowOperation(
-      CloudOperation cloudOperation,
-      CowCheckedExecute<R, E> cowExecute,
-      CowSerialize cowSerialize)
+      CloudOperation cloudOperation, CowCheckedExecute<R, E> cowExecute, CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
     OptionalInt httpStatusCode = OptionalInt.empty();

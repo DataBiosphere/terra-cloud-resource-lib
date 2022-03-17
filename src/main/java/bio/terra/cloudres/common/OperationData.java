@@ -47,8 +47,7 @@ public abstract class OperationData {
 
     public abstract Builder setHttpStatusCode(OptionalInt httpStatusCode);
 
-    public abstract Builder setCloudOperation(
-        CloudOperation cloudOperation);
+    public abstract Builder setCloudOperation(CloudOperation cloudOperation);
 
     public abstract Builder setRequestData(JsonObject requestData);
 
