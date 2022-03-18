@@ -22,17 +22,6 @@ configurations {
     testImplementation.extendsFrom testFixturesImplementation
 }
 
-def artifactory_repo_key = System.getenv("ARTIFACTORY_REPO_KEY") != null ? System.getenv("ARTIFACTORY_REPO_KEY") : 'libs-snapshot-local'
-def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
-def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(artifactoryPublish) &&
-            (artifactory_username == null || artifactory_password == null)) {
-        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
-    }
-}
-
 dependencies {
     // Google dependencies - make sure we are using -jre and not android and use common bom
     constraints {
@@ -156,15 +145,29 @@ task minniekenny(type: Exec) {
 
 test.dependsOn minniekenny
 
-publishing {
-    publications {
-        "$rootProject.name"(MavenPublication) {
-            groupId group
-            artifactId rootProject.name
-            version version
-            from components.java
-            suppressPomMetadataWarningsFor('testFixturesApiElements')
-            suppressPomMetadataWarningsFor('testFixturesApiRuntimeElements')
+def version = '1.0.0-alpha1'
+
+def artifactory_repo_key = System.getenv("ARTIFACTORY_REPO_KEY") != null ? System.getenv("ARTIFACTORY_REPO_KEY") : 'libs-snapshot-local'
+def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
+def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(artifactoryPublish) &&
+            (artifactory_username == null || artifactory_password == null)) {
+        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
+    }
+}
+
+artifactory {
+    publish {
+        contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
+        repository {
+            repoKey = "${artifactory_repo_key}"
+            username = "${artifactory_username}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publications(rootProject.name)
         }
     }
 }
