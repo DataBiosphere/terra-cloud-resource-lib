@@ -15,7 +15,7 @@ repositories {
     }
 }
 
-group = 'bio.terra.cloud-resource-lib'
+group = 'bio.terra'
 sourceCompatibility = JavaVersion.VERSION_11
 
 configurations {
@@ -165,9 +165,19 @@ artifactory {
             password = "${artifactory_password}"
         }
         defaults {
-            publications('ALL_PUBLICATIONS')
+            publications('terraCloudResourceLib')
             publishArtifacts = true
             publishPom = true
+        }
+    }
+}
+
+publishing {
+    publications {
+        terraCloudResourceLib(MavenPublication) {
+            version = gradle.crlVersion
+            artifactId = rootProject.name
+            from components.java
         }
     }
 }
