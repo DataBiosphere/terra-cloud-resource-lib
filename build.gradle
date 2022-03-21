@@ -156,6 +156,7 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
 }
 
+// Upload Maven artifacts to Artifactory using the Artifcatory plugin.
 artifactory {
     publish {
         contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
@@ -172,6 +173,7 @@ artifactory {
     }
 }
 
+// Publish jar file to a Maven module/artifact using the maven-publish plugin.
 publishing {
     publications {
         terraCloudResourceLib(MavenPublication) {
