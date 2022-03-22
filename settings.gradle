@@ -1,1 +1,2 @@
 rootProject.name = 'terra-cloud-resource-lib'
+gradle.ext.crlVersion = '1.0.2-SNAPSHOT'

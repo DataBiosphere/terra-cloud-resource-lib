@@ -15,22 +15,11 @@ repositories {
     }
 }
 
-group = 'bio.terra.cloud-resource-lib'
+group = 'bio.terra'
 sourceCompatibility = JavaVersion.VERSION_11
 
 configurations {
     testImplementation.extendsFrom testFixturesImplementation
-}
-
-def artifactory_repo_key = System.getenv("ARTIFACTORY_REPO_KEY") != null ? System.getenv("ARTIFACTORY_REPO_KEY") : 'libs-snapshot-local'
-def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
-def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(artifactoryPublish) &&
-            (artifactory_username == null || artifactory_password == null)) {
-        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
-    }
 }
 
 dependencies {
@@ -156,15 +145,41 @@ task minniekenny(type: Exec) {
 
 test.dependsOn minniekenny
 
+def artifactory_repo_key = System.getenv("ARTIFACTORY_REPO_KEY") != null ? System.getenv("ARTIFACTORY_REPO_KEY") : 'libs-snapshot-local'
+def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
+def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(artifactoryPublish) &&
+            (artifactory_username == null || artifactory_password == null)) {
+        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
+    }
+}
+
+// Upload Maven artifacts to Artifactory using the Artifcatory plugin.
+artifactory {
+    publish {
+        contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
+        repository {
+            repoKey = "${artifactory_repo_key}"
+            username = "${artifactory_username}"
+            password = "${artifactory_password}"
+        }
+        defaults {
+            publications('terraCloudResourceLib')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+}
+
+// Publish jar file to a Maven module/artifact using the maven-publish plugin.
 publishing {
     publications {
-        "$project.name"(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version project.version
+        terraCloudResourceLib(MavenPublication) {
+            version = gradle.crlVersion
+            artifactId = rootProject.name
             from components.java
-            suppressPomMetadataWarningsFor('testFixturesApiElements')
-            suppressPomMetadataWarningsFor('testFixturesApiRuntimeElements')
         }
     }
 }
