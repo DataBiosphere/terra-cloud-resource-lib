@@ -79,7 +79,7 @@ jobs:
           OVERRIDE_BUMP: ${{ steps.controls.outputs.semver-part }}
           RELEASE_BRANCHES: main
           VERSION_FILE_PATH: settings.gradle
-          VERSION_LINE_MATCH: "^gradle.ext.wsmVersion\\s*=\\s*\".*\""
+          VERSION_LINE_MATCH: "^gradle.ext.crlVersion\\s*=\\s*\".*\""
           VERSION_SUFFIX: SNAPSHOT
       - name: Set up AdoptOpenJDK
         if: steps.skiptest.outputs.is-bump == 'no'
@@ -98,61 +98,10 @@ jobs:
       - name: Grant execute permission for gradlew
         if: steps.skiptest.outputs.is-bump == 'no'
         run: chmod +x gradlew
-      - name: "Publish to Artifactory"
+      - name: Publish to Artifactory
         if: steps.skiptest.outputs.is-bump == 'no'
         run: ./gradlew :client:artifactoryPublish
         env:
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
           ARTIFACTORY_REPO_KEY: "libs-snapshot-local"
-      - name: Auth to GCR
-        if: steps.skiptest.outputs.is-bump == 'no'
-        uses: google-github-actions/setup-gcloud@master
-        with:
-          version: '270.0.0'
-          service_account_email: ${{ secrets.GCR_PUBLISH_EMAIL }}
-          service_account_key: ${{ secrets.GCR_PUBLISH_KEY }}
-      - name: Explicitly auth Docker for GCR
-        if: steps.skiptest.outputs.is-bump == 'no'
-        run: gcloud auth configure-docker --quiet
-      - name: Construct docker image name and tag
-        if: steps.skiptest.outputs.is-bump == 'no'
-        id: image-name
-        run: |
-          DOCKER_TAG=${{ steps.tag.outputs.tag }}
-          echo ::set-output name=name::gcr.io/${GOOGLE_PROJECT}/${SERVICE_NAME}:${DOCKER_TAG}
-      - name: Build image locally with jib
-        if: steps.skiptest.outputs.is-bump == 'no'
-        run: "./gradlew :service:jibDockerBuild --image=${{ steps.image-name.outputs.name }} -Djib.console=plain"
-      - name: Run Trivy vulnerability scanner
-        if: steps.skiptest.outputs.is-bump == 'no'
-        # Link to the github location of the action https://github.com/broadinstitute/dsp-appsec-trivy-action
-        uses: broadinstitute/dsp-appsec-trivy-action@v1
-        with:
-          image: ${{ steps.image-name.outputs.name }}
-      - name: Push GCR image
-        if: steps.skiptest.outputs.is-bump == 'no'
-        run: "docker push ${{ steps.image-name.outputs.name }}"
-      - name: Deploy to Terra Dev environment
-        if: github.event_name == 'push' && steps.skiptest.outputs.is-bump == 'no'
-        uses: broadinstitute/repository-dispatch@master
-        with:
-          token: ${{ secrets.BROADBOT_TOKEN }}
-          repository: broadinstitute/terra-helmfile
-          event-type: update-service
-          client-payload: '{"service": "workspacemanager", "version": "${{ steps.tag.outputs.tag }}", "dev_only": false}'
-      - name: Build the OpenAPI interface
-        if: steps.skiptest.outputs.is-bump == 'no'
-        run: ./gradlew :service:generateSwaggerCodeServer
-      - name: Where is the file
-        if: steps.skiptest.outputs.is-bump == 'no'
-        run: |
-          pwd
-          find . -name "service_openapi.yaml"
-      - name: Make release
-        if: steps.skiptest.outputs.is-bump == 'no'
-        uses: ncipollo/release-action@v1
-        id: create_release
-        with:
-          tag: ${{ steps.tag.outputs.tag }}
-          artifacts: "service/build/resources/main/api/service_openapi.yaml"
