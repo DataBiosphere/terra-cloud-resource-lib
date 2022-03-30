@@ -20,6 +20,7 @@ runs:
         echo "log=$log"
         pattern="^bump .*"
         IS_BUMP=no
+        # Note that workflow_dispatch events can never be bumps according to this logic.
         if [[ "${{ inputs.event-name }}" == "push" && "$log" =~ $pattern ]]; then
           IS_BUMP=yes
         fi
