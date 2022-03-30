@@ -5,7 +5,7 @@ package bio.terra.cloudres.common;
  *
  * <p>There is nothing for the CRL client to do about this. This should hopefully happen very
  * rarely, or we should revisit.
- * 
+ *
  */
 public class JanitorException extends RuntimeException {
   public JanitorException(String msg, Throwable cause) {
