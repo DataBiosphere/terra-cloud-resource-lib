@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: 'Part of the version to bump: major, minor, patch'
+        description: 'Part of the semantic version to bump'
         required: false
         default: 'patch'
         type: choice
@@ -100,7 +100,7 @@ jobs:
         run: chmod +x gradlew
       - name: Publish to Artifactory
         if: steps.skiptest.outputs.is-bump == 'no'
-        run: ./gradlew artifactoryPublish
+        run: ./gradlew artifactoryPublish --scan
         env:
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
