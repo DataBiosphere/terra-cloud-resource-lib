@@ -38,7 +38,6 @@ public class Defaults {
    *                     .setIpAllocationMethod(IpAllocationMethod.DYNAMIC)
    *                     .build()));
    * </pre>
-   *
    */
   public static Context buildContext(ResourceManagerRequestData requestData) {
     return new Context(CLOUD_RESOURCE_REQUEST_DATA_KEY, requestData);

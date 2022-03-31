@@ -16,8 +16,6 @@ import reactor.core.publisher.Mono;
  *
  * <p>Implemented as a {@link HttpRequestLogger} to record created resources as soon as the request
  * is made. This is a no-op if the HTTP request is not a cloud resource creation.
- *
- *
  */
 public class AzureResourceCleanupRecorder implements HttpRequestLogger {
   private final ClientConfig clientConfig;
