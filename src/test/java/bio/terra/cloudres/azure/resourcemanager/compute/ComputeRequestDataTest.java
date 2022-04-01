@@ -19,6 +19,7 @@ import bio.terra.janitor.model.AzureVirtualMachine;
 import bio.terra.janitor.model.CloudResourceUid;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.VirtualMachineExtension;
 import com.azure.resourcemanager.network.models.IpAllocationMethod;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
@@ -161,6 +162,7 @@ public class ComputeRequestDataTest {
             .setNetwork(mockNetwork())
             .setSubnetName("my-subnet")
             .setImage("my-image")
+            .setCustomScriptExtension(mockVirtualMachineExtension())
             .build();
 
     assertEquals(ComputeManagerOperation.AZURE_CREATE_VM, createVirtualMachine.cloudOperation());
@@ -168,7 +170,7 @@ public class ComputeRequestDataTest {
         "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\","
             + "\"name\":\"my-vm\",\"region\":\"eastus\","
             + "\"network\":\"my-network\",\"subnetName\":\"my-subnet\",\"ip\":null,"
-            + "\"disk\":\"my-disk\",\"image\":\"my-image\"}",
+            + "\"disk\":\"my-disk\",\"image\":\"my-image\",\"customScriptExtension\":\"my-custom-script-extension\"}",
         createVirtualMachine.serialize().toString());
     assertEquals(
         Optional.of(
@@ -201,6 +203,12 @@ public class ComputeRequestDataTest {
   private static NetworkSecurityGroup mockNetworkSecurityGroup() {
     NetworkSecurityGroup mock = mock(NetworkSecurityGroup.class);
     when(mock.name()).thenReturn("my-nsg");
+    return mock;
+  }
+
+  private static VirtualMachineExtension mockVirtualMachineExtension() {
+    VirtualMachineExtension mock = mock(VirtualMachineExtension.class);
+    when(mock.name()).thenReturn("my-custom-script-extension");
     return mock;
   }
 

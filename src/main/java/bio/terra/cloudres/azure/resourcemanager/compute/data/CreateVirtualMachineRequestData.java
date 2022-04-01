@@ -7,6 +7,7 @@ import bio.terra.janitor.model.AzureVirtualMachine;
 import bio.terra.janitor.model.CloudResourceUid;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.VirtualMachineExtension;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.google.auto.value.AutoValue;
@@ -30,6 +31,9 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
 
   /** Virtual machine image name. */
   public abstract String image();
+
+  /** Virtual machine custom script extension */
+  public abstract VirtualMachineExtension customScriptExtension();
 
   @Override
   public final CloudOperation cloudOperation() {
@@ -76,6 +80,8 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
 
     public abstract Builder setImage(String value);
 
+    public abstract Builder setCustomScriptExtension(VirtualMachineExtension value);
+
     public abstract CreateVirtualMachineRequestData build();
   }
 
@@ -87,6 +93,7 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
     requestData.addProperty("ip", publicIpAddress().ipAddress());
     requestData.addProperty("disk", disk().name());
     requestData.addProperty("image", image());
+    requestData.addProperty("customScriptExtension", customScriptExtension().name());
     return requestData;
   }
 }
