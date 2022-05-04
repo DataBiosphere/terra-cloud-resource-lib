@@ -180,6 +180,38 @@ public class ComputeRequestDataTest {
         createVirtualMachine.resourceUidCreation());
   }
 
+  @Test
+  public void serializeCreateVirtualMachineWithoutPublicIp() {
+    CreateVirtualMachineRequestData createVirtualMachine =
+        CreateVirtualMachineRequestData.builder()
+            .setTenantId("my-tenant")
+            .setSubscriptionId("my-sub")
+            .setResourceGroupName("my-rg")
+            .setRegion(Region.US_EAST)
+            .setName("my-vm")
+            .setDisk(mockDisk())
+            .setNetwork(mockNetwork())
+            .setSubnetName("my-subnet")
+            .setImage("my-image")
+            .build();
+
+    assertEquals(ComputeManagerOperation.AZURE_CREATE_VM, createVirtualMachine.cloudOperation());
+    assertEquals(
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\","
+            + "\"name\":\"my-vm\",\"region\":\"eastus\","
+            + "\"network\":\"my-network\",\"subnetName\":\"my-subnet\","
+            + "\"disk\":\"my-disk\",\"image\":\"my-image\"}",
+        createVirtualMachine.serialize().toString());
+    assertEquals(
+        Optional.of(
+            new CloudResourceUid()
+                .azureVirtualMachine(
+                    new AzureVirtualMachine()
+                        .resourceGroup(azureResourceGroup(createVirtualMachine))
+                        .vmName("my-vm"))),
+        createVirtualMachine.resourceUidCreation());
+  }
+
   private static PublicIpAddress mockPublicIpAddress() {
     PublicIpAddress mock = mock(PublicIpAddress.class);
     when(mock.name()).thenReturn("my-ip");
