@@ -12,6 +12,7 @@ import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /** Virtual machine creation request data. */
 @AutoValue
@@ -23,6 +24,7 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
   public abstract String subnetName();
 
   /** Public IP address associated with the VM. */
+  @Nullable
   public abstract PublicIpAddress publicIpAddress();
 
   /** Disk associated with the VM. */
@@ -84,7 +86,9 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
     JsonObject requestData = super.serializeCommon();
     requestData.addProperty("network", network().name());
     requestData.addProperty("subnetName", subnetName());
-    requestData.addProperty("ip", publicIpAddress().ipAddress());
+    if (publicIpAddress() != null) {
+      requestData.addProperty("ip", publicIpAddress().ipAddress());
+    }
     requestData.addProperty("disk", disk().name());
     requestData.addProperty("image", image());
     return requestData;
