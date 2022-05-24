@@ -8,6 +8,7 @@ import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleAiNotebookInstanceUid;
 import com.google.api.services.notebooks.v1.AIPlatformNotebooks;
+import com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances.UpdateMetadataItems;
 import com.google.api.services.notebooks.v1.AIPlatformNotebooksScopes;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.api.services.notebooks.v1.model.ListInstancesResponse;
@@ -18,6 +19,7 @@ import com.google.api.services.notebooks.v1.model.StartInstanceRequest;
 import com.google.api.services.notebooks.v1.model.StopInstanceRequest;
 import com.google.api.services.notebooks.v1.model.TestIamPermissionsRequest;
 import com.google.api.services.notebooks.v1.model.TestIamPermissionsResponse;
+import com.google.api.services.notebooks.v1.model.UpdateInstanceMetadataItemsRequest;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.base.Preconditions;
@@ -25,6 +27,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -450,6 +453,26 @@ public class AIPlatformNotebooksCow {
         InstanceName.fromNameFormat(getName()).addProperties(result);
         return result;
       }
+    }
+
+    /**
+     * See {@link AIPlatformNotebooks.Projects.Locations.Instances#updateMetadataItems(String,
+     * UpdateInstanceMetadataItemsRequest)}.
+     */
+    public UpdateMetadataItems updateMetadataItems(String name, Map<String, String> metadata)
+        throws IOException {
+      return instances.updateMetadataItems(
+          name, new UpdateInstanceMetadataItemsRequest().setItems(metadata));
+    }
+
+    /**
+     * See {@link AIPlatformNotebooks.Projects.Locations.Instances#updateMetadataItems(String,
+     * UpdateInstanceMetadataItemsRequest)}.
+     */
+    public UpdateMetadataItems updateMetadataItems(
+        InstanceName instanceName, Map<String, String> metadata) throws IOException {
+      return instances.updateMetadataItems(
+          instanceName.formatName(), new UpdateInstanceMetadataItemsRequest().setItems(metadata));
     }
 
     /**
