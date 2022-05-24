@@ -132,8 +132,8 @@ public class AIPlatformNotebooksCowTest {
 
     notebooks
         .instances()
-        .updateMetadataItems(
-            instanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3")).execute();
+        .updateMetadataItems(instanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"))
+        .execute();
 
     retrievedInstance = notebooks.instances().get(instanceName).execute();
     var metadata = retrievedInstance.getMetadata();
