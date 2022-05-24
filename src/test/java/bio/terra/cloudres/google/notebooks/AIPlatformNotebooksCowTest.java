@@ -25,6 +25,7 @@ import com.google.api.services.notebooks.v1.model.TestIamPermissionsRequest;
 import com.google.api.services.notebooks.v1.model.TestIamPermissionsResponse;
 import com.google.api.services.notebooks.v1.model.VmImage;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
@@ -119,6 +120,27 @@ public class AIPlatformNotebooksCowTest {
             GoogleJsonResponseException.class,
             () -> notebooks.instances().get(instanceName).execute());
     assertEquals(404, e.getStatusCode());
+  }
+
+  @Test
+  public void updateNotebookInstanceMetadata() throws Exception {
+    InstanceName instanceName = defaultInstanceName().build();
+    createInstance(instanceName);
+
+    Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
+    assertEquals(instanceName.formatName(), retrievedInstance.getName());
+    assertEquals(0, retrievedInstance.getMetadata().size());
+
+    notebooks
+        .instances()
+        .updateMetadataItems(
+            instanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"));
+
+    retrievedInstance = notebooks.instances().get(instanceName).execute();
+    var metadata = retrievedInstance.getMetadata();
+    assertEquals("bar", metadata.get("foo"));
+    assertEquals("3", metadata.get("count"));
+    assertEquals(2, metadata.size());
   }
 
   @Test
