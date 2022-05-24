@@ -129,18 +129,18 @@ public class AIPlatformNotebooksCowTest {
 
     Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
     assertEquals(instanceName.formatName(), retrievedInstance.getName());
-    assertEquals(0, retrievedInstance.getMetadata().size());
 
     notebooks
         .instances()
         .updateMetadataItems(
-            instanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"));
+            instanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3")).execute();
 
     retrievedInstance = notebooks.instances().get(instanceName).execute();
     var metadata = retrievedInstance.getMetadata();
     assertEquals("bar", metadata.get("foo"));
     assertEquals("3", metadata.get("count"));
-    assertEquals(2, metadata.size());
+
+    notebooks.instances().delete(instanceName).execute();
   }
 
   @Test
