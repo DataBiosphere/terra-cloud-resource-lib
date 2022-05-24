@@ -124,7 +124,8 @@ public class AIPlatformNotebooksCowTest {
 
   @Test
   public void updateNotebookInstanceMetadata() throws Exception {
-    InstanceName instanceName = defaultInstanceName().build();
+    InstanceName instanceName =
+        defaultInstanceName().instanceId("instance-with-foobar-metadata").build();
     createInstance(instanceName);
 
     Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
