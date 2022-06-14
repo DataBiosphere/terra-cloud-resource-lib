@@ -68,8 +68,6 @@ jobs:
         uses: ./.github/actions/bump-skip
         with:
           event-name: ${{ github.event_name }}
-      - name: set-safe-directory
-        run: git config --global --add safe.directory /github/workspace
       - name: Bump the tag to a new version
         if: steps.skiptest.outputs.is-bump == 'no'
         uses: databiosphere/github-actions/actions/bumper@bumper-0.0.6
