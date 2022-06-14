@@ -30,17 +30,18 @@ dependencies {
     }
 
     ext {
-        janitorclient = '0.7.2-SNAPSHOT'
+        janitorclient = '0.114.0-SNAPSHOT'
     }
 
     annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'
 
     api group: 'com.azure', name: 'azure-core', version: '1.24.1'
     api group: 'com.azure', name: 'azure-identity', version: '1.4.3'
-    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.10.0'
-    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-containerinstance', version: '2.3.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.15.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-containerinstance', version: '2.15.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-msi', version: '2.15.0'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-relay', version: '1.0.0-beta.1'
-    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.10.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.15.0'
     api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20201030-1.30.10'
     api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20210411-1.31.0'
     api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220224-1.32.1'
