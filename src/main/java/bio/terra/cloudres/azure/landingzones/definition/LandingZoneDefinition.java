@@ -1,6 +1,17 @@
 package bio.terra.cloudres.azure.landingzones.definition;
 
-public abstract class LandingZoneDefinition  {
+import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.relay.RelayManager;
 
-     abstract LandingZoneDefinable createDefinition(int version);
+public abstract class LandingZoneDefinition implements LandingZoneDefinable {
+
+    protected final RelayManager relayManager;
+    protected final AzureResourceManager azureResourceManager;
+
+    protected LandingZoneDefinition(AzureResourceManager azureResourceManager,
+                                    RelayManager relayManager) {
+        this.relayManager = relayManager;
+        this.azureResourceManager = azureResourceManager;
+    }
+
 }

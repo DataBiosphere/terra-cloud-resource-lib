@@ -1,72 +1,93 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
-import bio.terra.cloudres.azure.landingzones.TestArmResourcesFactory;
+import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
-import bio.terra.cloudres.azure.landingzones.definition.factories.ManagedNetworkWithSharedResourcesFactory;
+import bio.terra.cloudres.azure.landingzones.definition.factories.TestLandingZoneFactory;
 import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
+import bio.terra.cloudres.azure.resourcemanager.common.AzureIntegrationUtils;
+import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import reactor.core.publisher.Flux;
+import reactor.util.retry.Retry;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 
 @Tag("integration")
 class LandingZoneManagerTest {
 
-    private static AzureResourceManager azureResourceManager;
-    private static ResourceGroup resourceGroup;
+  private static AzureResourceManager azureResourceManager;
+  private static ResourceGroup resourceGroup;
+  private LandingZoneManager landingZoneManager;
 
+  @BeforeAll
+  static void setUpTestResourceGroup() {
+    azureResourceManager = TestArmResourcesFactory.createArmClient();
+    resourceGroup = TestArmResourcesFactory.createTestResourceGroup(azureResourceManager);
+  }
 
-    @BeforeAll
-    static void setUpTestResourceGroup() {
-        azureResourceManager = TestArmResourcesFactory.createArmClient();
-        resourceGroup = TestArmResourcesFactory.createTestResourceGroup(azureResourceManager);
-    }
+  @AfterAll
+  static void cleanUpArmResources() {
+    azureResourceManager.resourceGroups().deleteByName(resourceGroup.name());
+  }
 
-    private LandingZoneManager landingZoneManager;
+  @BeforeEach
+  void setUp() {
+    landingZoneManager =
+        LandingZoneManager.createLandingZoneManager(
+            AzureIntegrationUtils.getAdminAzureCredentialsOrDie(),
+            AzureIntegrationUtils.TERRA_DEV_AZURE_PROFILE,
+            resourceGroup);
+  }
 
-    @BeforeEach
-    void setUp() {
-        landingZoneManager = LandingZoneManager.createLandingZoneManager(azureResourceManager, resourceGroup);
-    }
+  @Test
+  void deployLandingZone_deploysTestLandingZoneDefinition() {
+    List<DeployedResource> resources =
+        landingZoneManager.deployLandingZone(
+            UUID.randomUUID().toString(), TestLandingZoneFactory.class, DefinitionVersion.V1);
 
-    @AfterAll
-    static void cleanUpArmResources() {
-       azureResourceManager.resourceGroups().deleteByName(resourceGroup.name());
-    }
+    // the test landing zone creates two resources: storage account and vnet.
+    assertThat(resources, hasSize(2));
+    assertThat(TestUtils.findFirstStorageAccountId(resources), is(notNullValue()));
+    assertThat(TestUtils.findFirstVNetId(resources), is(notNullValue()));
+  }
 
+  @Test
+  void deployLandingZone_duplicateDeploymentWithRetry_deploysSuccessfully() {
+    String landingZone = UUID.randomUUID().toString();
+    Flux<DeployedResource> first =
+        landingZoneManager
+            .deployLandingZoneAsync(landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1)
+            .retryWhen(Retry.max(1));
 
-    @Test
-    void createLandingZoneManager_createsManagedVNetWithSharedResources() {
-        List<DeployedResource> resources = landingZoneManager.deployLandingZone(
-                UUID.randomUUID().toString(),
-                ManagedNetworkWithSharedResourcesFactory.class,
-                DefinitionVersion.V1);
+    Flux<DeployedResource> second =
+        landingZoneManager
+            .deployLandingZoneAsync(landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1)
+            .retryWhen(Retry.max(1));
 
-        assertThat(resources, hasSize(4));
-    }
+    var results = Flux.merge(first, second).toStream().distinct().collect(Collectors.toList());
 
-    @Test
-    void listDefinitionFactories() {
-    }
+    // the test landing zone creates two resources: storage account and vnet.
+    assertThat(results, hasSize(2));
+    assertThat(TestUtils.findFirstStorageAccountId(results), is(notNullValue()));
+    assertThat(TestUtils.findFirstVNetId(results), is(notNullValue()));
+  }
 
-    @Test
-    void reader() {
-    }
+  @Test
+  void listDefinitionFactories() {}
 
-    @Test
-    void deployments() {
-    }
+  @Test
+  void reader() {}
 
-    @Test
-    void provider() {
-    }
+  @Test
+  void deployments() {}
+
+  @Test
+  void provider() {}
 }

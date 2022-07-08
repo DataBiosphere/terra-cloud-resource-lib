@@ -16,6 +16,11 @@ public class ResourcesTagMapWrapper {
 
     private final Map<WithCreate, Map<String, String>> relayResourcesTagsMap = new HashMap<>();
     private final ClientLogger logger = new ClientLogger(ResourcesTagMapWrapper.class);
+
+    public String getLandingZoneId() {
+        return landingZoneId;
+    }
+
     private final String landingZoneId;
 
     ResourcesTagMapWrapper(String landingZoneId) {

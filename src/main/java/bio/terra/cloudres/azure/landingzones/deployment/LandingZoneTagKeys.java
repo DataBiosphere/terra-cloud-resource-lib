@@ -10,6 +10,7 @@ public final class LandingZoneTagKeys extends ExpandableStringEnum<LandingZoneTa
 
     /**
      * Creates or finds a {@link LandingZoneTagKeys} from its string representation.
+     *
      * @param name a name to look for
      * @return the corresponding {@link LandingZoneTagKeys}
      */
@@ -17,7 +18,9 @@ public final class LandingZoneTagKeys extends ExpandableStringEnum<LandingZoneTa
         return fromString(name, LandingZoneTagKeys.class);
     }
 
-    /** @return known LandingZoneTagKeys values. */
+    /**
+     * @return known LandingZoneTagKeys values.
+     */
     public static Collection<LandingZoneTagKeys> values() {
         return values(LandingZoneTagKeys.class);
     }

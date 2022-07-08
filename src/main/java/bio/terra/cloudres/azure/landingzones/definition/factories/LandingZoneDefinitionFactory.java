@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface LandingZoneDefinitionFactory {
     DefinitionHeader header();
+
     List<DefinitionVersion> availableVersions();
+
     LandingZoneDefinable create(DefinitionVersion version);
 }

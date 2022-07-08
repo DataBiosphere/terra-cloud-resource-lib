@@ -75,13 +75,13 @@ dependencies {
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.10.0'
     testFixturesImplementation group: 'junit', name: 'junit', version: '4.13'
     testFixturesImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
-    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '4.4.0'
     testFixturesImplementation platform('com.google.cloud:libraries-bom:25.1.0')
 
     testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
     testImplementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "2.31"
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.4.0'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30' // For simple logging during testing
 
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'

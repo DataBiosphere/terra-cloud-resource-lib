@@ -10,6 +10,7 @@ public final class ResourcePurpose extends ExpandableStringEnum<ResourcePurpose>
 
     /**
      * Creates or finds a {@link ResourcePurpose} from its string representation.
+     *
      * @param name a name to look for
      * @return the corresponding {@link ResourcePurpose}
      */

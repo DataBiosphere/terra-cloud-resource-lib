@@ -1,5 +1,6 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
+import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionFactory;
@@ -8,13 +9,18 @@ import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDef
 import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployments;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeploymentsImpl;
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.management.profile.AzureProfile;
 import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import org.apache.commons.lang3.StringUtils;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class LandingZoneManager {
     private final LandingZoneDefinitionProvider landingZoneDefinitionProvider;
@@ -25,15 +31,30 @@ public class LandingZoneManager {
 
     private final ClientLogger logger = new ClientLogger(LandingZoneManager.class);
 
-    public static LandingZoneManager createLandingZoneManager(AzureResourceManager azureResourceManager,
+    public static LandingZoneManager createLandingZoneManager(TokenCredential credential,
+                                                              AzureProfile profile,
                                                               ResourceGroup resourceGroup) {
 
-        Objects.requireNonNull(azureResourceManager, "Resource Manager can't be null");
-        Objects.requireNonNull(resourceGroup, "Resource Group can't be null");
+        Objects.requireNonNull(credential, "credential can't be null");
+        Objects.requireNonNull(profile, "profile can't be null");
+        Objects.requireNonNull(resourceGroup, "resource group can't be null");
 
-        return new LandingZoneManager(new LandingZoneDefinitionProviderImpl(),
-                new LandingZoneDeploymentsImpl(), azureResourceManager, resourceGroup,
-                new ResourcesReaderImpl(azureResourceManager, resourceGroup));
+        ArmManagers armManagers = createArmManagers(credential, profile);
+
+        return new LandingZoneManager(new LandingZoneDefinitionProviderImpl(
+                armManagers),
+                new LandingZoneDeploymentsImpl(), armManagers.azureResourceManager(), resourceGroup,
+                new ResourcesReaderImpl(armManagers.azureResourceManager(), resourceGroup));
+    }
+
+    private static ArmManagers createArmManagers(TokenCredential credential, AzureProfile profile){
+        AzureResourceManager azureResourceManager = AzureResourceManager
+                .authenticate(credential,profile)
+                .withSubscription(profile.getSubscriptionId());
+        RelayManager relayManager = RelayManager
+                .authenticate(credential, profile);
+
+        return new ArmManagers(azureResourceManager, relayManager);
     }
 
     private LandingZoneManager(LandingZoneDefinitionProvider landingZoneDefinitionProvider,
@@ -55,6 +76,16 @@ public class LandingZoneManager {
                                                     Class<? extends LandingZoneDefinitionFactory> factory,
                                                     DefinitionVersion version) {
 
+        return deployLandingZoneAsync(landingZoneId,factory,version)
+                .toStream()
+                .collect(Collectors.toList());
+
+    }
+
+    public Flux<DeployedResource> deployLandingZoneAsync(String landingZoneId,
+                                                         Class<? extends LandingZoneDefinitionFactory> factory,
+                                                         DefinitionVersion version) {
+
         Objects.requireNonNull(factory, "Factory information can't be null");
         Objects.requireNonNull(version, "Factory version can't be null");
         if (StringUtils.isBlank(landingZoneId)){
@@ -64,8 +95,8 @@ public class LandingZoneManager {
         return landingZoneDefinitionProvider
                 .createDefinitionFactory(factory)
                 .create(version)
-                .definition(landingZoneDeployments.define(landingZoneId), resourceManager, resourceGroup)
-                .deploy();
+                .definition(landingZoneDeployments.define(landingZoneId), resourceGroup)
+                .deployAsync();
     }
 
     public ResourcesReader reader() {

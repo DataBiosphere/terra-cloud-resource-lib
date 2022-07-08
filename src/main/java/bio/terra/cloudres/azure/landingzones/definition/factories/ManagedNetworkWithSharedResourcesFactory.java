@@ -3,6 +3,7 @@ package bio.terra.cloudres.azure.landingzones.definition.factories;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
+import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
@@ -20,9 +21,14 @@ import com.azure.resourcemanager.resources.models.ResourceGroup;
 
 import java.util.List;
 
-public class ManagedNetworkWithSharedResourcesFactory implements LandingZoneDefinitionFactory {
+public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefinitionFactory {
     private final String LZ_NAME = "Managed Network with Shared Resources";
     private final String LZ_DESC = "Managed VNet with shared storage and relay namespace ";
+
+    public ManagedNetworkWithSharedResourcesFactory(AzureResourceManager azureResourceManager, RelayManager relayManager) {
+        super(azureResourceManager, relayManager);
+    }
+
     @Override
     public DefinitionHeader header() {
         return new DefinitionHeader(LZ_NAME, LZ_DESC);
@@ -35,37 +41,40 @@ public class ManagedNetworkWithSharedResourcesFactory implements LandingZoneDefi
 
     @Override
     public LandingZoneDefinable create(DefinitionVersion version) {
-        if (version.equals(DefinitionVersion.V1)){
-            return new DefinitionV1();
+        if (version.equals(DefinitionVersion.V1)) {
+            return new DefinitionV1(azureResourceManager, relayManager);
         }
         throw new RuntimeException("Invalid Version");
     }
 
 
-    class DefinitionV1 implements LandingZoneDefinable{
+    class DefinitionV1 extends LandingZoneDefinition {
 
-        private RelayManager relayManager;
+
+        protected DefinitionV1(AzureResourceManager azureResourceManager, RelayManager relayManager) {
+            super(azureResourceManager, relayManager);
+        }
 
         @Override
-        public Deployable definition(WithLandingZoneResource deployment, AzureResourceManager arm, ResourceGroup resourceGroup) {
-            var storage = arm.storageAccounts()
+        public Deployable definition(WithLandingZoneResource deployment, ResourceGroup resourceGroup) {
+            var storage = azureResourceManager.storageAccounts()
                     .define(ResourceUtils.createUniqueAzureResourceName())
                     .withRegion(resourceGroup.region())
                     .withExistingResourceGroup(resourceGroup);
 
-            var vNet = arm.networks()
+            var vNet = azureResourceManager.networks()
                     .define(ResourceUtils.createUniqueAzureResourceName())
                     .withRegion(resourceGroup.region())
                     .withExistingResourceGroup(resourceGroup)
                     .withAddressSpace("10.0.0.0/28")
                     .withSubnet("compute", "10.0.0.0/29");
 
-            var relay = relayManager(arm).namespaces()
+            var relay = relayManager.namespaces()
                     .define(ResourceUtils.createUniqueAzureResourceName(15))
                     .withRegion(resourceGroup.region())
                     .withExistingResourceGroup(resourceGroup.name());
 
-            var aks = arm.kubernetesClusters()
+            var aks = azureResourceManager.kubernetesClusters()
                     .define(ResourceUtils.createUniqueAzureResourceName())
                     .withRegion(resourceGroup.region())
                     .withExistingResourceGroup(resourceGroup)
@@ -87,15 +96,5 @@ public class ManagedNetworkWithSharedResourcesFactory implements LandingZoneDefi
 
         }
 
-        private RelayManager relayManager(AzureResourceManager arm){
-
-            ResourceManager manager = arm.genericResources().manager();
-            AzureProfile profile = new AzureProfile(arm.tenantId(),manager.subscriptionId(),manager.environment());
-            TokenCredential credential = new DefaultAzureCredentialBuilder()
-                    .authorityHost(profile.getEnvironment().getActiveDirectoryEndpoint())
-                    .build();
-            return RelayManager
-                    .authenticate(credential, profile);
-        }
     }
 }

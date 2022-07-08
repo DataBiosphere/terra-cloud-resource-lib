@@ -11,6 +11,7 @@ public final class DefinitionVersion extends ExpandableStringEnum<DefinitionVers
 
     /**
      * Creates or finds a {@link DefinitionVersion} from its string representation.
+     *
      * @param version a version to look for
      * @return the corresponding {@link DefinitionVersion}
      */

@@ -4,5 +4,6 @@ import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDef
 
 import java.util.List;
 
-public record FactoryInfo(Class<? extends LandingZoneDefinitionFactory> factoryClass, List<DefinitionVersion> versions ) {
+public record FactoryInfo(Class<? extends LandingZoneDefinitionFactory> factoryClass,
+                          List<DefinitionVersion> versions) {
 }

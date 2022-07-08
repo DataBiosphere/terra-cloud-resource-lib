@@ -1,26 +1,16 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
-import bio.terra.cloudres.azure.landingzones.TestArmResourcesFactory;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionFactory;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionProvider;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionProviderImpl;
 import bio.terra.cloudres.azure.landingzones.definition.factories.TestLandingZoneFactory;
-import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
-import bio.terra.cloudres.azure.landingzones.deployment.DeployedSubnet;
-import bio.terra.cloudres.azure.landingzones.deployment.DeployedVNet;
+import bio.terra.cloudres.azure.landingzones.deployment.*;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
-import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployments;
-import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeploymentsImpl;
-import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
-import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
+import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,35 +34,33 @@ class ResourcesReaderImplTest {
     private static WithLandingZoneResource landingZoneResourceDeployment;
 
     private static List<DeployedResource> landingZoneResources;
-
+    private ResourcesReader resourcesReader;
 
     @BeforeAll
-    static void setUpTestLandingZone(){
+    static void setUpTestLandingZone() {
         azureResourceManager = TestArmResourcesFactory.createArmClient();
         resourceGroup = TestArmResourcesFactory.createTestResourceGroup(azureResourceManager);
         landingZoneDeployments = new LandingZoneDeploymentsImpl();
         landingZoneResourceDeployment = landingZoneDeployments.define(UUID.randomUUID().toString());
 
-        landingZoneDefinitionProvider = new LandingZoneDefinitionProviderImpl();
+        landingZoneDefinitionProvider = new LandingZoneDefinitionProviderImpl(
+                TestArmResourcesFactory.createArmManagers());
         landingZoneFactory = landingZoneDefinitionProvider.createDefinitionFactory(TestLandingZoneFactory.class);
 
         landingZoneResources = landingZoneFactory.create(DefinitionVersion.V1)
-                .definition(landingZoneResourceDeployment,azureResourceManager,resourceGroup)
+                .definition(landingZoneResourceDeployment, resourceGroup)
                 .deploy();
     }
 
-    private ResourcesReader resourcesReader;
-
-    @BeforeEach
-    void setUp(){
-        resourcesReader = new ResourcesReaderImpl(azureResourceManager, resourceGroup);
-    }
-
     @AfterAll
-    static void cleanUpArmResources(){
+    static void cleanUpArmResources() {
         azureResourceManager.resourceGroups().deleteByName(resourceGroup.name());
     }
 
+    @BeforeEach
+    void setUp() {
+        resourcesReader = new ResourcesReaderImpl(azureResourceManager, resourceGroup);
+    }
 
     @Test
     void listSharedResources_storageResourceIsSharedResource() {
@@ -93,23 +81,23 @@ class ResourcesReaderImplTest {
         var resources = resourcesReader
                 .listVNetWithSubnetPurpose(SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET);
 
-        assertThat(resources,contains(hasToString(getDeployedVNet().toString())));
+        assertThat(resources, contains(hasToString(getDeployedVNet().toString())));
 
     }
 
-    private DeployedResource getDeployedStorage(){
+    private DeployedResource getDeployedStorage() {
         return landingZoneResources
                 .stream()
-                .filter(c->c.resourceType().equals("Microsoft.Storage/storageAccounts"))
+                .filter(c -> c.resourceType().equals("Microsoft.Storage/storageAccounts"))
                 .findFirst()
                 .get();
 
     }
 
-    private DeployedVNet getDeployedVNet(){
+    private DeployedVNet getDeployedVNet() {
         var deployedVNet = landingZoneResources
                 .stream()
-                .filter(c->c.resourceType().equals("Microsoft.Network/virtualNetworks"))
+                .filter(c -> c.resourceType().equals("Microsoft.Network/virtualNetworks"))
                 .findFirst()
                 .get();
 
@@ -127,7 +115,7 @@ class ResourcesReaderImplTest {
                     }
                 });
 
-        return new DeployedVNet(vNet.id(),subnetHashMap, vNet.regionName());
+        return new DeployedVNet(vNet.id(), subnetHashMap, vNet.regionName());
 
     }
 }

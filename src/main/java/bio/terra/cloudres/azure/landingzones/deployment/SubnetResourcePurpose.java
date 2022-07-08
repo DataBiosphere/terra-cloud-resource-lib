@@ -11,6 +11,7 @@ public final class SubnetResourcePurpose extends ExpandableStringEnum<SubnetReso
 
     /**
      * Creates or finds a {@link SubnetResourcePurpose} from its string representation.
+     *
      * @param name a name to look for
      * @return the corresponding {@link SubnetResourcePurpose}
      */

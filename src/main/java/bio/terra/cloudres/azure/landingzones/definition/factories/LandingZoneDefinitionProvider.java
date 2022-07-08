@@ -6,5 +6,6 @@ import java.util.Set;
 
 public interface LandingZoneDefinitionProvider {
     Set<FactoryInfo> factories();
+
     <T extends LandingZoneDefinitionFactory> LandingZoneDefinitionFactory createDefinitionFactory(Class<T> factory);
 }
