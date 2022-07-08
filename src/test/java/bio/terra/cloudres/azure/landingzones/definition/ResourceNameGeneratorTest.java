@@ -37,4 +37,15 @@ class ResourceNameGeneratorTest {
 
         assertThat(generator1.nextName(23).length(), equalTo(23));
     }
+
+    @Test
+    void resetSequence_firstNameIsRegeneratedAfterReset(){
+        String landingZoneId = UUID.randomUUID().toString();
+        ResourceNameGenerator generator1 = new ResourceNameGenerator(landingZoneId);
+        String firstName = generator1.nextName(23);
+        generator1.resetSequence();
+        String afterReset = generator1.nextName(23);
+
+        assertThat(firstName, equalTo(afterReset));
+    }
 }

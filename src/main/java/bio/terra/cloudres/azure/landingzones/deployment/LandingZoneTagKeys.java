@@ -4,6 +4,9 @@ import com.azure.core.util.ExpandableStringEnum;
 
 import java.util.Collection;
 
+/**
+ * Enum of tag keys for resources in the landing zone.
+ */
 public final class LandingZoneTagKeys extends ExpandableStringEnum<LandingZoneTagKeys> {
     public static final LandingZoneTagKeys LANDING_ZONE_ID = fromString("WLZ-ID");
     public static final LandingZoneTagKeys LANDING_ZONE_PURPOSE = fromString("WLZ-PURPOSE");

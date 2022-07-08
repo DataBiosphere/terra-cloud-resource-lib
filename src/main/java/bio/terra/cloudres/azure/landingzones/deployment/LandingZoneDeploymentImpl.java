@@ -13,8 +13,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+/** Implementation of a landing zone deployment */
 public class LandingZoneDeploymentImpl
     implements LandingZoneDeployment, LandingZoneDeployment.FluentDefinition {
 
@@ -27,7 +27,7 @@ public class LandingZoneDeploymentImpl
   @Override
   public List<DeployedResource> deploy() {
 
-    return deployAsync().toStream().collect(Collectors.toList());
+    return deployAsync().collectList().block();
   }
 
   @Override

@@ -1,8 +1,10 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
 import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
+import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionFactory;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionProvider;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionProviderImpl;
@@ -18,96 +20,114 @@ import com.azure.resourcemanager.resources.models.ResourceGroup;
 import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class LandingZoneManager {
-    private final LandingZoneDefinitionProvider landingZoneDefinitionProvider;
-    private final LandingZoneDeployments landingZoneDeployments;
-    private final AzureResourceManager resourceManager;
-    private final ResourceGroup resourceGroup;
-    private final ResourcesReader resourcesReader;
+  private static final ClientLogger logger = new ClientLogger(LandingZoneManager.class);
+  private final LandingZoneDefinitionProvider landingZoneDefinitionProvider;
+  private final LandingZoneDeployments landingZoneDeployments;
+  private final AzureResourceManager resourceManager;
+  private final ResourceGroup resourceGroup;
+  private final ResourcesReader resourcesReader;
 
-    private final ClientLogger logger = new ClientLogger(LandingZoneManager.class);
+  private LandingZoneManager(
+      LandingZoneDefinitionProvider landingZoneDefinitionProvider,
+      LandingZoneDeployments landingZoneDeployments,
+      AzureResourceManager resourceManager,
+      ResourceGroup resourceGroup,
+      ResourcesReader resourcesReader) {
+    this.landingZoneDefinitionProvider = landingZoneDefinitionProvider;
+    this.landingZoneDeployments = landingZoneDeployments;
+    this.resourceManager = resourceManager;
+    this.resourceGroup = resourceGroup;
+    this.resourcesReader = resourcesReader;
+  }
 
-    public static LandingZoneManager createLandingZoneManager(TokenCredential credential,
-                                                              AzureProfile profile,
-                                                              ResourceGroup resourceGroup) {
+  public static LandingZoneManager createLandingZoneManager(
+      TokenCredential credential, AzureProfile profile, String resourceGroupName) {
 
-        Objects.requireNonNull(credential, "credential can't be null");
-        Objects.requireNonNull(profile, "profile can't be null");
-        Objects.requireNonNull(resourceGroup, "resource group can't be null");
-
-        ArmManagers armManagers = createArmManagers(credential, profile);
-
-        return new LandingZoneManager(new LandingZoneDefinitionProviderImpl(
-                armManagers),
-                new LandingZoneDeploymentsImpl(), armManagers.azureResourceManager(), resourceGroup,
-                new ResourcesReaderImpl(armManagers.azureResourceManager(), resourceGroup));
+    Objects.requireNonNull(credential, "credential can't be null");
+    Objects.requireNonNull(profile, "profile can't be null");
+    if (StringUtils.isBlank(resourceGroupName)) {
+      throw logger.logExceptionAsError(
+          new IllegalArgumentException("Resource group name can't be blank or null"));
     }
 
-    private static ArmManagers createArmManagers(TokenCredential credential, AzureProfile profile){
-        AzureResourceManager azureResourceManager = AzureResourceManager
-                .authenticate(credential,profile)
-                .withSubscription(profile.getSubscriptionId());
-        RelayManager relayManager = RelayManager
-                .authenticate(credential, profile);
+    ArmManagers armManagers = createArmManagers(credential, profile);
+    ResourceGroup resourceGroup =
+        armManagers.azureResourceManager().resourceGroups().getByName(resourceGroupName);
 
-        return new ArmManagers(azureResourceManager, relayManager);
+    return new LandingZoneManager(
+        new LandingZoneDefinitionProviderImpl(armManagers),
+        new LandingZoneDeploymentsImpl(),
+        armManagers.azureResourceManager(),
+        resourceGroup,
+        new ResourcesReaderImpl(armManagers.azureResourceManager(), resourceGroup));
+  }
+
+  private static ArmManagers createArmManagers(TokenCredential credential, AzureProfile profile) {
+    AzureResourceManager azureResourceManager =
+        AzureResourceManager.authenticate(credential, profile)
+            .withSubscription(profile.getSubscriptionId());
+    RelayManager relayManager = RelayManager.authenticate(credential, profile);
+
+    return new ArmManagers(azureResourceManager, relayManager);
+  }
+
+  public List<FactoryInfo> listDefinitionFactories() {
+    return landingZoneDefinitionProvider.factories().stream().toList();
+  }
+
+  public List<DeployedResource> deployLandingZone(
+      String landingZoneId,
+      Class<? extends LandingZoneDefinitionFactory> factory,
+      DefinitionVersion version) {
+
+    return deployLandingZoneAsync(landingZoneId, factory, version)
+        .toStream()
+        .collect(Collectors.toList());
+  }
+
+  public Flux<DeployedResource> deployLandingZoneAsync(
+      String landingZoneId,
+      Class<? extends LandingZoneDefinitionFactory> factory,
+      DefinitionVersion version) {
+
+    Objects.requireNonNull(factory, "Factory information can't be null");
+    Objects.requireNonNull(version, "Factory version can't be null");
+    if (StringUtils.isBlank(landingZoneId)) {
+      throw logger.logExceptionAsError(
+          new IllegalArgumentException("Landing Zone ID can't be null or blank"));
     }
 
-    private LandingZoneManager(LandingZoneDefinitionProvider landingZoneDefinitionProvider,
-                               LandingZoneDeployments landingZoneDeployments,
-                               AzureResourceManager resourceManager,
-                               ResourceGroup resourceGroup, ResourcesReader resourcesReader) {
-        this.landingZoneDefinitionProvider = landingZoneDefinitionProvider;
-        this.landingZoneDeployments = landingZoneDeployments;
-        this.resourceManager = resourceManager;
-        this.resourceGroup = resourceGroup;
-        this.resourcesReader = resourcesReader;
-    }
+    return landingZoneDefinitionProvider
+        .createDefinitionFactory(factory)
+        .create(version)
+        .definition(createNewDefinitionContext(landingZoneId))
+        .deployAsync();
+  }
 
-    public List<FactoryInfo> listDefinitionFactories() {
-        return landingZoneDefinitionProvider.factories().stream().toList();
-    }
+  private DefinitionContext createNewDefinitionContext(String landingZoneId) {
+    return new DefinitionContext(
+        landingZoneId,
+        landingZoneDeployments.define(landingZoneId),
+        resourceGroup,
+        new ResourceNameGenerator(landingZoneId),
+        new HashMap<>());
+  }
 
-    public List<DeployedResource> deployLandingZone(String landingZoneId,
-                                                    Class<? extends LandingZoneDefinitionFactory> factory,
-                                                    DefinitionVersion version) {
+  public ResourcesReader reader() {
+    return resourcesReader;
+  }
 
-        return deployLandingZoneAsync(landingZoneId,factory,version)
-                .toStream()
-                .collect(Collectors.toList());
+  public LandingZoneDeployments deployments() {
+    return landingZoneDeployments;
+  }
 
-    }
-
-    public Flux<DeployedResource> deployLandingZoneAsync(String landingZoneId,
-                                                         Class<? extends LandingZoneDefinitionFactory> factory,
-                                                         DefinitionVersion version) {
-
-        Objects.requireNonNull(factory, "Factory information can't be null");
-        Objects.requireNonNull(version, "Factory version can't be null");
-        if (StringUtils.isBlank(landingZoneId)){
-            throw logger.logExceptionAsError( new IllegalArgumentException("Landing Zone ID can't be null or blank"));
-        }
-
-        return landingZoneDefinitionProvider
-                .createDefinitionFactory(factory)
-                .create(version)
-                .definition(landingZoneDeployments.define(landingZoneId), resourceGroup)
-                .deployAsync();
-    }
-
-    public ResourcesReader reader() {
-        return resourcesReader;
-    }
-
-    public LandingZoneDeployments deployments() {
-        return landingZoneDeployments;
-    }
-
-    public LandingZoneDefinitionProvider provider() {
-        return landingZoneDefinitionProvider;
-    }
+  public LandingZoneDefinitionProvider provider() {
+    return landingZoneDefinitionProvider;
+  }
 }
