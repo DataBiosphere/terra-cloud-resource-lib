@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * High level component to deploy and list deployment definitions, and listing resources by purpose.
+ */
 public class LandingZoneManager {
   private static final ClientLogger logger = new ClientLogger(LandingZoneManager.class);
   private final LandingZoneDefinitionProvider landingZoneDefinitionProvider;

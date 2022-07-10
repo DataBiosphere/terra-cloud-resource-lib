@@ -5,10 +5,10 @@ import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
+import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
-import bio.terra.cloudres.azure.landingzones.deployment.ResourceUtils;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
@@ -58,18 +58,19 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
     public Deployable definition(DefinitionContext definitionContext) {
       WithLandingZoneResource deployment = definitionContext.deployment();
       ResourceGroup resourceGroup = definitionContext.resourceGroup();
+      ResourceNameGenerator nameGenerator = definitionContext.resourceNameGenerator();
 
       var storage =
           azureResourceManager
               .storageAccounts()
-              .define(ResourceUtils.createUniqueAzureResourceName())
+              .define(nameGenerator.nextName(23))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup);
 
       var vNet =
           azureResourceManager
               .networks()
-              .define(ResourceUtils.createUniqueAzureResourceName())
+              .define(nameGenerator.nextName(23))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup)
               .withAddressSpace("10.0.0.0/28")
@@ -78,24 +79,24 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
       var relay =
           relayManager
               .namespaces()
-              .define(ResourceUtils.createUniqueAzureResourceName(15))
+              .define(nameGenerator.nextName(15))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup.name());
 
       var aks =
           azureResourceManager
               .kubernetesClusters()
-              .define(ResourceUtils.createUniqueAzureResourceName())
+              .define(nameGenerator.nextName(23))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup)
               .withDefaultVersion()
               .withSystemAssignedManagedServiceIdentity()
-              .defineAgentPool(ResourceUtils.createUniqueAzureResourceName(10))
+              .defineAgentPool(nameGenerator.nextName(10))
               .withVirtualMachineSize(ContainerServiceVMSizeTypes.STANDARD_A2_V2)
               .withAgentPoolVirtualMachineCount(1)
               .withAgentPoolMode(AgentPoolMode.SYSTEM)
               .attach()
-              .withDnsPrefix(ResourceUtils.createUniqueAzureResourceName());
+              .withDnsPrefix(nameGenerator.nextName(15));
 
       return deployment
           .withResourceWithPurpose(storage, ResourcePurpose.SHARED_RESOURCE)

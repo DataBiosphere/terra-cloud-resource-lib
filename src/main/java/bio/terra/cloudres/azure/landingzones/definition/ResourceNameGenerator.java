@@ -67,11 +67,15 @@ public class ResourceNameGenerator {
 
   private String prepareStringAsAzureResourceName(String hash, int length) {
     int end = Math.max(length, 5);
-    end = Math.min(end, hash.length());
+    end = Math.min(end, hash.length() + 2);
     return "lz" + hash.substring(0, end - 2);
   }
 
   private String parseStringToHash() {
     return String.format("%s%s", landingZoneId, sequence);
+  }
+
+  public String nextName() {
+    return nextName(66);
   }
 }

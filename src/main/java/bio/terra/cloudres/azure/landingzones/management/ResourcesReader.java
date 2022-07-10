@@ -8,9 +8,9 @@ import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import java.util.List;
 
 public interface ResourcesReader {
-    List<DeployedResource> listSharedResources();
+  List<DeployedResource> listSharedResources();
 
-    List<DeployedResource> listResourcesByPurpose(ResourcePurpose purpose);
+  List<DeployedResource> listResourcesByPurpose(ResourcePurpose purpose);
 
-    List<DeployedVNet> listVNetWithSubnetPurpose(SubnetResourcePurpose purpose);
+  List<DeployedVNet> listVNetWithSubnetPurpose(SubnetResourcePurpose purpose);
 }
