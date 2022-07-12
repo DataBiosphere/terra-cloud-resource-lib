@@ -16,7 +16,7 @@ repositories {
 }
 
 group = 'bio.terra'
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
     testImplementation.extendsFrom testFixturesImplementation
