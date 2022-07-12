@@ -4,9 +4,8 @@ import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.relay.models.RelayNamespace;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource.DefinitionWithTags;
 import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
-import reactor.core.publisher.Flux;
-
 import java.util.List;
+import reactor.core.publisher.Flux;
 
 /** Fluent API to define resource purpose and deployment in a landing zone. */
 public interface LandingZoneDeployment {

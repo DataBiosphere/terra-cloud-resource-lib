@@ -1,17 +1,16 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
-import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
-import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
-import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
+
+import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
+import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 @Tag("unit")
 class LandingZoneDefinitionProviderImplTest {

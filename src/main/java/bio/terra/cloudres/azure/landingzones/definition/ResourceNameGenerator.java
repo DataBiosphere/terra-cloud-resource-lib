@@ -1,7 +1,6 @@
 package bio.terra.cloudres.azure.landingzones.definition;
 
 import com.azure.core.util.logging.ClientLogger;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

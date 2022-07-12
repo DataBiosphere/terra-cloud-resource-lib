@@ -5,10 +5,9 @@ import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.relay.models.RelayNamespace.DefinitionStages.WithCreate;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource;
 import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /** Maintains the tags and resources to be deployed in a deployment instance. */
 public class ResourcesTagMapWrapper {

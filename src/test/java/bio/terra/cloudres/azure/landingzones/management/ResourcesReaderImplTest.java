@@ -1,5 +1,9 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
@@ -19,20 +23,15 @@ import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 
 @Tag("integration")
 class ResourcesReaderImplTest {

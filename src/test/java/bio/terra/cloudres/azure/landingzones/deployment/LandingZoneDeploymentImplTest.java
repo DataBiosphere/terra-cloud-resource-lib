@@ -1,21 +1,20 @@
 package bio.terra.cloudres.azure.landingzones.deployment;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.PrivateLinkSubResourceName;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import org.junit.jupiter.api.*;
-import reactor.core.publisher.Flux;
-import reactor.util.retry.Retry;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import org.junit.jupiter.api.*;
+import reactor.core.publisher.Flux;
+import reactor.util.retry.Retry;
 
 @Tag("integration")
 class LandingZoneDeploymentImplTest {

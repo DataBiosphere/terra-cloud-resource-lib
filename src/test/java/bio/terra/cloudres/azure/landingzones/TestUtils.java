@@ -1,7 +1,6 @@
 package bio.terra.cloudres.azure.landingzones;
 
 import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
-
 import java.util.List;
 
 public class TestUtils {

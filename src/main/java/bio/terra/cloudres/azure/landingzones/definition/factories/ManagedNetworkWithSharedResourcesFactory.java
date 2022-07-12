@@ -15,8 +15,8 @@ import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-
 import java.util.List;
+
 /**
  * An implementation of {@link LandingZoneDefinitionFactory} that deploys a VNet, a Shared Storage
  * Account and a Relay Namespaces

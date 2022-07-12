@@ -2,6 +2,7 @@ package bio.terra.cloudres.azure.landingzones.definition;
 
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.relay.RelayManager;
+
 /**
  * Base class for a Landing Zone Definition that contains the ARM clients to define the resource to
  * deploy

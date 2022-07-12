@@ -26,10 +26,10 @@ public class AzureIntegrationUtils {
 
   // 8201558-terra-dev
   public static final AzureProfile TERRA_DEV_AZURE_PROFILE =
-          new AzureProfile(
-                  "0cb7a640-45a2-4ed6-be9f-63519f86e04b",
-                  "c5f8eca3-f512-48cb-b01f-f19f1af9014c",
-                  AzureEnvironment.AZURE);
+      new AzureProfile(
+          "0cb7a640-45a2-4ed6-be9f-63519f86e04b",
+          "c5f8eca3-f512-48cb-b01f-f19f1af9014c",
+          AzureEnvironment.AZURE);
 
   public static final String DEFAULT_AZURE_RESOURCE_GROUP = "mrg-terra-integration-test-20211118";
 

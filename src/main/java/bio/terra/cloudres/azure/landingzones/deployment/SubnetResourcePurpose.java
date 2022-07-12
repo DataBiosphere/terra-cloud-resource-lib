@@ -1,8 +1,8 @@
 package bio.terra.cloudres.azure.landingzones.deployment;
 
 import com.azure.core.util.ExpandableStringEnum;
-
 import java.util.Collection;
+
 /** Enum of the subnet purposes */
 public final class SubnetResourcePurpose extends ExpandableStringEnum<SubnetResourcePurpose> {
   public static final SubnetResourcePurpose WORKSPACE_COMPUTE_SUBNET =

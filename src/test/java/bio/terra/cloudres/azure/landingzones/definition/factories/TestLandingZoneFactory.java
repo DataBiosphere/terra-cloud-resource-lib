@@ -11,7 +11,6 @@ import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.relay.RelayManager;
-
 import java.util.List;
 
 public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {

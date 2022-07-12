@@ -1,7 +1,6 @@
 package bio.terra.cloudres.azure.landingzones.deployment;
 
 import com.azure.core.util.ExpandableStringEnum;
-
 import java.util.Collection;
 
 /** Enum of tag keys for resources in the landing zone. */
@@ -19,9 +18,7 @@ public final class LandingZoneTagKeys extends ExpandableStringEnum<LandingZoneTa
     return fromString(name, LandingZoneTagKeys.class);
   }
 
-  /**
-   * @return known LandingZoneTagKeys values.
-   */
+  /** @return known LandingZoneTagKeys values. */
   public static Collection<LandingZoneTagKeys> values() {
     return values(LandingZoneTagKeys.class);
   }

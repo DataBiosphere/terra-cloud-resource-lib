@@ -1,6 +1,7 @@
 package bio.terra.cloudres.azure.landingzones.definition;
 
 import com.azure.core.util.ExpandableStringEnum;
+
 /** Enum representing the list of possible versions for a given definition. */
 public final class DefinitionVersion extends ExpandableStringEnum<DefinitionVersion> {
   public static final DefinitionVersion V1 = fromString("v1");

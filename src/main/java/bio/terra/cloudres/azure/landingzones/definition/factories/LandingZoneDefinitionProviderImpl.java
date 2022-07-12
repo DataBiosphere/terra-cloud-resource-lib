@@ -8,12 +8,12 @@ import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
-
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 /** Implementation of {@link LandingZoneDefinitionProvider} */
 public class LandingZoneDefinitionProviderImpl implements LandingZoneDefinitionProvider {
 

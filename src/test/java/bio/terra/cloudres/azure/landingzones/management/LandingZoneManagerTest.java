@@ -1,5 +1,8 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
@@ -8,18 +11,13 @@ import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
 import bio.terra.cloudres.azure.resourcemanager.common.AzureIntegrationUtils;
 import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.resources.models.GenericResource;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import org.junit.jupiter.api.*;
-import reactor.core.publisher.Flux;
-import reactor.util.retry.Retry;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import org.junit.jupiter.api.*;
+import reactor.core.publisher.Flux;
+import reactor.util.retry.Retry;
 
 @Tag("integration")
 class LandingZoneManagerTest {
@@ -84,17 +82,16 @@ class LandingZoneManagerTest {
     assertThat(TestUtils.findFirstStorageAccountId(distinct), is(notNullValue()));
     assertThat(TestUtils.findFirstVNetId(distinct), is(notNullValue()));
 
-
     assertThatExpectedResourcesExistsInResourceGroup(distinct);
   }
 
   private void assertThatExpectedResourcesExistsInResourceGroup(List<DeployedResource> result) {
 
     var resourcesInGroup =
-            azureResourceManager.genericResources().listByResourceGroup(resourceGroup.name()).stream()
-                    .collect(Collectors.toList());
+        azureResourceManager.genericResources().listByResourceGroup(resourceGroup.name()).stream()
+            .collect(Collectors.toList());
 
-    //there should be two resources in the group.
+    // there should be two resources in the group.
     assertThat(resourcesInGroup, hasSize(2));
     assertThat(
         resourcesInGroup.stream()
@@ -114,9 +111,10 @@ class LandingZoneManagerTest {
   void listDefinitionFactories_testFactoryIsListed() {
     var factories = landingZoneManager.listDefinitionFactories();
 
-    FactoryInfo testFactory = new FactoryInfo(TestLandingZoneFactory.class, List.of(DefinitionVersion.V1));
+    FactoryInfo testFactory =
+        new FactoryInfo(TestLandingZoneFactory.class, List.of(DefinitionVersion.V1));
 
-    assertThat(factories,hasItem(testFactory));
+    assertThat(factories, hasItem(testFactory));
   }
 
   @Test
