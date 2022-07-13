@@ -15,13 +15,11 @@ import bio.terra.cloudres.azure.resourcemanager.common.AzureIntegrationUtils;
 import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.resources.models.GenericResource;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -33,28 +31,28 @@ import reactor.util.retry.Retry;
 class LandingZoneManagerTest {
 
   private static AzureResourceManager azureResourceManager;
-  private static ResourceGroup resourceGroup;
   private final ClientLogger logger = new ClientLogger(LandingZoneManagerTest.class);
+  private ResourceGroup resourceGroup;
   private LandingZoneManager landingZoneManager;
 
   @BeforeAll
   static void setUpTestResourceGroup() {
     azureResourceManager = TestArmResourcesFactory.createArmClient();
-    resourceGroup = TestArmResourcesFactory.createTestResourceGroup(azureResourceManager);
-  }
-
-  @AfterAll
-  static void cleanUpArmResources() {
-    azureResourceManager.resourceGroups().deleteByName(resourceGroup.name());
   }
 
   @BeforeEach
   void setUp() {
+    resourceGroup = TestArmResourcesFactory.createTestResourceGroup(azureResourceManager);
     landingZoneManager =
         LandingZoneManager.createLandingZoneManager(
             AzureIntegrationUtils.getAdminAzureCredentialsOrDie(),
             AzureIntegrationUtils.TERRA_DEV_AZURE_PROFILE,
             resourceGroup.name());
+  }
+
+  @AfterEach
+  void cleanUp() {
+    azureResourceManager.resourceGroups().deleteByName(resourceGroup.name());
   }
 
   @Test
@@ -100,16 +98,10 @@ class LandingZoneManagerTest {
   private void assertThatExpectedResourcesExistsInResourceGroup(List<DeployedResource> result)
       throws InterruptedException {
 
-    TimeUnit.SECONDS.sleep(5); // wait for transient conflicts to settle.
-
     var resourcesInGroup =
         azureResourceManager.genericResources().listByResourceGroup(resourceGroup.name()).stream()
             .collect(Collectors.toList());
 
-    // there should be two resources in the group.
-    for (GenericResource resource : resourcesInGroup) {
-      logger.info("Resource: %s", resource);
-    }
     assertThat(resourcesInGroup, hasSize(2));
     assertThat(
         resourcesInGroup.stream()
@@ -134,13 +126,4 @@ class LandingZoneManagerTest {
 
     assertThat(factories, hasItem(testFactory));
   }
-
-  @Test
-  void reader() {}
-
-  @Test
-  void deployments() {}
-
-  @Test
-  void provider() {}
 }

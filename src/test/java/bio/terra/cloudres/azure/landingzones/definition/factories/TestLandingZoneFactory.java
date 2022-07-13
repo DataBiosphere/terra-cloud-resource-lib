@@ -1,5 +1,8 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
+import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH;
+import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_VNET_NAME_LENGTH;
+
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
@@ -46,14 +49,17 @@ public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
       var storage =
           azureResourceManager
               .storageAccounts()
-              .define(definitionContext.resourceNameGenerator().nextName(20))
+              .define(
+                  definitionContext
+                      .resourceNameGenerator()
+                      .nextName(MAX_STORAGE_ACCOUNT_NAME_LENGTH))
               .withRegion(Region.US_EAST2)
               .withExistingResourceGroup(definitionContext.resourceGroup());
 
       var vNet =
           azureResourceManager
               .networks()
-              .define(definitionContext.resourceNameGenerator().nextName(20))
+              .define(definitionContext.resourceNameGenerator().nextName(MAX_VNET_NAME_LENGTH))
               .withRegion(Region.US_EAST2)
               .withExistingResourceGroup(definitionContext.resourceGroup())
               .withAddressSpace("10.0.0.0/28")
