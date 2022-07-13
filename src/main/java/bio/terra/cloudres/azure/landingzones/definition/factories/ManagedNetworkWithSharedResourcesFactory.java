@@ -63,14 +63,14 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
       var storage =
           azureResourceManager
               .storageAccounts()
-              .define(nameGenerator.nextName(23))
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup);
 
       var vNet =
           azureResourceManager
               .networks()
-              .define(nameGenerator.nextName(23))
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_VNET_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup)
               .withAddressSpace("10.0.0.0/28")
@@ -79,24 +79,26 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
       var relay =
           relayManager
               .namespaces()
-              .define(nameGenerator.nextName(15))
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_RELAY_NS_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup.name());
 
       var aks =
           azureResourceManager
               .kubernetesClusters()
-              .define(nameGenerator.nextName(23))
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_AKS_CLUSTER_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup)
               .withDefaultVersion()
               .withSystemAssignedManagedServiceIdentity()
-              .defineAgentPool(nameGenerator.nextName(10))
+              .defineAgentPool(
+                  nameGenerator.nextName(ResourceNameGenerator.MAX_AKS_AGENT_POOL_NAME_LENGTH))
               .withVirtualMachineSize(ContainerServiceVMSizeTypes.STANDARD_A2_V2)
               .withAgentPoolVirtualMachineCount(1)
               .withAgentPoolMode(AgentPoolMode.SYSTEM)
               .attach()
-              .withDnsPrefix(nameGenerator.nextName(15));
+              .withDnsPrefix(
+                  nameGenerator.nextName(ResourceNameGenerator.MAX_AKS_DNS_PREFIX_NAME_LENGTH));
 
       return deployment
           .withResourceWithPurpose(storage, ResourcePurpose.SHARED_RESOURCE)

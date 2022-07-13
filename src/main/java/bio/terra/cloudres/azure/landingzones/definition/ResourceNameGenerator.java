@@ -11,6 +11,18 @@ import java.security.NoSuchAlgorithmException;
  * number. Each call to the method nextName() the internal sequence is increased.
  */
 public class ResourceNameGenerator {
+  public static final int MAX_NAME_LENGTH = 66;
+  public static final int MAX_STORAGE_ACCOUNT_NAME_LENGTH = 24;
+  public static final int MAX_RELAY_NS_NAME_LENGTH = 50;
+  // This is not the maximum value of 63. This lower value is to reduce the risk of deployment
+  // errors as the cluster name is added to the node pool resource group name.
+  // The node pool name resource group name can't be longer than 80 characters,
+  // and follows this pattern: MC_resourceGroupName_resourceName_AzureRegion.
+  public static final int MAX_AKS_CLUSTER_NAME_LENGTH = 25;
+  public static final int MAX_VNET_NAME_LENGTH = 64;
+  public static final int MAX_AKS_AGENT_POOL_NAME_LENGTH = 11;
+  public static final int MAX_AKS_DNS_PREFIX_NAME_LENGTH = 54;
+
   private final ClientLogger logger = new ClientLogger(ResourceNameGenerator.class);
   private final String landingZoneId;
   private int sequence;
@@ -75,6 +87,6 @@ public class ResourceNameGenerator {
   }
 
   public String nextName() {
-    return nextName(66);
+    return nextName(MAX_NAME_LENGTH);
   }
 }

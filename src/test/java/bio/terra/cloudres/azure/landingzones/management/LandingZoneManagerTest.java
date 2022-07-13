@@ -1,7 +1,10 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
@@ -14,8 +17,13 @@ import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.util.retry.Retry;
 
@@ -59,7 +67,8 @@ class LandingZoneManagerTest {
   }
 
   @Test
-  void deployLandingZone_duplicateDeploymentWithRetry_deploysSuccessfullyOnlyOneInstance() {
+  void deployLandingZone_duplicateDeploymentWithRetry_deploysSuccessfullyOnlyOneInstance()
+      throws InterruptedException {
     String landingZone = UUID.randomUUID().toString();
     Flux<DeployedResource> first =
         landingZoneManager
@@ -71,7 +80,7 @@ class LandingZoneManagerTest {
             .deployLandingZoneAsync(landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1)
             .retryWhen(Retry.max(1));
 
-    var results = Flux.merge(first, second).toStream().collect(Collectors.toList());
+    var results = Flux.merge(first, second).collectList().block();
 
     // There should be 4 items in the list. 2 for each deployment.
     assertThat(results, hasSize(4));
@@ -85,7 +94,10 @@ class LandingZoneManagerTest {
     assertThatExpectedResourcesExistsInResourceGroup(distinct);
   }
 
-  private void assertThatExpectedResourcesExistsInResourceGroup(List<DeployedResource> result) {
+  private void assertThatExpectedResourcesExistsInResourceGroup(List<DeployedResource> result)
+      throws InterruptedException {
+
+    TimeUnit.SECONDS.sleep(5); // wait for transient conflicts to settle.
 
     var resourcesInGroup =
         azureResourceManager.genericResources().listByResourceGroup(resourceGroup.name()).stream()
