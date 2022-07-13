@@ -1,5 +1,11 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
@@ -11,6 +17,10 @@ import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.resources.models.GenericResource;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,17 +28,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.util.retry.Retry;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 
 @Tag("integration")
 class LandingZoneManagerTest {
@@ -108,8 +107,8 @@ class LandingZoneManagerTest {
             .collect(Collectors.toList());
 
     // there should be two resources in the group.
-    for (GenericResource resource : resourcesInGroup ) {
-        logger.info("Resource: %s", resource);
+    for (GenericResource resource : resourcesInGroup) {
+      logger.info("Resource: %s", resource);
     }
     assertThat(resourcesInGroup, hasSize(2));
     assertThat(
