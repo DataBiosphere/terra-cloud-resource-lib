@@ -17,12 +17,12 @@ import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * High level component to deploy and list deployment definitions, and listing resources by purpose.
@@ -86,17 +86,19 @@ public class LandingZoneManager {
   public List<DeployedResource> deployLandingZone(
       String landingZoneId,
       Class<? extends LandingZoneDefinitionFactory> factory,
-      DefinitionVersion version) {
+      DefinitionVersion version,
+      Map<String, String> parameters) {
 
-    return deployLandingZoneAsync(landingZoneId, factory, version)
-        .toStream()
-        .collect(Collectors.toList());
+    return deployLandingZoneAsync(landingZoneId, factory, version, parameters)
+        .collectList()
+        .block();
   }
 
   public Flux<DeployedResource> deployLandingZoneAsync(
       String landingZoneId,
       Class<? extends LandingZoneDefinitionFactory> factory,
-      DefinitionVersion version) {
+      DefinitionVersion version,
+      Map<String, String> parameters) {
 
     Objects.requireNonNull(factory, "Factory information can't be null");
     Objects.requireNonNull(version, "Factory version can't be null");
@@ -108,17 +110,18 @@ public class LandingZoneManager {
     return landingZoneDefinitionProvider
         .createDefinitionFactory(factory)
         .create(version)
-        .definition(createNewDefinitionContext(landingZoneId))
+        .definition(createNewDefinitionContext(landingZoneId, parameters))
         .deployAsync();
   }
 
-  private DefinitionContext createNewDefinitionContext(String landingZoneId) {
+  private DefinitionContext createNewDefinitionContext(
+      String landingZoneId, Map<String, String> parameters) {
     return new DefinitionContext(
         landingZoneId,
         landingZoneDeployments.define(landingZoneId),
         resourceGroup,
         new ResourceNameGenerator(landingZoneId),
-        new HashMap<>());
+        parameters);
   }
 
   public ResourcesReader reader() {

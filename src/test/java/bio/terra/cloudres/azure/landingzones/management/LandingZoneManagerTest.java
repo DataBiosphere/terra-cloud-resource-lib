@@ -1,11 +1,5 @@
 package bio.terra.cloudres.azure.landingzones.management;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
@@ -16,9 +10,6 @@ import bio.terra.cloudres.azure.resourcemanager.common.TestArmResourcesFactory;
 import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +17,16 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.util.retry.Retry;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Tag("integration")
 class LandingZoneManagerTest {
@@ -59,7 +60,7 @@ class LandingZoneManagerTest {
   void deployLandingZone_deploysTestLandingZoneDefinition() {
     List<DeployedResource> resources =
         landingZoneManager.deployLandingZone(
-            UUID.randomUUID().toString(), TestLandingZoneFactory.class, DefinitionVersion.V1);
+            UUID.randomUUID().toString(), TestLandingZoneFactory.class, DefinitionVersion.V1, null);
 
     // the test landing zone creates two resources: storage account and vnet.
     assertThat(resources, hasSize(2));
@@ -73,12 +74,14 @@ class LandingZoneManagerTest {
     String landingZone = UUID.randomUUID().toString();
     Flux<DeployedResource> first =
         landingZoneManager
-            .deployLandingZoneAsync(landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1)
+            .deployLandingZoneAsync(
+                landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1, null)
             .retryWhen(Retry.max(1));
 
     Flux<DeployedResource> second =
         landingZoneManager
-            .deployLandingZoneAsync(landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1)
+            .deployLandingZoneAsync(
+                landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1, null)
             .retryWhen(Retry.max(1));
 
     var results = Flux.merge(first, second).collectList().block();

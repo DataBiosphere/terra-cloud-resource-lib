@@ -104,6 +104,16 @@ Resources are defined using the standard Azure Java SDK but with the following c
 - The `create()` method in the resource definition must not be called.
 - The resource definition must have the required configuration for a creation before it can be added to the deployment.
 
+### Receiving Parameters
+
+The `DefinitionContext` contains the property `Map<String, String> parameters`, which can be used to receive parameter
+for the definition of a landing zone.
+
+A few points to consider when implementing a definition that requires parameters:
+
+- You must add the necessary validation for these parameters.
+- `parameters` can be  `null`
+
 ### Naming Resources and Idempotency
 
 You can use the resource name generator in the deployment context to guarantee that names are consistent in retry
@@ -132,7 +142,7 @@ An instance of the resource name generator is included in the deployment context
 ### Handling Prerequisites
 
 The library deploys resources in a non-deterministic order. Therefore, it is not possible to assume any specific order.
-For cases when a resource must be created before other resources, you can create prerequisite deployment inside your
+For cases when a resource must be created before other resources, you can create a prerequisite deployment inside your
 definition.
 
 ```java
@@ -199,7 +209,8 @@ You can deploy Landing Zone Definition using the manager.
         landingZoneManager.deployLandingZone(
         landingZoneId,
         FooLZDefinitionV1.class,
-        DefinitionVersion.V1);
+        DefinitionVersion.V1,
+        parameters);
 
 ```
 
@@ -209,7 +220,7 @@ policies.
 ```java
     Flux<DeployedResource> resources=
         landingZoneManager
-        .deployLandingZoneAsync(landingZoneId,FooLZDefinitionV1.class,DefinitionVersion.V1)
+        .deployLandingZoneAsync(landingZoneId,FooLZDefinitionV1.class,DefinitionVersion.V1,parameters)
         .retryWhen(Retry.max(1));
 
 ```
@@ -228,5 +239,15 @@ Virtual Networks can be listed by subnet purpose:
 ```java
     List<DeployedVNet> vNets=
         landingZoneManager.reader().listVNetWithSubnetPurpose(SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET);
+
+```
+
+### Getting the available Landing Zone Factories
+
+You can get all available Landing Zone Factories using the Landing Zone Manager:
+
+```java
+
+Set<FactoryInfo> factories=landingZoneManager.provider().factories();
 
 ```
