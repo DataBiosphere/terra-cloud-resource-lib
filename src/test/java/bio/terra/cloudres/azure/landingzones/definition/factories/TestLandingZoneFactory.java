@@ -1,5 +1,8 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
+import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH;
+import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_VNET_NAME_LENGTH;
+
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
@@ -11,11 +14,7 @@ import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.relay.RelayManager;
-
 import java.util.List;
-
-import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH;
-import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_VNET_NAME_LENGTH;
 
 public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
   protected TestLandingZoneFactory(

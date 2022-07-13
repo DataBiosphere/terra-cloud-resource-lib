@@ -17,12 +17,11 @@ import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import org.apache.commons.lang3.StringUtils;
-import reactor.core.publisher.Flux;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import reactor.core.publisher.Flux;
 
 /**
  * High level component to deploy and list deployment definitions, and listing resources by purpose.
