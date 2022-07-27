@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import bio.terra.cloudres.azure.landingzones.TestUtils;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
-import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
+import bio.terra.cloudres.azure.landingzones.definition.FactoryDefinitionInfo;
 import bio.terra.cloudres.azure.landingzones.definition.factories.TestLandingZoneFactory;
 import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
 import bio.terra.cloudres.azure.resourcemanager.common.AzureIntegrationUtils;
@@ -59,7 +59,10 @@ class LandingZoneManagerTest {
   void deployLandingZone_deploysTestLandingZoneDefinition() {
     List<DeployedResource> resources =
         landingZoneManager.deployLandingZone(
-            UUID.randomUUID().toString(), TestLandingZoneFactory.class, DefinitionVersion.V1, null);
+            UUID.randomUUID().toString(),
+            TestLandingZoneFactory.class.getName(),
+            DefinitionVersion.V1,
+            null);
 
     // the test landing zone creates two resources: storage account and vnet.
     assertThat(resources, hasSize(2));
@@ -74,13 +77,13 @@ class LandingZoneManagerTest {
     Flux<DeployedResource> first =
         landingZoneManager
             .deployLandingZoneAsync(
-                landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1, null)
+                landingZone, TestLandingZoneFactory.class.getName(), DefinitionVersion.V1, null)
             .retryWhen(Retry.max(1));
 
     Flux<DeployedResource> second =
         landingZoneManager
             .deployLandingZoneAsync(
-                landingZone, TestLandingZoneFactory.class, DefinitionVersion.V1, null)
+                landingZone, TestLandingZoneFactory.class.getName(), DefinitionVersion.V1, null)
             .retryWhen(Retry.max(1));
 
     var results = Flux.merge(first, second).collectList().block();
@@ -121,10 +124,13 @@ class LandingZoneManagerTest {
 
   @Test
   void listDefinitionFactories_testFactoryIsListed() {
-    var factories = landingZoneManager.listDefinitionFactories();
-
-    FactoryInfo testFactory =
-        new FactoryInfo(TestLandingZoneFactory.class, List.of(DefinitionVersion.V1));
+    var factories = LandingZoneManager.listDefinitionFactories();
+    FactoryDefinitionInfo testFactory =
+        new FactoryDefinitionInfo(
+            TestLandingZoneFactory.LZ_NAME,
+            TestLandingZoneFactory.LZ_DESC,
+            TestLandingZoneFactory.class.getName(),
+            List.of(DefinitionVersion.V1));
 
     assertThat(factories, hasItem(testFactory));
   }

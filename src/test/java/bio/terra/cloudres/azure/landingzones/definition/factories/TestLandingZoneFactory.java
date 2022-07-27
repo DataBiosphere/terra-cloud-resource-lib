@@ -17,14 +17,19 @@ import com.azure.resourcemanager.relay.RelayManager;
 import java.util.List;
 
 public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
-  protected TestLandingZoneFactory(
+  public static final String LZ_NAME = "LZ_NAME";
+  public static final String LZ_DESC = "LZ_DESC";
+
+  TestLandingZoneFactory() {}
+
+  public TestLandingZoneFactory(
       AzureResourceManager azureResourceManager, RelayManager relayManager) {
     super(azureResourceManager, relayManager);
   }
 
   @Override
   public DefinitionHeader header() {
-    return new DefinitionHeader("Test LZ", "Description of Test LZ");
+    return new DefinitionHeader(LZ_NAME, LZ_DESC);
   }
 
   @Override

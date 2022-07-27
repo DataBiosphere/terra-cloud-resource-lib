@@ -10,6 +10,7 @@ import java.util.List;
  * the available versions and the header
  */
 public interface LandingZoneDefinitionFactory {
+
   DefinitionHeader header();
 
   List<DefinitionVersion> availableVersions();
