@@ -31,7 +31,7 @@ class ManagedNetworkWithSharedResourcesFactoryTest extends LandingZoneTestFixtur
         landingZoneManager
             .deployLandingZoneAsync(
                 UUID.randomUUID().toString(),
-                ManagedNetworkWithSharedResourcesFactory.class,
+                ManagedNetworkWithSharedResourcesFactory.class.getName(),
                 DefinitionVersion.V1,
                 null)
             .collectList()

@@ -28,13 +28,20 @@ public interface LandingZoneDefinitionFactory {
 ```
 
 The library includes an abstract class that expects the Azure Resource Manager (ARM)
-clients: `ArmClientsDefinitionFactory`. Factories should extend this class and must be implemented in `factories`
-package.
+clients: `ArmClientsDefinitionFactory`. Factories should extend this class.
+
+In addition, factories:
+
+- Must be implemented in the `factories` package.
+- Must have a package scoped parameterless constructor.
 
 ```java
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
 public class FooLZFactory extends ArmClientsDefinitionFactory {
+
+    FooLZFactory() {
+    }
 
     @Override
     public DefinitionHeader header() {
@@ -208,7 +215,7 @@ You can deploy Landing Zone Definition using the manager.
     List<DeployedResource> resources=
         landingZoneManager.deployLandingZone(
         landingZoneId,
-        FooLZDefinitionV1.class,
+        "FooLZFactory",
         DefinitionVersion.V1,
         parameters);
 
@@ -244,10 +251,10 @@ Virtual Networks can be listed by subnet purpose:
 
 ### Getting the available Landing Zone Factories
 
-You can get all available Landing Zone Factories using the Landing Zone Manager:
+You can get all available Landing Zone Factories:
 
 ```java
 
-Set<FactoryInfo> factories=landingZoneManager.provider().factories();
+List<FactoryInfo> factories=LandingZoneManager.listDefinitionFactories();
 
 ```

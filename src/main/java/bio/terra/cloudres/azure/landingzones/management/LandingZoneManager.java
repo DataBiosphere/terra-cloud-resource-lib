@@ -3,9 +3,10 @@ package bio.terra.cloudres.azure.landingzones.management;
 import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
-import bio.terra.cloudres.azure.landingzones.definition.FactoryInfo;
+import bio.terra.cloudres.azure.landingzones.definition.FactoryDefinitionInfo;
 import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionFactory;
+import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionFactoryListProviderImpl;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionProvider;
 import bio.terra.cloudres.azure.landingzones.definition.factories.LandingZoneDefinitionProviderImpl;
 import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
@@ -78,27 +79,29 @@ public class LandingZoneManager {
     return new ArmManagers(azureResourceManager, relayManager);
   }
 
-  public List<FactoryInfo> listDefinitionFactories() {
-    return landingZoneDefinitionProvider.factories().stream().toList();
+  public static List<FactoryDefinitionInfo> listDefinitionFactories() {
+    var landingZoneDefinitionListProvider = new LandingZoneDefinitionFactoryListProviderImpl();
+    return landingZoneDefinitionListProvider.listFactories();
   }
 
   public List<DeployedResource> deployLandingZone(
       String landingZoneId,
-      Class<? extends LandingZoneDefinitionFactory> factory,
+      String className,
       DefinitionVersion version,
       Map<String, String> parameters) {
 
-    return deployLandingZoneAsync(landingZoneId, factory, version, parameters)
+    return deployLandingZoneAsync(landingZoneId, className, version, parameters)
         .collectList()
         .block();
   }
 
   public Flux<DeployedResource> deployLandingZoneAsync(
       String landingZoneId,
-      Class<? extends LandingZoneDefinitionFactory> factory,
+      String className,
       DefinitionVersion version,
       Map<String, String> parameters) {
 
+    Class<? extends LandingZoneDefinitionFactory> factory = getFactoryFromClassName(className);
     Objects.requireNonNull(factory, "Factory information can't be null");
     Objects.requireNonNull(version, "Factory version can't be null");
     if (StringUtils.isBlank(landingZoneId)) {
@@ -111,6 +114,15 @@ public class LandingZoneManager {
         .create(version)
         .definition(createNewDefinitionContext(landingZoneId, parameters))
         .deployAsync();
+  }
+
+  private Class<? extends LandingZoneDefinitionFactory> getFactoryFromClassName(String className) {
+
+    return new LandingZoneDefinitionFactoryListProviderImpl()
+        .listFactoriesClasses().stream()
+            .filter(f -> f.getName().equals(className))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Invalid factory definition name"));
   }
 
   private DefinitionContext createNewDefinitionContext(
