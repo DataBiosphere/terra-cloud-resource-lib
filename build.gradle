@@ -42,6 +42,7 @@ dependencies {
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-msi', version: '2.15.0'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-relay', version: '1.0.0-beta.1'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.15.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-batch', version: '1.0.0'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager', version: '2.15.0'
     api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20201030-1.30.10'
     api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20210411-1.31.0'
