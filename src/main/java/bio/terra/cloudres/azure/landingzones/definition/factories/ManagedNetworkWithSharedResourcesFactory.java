@@ -22,8 +22,10 @@ import java.util.List;
  * Account and a Relay Namespaces
  */
 public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefinitionFactory {
-  private final String LZ_NAME = "Managed Network with Shared Resources";
-  private final String LZ_DESC = "Managed VNet with shared storage and relay namespace ";
+  private static final String LZ_NAME = "Managed Network with Shared Resources";
+  private static final String LZ_DESC = "Managed VNet with shared storage and relay namespace ";
+
+  ManagedNetworkWithSharedResourcesFactory() {}
 
   public ManagedNetworkWithSharedResourcesFactory(
       AzureResourceManager azureResourceManager, RelayManager relayManager) {

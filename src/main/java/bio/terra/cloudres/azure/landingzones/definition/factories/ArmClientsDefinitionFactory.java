@@ -13,4 +13,9 @@ public abstract class ArmClientsDefinitionFactory implements LandingZoneDefiniti
     this.azureResourceManager = azureResourceManager;
     this.relayManager = relayManager;
   }
+
+  protected ArmClientsDefinitionFactory() {
+    this.azureResourceManager = null;
+    this.relayManager = null;
+  }
 }

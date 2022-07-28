@@ -76,9 +76,10 @@ jobs:
           integration.azure.admin.clientSecret=${AZURE_MANAGED_APP_CLIENT_SECRET}
           integration.azure.admin.tenantId=${AZURE_MANAGED_APP_TENANT_ID}
           EOF
-      - name: Set up AdoptOpenJDK 17
-        uses: joschi/setup-jdk@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
         with:
+          distribution: 'temurin'
           java-version: 17
       # See https://github.com/actions/cache/blob/main/examples.md#java---gradle
       - name: Cache Gradle packages
