@@ -11,8 +11,10 @@ import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.De
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.batch.BatchManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
@@ -28,8 +30,11 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
   ManagedNetworkWithSharedResourcesFactory() {}
 
   public ManagedNetworkWithSharedResourcesFactory(
-      AzureResourceManager azureResourceManager, RelayManager relayManager) {
-    super(azureResourceManager, relayManager);
+      AzureResourceManager azureResourceManager,
+      RelayManager relayManager,
+      BatchManager batchManager,
+      PostgreSqlManager postgreSqlManager) {
+    super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
   }
 
   @Override
@@ -45,15 +50,19 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
   @Override
   public LandingZoneDefinable create(DefinitionVersion version) {
     if (version.equals(DefinitionVersion.V1)) {
-      return new DefinitionV1(azureResourceManager, relayManager);
+      return new DefinitionV1(azureResourceManager, relayManager, batchManager, postgreSqlManager);
     }
     throw new RuntimeException("Invalid Version");
   }
 
   class DefinitionV1 extends LandingZoneDefinition {
 
-    protected DefinitionV1(AzureResourceManager azureResourceManager, RelayManager relayManager) {
-      super(azureResourceManager, relayManager);
+    protected DefinitionV1(
+        AzureResourceManager azureResourceManager,
+        RelayManager relayManager,
+        BatchManager batchManager,
+        PostgreSqlManager postgreSqlManager) {
+      super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
     }
 
     @Override

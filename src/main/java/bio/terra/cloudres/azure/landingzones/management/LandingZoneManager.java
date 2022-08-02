@@ -16,6 +16,8 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.batch.BatchManager;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
@@ -75,8 +77,10 @@ public class LandingZoneManager {
         AzureResourceManager.authenticate(credential, profile)
             .withSubscription(profile.getSubscriptionId());
     RelayManager relayManager = RelayManager.authenticate(credential, profile);
+    BatchManager batchManager = BatchManager.authenticate(credential, profile);
+    PostgreSqlManager postgreSqlManager = PostgreSqlManager.authenticate(credential, profile);
 
-    return new ArmManagers(azureResourceManager, relayManager);
+    return new ArmManagers(azureResourceManager, relayManager, batchManager, postgreSqlManager);
   }
 
   public static List<FactoryDefinitionInfo> listDefinitionFactories() {

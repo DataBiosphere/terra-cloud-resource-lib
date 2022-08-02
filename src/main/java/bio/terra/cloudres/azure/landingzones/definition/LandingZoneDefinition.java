@@ -1,6 +1,8 @@
 package bio.terra.cloudres.azure.landingzones.definition;
 
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.batch.BatchManager;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.relay.RelayManager;
 
 /**
@@ -9,12 +11,19 @@ import com.azure.resourcemanager.relay.RelayManager;
  */
 public abstract class LandingZoneDefinition implements LandingZoneDefinable {
 
-  protected final RelayManager relayManager;
   protected final AzureResourceManager azureResourceManager;
+  protected final RelayManager relayManager;
+  protected final BatchManager batchManager;
+  protected final PostgreSqlManager postgreSqlManager;
 
   protected LandingZoneDefinition(
-      AzureResourceManager azureResourceManager, RelayManager relayManager) {
-    this.relayManager = relayManager;
+      AzureResourceManager azureResourceManager,
+      RelayManager relayManager,
+      BatchManager batchManager,
+      PostgreSqlManager postgreSqlManager) {
     this.azureResourceManager = azureResourceManager;
+    this.relayManager = relayManager;
+    this.batchManager = batchManager;
+    this.postgreSqlManager = postgreSqlManager;
   }
 }

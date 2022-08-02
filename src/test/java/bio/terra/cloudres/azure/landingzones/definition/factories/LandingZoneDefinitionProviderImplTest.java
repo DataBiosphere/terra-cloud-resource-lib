@@ -16,7 +16,7 @@ class LandingZoneDefinitionProviderImplTest {
 
   @BeforeEach
   void setUp() {
-    armManagers = new ArmManagers(null, null);
+    armManagers = new ArmManagers(null, null, null, null);
     provider = new LandingZoneDefinitionProviderImpl(armManagers);
   }
 

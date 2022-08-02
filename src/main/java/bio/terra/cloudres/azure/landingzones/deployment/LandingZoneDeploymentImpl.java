@@ -2,7 +2,10 @@ package bio.terra.cloudres.azure.landingzones.deployment;
 
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
+import com.azure.resourcemanager.batch.models.BatchAccount;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.postgresql.models.Server;
+import com.azure.resourcemanager.relay.models.RelayNamespace;
 import com.azure.resourcemanager.relay.models.RelayNamespace.DefinitionStages.WithCreate;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource.DefinitionWithTags;
@@ -109,8 +112,23 @@ public class LandingZoneDeploymentImpl
   }
 
   @Override
-  public Deployable withResourceWithPurpose(WithCreate relay, ResourcePurpose purpose) {
+  public Deployable withResourceWithPurpose(
+      RelayNamespace.DefinitionStages.WithCreate relay, ResourcePurpose purpose) {
     resourcesTagMapWrapper.putWithPurpose(relay, purpose);
+    return this;
+  }
+
+  @Override
+  public Deployable withResourceWithPurpose(
+      BatchAccount.DefinitionStages.WithCreate batch, ResourcePurpose purpose) {
+    resourcesTagMapWrapper.putWithPurpose(batch, purpose);
+    return this;
+  }
+
+  @Override
+  public Deployable withResourceWithPurpose(
+      Server.DefinitionStages.WithCreate posgres, ResourcePurpose purpose) {
+    resourcesTagMapWrapper.putWithPurpose(posgres, purpose);
     return this;
   }
 

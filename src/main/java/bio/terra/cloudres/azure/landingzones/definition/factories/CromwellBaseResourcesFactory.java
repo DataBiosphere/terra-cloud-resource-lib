@@ -6,8 +6,13 @@ import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.De
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.batch.BatchManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
+import com.azure.resourcemanager.postgresql.PostgreSqlManager;
+import com.azure.resourcemanager.postgresql.models.InfrastructureEncryption;
+import com.azure.resourcemanager.postgresql.models.ServerPropertiesForCreate;
+import com.azure.resourcemanager.postgresql.models.ServerVersion;
 import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
@@ -24,9 +29,14 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
       "Cromwell Base Resources: VNet, AKS Account & Nodepool, Batch Account,"
           + " Storage Account, PostgreSQL server, Subnets for AKS, Batch, Posgres, and Compute";
 
+  CromwellBaseResourcesFactory() {}
+
   public CromwellBaseResourcesFactory(
-      AzureResourceManager azureResourceManager, RelayManager relayManager) {
-    super(azureResourceManager, relayManager);
+      AzureResourceManager azureResourceManager,
+      RelayManager relayManager,
+      BatchManager batchManager,
+      PostgreSqlManager postgreSqlManager) {
+    super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
   }
 
   @Override
@@ -42,15 +52,19 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
   @Override
   public LandingZoneDefinable create(DefinitionVersion version) {
     if (version.equals(DefinitionVersion.V1)) {
-      return new DefinitionV1(azureResourceManager, relayManager);
+      return new DefinitionV1(azureResourceManager, relayManager, batchManager, postgreSqlManager);
     }
     throw new RuntimeException("Invalid Version");
   }
 
   class DefinitionV1 extends LandingZoneDefinition {
 
-    protected DefinitionV1(AzureResourceManager azureResourceManager, RelayManager relayManager) {
-      super(azureResourceManager, relayManager);
+    protected DefinitionV1(
+        AzureResourceManager azureResourceManager,
+        RelayManager relayManager,
+        BatchManager batchManager,
+        PostgreSqlManager postgreSqlManager) {
+      super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
     }
 
     @Override
@@ -94,8 +108,12 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
       //              .kubernetesClusters()
       //              .stop(resourceGroup.name(), aks.name());
 
-      //      var batch =
-      //              azureResourceManager
+      var batch =
+          batchManager
+              .batchAccounts()
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_BATCH_ACCOUNT_NAME_LENGTH))
+              .withRegion(resourceGroup.region())
+              .withExistingResourceGroup(resourceGroup.name());
 
       var storage =
           azureResourceManager
@@ -104,13 +122,24 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup);
 
-      /*   TODO do we need this?
+      var postgres =
+          postgreSqlManager
+              .servers()
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_SERVER_NAME_LENGTH))
+              .withRegion(resourceGroup.region())
+              .withExistingResourceGroup(resourceGroup.name())
+              .withProperties(
+                  new ServerPropertiesForCreate()
+                      .withVersion(ServerVersion.ONE_ONE)
+                      .withInfrastructureEncryption(InfrastructureEncryption.ENABLED));
+
+      //   TODO do we need this?
       var relay =
-       relayManager
-           .namespaces()
-           .define(nameGenerator.nextName(ResourceNameGenerator.MAX_RELAY_NS_NAME_LENGTH))
-           .withRegion(resourceGroup.region())
-           .withExistingResourceGroup(resourceGroup.name());*/
+          relayManager
+              .namespaces()
+              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_RELAY_NS_NAME_LENGTH))
+              .withRegion(resourceGroup.region())
+              .withExistingResourceGroup(resourceGroup.name());
 
       return deployment
           .withVNetWithPurpose(vNet, "aks", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
@@ -118,8 +147,10 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
           .withVNetWithPurpose(vNet, "postgres", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
           .withVNetWithPurpose(vNet, "compute", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
           .withResourceWithPurpose(aks, ResourcePurpose.SHARED_RESOURCE)
-          // .withResourceWithPurpose(relay, ResourcePurpose.SHARED_RESOURCE)
-          .withResourceWithPurpose(storage, ResourcePurpose.SHARED_RESOURCE);
+          .withResourceWithPurpose(batch, ResourcePurpose.SHARED_RESOURCE)
+          .withResourceWithPurpose(storage, ResourcePurpose.SHARED_RESOURCE)
+          .withResourceWithPurpose(postgres, ResourcePurpose.SHARED_RESOURCE);
+      // TODO remove .withResourceWithPurpose(relay, ResourcePurpose.SHARED_RESOURCE)
     }
   }
 }
