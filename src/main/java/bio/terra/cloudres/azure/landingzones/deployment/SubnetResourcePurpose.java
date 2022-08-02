@@ -11,7 +11,9 @@ public final class SubnetResourcePurpose extends ExpandableStringEnum<SubnetReso
       fromString("WORKSPACE_STORAGE_SUBNET");
   public static final SubnetResourcePurpose AKS_NODE_POOL_SUBNET =
       fromString("AKS_NODE_POOL_SUBNET");
-
+  public static final SubnetResourcePurpose POSTGRESQL_SUBNET = fromString("POSTGRESQL_SUBNET");
+  public static final SubnetResourcePurpose WORKSPACE_BATCH_SUBNET =
+      fromString("WORKSPACE_BATCH_SUBNET");
   /**
    * Creates or finds a {@link SubnetResourcePurpose} from its string representation.
    *

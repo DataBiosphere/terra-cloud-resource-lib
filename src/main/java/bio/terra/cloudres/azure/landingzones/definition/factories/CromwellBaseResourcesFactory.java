@@ -133,7 +133,6 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
                       .withVersion(ServerVersion.ONE_ONE)
                       .withInfrastructureEncryption(InfrastructureEncryption.ENABLED));
 
-      //   TODO do we need this?
       var relay =
           relayManager
               .namespaces()
@@ -142,15 +141,15 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withExistingResourceGroup(resourceGroup.name());
 
       return deployment
-          .withVNetWithPurpose(vNet, "aks", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
-          .withVNetWithPurpose(vNet, "batch", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
-          .withVNetWithPurpose(vNet, "postgres", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
+          .withVNetWithPurpose(vNet, "aks", SubnetResourcePurpose.AKS_NODE_POOL_SUBNET)
+          .withVNetWithPurpose(vNet, "batch", SubnetResourcePurpose.WORKSPACE_BATCH_SUBNET)
+          .withVNetWithPurpose(vNet, "postgres", SubnetResourcePurpose.POSTGRESQL_SUBNET)
           .withVNetWithPurpose(vNet, "compute", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
           .withResourceWithPurpose(aks, ResourcePurpose.SHARED_RESOURCE)
           .withResourceWithPurpose(batch, ResourcePurpose.SHARED_RESOURCE)
           .withResourceWithPurpose(storage, ResourcePurpose.SHARED_RESOURCE)
-          .withResourceWithPurpose(postgres, ResourcePurpose.SHARED_RESOURCE);
-      // TODO remove .withResourceWithPurpose(relay, ResourcePurpose.SHARED_RESOURCE)
+          .withResourceWithPurpose(postgres, ResourcePurpose.SHARED_RESOURCE)
+          .withResourceWithPurpose(relay, ResourcePurpose.SHARED_RESOURCE);
     }
   }
 }
