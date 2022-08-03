@@ -1,21 +1,13 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
-import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
-import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
-import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
-import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
-import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
-import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
+import bio.terra.cloudres.azure.landingzones.definition.*;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.batch.BatchManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
-import com.azure.resourcemanager.postgresql.PostgreSqlManager;
-import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
 
@@ -29,12 +21,8 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
 
   ManagedNetworkWithSharedResourcesFactory() {}
 
-  public ManagedNetworkWithSharedResourcesFactory(
-      AzureResourceManager azureResourceManager,
-      RelayManager relayManager,
-      BatchManager batchManager,
-      PostgreSqlManager postgreSqlManager) {
-    super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
+  public ManagedNetworkWithSharedResourcesFactory(ArmManagers armManagers) {
+    super(armManagers);
   }
 
   @Override
@@ -50,23 +38,20 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
   @Override
   public LandingZoneDefinable create(DefinitionVersion version) {
     if (version.equals(DefinitionVersion.V1)) {
-      return new DefinitionV1(azureResourceManager, relayManager, batchManager, postgreSqlManager);
+      return new DefinitionV1(armManagers);
     }
     throw new RuntimeException("Invalid Version");
   }
 
   class DefinitionV1 extends LandingZoneDefinition {
 
-    protected DefinitionV1(
-        AzureResourceManager azureResourceManager,
-        RelayManager relayManager,
-        BatchManager batchManager,
-        PostgreSqlManager postgreSqlManager) {
-      super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
+    protected DefinitionV1(ArmManagers armManagers) {
+      super(armManagers);
     }
 
     @Override
     public Deployable definition(DefinitionContext definitionContext) {
+      AzureResourceManager azureResourceManager = armManagers.azureResourceManager();
       WithLandingZoneResource deployment = definitionContext.deployment();
       ResourceGroup resourceGroup = definitionContext.resourceGroup();
       ResourceNameGenerator nameGenerator = definitionContext.resourceNameGenerator();
@@ -88,7 +73,8 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
               .withSubnet("compute", "10.0.0.0/29");
 
       var relay =
-          relayManager
+          armManagers
+              .relayManager()
               .namespaces()
               .define(nameGenerator.nextName(ResourceNameGenerator.MAX_RELAY_NS_NAME_LENGTH))
               .withRegion(resourceGroup.region())

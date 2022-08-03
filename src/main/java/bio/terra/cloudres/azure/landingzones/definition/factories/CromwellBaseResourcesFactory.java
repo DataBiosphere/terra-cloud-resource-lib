@@ -6,14 +6,11 @@ import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.De
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.batch.BatchManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
-import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.postgresql.models.InfrastructureEncryption;
 import com.azure.resourcemanager.postgresql.models.ServerPropertiesForCreate;
 import com.azure.resourcemanager.postgresql.models.ServerVersion;
-import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
 
@@ -31,12 +28,8 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
 
   CromwellBaseResourcesFactory() {}
 
-  public CromwellBaseResourcesFactory(
-      AzureResourceManager azureResourceManager,
-      RelayManager relayManager,
-      BatchManager batchManager,
-      PostgreSqlManager postgreSqlManager) {
-    super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
+  public CromwellBaseResourcesFactory(ArmManagers armManagers) {
+    super(armManagers);
   }
 
   @Override
@@ -52,23 +45,20 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
   @Override
   public LandingZoneDefinable create(DefinitionVersion version) {
     if (version.equals(DefinitionVersion.V1)) {
-      return new DefinitionV1(azureResourceManager, relayManager, batchManager, postgreSqlManager);
+      return new DefinitionV1(armManagers);
     }
     throw new RuntimeException("Invalid Version");
   }
 
   class DefinitionV1 extends LandingZoneDefinition {
 
-    protected DefinitionV1(
-        AzureResourceManager azureResourceManager,
-        RelayManager relayManager,
-        BatchManager batchManager,
-        PostgreSqlManager postgreSqlManager) {
-      super(azureResourceManager, relayManager, batchManager, postgreSqlManager);
+    protected DefinitionV1(ArmManagers armManagers) {
+      super(armManagers);
     }
 
     @Override
     public Deployable definition(DefinitionContext definitionContext) {
+      AzureResourceManager azureResourceManager = armManagers.azureResourceManager();
       WithLandingZoneResource deployment = definitionContext.deployment();
       ResourceGroup resourceGroup = definitionContext.resourceGroup();
       ResourceNameGenerator nameGenerator = definitionContext.resourceNameGenerator();
@@ -109,7 +99,8 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
       //              .stop(resourceGroup.name(), aks.name());
 
       var batch =
-          batchManager
+          armManagers
+              .batchManager()
               .batchAccounts()
               .define(nameGenerator.nextName(ResourceNameGenerator.MAX_BATCH_ACCOUNT_NAME_LENGTH))
               .withRegion(resourceGroup.region())
@@ -123,9 +114,11 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withExistingResourceGroup(resourceGroup);
 
       var postgres =
-          postgreSqlManager
+          armManagers
+              .postgreSqlManager()
               .servers()
-              .define(nameGenerator.nextName(ResourceNameGenerator.MAX_SERVER_NAME_LENGTH))
+              .define(
+                  nameGenerator.nextName(ResourceNameGenerator.MAX_POSTGRESQL_SERVER_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup.name())
               .withProperties(
@@ -134,7 +127,8 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
                       .withInfrastructureEncryption(InfrastructureEncryption.ENABLED));
 
       var relay =
-          relayManager
+          armManagers
+              .relayManager()
               .namespaces()
               .define(nameGenerator.nextName(ResourceNameGenerator.MAX_RELAY_NS_NAME_LENGTH))
               .withRegion(resourceGroup.region())
