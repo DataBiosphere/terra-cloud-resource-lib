@@ -1,6 +1,12 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
-import bio.terra.cloudres.azure.landingzones.definition.*;
+import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
+import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
+import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
+import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
@@ -92,11 +98,6 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .attach()
               .withDnsPrefix(
                   nameGenerator.nextName(ResourceNameGenerator.MAX_AKS_DNS_PREFIX_NAME_LENGTH));
-
-      //   TODO can we make this async/sequential after deployment?
-      //      var stopAks = azureResourceManager
-      //              .kubernetesClusters()
-      //              .stop(resourceGroup.name(), aks.name());
 
       var batch =
           armManagers

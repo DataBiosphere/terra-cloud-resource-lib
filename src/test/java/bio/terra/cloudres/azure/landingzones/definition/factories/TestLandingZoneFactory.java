@@ -1,14 +1,20 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
-import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.*;
-
-import bio.terra.cloudres.azure.landingzones.definition.*;
+import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
+import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
+import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
+import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import java.util.List;
+
+import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH;
+import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_VNET_NAME_LENGTH;
 
 public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
   public static final String LZ_NAME = "LZ_NAME";
