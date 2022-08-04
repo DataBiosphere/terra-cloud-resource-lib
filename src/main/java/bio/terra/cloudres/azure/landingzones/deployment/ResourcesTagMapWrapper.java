@@ -3,6 +3,7 @@ package bio.terra.cloudres.azure.landingzones.deployment;
 import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.batch.models.BatchAccount;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.PrivateEndpoint;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.relay.models.RelayNamespace;
 import com.azure.resourcemanager.relay.models.RelayNamespace.DefinitionStages.WithCreate;
@@ -23,6 +24,8 @@ public class ResourcesTagMapWrapper {
       batchResourcesTagsMap = new HashMap<>();
   private final Map<Server.DefinitionStages.WithCreate, Map<String, String>>
       postgresResourcesTagsMap = new HashMap<>();
+  private final Map<PrivateEndpoint.DefinitionStages.WithCreate, Map<String, String>>
+      privateEndpointResourcesTagsMap = new HashMap<>();
   private final ClientLogger logger = new ClientLogger(ResourcesTagMapWrapper.class);
   private final String landingZoneId;
 
@@ -110,6 +113,13 @@ public class ResourcesTagMapWrapper {
     putTagKeyValue(posgres, LandingZoneTagKeys.LANDING_ZONE_PURPOSE.toString(), purpose.toString());
   }
 
+  void putWithPurpose(
+      PrivateEndpoint.DefinitionStages.WithCreate privateEndpoint, ResourcePurpose purpose) {
+    putTagKeyValue(privateEndpoint, LandingZoneTagKeys.LANDING_ZONE_ID.toString(), landingZoneId);
+    putTagKeyValue(
+        privateEndpoint, LandingZoneTagKeys.LANDING_ZONE_PURPOSE.toString(), purpose.toString());
+  }
+
   private void putTagKeyValue(
       RelayNamespace.DefinitionStages.WithCreate relay, String key, String value) {
     Map<String, String> tagMap = relayResourcesTagsMap.get(relay);
@@ -141,5 +151,16 @@ public class ResourcesTagMapWrapper {
 
     tagMap.put(key, value);
     postgresResourcesTagsMap.put(posgres, tagMap);
+  }
+
+  private void putTagKeyValue(
+      PrivateEndpoint.DefinitionStages.WithCreate privateEndpoint, String key, String value) {
+    Map<String, String> tagMap = privateEndpointResourcesTagsMap.get(privateEndpoint);
+    if (tagMap == null) {
+      tagMap = new HashMap<>();
+    }
+
+    tagMap.put(key, value);
+    privateEndpointResourcesTagsMap.put(privateEndpoint, tagMap);
   }
 }

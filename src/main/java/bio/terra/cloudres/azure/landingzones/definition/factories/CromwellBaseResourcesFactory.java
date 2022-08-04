@@ -1,5 +1,10 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
+import static bio.terra.cloudres.azure.landingzones.definition.factories.CromwellBaseResourcesFactory.Subnet.AKS_SUBNET;
+import static bio.terra.cloudres.azure.landingzones.definition.factories.CromwellBaseResourcesFactory.Subnet.BATCH_SUBNET;
+import static bio.terra.cloudres.azure.landingzones.definition.factories.CromwellBaseResourcesFactory.Subnet.COMPUTE_SUBNET;
+import static bio.terra.cloudres.azure.landingzones.definition.factories.CromwellBaseResourcesFactory.Subnet.POSTGRESQL_SUBNET;
+
 import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
@@ -11,10 +16,16 @@ import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.De
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
+import com.azure.core.util.logging.ClientLogger;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.Networks;
+import com.azure.resourcemanager.network.models.PrivateLinkSubResourceName;
 import com.azure.resourcemanager.postgresql.models.InfrastructureEncryption;
+import com.azure.resourcemanager.postgresql.models.PublicNetworkAccessEnum;
+import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.ServerPropertiesForCreate;
 import com.azure.resourcemanager.postgresql.models.ServerVersion;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
@@ -31,6 +42,13 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
   private final String LZ_DESC =
       "Cromwell Base Resources: VNet, AKS Account & Nodepool, Batch Account,"
           + " Storage Account, PostgreSQL server, Subnets for AKS, Batch, Posgres, and Compute";
+
+  enum Subnet {
+    AKS_SUBNET,
+    BATCH_SUBNET,
+    POSTGRESQL_SUBNET,
+    COMPUTE_SUBNET
+  }
 
   CromwellBaseResourcesFactory() {}
 
@@ -58,6 +76,8 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
 
   class DefinitionV1 extends LandingZoneDefinition {
 
+    private final ClientLogger logger = new ClientLogger(DefinitionV1.class);
+
     protected DefinitionV1(ArmManagers armManagers) {
       super(armManagers);
     }
@@ -76,11 +96,58 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup)
               .withAddressSpace("10.0.0.0/28")
-              .withSubnet("aks", "10.0.0.0/29")
-              .withSubnet("batch", "10.0.0.0/30")
-              .withSubnet("postgres", "10.0.0.0/31")
-              .withSubnet("compute", "10.0.0.0/32");
+              .withSubnet(AKS_SUBNET.name(), "10.0.0.0/29")
+              .withSubnet(BATCH_SUBNET.name(), "10.0.0.0/30")
+              .withSubnet(POSTGRESQL_SUBNET.name(), "10.0.0.0/31")
+              .withSubnet(COMPUTE_SUBNET.name(), "10.0.0.0/32");
 
+      var postgres =
+          armManagers
+              .postgreSqlManager()
+              .servers()
+              .define(
+                  nameGenerator.nextName(ResourceNameGenerator.MAX_POSTGRESQL_SERVER_NAME_LENGTH))
+              .withRegion(resourceGroup.region())
+              .withExistingResourceGroup(resourceGroup.name())
+              .withProperties(
+                  new ServerPropertiesForCreate()
+                      .withVersion(ServerVersion.ONE_ONE)
+                      .withInfrastructureEncryption(InfrastructureEncryption.ENABLED)
+                      .withPublicNetworkAccess(PublicNetworkAccessEnum.DISABLED));
+
+      var prerequisites =
+          deployment
+              .definePrerequisites()
+              .withVNetWithPurpose(
+                  vNet, AKS_SUBNET.name(), SubnetResourcePurpose.AKS_NODE_POOL_SUBNET)
+              .withVNetWithPurpose(
+                  vNet, BATCH_SUBNET.name(), SubnetResourcePurpose.WORKSPACE_BATCH_SUBNET)
+              .withVNetWithPurpose(
+                  vNet, POSTGRESQL_SUBNET.name(), SubnetResourcePurpose.POSTGRESQL_SUBNET)
+              .withVNetWithPurpose(
+                  vNet, COMPUTE_SUBNET.name(), SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
+              .withResourceWithPurpose(postgres, ResourcePurpose.SHARED_RESOURCE)
+              .deploy();
+
+      Networks listNetworks = azureResourceManager.networks();
+      Network vNetwork =
+          listNetworks
+              .listByResourceGroupAsync(resourceGroup.name())
+              .flatMap(
+                  network -> {
+                    logger.info(
+                        "Getting network name and id---- "
+                            + network.name()
+                            + " created @ "
+                            + network.id());
+                    return network.refreshAsync();
+                  })
+              .blockLast();
+
+      Server postgreSqlServer =
+          armManagers.postgreSqlManager().servers().list().stream().findFirst().get();
+
+      assert vNetwork != null;
       var aks =
           azureResourceManager
               .kubernetesClusters()
@@ -95,6 +162,7 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withAgentPoolVirtualMachineCount(1)
               .withAgentPoolMode(
                   AgentPoolMode.SYSTEM) // TODO VM Size? Pool Machine count? AgentPoolMode?
+              .withVirtualNetwork(vNetwork.id(), AKS_SUBNET.name())
               .attach()
               .withDnsPrefix(
                   nameGenerator.nextName(ResourceNameGenerator.MAX_AKS_DNS_PREFIX_NAME_LENGTH));
@@ -114,18 +182,20 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup);
 
-      var postgres =
-          armManagers
-              .postgreSqlManager()
-              .servers()
+      var privateEndpoint =
+          azureResourceManager
+              .privateEndpoints()
               .define(
-                  nameGenerator.nextName(ResourceNameGenerator.MAX_POSTGRESQL_SERVER_NAME_LENGTH))
+                  nameGenerator.nextName(ResourceNameGenerator.MAX_PRIVATE_ENDPOINT_NAME_LENGTH))
               .withRegion(resourceGroup.region())
-              .withExistingResourceGroup(resourceGroup.name())
-              .withProperties(
-                  new ServerPropertiesForCreate()
-                      .withVersion(ServerVersion.ONE_ONE)
-                      .withInfrastructureEncryption(InfrastructureEncryption.ENABLED));
+              .withExistingResourceGroup(resourceGroup)
+              .withSubnetId(vNetwork.subnets().get(POSTGRESQL_SUBNET.name()).id())
+              .definePrivateLinkServiceConnection(
+                  nameGenerator.nextName(
+                      ResourceNameGenerator.MAX_PRIVATE_LINK_CONNECTION_NAME_LENGTH))
+              .withResourceId(postgreSqlServer.id())
+              .withSubResource(PrivateLinkSubResourceName.SQL_SERVER)
+              .attach();
 
       var relay =
           armManagers
@@ -136,15 +206,11 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withExistingResourceGroup(resourceGroup.name());
 
       return deployment
-          .withVNetWithPurpose(vNet, "aks", SubnetResourcePurpose.AKS_NODE_POOL_SUBNET)
-          .withVNetWithPurpose(vNet, "batch", SubnetResourcePurpose.WORKSPACE_BATCH_SUBNET)
-          .withVNetWithPurpose(vNet, "postgres", SubnetResourcePurpose.POSTGRESQL_SUBNET)
-          .withVNetWithPurpose(vNet, "compute", SubnetResourcePurpose.WORKSPACE_COMPUTE_SUBNET)
           .withResourceWithPurpose(aks, ResourcePurpose.SHARED_RESOURCE)
           .withResourceWithPurpose(batch, ResourcePurpose.SHARED_RESOURCE)
           .withResourceWithPurpose(storage, ResourcePurpose.SHARED_RESOURCE)
-          .withResourceWithPurpose(postgres, ResourcePurpose.SHARED_RESOURCE)
-          .withResourceWithPurpose(relay, ResourcePurpose.SHARED_RESOURCE);
+          .withResourceWithPurpose(relay, ResourcePurpose.SHARED_RESOURCE)
+          .withResourceWithPurpose(privateEndpoint, ResourcePurpose.SHARED_RESOURCE);
     }
   }
 }

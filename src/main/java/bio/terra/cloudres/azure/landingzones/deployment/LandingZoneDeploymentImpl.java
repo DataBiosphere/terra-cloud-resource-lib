@@ -4,6 +4,7 @@ import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.De
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import com.azure.resourcemanager.batch.models.BatchAccount;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.PrivateEndpoint;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.relay.models.RelayNamespace;
 import com.azure.resourcemanager.relay.models.RelayNamespace.DefinitionStages.WithCreate;
@@ -28,7 +29,6 @@ public class LandingZoneDeploymentImpl
 
   @Override
   public List<DeployedResource> deploy() {
-
     return deployAsync().collectList().block();
   }
 
@@ -129,6 +129,13 @@ public class LandingZoneDeploymentImpl
   public Deployable withResourceWithPurpose(
       Server.DefinitionStages.WithCreate posgres, ResourcePurpose purpose) {
     resourcesTagMapWrapper.putWithPurpose(posgres, purpose);
+    return this;
+  }
+
+  @Override
+  public Deployable withResourceWithPurpose(
+      PrivateEndpoint.DefinitionStages.WithCreate privateEndpoint, ResourcePurpose purpose) {
+    resourcesTagMapWrapper.putWithPurpose(privateEndpoint, purpose);
     return this;
   }
 

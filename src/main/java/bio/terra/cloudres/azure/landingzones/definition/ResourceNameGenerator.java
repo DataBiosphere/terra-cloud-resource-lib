@@ -16,6 +16,8 @@ public class ResourceNameGenerator {
   public static final int MAX_BATCH_ACCOUNT_NAME_LENGTH = 24;
   public static final int MAX_RELAY_NS_NAME_LENGTH = 50;
   public static final int MAX_POSTGRESQL_SERVER_NAME_LENGTH = 63;
+  public static final int MAX_PRIVATE_ENDPOINT_NAME_LENGTH = 23; // TODO verify this
+  public static final int MAX_PRIVATE_LINK_CONNECTION_NAME_LENGTH = 10; // TODO verify this
   // This is not the maximum value of 63. This lower value is to reduce the risk of deployment
   // errors as the cluster name is added to the node pool resource group name.
   // The node pool name resource group name can't be longer than 80 characters,
