@@ -12,7 +12,6 @@ import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
 import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
-import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
@@ -24,17 +23,13 @@ import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeT
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.Networks;
 import com.azure.resourcemanager.network.models.PrivateLinkSubResourceName;
-import com.azure.resourcemanager.postgresql.models.InfrastructureEncryption;
 import com.azure.resourcemanager.postgresql.models.PublicNetworkAccessEnum;
 import com.azure.resourcemanager.postgresql.models.Server;
-import com.azure.resourcemanager.postgresql.models.ServerPropertiesForCreate;
 import com.azure.resourcemanager.postgresql.models.ServerPropertiesForDefaultCreate;
 import com.azure.resourcemanager.postgresql.models.ServerVersion;
 import com.azure.resourcemanager.postgresql.models.Sku;
-import com.azure.resourcemanager.postgresql.models.StorageProfile;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * An implementation of {@link LandingZoneDefinitionFactory} that deploys resources required for
@@ -119,7 +114,8 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
                       .withAdministratorLogin("test_lz_admin")
                       .withAdministratorLoginPassword("AFDgLSVgM4oY!4")
                       .withVersion(ServerVersion.ONE_ONE)
-                      .withPublicNetworkAccess(PublicNetworkAccessEnum.DISABLED));
+                      .withPublicNetworkAccess(PublicNetworkAccessEnum.DISABLED))
+              .withSku(new Sku().withName("GP_Gen5_2"));
 
       var prerequisites =
           deployment
@@ -158,6 +154,21 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .stream()
               .findFirst().get();
 
+      var privateEndpoint =
+          azureResourceManager
+              .privateEndpoints()
+              .define(
+                  nameGenerator.nextName(ResourceNameGenerator.MAX_PRIVATE_ENDPOINT_NAME_LENGTH))
+              .withRegion(resourceGroup.region())
+              .withExistingResourceGroup(resourceGroup)
+              .withSubnetId(vNetwork.subnets().get(POSTGRESQL_SUBNET.name()).id())
+              .definePrivateLinkServiceConnection(
+                  nameGenerator.nextName(
+                      ResourceNameGenerator.MAX_PRIVATE_LINK_CONNECTION_NAME_LENGTH))
+              .withResourceId(postgreSqlServer.id())
+              .withSubResource(PrivateLinkSubResourceName.fromString("postgresqlServer"))
+              .attach();
+
       var aks =
           azureResourceManager
               .kubernetesClusters()
@@ -191,21 +202,6 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .define(nameGenerator.nextName(ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup);
-
-      var privateEndpoint =
-          azureResourceManager
-              .privateEndpoints()
-              .define(
-                  nameGenerator.nextName(ResourceNameGenerator.MAX_PRIVATE_ENDPOINT_NAME_LENGTH))
-              .withRegion(resourceGroup.region())
-              .withExistingResourceGroup(resourceGroup)
-              .withSubnetId(vNetwork.subnets().get(POSTGRESQL_SUBNET.name()).id())
-              .definePrivateLinkServiceConnection(
-                  nameGenerator.nextName(
-                      ResourceNameGenerator.MAX_PRIVATE_LINK_CONNECTION_NAME_LENGTH))
-              .withResourceId(postgreSqlServer.id())
-              .withSubResource(PrivateLinkSubResourceName.SQL_SERVER)
-              .attach();
 
       var relay =
           armManagers

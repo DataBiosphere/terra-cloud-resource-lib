@@ -37,7 +37,8 @@ class CromwellBaseResourcesFactoryTest extends LandingZoneTestFixture {
             .collectList()
             .block();
 
-    assertThat(resources, hasSize(9));
+    // Note that this resource list does not include pre-requisite resources
+    assertThat(resources, hasSize(5));
 
     // check if you can read lz resources
     TimeUnit.SECONDS.sleep(3); // wait for tag propagation...
