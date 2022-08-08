@@ -12,6 +12,7 @@ import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
 import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
+import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
@@ -27,9 +28,13 @@ import com.azure.resourcemanager.postgresql.models.InfrastructureEncryption;
 import com.azure.resourcemanager.postgresql.models.PublicNetworkAccessEnum;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.postgresql.models.ServerPropertiesForCreate;
+import com.azure.resourcemanager.postgresql.models.ServerPropertiesForDefaultCreate;
 import com.azure.resourcemanager.postgresql.models.ServerVersion;
+import com.azure.resourcemanager.postgresql.models.Sku;
+import com.azure.resourcemanager.postgresql.models.StorageProfile;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An implementation of {@link LandingZoneDefinitionFactory} that deploys resources required for
@@ -95,11 +100,11 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .define(nameGenerator.nextName(ResourceNameGenerator.MAX_VNET_NAME_LENGTH))
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup)
-              .withAddressSpace("10.0.0.0/28")
-              .withSubnet(AKS_SUBNET.name(), "10.0.0.0/29")
-              .withSubnet(BATCH_SUBNET.name(), "10.0.0.0/30")
-              .withSubnet(POSTGRESQL_SUBNET.name(), "10.0.0.0/31")
-              .withSubnet(COMPUTE_SUBNET.name(), "10.0.0.0/32");
+              .withAddressSpace("10.1.0.0/27")
+              .withSubnet(AKS_SUBNET.name(), "10.1.0.0/29")
+              .withSubnet(BATCH_SUBNET.name(), "10.1.0.8/29")
+              .withSubnet(POSTGRESQL_SUBNET.name(), "10.1.0.16/29")
+              .withSubnet(COMPUTE_SUBNET.name(), "10.1.0.24/29");
 
       var postgres =
           armManagers
@@ -110,9 +115,10 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withRegion(resourceGroup.region())
               .withExistingResourceGroup(resourceGroup.name())
               .withProperties(
-                  new ServerPropertiesForCreate()
+                  new ServerPropertiesForDefaultCreate()
+                      .withAdministratorLogin("test_lz_admin")
+                      .withAdministratorLoginPassword("AFDgLSVgM4oY!4")
                       .withVersion(ServerVersion.ONE_ONE)
-                      .withInfrastructureEncryption(InfrastructureEncryption.ENABLED)
                       .withPublicNetworkAccess(PublicNetworkAccessEnum.DISABLED));
 
       var prerequisites =
@@ -144,10 +150,14 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
                   })
               .blockLast();
 
-      Server postgreSqlServer =
-          armManagers.postgreSqlManager().servers().list().stream().findFirst().get();
-
       assert vNetwork != null;
+
+      Server postgreSqlServer =
+          armManagers.postgreSqlManager().servers()
+              .listByResourceGroup(resourceGroup.name())
+              .stream()
+              .findFirst().get();
+
       var aks =
           azureResourceManager
               .kubernetesClusters()

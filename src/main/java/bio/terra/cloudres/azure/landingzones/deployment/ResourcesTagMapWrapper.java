@@ -6,7 +6,6 @@ import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.PrivateEndpoint;
 import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.relay.models.RelayNamespace;
-import com.azure.resourcemanager.relay.models.RelayNamespace.DefinitionStages.WithCreate;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource;
 import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
 import java.util.HashMap;
@@ -76,8 +75,20 @@ public class ResourcesTagMapWrapper {
     return resourcesTagsMap;
   }
 
-  Map<WithCreate, Map<String, String>> getRelayResourcesTagsMap() {
+  Map<RelayNamespace.DefinitionStages.WithCreate, Map<String, String>> getRelayResourcesTagsMap() {
     return relayResourcesTagsMap;
+  }
+
+  Map<BatchAccount.DefinitionStages.WithCreate, Map<String, String>> getBatchResourcesTagsMap() {
+    return batchResourcesTagsMap;
+  }
+
+  Map<Server.DefinitionStages.WithCreate, Map<String, String>> getPostgresResourcesTagsMap() {
+    return postgresResourcesTagsMap;
+  }
+
+  Map<PrivateEndpoint.DefinitionStages.WithCreate, Map<String, String>> getPrivateEndpointResourcesTagsMap() {
+    return privateEndpointResourcesTagsMap;
   }
 
   Map<String, String> getResourceTagsMap(Creatable<?> resource) {
