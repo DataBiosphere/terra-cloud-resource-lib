@@ -12,6 +12,7 @@ import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinable;
 import bio.terra.cloudres.azure.landingzones.definition.LandingZoneDefinition;
 import bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator;
+import bio.terra.cloudres.azure.landingzones.deployment.DeployedResource;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
 import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
@@ -30,6 +31,7 @@ import com.azure.resourcemanager.postgresql.models.ServerVersion;
 import com.azure.resourcemanager.postgresql.models.Sku;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An implementation of {@link LandingZoneDefinitionFactory} that deploys resources required for
@@ -131,28 +133,15 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .withResourceWithPurpose(postgres, ResourcePurpose.SHARED_RESOURCE)
               .deploy();
 
-      Networks listNetworks = azureResourceManager.networks();
-      Network vNetwork =
-          listNetworks
-              .listByResourceGroupAsync(resourceGroup.name())
-              .flatMap(
-                  network -> {
-                    logger.info(
-                        "Getting network name and id---- "
-                            + network.name()
-                            + " created @ "
-                            + network.id());
-                    return network.refreshAsync();
-                  })
-              .blockLast();
-
-      assert vNetwork != null;
-
-      Server postgreSqlServer =
-          armManagers.postgreSqlManager().servers()
-              .listByResourceGroup(resourceGroup.name())
-              .stream()
-              .findFirst().get();
+      String vNetId = prerequisites.stream()
+          .filter(deployedResource -> Objects.equals(deployedResource.resourceType(), "Microsoft.Network/virtualNetworks"))
+          .findFirst()
+          .get().resourceId();
+      String postgreSqlId = prerequisites.stream()
+          .filter(deployedResource -> Objects.equals(deployedResource.resourceType(), "Microsoft.DBforPostgreSQL/servers"))
+          .findFirst()
+          .get().resourceId();
+      Network vNetwork = azureResourceManager.networks().getById(vNetId);
 
       var privateEndpoint =
           azureResourceManager
@@ -165,7 +154,7 @@ public class CromwellBaseResourcesFactory extends ArmClientsDefinitionFactory {
               .definePrivateLinkServiceConnection(
                   nameGenerator.nextName(
                       ResourceNameGenerator.MAX_PRIVATE_LINK_CONNECTION_NAME_LENGTH))
-              .withResourceId(postgreSqlServer.id())
+              .withResourceId(postgreSqlId)
               .withSubResource(PrivateLinkSubResourceName.fromString("postgresqlServer"))
               .attach();
 
