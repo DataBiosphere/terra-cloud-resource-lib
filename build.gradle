@@ -16,7 +16,7 @@ repositories {
 }
 
 group = 'bio.terra'
-sourceCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
     testImplementation.extendsFrom testFixturesImplementation
@@ -42,6 +42,9 @@ dependencies {
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-msi', version: '2.15.0'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-relay', version: '1.0.0-beta.1'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.15.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-batch', version: '1.0.0'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-postgresql', version: '1.0.2'
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager', version: '2.15.0'
     api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20201030-1.30.10'
     api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20210411-1.31.0'
     api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220224-1.32.1'
@@ -55,6 +58,7 @@ dependencies {
     api group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.108.0'
     api group: 'com.google.guava', name: 'guava'
 
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
     implementation group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.3.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
@@ -73,13 +77,13 @@ dependencies {
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.10.0'
     testFixturesImplementation group: 'junit', name: 'junit', version: '4.13'
     testFixturesImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
-    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '4.4.0'
     testFixturesImplementation platform('com.google.cloud:libraries-bom:25.1.0')
 
     testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
     testImplementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "2.31"
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.4.0'
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30' // For simple logging during testing
 
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'
