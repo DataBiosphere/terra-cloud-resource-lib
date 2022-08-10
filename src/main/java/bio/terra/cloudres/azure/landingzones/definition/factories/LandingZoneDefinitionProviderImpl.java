@@ -2,8 +2,6 @@ package bio.terra.cloudres.azure.landingzones.definition.factories;
 
 import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
 import com.azure.core.util.logging.ClientLogger;
-import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.relay.RelayManager;
 
 /** Implementation of {@link LandingZoneDefinitionProvider} */
 public class LandingZoneDefinitionProviderImpl implements LandingZoneDefinitionProvider {
@@ -24,9 +22,7 @@ public class LandingZoneDefinitionProviderImpl implements LandingZoneDefinitionP
   private <T extends LandingZoneDefinitionFactory> T createNewFactoryInstance(
       Class<T> factoryClass) {
     try {
-      return factoryClass
-          .getDeclaredConstructor(AzureResourceManager.class, RelayManager.class)
-          .newInstance(armManagers.azureResourceManager(), armManagers.relayManager());
+      return factoryClass.getDeclaredConstructor(ArmManagers.class).newInstance(armManagers);
     } catch (Exception e) {
       throw logger.logExceptionAsError(new RuntimeException(e));
     }

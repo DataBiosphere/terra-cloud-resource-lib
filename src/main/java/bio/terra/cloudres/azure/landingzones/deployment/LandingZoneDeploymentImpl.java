@@ -2,7 +2,11 @@ package bio.terra.cloudres.azure.landingzones.deployment;
 
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.Deployable;
 import bio.terra.cloudres.azure.landingzones.deployment.LandingZoneDeployment.DefinitionStages.WithLandingZoneResource;
+import com.azure.resourcemanager.batch.models.BatchAccount;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.PrivateEndpoint;
+import com.azure.resourcemanager.postgresql.models.Server;
+import com.azure.resourcemanager.relay.models.RelayNamespace;
 import com.azure.resourcemanager.relay.models.RelayNamespace.DefinitionStages.WithCreate;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource.DefinitionWithTags;
@@ -25,19 +29,37 @@ public class LandingZoneDeploymentImpl
 
   @Override
   public List<DeployedResource> deploy() {
-
     return deployAsync().collectList().block();
   }
 
   @Override
   public Flux<DeployedResource> deployAsync() {
-    return Flux.merge(deployResourcesAsync(), deployRelayResourcesAsync());
+    return Flux.merge(deployResourcesAsync(), deployRelayResourcesAsync(), deployBatchResourcesAsync(),
+        deployPosgresResourcesAsync(), deployPrivateEndpointResourcesAsync());
   }
 
   private Flux<DeployedResource> deployRelayResourcesAsync() {
-    Map<WithCreate, Map<String, String>> resourcesTagsMap =
+    Map<RelayNamespace.DefinitionStages.WithCreate, Map<String, String>> resourcesTagsMap =
         resourcesTagMapWrapper.getRelayResourcesTagsMap();
     return Flux.fromIterable(resourcesTagsMap.entrySet()).flatMap(this::deployRelayResourceAsync);
+  }
+
+  private Flux<DeployedResource> deployBatchResourcesAsync() {
+    Map<BatchAccount.DefinitionStages.WithCreate, Map<String, String>> resourcesTagsMap =
+        resourcesTagMapWrapper.getBatchResourcesTagsMap();
+    return Flux.fromIterable(resourcesTagsMap.entrySet()).flatMap(this::deployBatchResourceAsync);
+  }
+
+  private Flux<DeployedResource> deployPosgresResourcesAsync() {
+    Map<Server.DefinitionStages.WithCreate, Map<String, String>> resourcesTagsMap =
+        resourcesTagMapWrapper.getPostgresResourcesTagsMap();
+    return Flux.fromIterable(resourcesTagsMap.entrySet()).flatMap(this::deployPostgresResourceAsync);
+  }
+
+  private Flux<DeployedResource> deployPrivateEndpointResourcesAsync() {
+    Map<PrivateEndpoint.DefinitionStages.WithCreate, Map<String, String>> resourcesTagsMap =
+        resourcesTagMapWrapper.getPrivateEndpointResourcesTagsMap();
+    return Flux.fromIterable(resourcesTagsMap.entrySet()).flatMap(this::deployPrivateEndpointResourceAsync);
   }
 
   private Publisher<? extends DeployedResource> deployRelayResourceAsync(
@@ -49,6 +71,39 @@ public class LandingZoneDeploymentImpl
     }
 
     return Mono.just(relayResource.create())
+        .map(n -> new DeployedResource(n.id(), n.type(), n.tags(), n.regionName()));
+  }
+
+  private Publisher<? extends DeployedResource> deployBatchResourceAsync(
+      Map.Entry<BatchAccount.DefinitionStages.WithCreate, Map<String, String>> resourceEntry) {
+
+    BatchAccount.DefinitionStages.WithCreate resource = resourceEntry.getKey();
+    if (resourceEntry.getValue() != null) {
+      resource.withTags(resourceEntry.getValue());
+    }
+
+    return Mono.just(resource.create())
+        .map(n -> new DeployedResource(n.id(), n.type(), n.tags(), n.regionName()));
+  }
+
+  private Publisher<? extends DeployedResource> deployPostgresResourceAsync(
+      Map.Entry<Server.DefinitionStages.WithCreate, Map<String, String>> resourceEntry) {
+
+    Server.DefinitionStages.WithCreate resource = resourceEntry.getKey();
+    if (resourceEntry.getValue() != null) {
+      resource.withTags(resourceEntry.getValue());
+    }
+
+    return Mono.just(resource.create())
+        .map(n -> new DeployedResource(n.id(), n.type(), n.tags(), n.regionName()));
+  }
+
+  private Publisher<? extends DeployedResource> deployPrivateEndpointResourceAsync(
+      Map.Entry<PrivateEndpoint.DefinitionStages.WithCreate, Map<String, String>> resourceEntry) {
+
+    PrivateEndpoint.DefinitionStages.WithCreate resource = resourceEntry.getKey();
+
+    return Mono.just(resource.create())
         .map(n -> new DeployedResource(n.id(), n.type(), n.tags(), n.regionName()));
   }
 
@@ -109,8 +164,30 @@ public class LandingZoneDeploymentImpl
   }
 
   @Override
-  public Deployable withResourceWithPurpose(WithCreate relay, ResourcePurpose purpose) {
+  public Deployable withResourceWithPurpose(
+      RelayNamespace.DefinitionStages.WithCreate relay, ResourcePurpose purpose) {
     resourcesTagMapWrapper.putWithPurpose(relay, purpose);
+    return this;
+  }
+
+  @Override
+  public Deployable withResourceWithPurpose(
+      BatchAccount.DefinitionStages.WithCreate batch, ResourcePurpose purpose) {
+    resourcesTagMapWrapper.putWithPurpose(batch, purpose);
+    return this;
+  }
+
+  @Override
+  public Deployable withResourceWithPurpose(
+      Server.DefinitionStages.WithCreate posgres, ResourcePurpose purpose) {
+    resourcesTagMapWrapper.putWithPurpose(posgres, purpose);
+    return this;
+  }
+
+  @Override
+  public Deployable withResourceWithPurpose(
+      PrivateEndpoint.DefinitionStages.WithCreate privateEndpoint, ResourcePurpose purpose) {
+    resourcesTagMapWrapper.putWithPurpose(privateEndpoint, purpose);
     return this;
   }
 

@@ -1,5 +1,6 @@
 package bio.terra.cloudres.azure.landingzones.definition.factories;
 
+import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
@@ -13,7 +14,6 @@ import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerservice.models.AgentPoolMode;
 import com.azure.resourcemanager.containerservice.models.ContainerServiceVMSizeTypes;
-import com.azure.resourcemanager.relay.RelayManager;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import java.util.List;
 
@@ -27,9 +27,8 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
 
   ManagedNetworkWithSharedResourcesFactory() {}
 
-  public ManagedNetworkWithSharedResourcesFactory(
-      AzureResourceManager azureResourceManager, RelayManager relayManager) {
-    super(azureResourceManager, relayManager);
+  public ManagedNetworkWithSharedResourcesFactory(ArmManagers armManagers) {
+    super(armManagers);
   }
 
   @Override
@@ -45,19 +44,20 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
   @Override
   public LandingZoneDefinable create(DefinitionVersion version) {
     if (version.equals(DefinitionVersion.V1)) {
-      return new DefinitionV1(azureResourceManager, relayManager);
+      return new DefinitionV1(armManagers);
     }
     throw new RuntimeException("Invalid Version");
   }
 
   class DefinitionV1 extends LandingZoneDefinition {
 
-    protected DefinitionV1(AzureResourceManager azureResourceManager, RelayManager relayManager) {
-      super(azureResourceManager, relayManager);
+    protected DefinitionV1(ArmManagers armManagers) {
+      super(armManagers);
     }
 
     @Override
     public Deployable definition(DefinitionContext definitionContext) {
+      AzureResourceManager azureResourceManager = armManagers.azureResourceManager();
       WithLandingZoneResource deployment = definitionContext.deployment();
       ResourceGroup resourceGroup = definitionContext.resourceGroup();
       ResourceNameGenerator nameGenerator = definitionContext.resourceNameGenerator();
@@ -79,7 +79,8 @@ public class ManagedNetworkWithSharedResourcesFactory extends ArmClientsDefiniti
               .withSubnet("compute", "10.0.0.0/29");
 
       var relay =
-          relayManager
+          armManagers
+              .relayManager()
               .namespaces()
               .define(nameGenerator.nextName(ResourceNameGenerator.MAX_RELAY_NS_NAME_LENGTH))
               .withRegion(resourceGroup.region())

@@ -1,6 +1,9 @@
 package bio.terra.cloudres.azure.landingzones.deployment;
 
+import com.azure.resourcemanager.batch.models.BatchAccount;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.PrivateEndpoint;
+import com.azure.resourcemanager.postgresql.models.Server;
 import com.azure.resourcemanager.relay.models.RelayNamespace;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.Resource.DefinitionWithTags;
 import com.azure.resourcemanager.resources.fluentcore.model.Creatable;
@@ -31,6 +34,16 @@ public interface LandingZoneDeployment {
 
       Deployable withResourceWithPurpose(
           RelayNamespace.DefinitionStages.WithCreate relay, ResourcePurpose sharedResource);
+
+      Deployable withResourceWithPurpose(
+          BatchAccount.DefinitionStages.WithCreate batchAccount, ResourcePurpose sharedResource);
+
+      Deployable withResourceWithPurpose(
+          Server.DefinitionStages.WithCreate batchAccount, ResourcePurpose sharedResource);
+
+      Deployable withResourceWithPurpose(
+          PrivateEndpoint.DefinitionStages.WithCreate privateEndpoint,
+          ResourcePurpose sharedResource);
 
       WithLandingZoneResource definePrerequisites();
     }

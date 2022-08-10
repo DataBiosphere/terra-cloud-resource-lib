@@ -16,8 +16,10 @@ class LandingZoneDefinitionFactoryListProviderImplTest {
   void listFactories_listContainsTestLandingZoneDefinitionFactory() {
     var provider = new LandingZoneDefinitionFactoryListProviderImpl();
 
+    List<FactoryDefinitionInfo> factoryDefinitionInfos = provider.listFactories();
+
     assertThat(
-        provider.listFactories(),
+        factoryDefinitionInfos,
         hasItem(
             new FactoryDefinitionInfo(
                 TestLandingZoneFactory.LZ_NAME,

@@ -3,6 +3,7 @@ package bio.terra.cloudres.azure.landingzones.definition.factories;
 import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_STORAGE_ACCOUNT_NAME_LENGTH;
 import static bio.terra.cloudres.azure.landingzones.definition.ResourceNameGenerator.MAX_VNET_NAME_LENGTH;
 
+import bio.terra.cloudres.azure.landingzones.definition.ArmManagers;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionContext;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionHeader;
 import bio.terra.cloudres.azure.landingzones.definition.DefinitionVersion;
@@ -13,7 +14,6 @@ import bio.terra.cloudres.azure.landingzones.deployment.ResourcePurpose;
 import bio.terra.cloudres.azure.landingzones.deployment.SubnetResourcePurpose;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.relay.RelayManager;
 import java.util.List;
 
 public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
@@ -22,9 +22,8 @@ public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
 
   TestLandingZoneFactory() {}
 
-  public TestLandingZoneFactory(
-      AzureResourceManager azureResourceManager, RelayManager relayManager) {
-    super(azureResourceManager, relayManager);
+  public TestLandingZoneFactory(ArmManagers armManagers) {
+    super(armManagers);
   }
 
   @Override
@@ -39,18 +38,19 @@ public class TestLandingZoneFactory extends ArmClientsDefinitionFactory {
 
   @Override
   public LandingZoneDefinable create(DefinitionVersion version) {
-    return new TestLandingZone(azureResourceManager, relayManager);
+    return new TestLandingZone(armManagers);
   }
 
   class TestLandingZone extends LandingZoneDefinition {
 
-    protected TestLandingZone(
-        AzureResourceManager azureResourceManager, RelayManager relayManager) {
-      super(azureResourceManager, relayManager);
+    protected TestLandingZone(ArmManagers armManagers) {
+      super(armManagers);
     }
 
     @Override
     public Deployable definition(DefinitionContext definitionContext) {
+      AzureResourceManager azureResourceManager = armManagers.azureResourceManager();
+
       var storage =
           azureResourceManager
               .storageAccounts()
