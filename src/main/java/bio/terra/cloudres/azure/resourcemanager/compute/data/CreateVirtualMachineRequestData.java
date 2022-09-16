@@ -87,10 +87,8 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
     JsonObject requestData = super.serializeCommon();
     requestData.addProperty("network", network().name());
     requestData.addProperty("subnetName", subnetName());
-    if (publicIpAddress() != null) {
-      requestData.addProperty("ip", publicIpAddress().ipAddress());
-    }
-    requestData.addProperty("disk", disk().name());
+    Optional.ofNullable(publicIpAddress()).ifPresent(ip -> requestData.addProperty("ip", ip.ipAddress()));
+    Optional.ofNullable(disk()).ifPresent(d -> requestData.addProperty("disk", d.name()));
     requestData.addProperty("image", image());
     return requestData;
   }
