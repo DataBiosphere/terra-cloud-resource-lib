@@ -28,6 +28,7 @@ public abstract class CreateVirtualMachineRequestData extends BaseComputeRequest
   public abstract PublicIpAddress publicIpAddress();
 
   /** Disk associated with the VM. */
+  @Nullable
   public abstract Disk disk();
 
   /** Virtual machine image name. */
