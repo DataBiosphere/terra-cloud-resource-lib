@@ -19,7 +19,9 @@ database. The resources tracked for cleanup can be later deleted, if they have n
 
 ## Requirements
 
-Java 17
+- Java 17
+- [git-secret](https://git-secret.io/installation)
+- git config updated via `./minnie-kenny.sh -f`
 
 ## Using the Gradle wrapper
 Set executable permissions:
@@ -54,7 +56,7 @@ And `common/src/testFixtures/resources/integration_service_account-user.json`
 
 Broad employees can get the credentials from Vault with:
 ```
-./render-test-config.sh
+./local-dev/render-test-config.sh
 ```
 Then actually run the tests with:
 ```
