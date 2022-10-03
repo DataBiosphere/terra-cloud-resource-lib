@@ -7,19 +7,20 @@ plugins {
     id 'maven-publish'
 }
 
+group = 'bio.terra'
+sourceCompatibility = JavaVersion.VERSION_11
+
+// If true, search local repository (~/.m2/repository/) first for dependencies.
+def useMavenLocal = false
 repositories {
+    if (useMavenLocal) {
+        mavenLocal() // must be listed first to take effect
+    }
     mavenCentral()
     google()
     maven {
         url 'https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/'
     }
-}
-
-group = 'bio.terra'
-sourceCompatibility = JavaVersion.VERSION_11
-
-configurations {
-    testImplementation.extendsFrom testFixturesImplementation
 }
 
 dependencies {
@@ -87,24 +88,11 @@ dependencies {
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'
 }
 
-dependencyLocking {
-    lockAllConfigurations() // see https://docs.gradle.org/current/userguide/dependency_locking.html
-}
-
-processTestResources {
-    // Include src/testFixtures/resources for integration test credentials.
-    from("$projectDir/src/testFixtures/resources")
-}
-
-// Linter
-spotless {
-    java {
-        googleJavaFormat()
-        targetExclude "${buildDir}/**"
-    }
-}
-
-build.dependsOn spotlessApply
+//java {
+   // toolchain {
+   //     languageVersion.set(JavaLanguageVersion.of(17))
+   // }
+//}
 
 // for Gradle Build Scans
 if (hasProperty("buildScan")) {
@@ -114,75 +102,8 @@ if (hasProperty("buildScan")) {
     }
 }
 
-// Modify the standard :test task to only include unit-tagged tests.
-test {
-    useJUnitPlatform {
-        includeTags 'unit'
-    }
-}
-
-// Create a new :integrationTest task to run integration tests. This won't be executed as
-// part of the standard `./gradlew build` invocation.
-task integrationTest(type: Test) {
-    useJUnitPlatform {
-        includeTags "integration"
-    }
-    shouldRunAfter test
-    // Force tests to always be re-run, since integration tests involve communicating with external
-    // resources.
-    outputs.upToDateWhen { false }
-}
-
-java {
-    // Builds Javadoc into the published package as part of the 'assemble' task.
-    withJavadocJar()
-    // Builds sources into the published package as part of the 'assemble' task.
-    withSourcesJar()
-}
-
-// Enforce that 'git secrets' is correctly installed and configured on the
-// current cloned git repo.
-task minniekenny(type: Exec) {
-    commandLine 'sh', file('minnie-kenny.sh')
-}
-
-test.dependsOn minniekenny
-
-def artifactory_repo_key = System.getenv("ARTIFACTORY_REPO_KEY") != null ? System.getenv("ARTIFACTORY_REPO_KEY") : 'libs-snapshot-local'
-def artifactory_username = System.getenv('ARTIFACTORY_USERNAME')
-def artifactory_password = System.getenv('ARTIFACTORY_PASSWORD')
-
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.hasTask(artifactoryPublish) &&
-            (artifactory_username == null || artifactory_password == null)) {
-        throw new GradleException("Set env vars ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD to publish")
-    }
-}
-
-// Upload Maven artifacts to Artifactory using the Artifcatory plugin.
-artifactory {
-    publish {
-        contextUrl = 'https://broadinstitute.jfrog.io/broadinstitute/'
-        repository {
-            repoKey = "${artifactory_repo_key}"
-            username = "${artifactory_username}"
-            password = "${artifactory_password}"
-        }
-        defaults {
-            publications('terraCloudResourceLib')
-            publishArtifacts = true
-            publishPom = true
-        }
-    }
-}
-
-// Publish jar file to a Maven module/artifact using the maven-publish plugin.
-publishing {
-    publications {
-        terraCloudResourceLib(MavenPublication) {
-            version = gradle.crlVersion
-            artifactId = rootProject.name
-            from components.java
-        }
-    }
-}
+apply from: "$rootDir/gradle/dependency-locking.gradle"
+apply from: "$rootDir/gradle/javadoc.gradle"
+apply from: "$rootDir/gradle/publishing.gradle"
+apply from: "$rootDir/gradle/spotless.gradle"
+apply from: "$rootDir/gradle/test.gradle"
