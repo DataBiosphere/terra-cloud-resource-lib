@@ -17,6 +17,10 @@ database. The resources tracked for cleanup can be later deleted, if they have n
 
 # Development
 
+## Requirements
+
+Java 17
+
 ## Using the Gradle wrapper
 Set executable permissions:
 ```
@@ -28,13 +32,8 @@ We use [Gradle's dependency locking](https://docs.gradle.org/current/userguide/d
 to ensure that builds use the same transitive dependencies, so they're reproducible. This means that
 adding or updating a dependency requires telling Gradle to save the change. If you're getting errors
 that mention "dependency lock state" after changing a dep, you need to do this step.
-
-```sh
-./gradlew :{subProjectName}:dependencies --write-locks
 ```
-For example:
-```sh
-./gradlew :google-bigquery:dependencies --write-locks
+./gradlew dependencies --write-locks
 ```
 
 ## Testing

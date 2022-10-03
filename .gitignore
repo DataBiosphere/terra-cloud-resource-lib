@@ -37,6 +37,9 @@ out/
 ### Mac directory metadata
 .DS_Store
 
+### Jenv directory-local version setting
+.java-version
+
 ### OpenAPI CodeGen detritus
 .openapi-generator/
 pom.xml
