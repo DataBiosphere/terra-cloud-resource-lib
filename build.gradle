@@ -8,7 +8,6 @@ plugins {
 }
 
 group = 'bio.terra'
-sourceCompatibility = JavaVersion.VERSION_11
 
 // If true, search local repository (~/.m2/repository/) first for dependencies.
 def useMavenLocal = false
