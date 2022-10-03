@@ -96,8 +96,6 @@ jobs:
           restore-keys: v1-${{ runner.os }}-gradle-${{ hashfiles('**/gradle-wrapper.properties') }}
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Lint
-        run: ./gradlew spotlessCheck
       - name: Build, assemble and test
         run: ./gradlew build -x minniekenny --scan # skip minniekenny
       # TODO(CA-814): Determine how to run tests based on modified packages.

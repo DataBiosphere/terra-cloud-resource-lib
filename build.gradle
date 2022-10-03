@@ -1,10 +1,11 @@
 plugins {
-    id 'com.diffplug.spotless' version '6.3.0'
-    id 'com.jfrog.artifactory' version '4.28.1'
     id 'idea'
     id 'java-library'
     id 'java-test-fixtures'
     id 'maven-publish'
+
+    id 'com.diffplug.spotless' version '6.10.0'
+    id 'com.jfrog.artifactory' version '4.29.0'
 }
 
 group = 'bio.terra'
@@ -23,19 +24,48 @@ repositories {
 }
 
 dependencies {
-    // Google dependencies - make sure we are using -jre and not android and use common bom
-    constraints {
-        implementation 'com.google.guava:guava:31.1-jre' // "-jre" for Java 8 or higher
-        testFixturesImplementation 'com.google.guava:guava:31.1-jre' // "-jre" for Java 8 or higher
+    // JSON processing
+    ext {
+        jackson = '2.13.4'
     }
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jackson}"
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: "${jackson}"
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "${jackson}"
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'
+
+    // Misc. Services
+    testImplementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '3.0.8'
+
+    // Google dependencies
+    constraints {
+        implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre' for Java 8 or higher
+        testFixturesImplementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre" for Java 8 or higher
+    }
+    implementation platform('com.google.cloud:libraries-bom:26.0.0') // use common bom
+    implementation group: 'com.google.cloud', name: 'google-cloud-pubsub'
+    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20220716-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20220710-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220720-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v2-rev20220505-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220526-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220716-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1-rev20220615-1.32.1'
+    api group: 'com.google.auth', name: 'google-auth-library-oauth2-http'
+    api group: 'com.google.cloud', name: 'google-cloud-billing'
+    api group: 'com.google.cloud', name: 'google-cloud-core-http'
+    api group: 'com.google.cloud', name: 'google-cloud-storage'
+    api group: 'com.google.guava', name: 'guava'
+    testFixturesImplementation platform('com.google.cloud:libraries-bom:26.0.0')
+    testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
 
     ext {
-        janitorclient = '0.114.0-SNAPSHOT'
+        autoValue = '1.9'
     }
+    implementation group: 'com.google.auto.value', name: 'auto-value-annotations', version: autoValue
+    annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: autoValue
 
-    annotationProcessor group: 'com.google.auto.value', name: 'auto-value', version: '1.7.3'
+    // Azure dependencies // TODO
 
-    // azure deps
     api group: 'com.azure', name: 'azure-core', version: '1.32.0'
     api group: 'com.azure', name: 'azure-identity', version: '1.4.3'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: '2.15.0'
@@ -44,47 +74,43 @@ dependencies {
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-relay', version: '1.0.0-beta.1'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.15.0'
 
-    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20201030-1.30.10'
-    api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20210411-1.31.0'
-    api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220224-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v2-rev20220217-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220217-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220125-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1beta1-rev20210806-1.32.1'
-    api group: 'com.google.auth', name: 'google-auth-library-oauth2-http'
-    api group: 'com.google.cloud', name: 'google-cloud-billing', version: '1.1.17'
-    api group: 'com.google.cloud', name: 'google-cloud-core-http'
-    api group: 'com.google.cloud', name: 'google-cloud-storage', version: '1.108.0'
-    api group: 'com.google.guava', name: 'guava'
-
-    implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
-    implementation group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.3.0'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.12.3'
-    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.12.3'
-    implementation group: 'com.google.auto.value', name: 'auto-value-annotations', version: '1.7.3'
-    implementation group: 'com.google.cloud', name: 'google-cloud-pubsub'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
-    implementation group: 'io.opencensus', name: 'opencensus-api', version: '0.28.3'
-    implementation group: 'io.opencensus', name: 'opencensus-impl', version: '0.28.3'
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
-    implementation platform('com.google.cloud:libraries-bom:25.1.0')
-
-    testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
     testFixturesImplementation group: 'com.azure', name: 'azure-core', version: '1.24.1'
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.10.0'
-    testFixturesImplementation group: 'junit', name: 'junit', version: '4.13'
-    testFixturesImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
-    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
-    testFixturesImplementation platform('com.google.cloud:libraries-bom:25.1.0')
 
-    testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
-    testImplementation group: 'org.glassfish.jersey.core', name: 'jersey-client', version: "2.31"
+
+    // Terra libraries
+    ext {
+        janitorclient = '0.114.0-SNAPSHOT' // TODO
+    }
+    implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
+    testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
+
+    // Logging
+    ext {
+        slf4j = '2.0.3'
+    }
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4j
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4j
+
+    // Metrics & Tracing
+    ext {
+        opencensus = '0.31.1'
+    }
+    implementation group: 'io.opencensus', name: 'opencensus-api', version: opencensus
+    implementation group: 'io.opencensus', name: 'opencensus-impl', version: opencensus
+
+    // Testing
+    ext {
+        jUnit = '5.9.0'
+    }
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jUnit
+    testFixturesImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: jUnit
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: jUnit
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.6.0'
-    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30' // For simple logging during testing
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
+    testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
 
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'
+    // implementation group: 'com.diffplug.spotless', name: 'spotless-plugin-gradle', version: '6.3.0' TODO needed?
 }
 
 java {
@@ -94,10 +120,10 @@ java {
 }
 
 // for Gradle Build Scans
-if (hasProperty("buildScan")) {
+if (hasProperty('buildScan')) {
     buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
     }
 }
 
