@@ -29,8 +29,6 @@ task integrationTest(type: Test) {
     // TODO(PF-2088) - Fix retry logic above for integration tests
 }
 
-
-
 // Enforce that 'git secrets' is correctly installed and configured on the
 // current cloned git repo.
 task minniekenny(type: Exec) {
