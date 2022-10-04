@@ -26,6 +26,7 @@ task integrationTest(type: Test) {
     // Force tests to always be re-run, since integration tests involve communicating with external
     // resources.
     outputs.upToDateWhen { false }
+    // TODO(PF-2088) - Fix retry logic above for integration tests
 }
 
 
