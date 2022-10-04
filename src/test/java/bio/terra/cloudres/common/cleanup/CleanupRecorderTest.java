@@ -89,7 +89,7 @@ public class CleanupRecorderTest {
           .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
   @BeforeEach
-  private void setup() throws Exception {
+  public void setup() throws Exception {
     CleanupRecorder.providePublisher(mockPublisher);
     CleanupRecorder.provideClock(Clock.fixed(CREATION.toInstant(), ZoneId.systemDefault()));
     when(mockPublisher.publish(any(PubsubMessage.class)))
