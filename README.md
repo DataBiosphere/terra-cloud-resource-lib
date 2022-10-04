@@ -17,6 +17,12 @@ database. The resources tracked for cleanup can be later deleted, if they have n
 
 # Development
 
+## Requirements
+
+- Java 17
+- [git-secret](https://git-secret.io/installation)
+- git config updated via `./minnie-kenny.sh -f`
+
 ## Using the Gradle wrapper
 Set executable permissions:
 ```
@@ -28,13 +34,8 @@ We use [Gradle's dependency locking](https://docs.gradle.org/current/userguide/d
 to ensure that builds use the same transitive dependencies, so they're reproducible. This means that
 adding or updating a dependency requires telling Gradle to save the change. If you're getting errors
 that mention "dependency lock state" after changing a dep, you need to do this step.
-
-```sh
-./gradlew :{subProjectName}:dependencies --write-locks
 ```
-For example:
-```sh
-./gradlew :google-bigquery:dependencies --write-locks
+./gradlew dependencies --write-locks
 ```
 
 ## Testing
@@ -55,16 +56,11 @@ And `common/src/testFixtures/resources/integration_service_account-user.json`
 
 Broad employees can get the credentials from Vault with:
 ```
-./render-test-config.sh
+./local-dev/render-test-config.sh
 ```
 Then actually run the tests with:
 ```
 ./gradlew integrationTest
-```
-
-Run a single test:
-```
-./gradlew :google-bigquery:integrationTest --tests BigQueryCowTest.listDataset
 ```
 
 TODO: Make this easier, consider making credentials path configurable.

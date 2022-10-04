@@ -1,0 +1,38 @@
+
+
+// Modify the standard :test task to only include unit-tagged tests.
+test {
+    useJUnitPlatform {
+        includeTags 'unit'
+    }
+}
+
+configurations {
+    testImplementation.extendsFrom testFixturesImplementation
+}
+
+processTestResources {
+    // Include src/testFixtures/resources for integration test credentials.
+    from("$projectDir/src/testFixtures/resources")
+}
+
+// Create a new :integrationTest task to run integration tests. This won't be executed as
+// part of the standard `./gradlew build` invocation.
+task integrationTest(type: Test) {
+    useJUnitPlatform {
+        includeTags "integration"
+    }
+    shouldRunAfter test
+    // Force tests to always be re-run, since integration tests involve communicating with external
+    // resources.
+    outputs.upToDateWhen { false }
+    // TODO(PF-2088) - Fix retry logic above for integration tests
+}
+
+// Enforce that 'git secrets' is correctly installed and configured on the
+// current cloned git repo.
+task minniekenny(type: Exec) {
+    commandLine 'sh', file('minnie-kenny.sh')
+}
+
+test.dependsOn minniekenny

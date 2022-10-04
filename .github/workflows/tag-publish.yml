@@ -17,11 +17,8 @@ name: Bump, Tag, and Publish
 # - BROADBOT_TOKEN - the broadbot token, so we can avoid two reviewer rule on GHA operations
 on:
   push:
-    branches:
-      - master
-    paths-ignore:
-      - 'README.md'
-      - '.github/**'
+    branches: [ master ]
+    paths-ignore: [ '**.md', '.github/**' ]
   workflow_dispatch:
     inputs:
       bump:
@@ -37,10 +34,12 @@ on:
         description: 'Branch to run the workflow on'
         required: false
         default: master
+
 env:
   SERVICE_NAME: ${{ github.event.repository.name }}
   GOOGLE_PROJECT: terra-kernel-k8s
   GKE_CLUSTER: terra-kernel-k8s
+
 jobs:
   tag-publish-job:
     runs-on: ubuntu-latest
@@ -81,12 +80,12 @@ jobs:
           VERSION_FILE_PATH: settings.gradle
           VERSION_LINE_MATCH: "^gradle.ext.crlVersion\\s*=\\s*\".*\""
           VERSION_SUFFIX: SNAPSHOT
-      - name: Set up AdoptOpenJDK
+      - name: Set up JDK 17
         if: steps.skiptest.outputs.is-bump == 'no'
         uses: actions/setup-java@v3
         with:
-          java-version: 11
           distribution: 'temurin'
+          java-version: 17
       - name: Cache Gradle packages
         if: steps.skiptest.outputs.is-bump == 'no'
         uses: actions/cache@v2

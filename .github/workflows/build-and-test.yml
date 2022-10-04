@@ -6,8 +6,11 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ master ]
+    paths-ignore: [ '**.md' ]
   pull_request:
+    # Branch settings require status checks before merging, so don't add paths-ignore.
     branches: [ '**' ]
+
 env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
   VAULT_SERVICE_ACCOUNT_ADMIN_PATH: secret/dsde/terra/crl-test/default/service-account-admin.json
@@ -20,6 +23,7 @@ env:
   SERVICE_ACCOUNT_JANITOR_CLIENT_FILE: src/testFixtures/resources/integration_service_account_janitor_client.json
   AZURE_MANAGED_APP_CLIENT_FILE: src/testFixtures/resources/integration_azure_managed_app_client.json
   AZURE_PROPERTIES_FILE: src/testFixtures/resources/integration_azure_env.properties
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -76,11 +80,11 @@ jobs:
           integration.azure.admin.clientSecret=${AZURE_MANAGED_APP_CLIENT_SECRET}
           integration.azure.admin.tenantId=${AZURE_MANAGED_APP_TENANT_ID}
           EOF
-      - name: Set up AdoptOpenJDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: 11
           distribution: 'temurin'
+          java-version: 17
       # See https://github.com/actions/cache/blob/main/examples.md#java---gradle
       - name: Cache Gradle packages
         uses: actions/cache@v2
