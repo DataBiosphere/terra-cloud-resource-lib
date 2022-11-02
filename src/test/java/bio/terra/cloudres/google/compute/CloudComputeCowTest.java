@@ -260,6 +260,12 @@ public class CloudComputeCowTest {
   }
 
   @Test
+  public void listZone() throws Exception {
+    ZoneList zoneList = defaultCompute().zones().list(reusableProject.getProjectId()).execute();
+    assertThat(zoneList.getItems().size(), Matchers.greaterThan(0));
+  }
+
+  @Test
   public void networkInsertSerialize() throws Exception {
     Network network = new Network().setName("network-name");
     CloudComputeCow.Networks.Insert insert =

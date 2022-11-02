@@ -619,6 +619,61 @@ public class CloudComputeCow {
         return result;
       }
     }
+
+    /** See {@link Compute.Zones#list(String)}. */
+    public List list(String project) throws IOException {
+      return new List(zones.list(project));
+    }
+
+    public class List extends AbstractRequestCow<ZoneList> {
+      private final Compute.Zones.List list;
+
+      private List(Compute.Zones.List list) {
+        super(CloudComputeOperation.GOOGLE_LIST_ZONE, clientConfig, operationAnnotator, list);
+        this.list = list;
+      }
+
+      /** See {@link Compute.Zones.List#setProject(String)}. */
+      public List setProject(String project) {
+        this.list.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Zones.List#setFilter(String)}. */
+      public List setFilter(String filter) {
+        this.list.setFilter(filter);
+        return this;
+      }
+
+      /** See {@link Compute.Zones.List#setMaxResults(Long)}. */
+      public List setMaxResults(Long maxResults) {
+        this.list.setMaxResults(maxResults);
+        return this;
+      }
+
+      /** See {@link Compute.Zones.List#setOrderBy(String)}. */
+      public List setOrderBy(String orderBy) {
+        this.list.setOrderBy(orderBy);
+        return this;
+      }
+
+      /** See {@link Compute.Zones.List#setPageToken(String)}. */
+      public List setPageToken(String pageToken) {
+        this.list.setPageToken(pageToken);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", list.getProject());
+        result.addProperty("filter", list.getFilter());
+        result.addProperty("max_results", list.getMaxResults());
+        result.addProperty("order_by", list.getOrderBy());
+        result.addProperty("page_token", list.getPageToken());
+        return result;
+      }
+    }
   }
 
   /**
