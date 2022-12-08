@@ -2,6 +2,7 @@ package bio.terra.cloudres.google.notebooks;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.OperationAnnotator;
+import bio.terra.cloudres.common.notebooks.NotebooksCow;
 import bio.terra.cloudres.google.api.services.common.AbstractRequestCow;
 import bio.terra.cloudres.google.api.services.common.Defaults;
 import bio.terra.cloudres.google.api.services.common.OperationCow;
@@ -31,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import bio.terra.cloudres.common.notebooks.NotebooksCow;
 
 /** A Cloud Object Wrapper(COW) for Google API Client Library: {@link AIPlatformNotebooks} */
 public class GcpNotebooksCow implements NotebooksCow {
@@ -41,8 +41,7 @@ public class GcpNotebooksCow implements NotebooksCow {
   private final OperationAnnotator operationAnnotator;
   private final AIPlatformNotebooks notebooks;
 
-  public GcpNotebooksCow(
-      ClientConfig clientConfig, AIPlatformNotebooks.Builder notebooksBuilder) {
+  public GcpNotebooksCow(ClientConfig clientConfig, AIPlatformNotebooks.Builder notebooksBuilder) {
     this.clientConfig = clientConfig;
     operationAnnotator = new OperationAnnotator(clientConfig, logger);
     notebooks = notebooksBuilder.build();
@@ -79,12 +78,18 @@ public class GcpNotebooksCow implements NotebooksCow {
       return new Create(instances.create(parent, instance), instance);
     }
 
-    /** Create an instance with the {@link GcpNotebookInstanceName}. See {@link #create(String, Instance)}. */
-    public Create create(GcpNotebookInstanceName gcpNotebookInstanceName, Instance instance) throws IOException {
+    /**
+     * Create an instance with the {@link GcpNotebookInstanceName}. See {@link #create(String,
+     * Instance)}.
+     */
+    public Create create(GcpNotebookInstanceName gcpNotebookInstanceName, Instance instance)
+        throws IOException {
       Preconditions.checkArgument(
-          instance.getName() == null || instance.getName().equals(gcpNotebookInstanceName.formatName()),
+          instance.getName() == null
+              || instance.getName().equals(gcpNotebookInstanceName.formatName()),
           "The instance name and it's desired name should be the same if set.");
-      return create(gcpNotebookInstanceName.formatParent(), instance).setInstanceId(gcpNotebookInstanceName.instanceId());
+      return create(gcpNotebookInstanceName.formatParent(), instance)
+          .setInstanceId(gcpNotebookInstanceName.instanceId());
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Create}. */
@@ -278,7 +283,8 @@ public class GcpNotebooksCow implements NotebooksCow {
     }
 
     /** {@link #getIamPolicy(String)} override for {@link GcpNotebookInstanceName}. */
-    public GetIamPolicy getIamPolicy(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException {
+    public GetIamPolicy getIamPolicy(GcpNotebookInstanceName gcpNotebookInstanceName)
+        throws IOException {
       return getIamPolicy(gcpNotebookInstanceName.formatName());
     }
 
@@ -338,8 +344,12 @@ public class GcpNotebooksCow implements NotebooksCow {
       return new SetIamPolicy(instances.setIamPolicy(resource, content));
     }
 
-    /** {@link #setIamPolicy(String, SetIamPolicyRequest)} override for {@link GcpNotebookInstanceName}. */
-    public SetIamPolicy setIamPolicy(GcpNotebookInstanceName gcpNotebookInstanceName, SetIamPolicyRequest content)
+    /**
+     * {@link #setIamPolicy(String, SetIamPolicyRequest)} override for {@link
+     * GcpNotebookInstanceName}.
+     */
+    public SetIamPolicy setIamPolicy(
+        GcpNotebookInstanceName gcpNotebookInstanceName, SetIamPolicyRequest content)
         throws IOException {
       return setIamPolicy(gcpNotebookInstanceName.formatName(), content);
     }
@@ -471,9 +481,11 @@ public class GcpNotebooksCow implements NotebooksCow {
      * UpdateInstanceMetadataItemsRequest)}.
      */
     public UpdateMetadataItems updateMetadataItems(
-        GcpNotebookInstanceName gcpNotebookInstanceName, Map<String, String> metadata) throws IOException {
+        GcpNotebookInstanceName gcpNotebookInstanceName, Map<String, String> metadata)
+        throws IOException {
       return instances.updateMetadataItems(
-          gcpNotebookInstanceName.formatName(), new UpdateInstanceMetadataItemsRequest().setItems(metadata));
+          gcpNotebookInstanceName.formatName(),
+          new UpdateInstanceMetadataItemsRequest().setItems(metadata));
     }
 
     /**
@@ -486,8 +498,8 @@ public class GcpNotebooksCow implements NotebooksCow {
     }
 
     /**
-     * Test the IAM permissoins of a service account with the {@link GcpNotebookInstanceName}. See {@link
-     * #testIamPermissions(String, TestIamPermissionsRequest)}.
+     * Test the IAM permissoins of a service account with the {@link GcpNotebookInstanceName}. See
+     * {@link #testIamPermissions(String, TestIamPermissionsRequest)}.
      */
     public TestIamPermissions testIamPermissions(
         GcpNotebookInstanceName name, TestIamPermissionsRequest content) throws IOException {
@@ -573,7 +585,8 @@ public class GcpNotebooksCow implements NotebooksCow {
     }
 
     public OperationCow<Operation> operationCow(Operation operation) {
-      return new OperationCow<>(operation, GcpNotebooksOperationAdapter::new, op -> get(op.getName()));
+      return new OperationCow<>(
+          operation, GcpNotebooksOperationAdapter::new, op -> get(op.getName()));
     }
   }
 }

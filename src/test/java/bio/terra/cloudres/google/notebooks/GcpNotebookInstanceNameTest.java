@@ -23,13 +23,15 @@ public class GcpNotebookInstanceNameTest {
 
   @Test
   public void invalidName() {
-    assertThrows(IllegalArgumentException.class, () -> GcpNotebookInstanceName.fromNameFormat("foo"));
+    assertThrows(
+        IllegalArgumentException.class, () -> GcpNotebookInstanceName.fromNameFormat("foo"));
   }
 
   @Test
   public void parent() {
     String parent = "projects/my-project/locations/uswest1-b";
-    GcpNotebookInstanceName gcpNotebookInstanceName = GcpNotebookInstanceName.fromParentAndId(parent, "my-id");
+    GcpNotebookInstanceName gcpNotebookInstanceName =
+        GcpNotebookInstanceName.fromParentAndId(parent, "my-id");
 
     assertEquals("my-project", gcpNotebookInstanceName.projectId());
     assertEquals("uswest1-b", gcpNotebookInstanceName.location());
@@ -40,7 +42,8 @@ public class GcpNotebookInstanceNameTest {
   @Test
   public void invalidParent() {
     assertThrows(
-        IllegalArgumentException.class, () -> GcpNotebookInstanceName.fromParentAndId("foo", "my-id"));
+        IllegalArgumentException.class,
+        () -> GcpNotebookInstanceName.fromParentAndId("foo", "my-id"));
   }
 
   @Test

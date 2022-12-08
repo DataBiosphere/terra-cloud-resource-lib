@@ -70,14 +70,16 @@ public class GcpNotebooksCowTest {
   }
 
   /**
-   * Creates a notebook instance for the {@link GcpNotebookInstanceName}. Blocks until the instance is created
-   * successfully or fails
+   * Creates a notebook instance for the {@link GcpNotebookInstanceName}. Blocks until the instance
+   * is created successfully or fails
    */
-  private void createInstance(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException, InterruptedException {
+  private void createInstance(GcpNotebookInstanceName gcpNotebookInstanceName)
+      throws IOException, InterruptedException {
     OperationCow<Operation> createOperation =
         notebooks
             .operations()
-            .operationCow(notebooks.instances().create(gcpNotebookInstanceName, defaultInstance()).execute());
+            .operationCow(
+                notebooks.instances().create(gcpNotebookInstanceName, defaultInstance()).execute());
     OperationTestUtils.pollAndAssertSuccess(
         createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
   }
@@ -111,7 +113,9 @@ public class GcpNotebooksCowTest {
         Matchers.hasItem(gcpNotebookInstanceName.formatName()));
 
     OperationCow<Operation> deleteOperation =
-        notebooks.operations().operationCow(notebooks.instances().delete(gcpNotebookInstanceName).execute());
+        notebooks
+            .operations()
+            .operationCow(notebooks.instances().delete(gcpNotebookInstanceName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         deleteOperation, Duration.ofSeconds(30), Duration.ofMinutes(5));
 
@@ -133,7 +137,8 @@ public class GcpNotebooksCowTest {
 
     notebooks
         .instances()
-        .updateMetadataItems(gcpNotebookInstanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"))
+        .updateMetadataItems(
+            gcpNotebookInstanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"))
         .execute();
 
     retrievedInstance = notebooks.instances().get(gcpNotebookInstanceName).execute();
@@ -146,7 +151,8 @@ public class GcpNotebooksCowTest {
 
   @Test
   public void setGetTestIamPolicyNotebookInstance() throws Exception {
-    GcpNotebookInstanceName gcpNotebookInstanceName = defaultInstanceName().instanceId("set-get-iam").build();
+    GcpNotebookInstanceName gcpNotebookInstanceName =
+        defaultInstanceName().instanceId("set-get-iam").build();
     createInstance(gcpNotebookInstanceName);
 
     String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
@@ -189,20 +195,27 @@ public class GcpNotebooksCowTest {
 
   @Test
   public void stopStartNotebookInstance() throws Exception {
-    GcpNotebookInstanceName gcpNotebookInstanceName = defaultInstanceName().instanceId("stop-start").build();
+    GcpNotebookInstanceName gcpNotebookInstanceName =
+        defaultInstanceName().instanceId("stop-start").build();
     createInstance(gcpNotebookInstanceName);
 
     OperationCow<Operation> stopOperation =
-        notebooks.operations().operationCow(notebooks.instances().stop(gcpNotebookInstanceName).execute());
+        notebooks
+            .operations()
+            .operationCow(notebooks.instances().stop(gcpNotebookInstanceName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertEquals("STOPPED", notebooks.instances().get(gcpNotebookInstanceName).execute().getState());
+    assertEquals(
+        "STOPPED", notebooks.instances().get(gcpNotebookInstanceName).execute().getState());
 
     OperationCow<Operation> startOperation =
-        notebooks.operations().operationCow(notebooks.instances().start(gcpNotebookInstanceName).execute());
+        notebooks
+            .operations()
+            .operationCow(notebooks.instances().start(gcpNotebookInstanceName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertEquals("PROVISIONING", notebooks.instances().get(gcpNotebookInstanceName).execute().getState());
+    assertEquals(
+        "PROVISIONING", notebooks.instances().get(gcpNotebookInstanceName).execute().getState());
 
     notebooks.instances().delete(gcpNotebookInstanceName).execute();
   }
