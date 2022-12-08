@@ -36,8 +36,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("integration")
-public class AIPlatformNotebooksCowTest {
-  private static final AIPlatformNotebooksCow notebooks = defaultNotebooksCow();
+public class GcpNotebooksCowTest {
+  private static final GcpNotebooksCow notebooks = defaultNotebooksCow();
   /** A dynamically created Google Project to manipulate AI Notebooks within for testing. */
   private static Project reusableProject;
 
@@ -52,9 +52,9 @@ public class AIPlatformNotebooksCowTest {
     reusableNetwork = NetworkUtils.exceuteCreateNetwork(reusableProject.getProjectId(), true);
   }
 
-  private static AIPlatformNotebooksCow defaultNotebooksCow() {
+  private static GcpNotebooksCow defaultNotebooksCow() {
     try {
-      return AIPlatformNotebooksCow.create(
+      return GcpNotebooksCow.create(
           IntegrationUtils.DEFAULT_CLIENT_CONFIG,
           IntegrationCredentials.getAdminGoogleCredentialsOrDie());
     } catch (GeneralSecurityException | IOException e) {
@@ -62,22 +62,22 @@ public class AIPlatformNotebooksCowTest {
     }
   }
 
-  private static InstanceName.Builder defaultInstanceName() {
-    return InstanceName.builder()
+  private static GcpNotebookInstanceName.Builder defaultInstanceName() {
+    return GcpNotebookInstanceName.builder()
         .projectId(reusableProject.getProjectId())
         .location("us-east1-b")
         .instanceId("default-id");
   }
 
   /**
-   * Creates a notebook instance for the {@link InstanceName}. Blocks until the instance is created
+   * Creates a notebook instance for the {@link GcpNotebookInstanceName}. Blocks until the instance is created
    * successfully or fails
    */
-  private void createInstance(InstanceName instanceName) throws IOException, InterruptedException {
+  private void createInstance(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException, InterruptedException {
     OperationCow<Operation> createOperation =
         notebooks
             .operations()
-            .operationCow(notebooks.instances().create(instanceName, defaultInstance()).execute());
+            .operationCow(notebooks.instances().create(gcpNotebookInstanceName, defaultInstance()).execute());
     OperationTestUtils.pollAndAssertSuccess(
         createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
   }
@@ -96,80 +96,80 @@ public class AIPlatformNotebooksCowTest {
 
   @Test
   public void createGetListDeleteNotebookInstance() throws Exception {
-    InstanceName instanceName = defaultInstanceName().build();
-    createInstance(instanceName);
+    GcpNotebookInstanceName gcpNotebookInstanceName = defaultInstanceName().build();
+    createInstance(gcpNotebookInstanceName);
 
-    Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
-    assertEquals(instanceName.formatName(), retrievedInstance.getName());
+    Instance retrievedInstance = notebooks.instances().get(gcpNotebookInstanceName).execute();
+    assertEquals(gcpNotebookInstanceName.formatName(), retrievedInstance.getName());
 
     ListInstancesResponse listResponse =
-        notebooks.instances().list(instanceName.formatParent()).execute();
+        notebooks.instances().list(gcpNotebookInstanceName.formatParent()).execute();
     // There may be other notebook instances from other tests.
     assertThat(listResponse.getInstances().size(), Matchers.greaterThan(0));
     assertThat(
         listResponse.getInstances().stream().map(Instance::getName).collect(Collectors.toList()),
-        Matchers.hasItem(instanceName.formatName()));
+        Matchers.hasItem(gcpNotebookInstanceName.formatName()));
 
     OperationCow<Operation> deleteOperation =
-        notebooks.operations().operationCow(notebooks.instances().delete(instanceName).execute());
+        notebooks.operations().operationCow(notebooks.instances().delete(gcpNotebookInstanceName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         deleteOperation, Duration.ofSeconds(30), Duration.ofMinutes(5));
 
     GoogleJsonResponseException e =
         assertThrows(
             GoogleJsonResponseException.class,
-            () -> notebooks.instances().get(instanceName).execute());
+            () -> notebooks.instances().get(gcpNotebookInstanceName).execute());
     assertEquals(404, e.getStatusCode());
   }
 
   @Test
   public void updateNotebookInstanceMetadata() throws Exception {
-    InstanceName instanceName =
+    GcpNotebookInstanceName gcpNotebookInstanceName =
         defaultInstanceName().instanceId("instance-with-foobar-metadata").build();
-    createInstance(instanceName);
+    createInstance(gcpNotebookInstanceName);
 
-    Instance retrievedInstance = notebooks.instances().get(instanceName).execute();
-    assertEquals(instanceName.formatName(), retrievedInstance.getName());
+    Instance retrievedInstance = notebooks.instances().get(gcpNotebookInstanceName).execute();
+    assertEquals(gcpNotebookInstanceName.formatName(), retrievedInstance.getName());
 
     notebooks
         .instances()
-        .updateMetadataItems(instanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"))
+        .updateMetadataItems(gcpNotebookInstanceName.formatName(), ImmutableMap.of("foo", "bar", "count", "3"))
         .execute();
 
-    retrievedInstance = notebooks.instances().get(instanceName).execute();
+    retrievedInstance = notebooks.instances().get(gcpNotebookInstanceName).execute();
     var metadata = retrievedInstance.getMetadata();
     assertEquals("bar", metadata.get("foo"));
     assertEquals("3", metadata.get("count"));
 
-    notebooks.instances().delete(instanceName).execute();
+    notebooks.instances().delete(gcpNotebookInstanceName).execute();
   }
 
   @Test
   public void setGetTestIamPolicyNotebookInstance() throws Exception {
-    InstanceName instanceName = defaultInstanceName().instanceId("set-get-iam").build();
-    createInstance(instanceName);
+    GcpNotebookInstanceName gcpNotebookInstanceName = defaultInstanceName().instanceId("set-get-iam").build();
+    createInstance(gcpNotebookInstanceName);
 
     String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
     Binding binding =
         new Binding()
             .setRole("roles/notebooks.viewer")
             .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
-    Policy policy = notebooks.instances().getIamPolicy(instanceName).execute();
+    Policy policy = notebooks.instances().getIamPolicy(gcpNotebookInstanceName).execute();
     policy.setBindings(ImmutableList.of(binding));
 
     Policy updatedPolicy =
         notebooks
             .instances()
-            .setIamPolicy(instanceName, new SetIamPolicyRequest().setPolicy(policy))
+            .setIamPolicy(gcpNotebookInstanceName, new SetIamPolicyRequest().setPolicy(policy))
             .execute();
 
     assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
-    Policy secondRetrieval = notebooks.instances().getIamPolicy(instanceName).execute();
+    Policy secondRetrieval = notebooks.instances().getIamPolicy(gcpNotebookInstanceName).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
 
     // Test the permissions of the user for which the IAM policy was set.
-    AIPlatformNotebooksCow userNotebooks =
-        AIPlatformNotebooksCow.create(
+    GcpNotebooksCow userNotebooks =
+        GcpNotebooksCow.create(
             IntegrationUtils.DEFAULT_CLIENT_CONFIG,
             IntegrationCredentials.getUserGoogleCredentialsOrDie());
     // Notebook get permission from "roles/notebooks.viewer".
@@ -178,33 +178,33 @@ public class AIPlatformNotebooksCowTest {
         userNotebooks
             .instances()
             .testIamPermissions(
-                instanceName,
+                gcpNotebookInstanceName,
                 new TestIamPermissionsRequest()
                     .setPermissions(ImmutableList.of(getNotebookPermission)))
             .execute();
     assertThat(iamResponse.getPermissions(), Matchers.contains(getNotebookPermission));
 
-    notebooks.instances().delete(instanceName).execute();
+    notebooks.instances().delete(gcpNotebookInstanceName).execute();
   }
 
   @Test
   public void stopStartNotebookInstance() throws Exception {
-    InstanceName instanceName = defaultInstanceName().instanceId("stop-start").build();
-    createInstance(instanceName);
+    GcpNotebookInstanceName gcpNotebookInstanceName = defaultInstanceName().instanceId("stop-start").build();
+    createInstance(gcpNotebookInstanceName);
 
     OperationCow<Operation> stopOperation =
-        notebooks.operations().operationCow(notebooks.instances().stop(instanceName).execute());
+        notebooks.operations().operationCow(notebooks.instances().stop(gcpNotebookInstanceName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertEquals("STOPPED", notebooks.instances().get(instanceName).execute().getState());
+    assertEquals("STOPPED", notebooks.instances().get(gcpNotebookInstanceName).execute().getState());
 
     OperationCow<Operation> startOperation =
-        notebooks.operations().operationCow(notebooks.instances().start(instanceName).execute());
+        notebooks.operations().operationCow(notebooks.instances().start(gcpNotebookInstanceName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertEquals("PROVISIONING", notebooks.instances().get(instanceName).execute().getState());
+    assertEquals("PROVISIONING", notebooks.instances().get(gcpNotebookInstanceName).execute().getState());
 
-    notebooks.instances().delete(instanceName).execute();
+    notebooks.instances().delete(gcpNotebookInstanceName).execute();
   }
 
   @Test
@@ -219,7 +219,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .create(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -236,7 +236,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .get(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -252,7 +252,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .delete(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -283,7 +283,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .getIamPolicy(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -309,7 +309,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .setIamPolicy(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -326,7 +326,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .start(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -342,7 +342,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .stop(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")
@@ -359,7 +359,7 @@ public class AIPlatformNotebooksCowTest {
         notebooks
             .instances()
             .testIamPermissions(
-                InstanceName.builder()
+                GcpNotebookInstanceName.builder()
                     .projectId("my-project")
                     .location("us-east1-b")
                     .instanceId("my-id")

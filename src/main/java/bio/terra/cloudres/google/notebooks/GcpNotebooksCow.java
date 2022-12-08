@@ -31,27 +31,28 @@ import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import bio.terra.cloudres.common.notebooks.NotebooksCow;
 
 /** A Cloud Object Wrapper(COW) for Google API Client Library: {@link AIPlatformNotebooks} */
-public class AIPlatformNotebooksCow {
-  private final Logger logger = LoggerFactory.getLogger(AIPlatformNotebooksCow.class);
+public class GcpNotebooksCow implements NotebooksCow {
+  private final Logger logger = LoggerFactory.getLogger(GcpNotebooksCow.class);
 
   private final ClientConfig clientConfig;
   private final OperationAnnotator operationAnnotator;
   private final AIPlatformNotebooks notebooks;
 
-  public AIPlatformNotebooksCow(
+  public GcpNotebooksCow(
       ClientConfig clientConfig, AIPlatformNotebooks.Builder notebooksBuilder) {
     this.clientConfig = clientConfig;
     operationAnnotator = new OperationAnnotator(clientConfig, logger);
     notebooks = notebooksBuilder.build();
   }
 
-  /** Create a {@link AIPlatformNotebooksCow} with some default configurations for convenience. */
-  public static AIPlatformNotebooksCow create(
+  /** Create a {@link GcpNotebooksCow} with some default configurations for convenience. */
+  public static GcpNotebooksCow create(
       ClientConfig clientConfig, GoogleCredentials googleCredentials)
       throws GeneralSecurityException, IOException {
-    return new AIPlatformNotebooksCow(
+    return new GcpNotebooksCow(
         clientConfig,
         new AIPlatformNotebooks.Builder(
                 Defaults.httpTransport(),
@@ -78,12 +79,12 @@ public class AIPlatformNotebooksCow {
       return new Create(instances.create(parent, instance), instance);
     }
 
-    /** Create an instance with the {@link InstanceName}. See {@link #create(String, Instance)}. */
-    public Create create(InstanceName instanceName, Instance instance) throws IOException {
+    /** Create an instance with the {@link GcpNotebookInstanceName}. See {@link #create(String, Instance)}. */
+    public Create create(GcpNotebookInstanceName gcpNotebookInstanceName, Instance instance) throws IOException {
       Preconditions.checkArgument(
-          instance.getName() == null || instance.getName().equals(instanceName.formatName()),
+          instance.getName() == null || instance.getName().equals(gcpNotebookInstanceName.formatName()),
           "The instance name and it's desired name should be the same if set.");
-      return create(instanceName.formatParent(), instance).setInstanceId(instanceName.instanceId());
+      return create(gcpNotebookInstanceName.formatParent(), instance).setInstanceId(gcpNotebookInstanceName.instanceId());
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Create}. */
@@ -94,7 +95,7 @@ public class AIPlatformNotebooksCow {
       private Create(
           AIPlatformNotebooks.Projects.Locations.Instances.Create create, Instance instance) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_CREATE_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_CREATE_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             create);
@@ -121,21 +122,21 @@ public class AIPlatformNotebooksCow {
 
       @Override
       protected Optional<CloudResourceUid> resourceUidCreation() {
-        InstanceName instanceName =
-            InstanceName.fromParentAndId(create.getParent(), create.getInstanceId());
+        GcpNotebookInstanceName gcpNotebookInstanceName =
+            GcpNotebookInstanceName.fromParentAndId(create.getParent(), create.getInstanceId());
         return Optional.of(
             new CloudResourceUid()
                 .googleAiNotebookInstanceUid(
                     new GoogleAiNotebookInstanceUid()
-                        .projectId(instanceName.projectId())
-                        .location(instanceName.location())
-                        .instanceId(instanceName.instanceId())));
+                        .projectId(gcpNotebookInstanceName.projectId())
+                        .location(gcpNotebookInstanceName.location())
+                        .instanceId(gcpNotebookInstanceName.instanceId())));
       }
 
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromParentAndId(create.getParent(), create.getInstanceId())
+        GcpNotebookInstanceName.fromParentAndId(create.getParent(), create.getInstanceId())
             .addProperties(result);
         result.add("instance", new Gson().toJsonTree(instance));
         return result;
@@ -148,8 +149,8 @@ public class AIPlatformNotebooksCow {
     }
 
     /** Delete override for InstanceName. See {@link #delete(String)}. */
-    public Delete delete(InstanceName instanceName) throws IOException {
-      return delete(instanceName.formatName());
+    public Delete delete(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException {
+      return delete(gcpNotebookInstanceName.formatName());
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Delete}. */
@@ -158,7 +159,7 @@ public class AIPlatformNotebooksCow {
 
       private Delete(AIPlatformNotebooks.Projects.Locations.Instances.Delete delete) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_DELETE_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_DELETE_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             delete);
@@ -172,7 +173,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(delete.getName()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(delete.getName()).addProperties(result);
         return result;
       }
     }
@@ -183,8 +184,8 @@ public class AIPlatformNotebooksCow {
     }
 
     /** Get override for InstanceName. See {@link #get(String)}. */
-    public Get get(InstanceName instanceName) throws IOException {
-      return get(instanceName.formatName());
+    public Get get(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException {
+      return get(gcpNotebookInstanceName.formatName());
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.Get}. */
@@ -193,7 +194,7 @@ public class AIPlatformNotebooksCow {
 
       private Get(AIPlatformNotebooks.Projects.Locations.Instances.Get get) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_GET_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_GET_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             get);
@@ -207,7 +208,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(get.getName()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(get.getName()).addProperties(result);
         return result;
       }
     }
@@ -224,7 +225,7 @@ public class AIPlatformNotebooksCow {
 
       private List(AIPlatformNotebooks.Projects.Locations.Instances.List list) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_LIST_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_LIST_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             list);
@@ -276,9 +277,9 @@ public class AIPlatformNotebooksCow {
       return new GetIamPolicy(instances.getIamPolicy(resource));
     }
 
-    /** {@link #getIamPolicy(String)} override for {@link InstanceName}. */
-    public GetIamPolicy getIamPolicy(InstanceName instanceName) throws IOException {
-      return getIamPolicy(instanceName.formatName());
+    /** {@link #getIamPolicy(String)} override for {@link GcpNotebookInstanceName}. */
+    public GetIamPolicy getIamPolicy(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException {
+      return getIamPolicy(gcpNotebookInstanceName.formatName());
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy}. */
@@ -288,7 +289,7 @@ public class AIPlatformNotebooksCow {
       private GetIamPolicy(
           AIPlatformNotebooks.Projects.Locations.Instances.GetIamPolicy getIamPolicy) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_GET_IAM_POLICY_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_GET_IAM_POLICY_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             getIamPolicy);
@@ -321,7 +322,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(getResource()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(getResource()).addProperties(result);
         result.addProperty(
             "options_requested_policy_version", getIamPolicy.getOptionsRequestedPolicyVersion());
         return result;
@@ -337,10 +338,10 @@ public class AIPlatformNotebooksCow {
       return new SetIamPolicy(instances.setIamPolicy(resource, content));
     }
 
-    /** {@link #setIamPolicy(String, SetIamPolicyRequest)} override for {@link InstanceName}. */
-    public SetIamPolicy setIamPolicy(InstanceName instanceName, SetIamPolicyRequest content)
+    /** {@link #setIamPolicy(String, SetIamPolicyRequest)} override for {@link GcpNotebookInstanceName}. */
+    public SetIamPolicy setIamPolicy(GcpNotebookInstanceName gcpNotebookInstanceName, SetIamPolicyRequest content)
         throws IOException {
-      return setIamPolicy(instanceName.formatName(), content);
+      return setIamPolicy(gcpNotebookInstanceName.formatName(), content);
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Instances.SetIamPolicy}. */
@@ -350,7 +351,7 @@ public class AIPlatformNotebooksCow {
       private SetIamPolicy(
           AIPlatformNotebooks.Projects.Locations.Instances.SetIamPolicy setIamPolicy) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_SET_IAM_POLICY_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_SET_IAM_POLICY_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             setIamPolicy);
@@ -370,7 +371,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(getResource()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(getResource()).addProperties(result);
         result.add(
             "content", new Gson().toJsonTree(setIamPolicy.getJsonContent()).getAsJsonObject());
         return result;
@@ -387,9 +388,9 @@ public class AIPlatformNotebooksCow {
       return new Start(instances.start(name, new StartInstanceRequest()));
     }
 
-    /** {@link #start(String)} override for {@link InstanceName}. */
-    public Start start(InstanceName instanceName) throws IOException {
-      return start(instanceName.formatName());
+    /** {@link #start(String)} override for {@link GcpNotebookInstanceName}. */
+    public Start start(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException {
+      return start(gcpNotebookInstanceName.formatName());
     }
 
     public class Start extends AbstractRequestCow<Operation> {
@@ -397,7 +398,7 @@ public class AIPlatformNotebooksCow {
 
       private Start(AIPlatformNotebooks.Projects.Locations.Instances.Start start) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_START_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_START_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             start);
@@ -411,7 +412,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(getName()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(getName()).addProperties(result);
         return result;
       }
     }
@@ -426,9 +427,9 @@ public class AIPlatformNotebooksCow {
       return new Stop(instances.stop(name, new StopInstanceRequest()));
     }
 
-    /** {@link #stop(String)} override for {@link InstanceName}. */
-    public Stop stop(InstanceName instanceName) throws IOException {
-      return stop(instanceName.formatName());
+    /** {@link #stop(String)} override for {@link GcpNotebookInstanceName}. */
+    public Stop stop(GcpNotebookInstanceName gcpNotebookInstanceName) throws IOException {
+      return stop(gcpNotebookInstanceName.formatName());
     }
 
     public class Stop extends AbstractRequestCow<Operation> {
@@ -436,7 +437,7 @@ public class AIPlatformNotebooksCow {
 
       private Stop(AIPlatformNotebooks.Projects.Locations.Instances.Stop stop) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_STOP_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_STOP_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             stop);
@@ -450,7 +451,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(getName()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(getName()).addProperties(result);
         return result;
       }
     }
@@ -470,9 +471,9 @@ public class AIPlatformNotebooksCow {
      * UpdateInstanceMetadataItemsRequest)}.
      */
     public UpdateMetadataItems updateMetadataItems(
-        InstanceName instanceName, Map<String, String> metadata) throws IOException {
+        GcpNotebookInstanceName gcpNotebookInstanceName, Map<String, String> metadata) throws IOException {
       return instances.updateMetadataItems(
-          instanceName.formatName(), new UpdateInstanceMetadataItemsRequest().setItems(metadata));
+          gcpNotebookInstanceName.formatName(), new UpdateInstanceMetadataItemsRequest().setItems(metadata));
     }
 
     /**
@@ -485,11 +486,11 @@ public class AIPlatformNotebooksCow {
     }
 
     /**
-     * Test the IAM permissoins of a service account with the {@link InstanceName}. See {@link
+     * Test the IAM permissoins of a service account with the {@link GcpNotebookInstanceName}. See {@link
      * #testIamPermissions(String, TestIamPermissionsRequest)}.
      */
     public TestIamPermissions testIamPermissions(
-        InstanceName name, TestIamPermissionsRequest content) throws IOException {
+        GcpNotebookInstanceName name, TestIamPermissionsRequest content) throws IOException {
       return testIamPermissions(name.formatName(), content);
     }
 
@@ -501,7 +502,7 @@ public class AIPlatformNotebooksCow {
       private TestIamPermissions(
           AIPlatformNotebooks.Projects.Locations.Instances.TestIamPermissions testIamPermissions) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_TEST_IAM_PERMISSIONS_NOTEBOOKS_INSTANCE,
+            GcpNotebooksOperation.GOOGLE_TEST_IAM_PERMISSIONS_NOTEBOOKS_INSTANCE,
             clientConfig,
             operationAnnotator,
             testIamPermissions);
@@ -524,7 +525,7 @@ public class AIPlatformNotebooksCow {
       @Override
       protected JsonObject serialize() {
         JsonObject result = new JsonObject();
-        InstanceName.fromNameFormat(getResource()).addProperties(result);
+        GcpNotebookInstanceName.fromNameFormat(getResource()).addProperties(result);
         result.add(
             "content",
             new Gson().toJsonTree(testIamPermissions.getJsonContent()).getAsJsonObject());
@@ -534,8 +535,8 @@ public class AIPlatformNotebooksCow {
   }
 
   /** See {@link AIPlatformNotebooks.Projects.Locations.Instances#operations()}. */
-  public AIPlatformNotebooksCow.Operations operations() {
-    return new AIPlatformNotebooksCow.Operations(notebooks.projects().locations().operations());
+  public GcpNotebooksCow.Operations operations() {
+    return new GcpNotebooksCow.Operations(notebooks.projects().locations().operations());
   }
 
   /** See {@link AIPlatformNotebooks.Projects.Locations.Operations}. */
@@ -547,8 +548,8 @@ public class AIPlatformNotebooksCow {
     }
 
     /** See {@link AIPlatformNotebooks.Projects.Locations.Operations#get(String)} */
-    public AIPlatformNotebooksCow.Operations.Get get(String name) throws IOException {
-      return new AIPlatformNotebooksCow.Operations.Get(operations.get(name));
+    public GcpNotebooksCow.Operations.Get get(String name) throws IOException {
+      return new GcpNotebooksCow.Operations.Get(operations.get(name));
     }
 
     public class Get extends AbstractRequestCow<Operation> {
@@ -556,7 +557,7 @@ public class AIPlatformNotebooksCow {
 
       public Get(AIPlatformNotebooks.Projects.Locations.Operations.Get get) {
         super(
-            AIPlatformNotebooksOperation.GOOGLE_NOTEBOOKS_OPERATION_GET,
+            GcpNotebooksOperation.GOOGLE_NOTEBOOKS_OPERATION_GET,
             clientConfig,
             operationAnnotator,
             get);
@@ -572,7 +573,7 @@ public class AIPlatformNotebooksCow {
     }
 
     public OperationCow<Operation> operationCow(Operation operation) {
-      return new OperationCow<>(operation, NotebooksOperationAdapter::new, op -> get(op.getName()));
+      return new OperationCow<>(operation, GcpNotebooksOperationAdapter::new, op -> get(op.getName()));
     }
   }
 }

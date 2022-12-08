@@ -1,5 +1,6 @@
 package bio.terra.cloudres.google.notebooks;
 
+import bio.terra.cloudres.common.notebooks.InstanceName;
 import com.google.api.services.notebooks.v1.model.Instance;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
  * {@link com.google.api.services.notebooks.v1.AIPlatformNotebooks.Projects.Locations.Instances}.
  */
 @AutoValue
-public abstract class InstanceName {
+public abstract class GcpNotebookInstanceName implements InstanceName {
   private static final Pattern NAME_PATTERN =
       Pattern.compile("^projects/([^/]+)/locations/([^/]+)/instances/([^/]+)$");
   private static final Pattern PARENT_PATTERN =
@@ -44,18 +45,18 @@ public abstract class InstanceName {
   }
 
   /**
-   * Parse the name format to create an {@link InstanceName}.
+   * Parse the name format to create an {@link GcpNotebookInstanceName}.
    *
    * @throws IllegalArgumentException on parse failure.
    * @see #formatName()
    */
-  public static InstanceName fromNameFormat(String name) {
+  public static GcpNotebookInstanceName fromNameFormat(String name) {
     Matcher matcher = NAME_PATTERN.matcher(name);
     if (!matcher.matches()) {
       throw new IllegalArgumentException(
           String.format("Name must conform to %s but got '%s'", NAME_PATTERN.pattern(), name));
     }
-    return InstanceName.builder()
+    return GcpNotebookInstanceName.builder()
         .projectId(matcher.group(1))
         .location(matcher.group(2))
         .instanceId(matcher.group(3))
@@ -63,19 +64,19 @@ public abstract class InstanceName {
   }
 
   /**
-   * Parse the parent format with an instance ID to create an {@link InstanceName}.
+   * Parse the parent format with an instance ID to create an {@link GcpNotebookInstanceName}.
    *
    * @throws IllegalArgumentException on parse failure.
    * @see #formatParent()
    */
-  public static InstanceName fromParentAndId(String parent, String instanceId) {
+  public static GcpNotebookInstanceName fromParentAndId(String parent, String instanceId) {
     Matcher matcher = PARENT_PATTERN.matcher(parent);
     if (!matcher.matches()) {
       throw new IllegalArgumentException(
           String.format(
               "PARENT must conform to %s but got '%s'", PARENT_PATTERN.pattern(), parent));
     }
-    return InstanceName.builder()
+    return GcpNotebookInstanceName.builder()
         .projectId(matcher.group(1))
         .location(matcher.group(2))
         .instanceId(instanceId)
@@ -83,7 +84,7 @@ public abstract class InstanceName {
   }
 
   public static Builder builder() {
-    return new AutoValue_InstanceName.Builder();
+    return new AutoValue_GcpNotebookInstanceName.Builder();
   }
 
   /** Adds properties to the JsonObject for the fields on this. */
@@ -93,7 +94,7 @@ public abstract class InstanceName {
     jsonObject.addProperty("instanceId", instanceId());
   }
 
-  /** Builder for {@link InstanceName}. */
+  /** Builder for {@link GcpNotebookInstanceName}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder projectId(String projectId);
@@ -102,6 +103,6 @@ public abstract class InstanceName {
 
     public abstract Builder instanceId(String instanceId);
 
-    public abstract InstanceName build();
+    public abstract GcpNotebookInstanceName build();
   }
 }

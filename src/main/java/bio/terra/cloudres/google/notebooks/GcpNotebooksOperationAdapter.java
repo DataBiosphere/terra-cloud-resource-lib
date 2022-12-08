@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 /** A {@link OperationCow.OperationAdapter} for {@link Operation}. */
-class NotebooksOperationAdapter implements OperationCow.OperationAdapter<Operation> {
+class GcpNotebooksOperationAdapter implements OperationCow.OperationAdapter<Operation> {
   private final Operation operation;
 
-  NotebooksOperationAdapter(Operation operation) {
+  GcpNotebooksOperationAdapter(Operation operation) {
     this.operation = operation;
   }
 
