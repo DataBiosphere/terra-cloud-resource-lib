@@ -79,6 +79,11 @@ dependencies {
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: azureRsrcMg
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: azureRsrcMg
 
+    // AWS dependencies
+    implementation platform('software.amazon.awssdk:bom:2.18.34')
+    implementation 'software.amazon.awssdk:auth'
+    implementation 'software.amazon.awssdk:sagemaker'
+
     // Terra libraries
     ext {
         janitorclient = '0.114.0-SNAPSHOT'
