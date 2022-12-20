@@ -68,6 +68,7 @@ dependencies {
     ext {
         azureCore = '1.32.0'
         azureRsrcMg = '2.19.0'
+        azureRsrcMgBatch = '1.0.0'
     }
     api group: 'com.azure', name: 'azure-core', version: azureCore
     testFixturesImplementation group: 'com.azure', name: 'azure-core', version: azureCore
@@ -77,11 +78,12 @@ dependencies {
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-msi', version: azureRsrcMg
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-relay', version: '1.0.0-beta.1'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: azureRsrcMg
+    api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-batch', version: azureRsrcMgBatch
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: azureRsrcMg
 
     // Terra libraries
     ext {
-        janitorclient = '0.114.0-SNAPSHOT'
+        janitorclient = '0.113.15-TOAZ-284-update-janitor-2-SNAPSHOT'
     }
     implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
     testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient

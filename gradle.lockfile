@@ -1,8 +1,9 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
-bio.terra:terra-resource-janitor-client:0.114.0-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+bio.terra:terra-resource-janitor-client:0.113.15-TOAZ-284-update-janitor-2-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-authorization:2.19.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+com.azure.resourcemanager:azure-resourcemanager-batch:1.0.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-compute:2.19.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-containerinstance:2.19.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-msi:2.19.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
@@ -134,7 +135,7 @@ io.perfmark:perfmark-api:0.25.0=runtimeClasspath,testFixturesRuntimeClasspath,te
 io.projectreactor.netty:reactor-netty-core:1.0.22=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 io.projectreactor.netty:reactor-netty-http:1.0.22=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 io.projectreactor:reactor-core:3.4.22=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
-io.swagger.core.v3:swagger-annotations:2.1.5=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+io.swagger.core.v3:swagger-annotations:2.2.2=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 jakarta.activation:jakarta.activation-api:1.2.2=runtimeClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 jakarta.annotation:jakarta.annotation-api:1.3.5=runtimeClasspath,testFixturesRuntimeClasspath
 jakarta.annotation:jakarta.annotation-api:2.0.0=testCompileClasspath,testRuntimeClasspath

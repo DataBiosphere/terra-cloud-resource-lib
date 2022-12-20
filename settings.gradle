@@ -1,3 +1,3 @@
 rootProject.name = 'terra-cloud-resource-lib'
 // The next line should only be changed by the BroadBot d.b.a. bumptagbot.
-gradle.ext.crlVersion = "1.2.5-SNAPSHOT"
+gradle.ext.crlVersion = "1.2.5-TOAZ-284-2-SNAPSHOT"
