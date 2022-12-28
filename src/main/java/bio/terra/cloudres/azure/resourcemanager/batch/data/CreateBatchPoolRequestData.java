@@ -5,7 +5,6 @@ import bio.terra.cloudres.common.CloudOperation;
 import bio.terra.janitor.model.AzureBatchPool;
 import bio.terra.janitor.model.AzureResourceGroup;
 import bio.terra.janitor.model.CloudResourceUid;
-import com.azure.core.management.Region;
 import com.google.auto.value.AutoValue;
 import com.google.gson.JsonObject;
 import java.util.Optional;
@@ -47,13 +46,13 @@ public abstract class CreateBatchPoolRequestData extends BaseBatchPoolRequestDat
 
     public abstract CreateBatchPoolRequestData.Builder setVmSize(String value);
 
-    public abstract CreateBatchPoolRequestData.Builder setRegion(Region value);
-
     public abstract CreateBatchPoolRequestData.Builder setTenantId(String value);
 
     public abstract CreateBatchPoolRequestData.Builder setSubscriptionId(String value);
 
     public abstract CreateBatchPoolRequestData.Builder setResourceGroupName(String value);
+
+    public abstract CreateBatchPoolRequestData.Builder setBatchAccountName(String value);
 
     public abstract CreateBatchPoolRequestData build();
   }
