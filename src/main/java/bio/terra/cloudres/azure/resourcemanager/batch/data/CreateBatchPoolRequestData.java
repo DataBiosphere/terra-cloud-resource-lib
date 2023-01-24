@@ -33,6 +33,7 @@ public abstract class CreateBatchPoolRequestData extends BaseBatchPoolRequestDat
                             .tenantId(tenantId())
                             .subscriptionId(subscriptionId())
                             .resourceGroupName(resourceGroupName()))
+                    .batchAccountName(batchAccountName())
                     .id(id())));
   }
 

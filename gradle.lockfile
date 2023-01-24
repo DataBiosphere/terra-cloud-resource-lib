@@ -1,7 +1,7 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
-bio.terra:terra-resource-janitor-client:0.113.15-TOAZ-284-update-janitor-2-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
+bio.terra:terra-resource-janitor-client:0.113.15-TOAZ-284-update-janitor-3-SNAPSHOT=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-authorization:2.19.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-batch:1.0.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
 com.azure.resourcemanager:azure-resourcemanager-compute:2.19.0=compileClasspath,runtimeClasspath,testCompileClasspath,testFixturesCompileClasspath,testFixturesRuntimeClasspath,testRuntimeClasspath
