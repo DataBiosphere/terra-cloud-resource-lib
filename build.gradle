@@ -83,7 +83,7 @@ dependencies {
 
     // Terra libraries
     ext {
-        janitorclient = '0.113.15-TOAZ-284-update-janitor-3-SNAPSHOT'
+        janitorclient = '0.113.16-SNAPSHOT'
     }
     implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
     testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
