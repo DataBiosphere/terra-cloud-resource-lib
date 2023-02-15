@@ -4,12 +4,13 @@
 name: Java CI with Gradle
 
 on:
+  workflow_dispatch: {}
   push:
     branches: [ master ]
     paths-ignore: [ '**.md' ]
   pull_request:
     # Branch settings require status checks before merging, so don't add paths-ignore.
-    branches: [ '**' ]
+    branches: [ master ]
 
 env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
