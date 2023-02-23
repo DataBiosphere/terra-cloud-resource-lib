@@ -57,12 +57,14 @@ public class CloudBillingClientCowTest {
   public void testIamPermissions() throws Exception {
     Project project = ProjectUtils.executeCreateProject();
     try (CloudBillingClientCow billingCow = defaultBillingCow()) {
-      ProjectBillingInfo initialBilling =
-          billingCow.getProjectBillingInfo("projects/" + project.getProjectId());
+      ProjectBillingInfo setBilling =
+          ProjectBillingInfo.newBuilder().setBillingAccountName(BILLING_ACCOUNT_NAME).build();
+      ProjectBillingInfo updatedBilling =
+          billingCow.updateProjectBillingInfo("projects/" + project.getProjectId(), setBilling);
       var permissions = List.of("billing.resourceAssociations.create");
       var request =
           TestIamPermissionsRequest.newBuilder()
-              .setResource(initialBilling.getBillingAccountName())
+              .setResource(updatedBilling.getBillingAccountName())
               .addAllPermissions(permissions)
               .build();
       var response = billingCow.testIamPermissions(request);
