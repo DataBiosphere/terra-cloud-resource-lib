@@ -29,7 +29,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Pull Vault image
         run: docker pull vault:1.1.0
       # Currently, there's no way to add capabilities to Docker actions on Git, and Vault needs IPC_LOCK to run.
