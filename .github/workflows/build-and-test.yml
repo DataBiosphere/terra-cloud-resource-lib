@@ -29,7 +29,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Pull Vault image
         run: docker pull vault:1.1.0
       # Currently, there's no way to add capabilities to Docker actions on Git, and Vault needs IPC_LOCK to run.
@@ -43,7 +43,7 @@ jobs:
               auth/approle/login role_id=${{ secrets.VAULT_APPROLE_ROLE_ID }} \
               secret_id=${{ secrets.VAULT_APPROLE_SECRET_ID }})
           echo ::add-mask::$VAULT_TOKEN
-          echo ::set-output name=vault-token::$VAULT_TOKEN
+          echo vault-token=$VAULT_TOKEN >> $GITHUB_OUTPUT
       - name: Get service account credentials from Vault
         id: vault-secret-step
         run: |
@@ -88,7 +88,7 @@ jobs:
           java-version: 17
       # See https://github.com/actions/cache/blob/main/examples.md#java---gradle
       - name: Cache Gradle packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -105,7 +105,7 @@ jobs:
         run: ./gradlew integrationTest --scan
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Test Reports
           path: |
