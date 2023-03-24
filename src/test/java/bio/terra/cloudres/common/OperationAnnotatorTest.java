@@ -54,18 +54,20 @@ public class OperationAnnotatorTest {
         }
       };
 
-  private final OperationAnnotator.CowExecute<?> RETRIABLE_COW_EXECUTE = new OperationAnnotator.CowExecute<Void>() {
-    int retryCount = 0;
-    @Override
-    public Void execute() {
-      if (retryCount == OperationAnnotator.MAX_RETRIES) {
-        return null;
-      } else {
-        retryCount += 1;
-        throw new ResourceManagerException(500, ERROR_MESSAGE);
-      }
-    }
-  };
+  private final OperationAnnotator.CowExecute<?> RETRIABLE_COW_EXECUTE =
+      new OperationAnnotator.CowExecute<Void>() {
+        int retryCount = 0;
+
+        @Override
+        public Void execute() {
+          if (retryCount == OperationAnnotator.MAX_RETRIES) {
+            return null;
+          } else {
+            retryCount += 1;
+            throw new ResourceManagerException(500, ERROR_MESSAGE);
+          }
+        }
+      };
 
   private static final OperationAnnotator.CowExecute<?> SERVER_ERROR_RESPONSE_COW_EXECUTE =
       () -> {
@@ -309,11 +311,13 @@ public class OperationAnnotatorTest {
     operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
     Assert.assertThrows(
         ResourceManagerException.class,
-        () -> operationAnnotator.executeCowOperation(
-        StubCloudOperation.TEST_OPERATION, SERVER_ERROR_RESPONSE_COW_EXECUTE, SERIALIZE));
+        () ->
+            operationAnnotator.executeCowOperation(
+                StubCloudOperation.TEST_OPERATION, SERVER_ERROR_RESPONSE_COW_EXECUTE, SERIALIZE));
 
     // Validate the logged response has tryCount set
-    verify(mockLogger).debug(any(), gsonArgumentCaptor.capture(), exceptionArgumentCaptor.capture());
+    verify(mockLogger)
+        .debug(any(), gsonArgumentCaptor.capture(), exceptionArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
     assertEquals(json.getAsJsonPrimitive("tryCount").getAsInt(), OperationAnnotator.MAX_RETRIES);
 

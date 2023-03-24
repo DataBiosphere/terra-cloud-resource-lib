@@ -94,8 +94,8 @@ public class OperationAnnotator {
         }
       }
     } finally {
-      // Record operation and close the span exactly once, regardless of how many times the operation
-      // was retried.
+      // Record operation and close the span exactly once, regardless of how many times the
+      // operation was retried.
       recordOperation(
           OperationData.builder()
               .setCloudOperation(cloudOperation)
