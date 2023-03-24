@@ -23,6 +23,12 @@ public class MetricsTestUtil {
           TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
           TagValue.create("404"));
 
+  public static final List<TagValue> ERROR_COUNT_500 =
+      Arrays.asList(
+          TagValue.create(CLIENT),
+          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
+          TagValue.create("500"));
+
   public static final View.Name API_VIEW_NAME =
       View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");
   public static final View.Name ERROR_VIEW_NAME =
