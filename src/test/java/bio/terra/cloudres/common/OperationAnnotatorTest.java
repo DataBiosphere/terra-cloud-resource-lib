@@ -54,6 +54,24 @@ public class OperationAnnotatorTest {
         }
       };
 
+  private final OperationAnnotator.CowExecute<?> RETRIABLE_COW_EXECUTE = new OperationAnnotator.CowExecute<Void>() {
+    int retryCount = 0;
+    @Override
+    public Void execute() {
+      if (retryCount == OperationAnnotator.MAX_RETRIES) {
+        return null;
+      } else {
+        retryCount += 1;
+        throw new ResourceManagerException(500, ERROR_MESSAGE);
+      }
+    }
+  };
+
+  private static final OperationAnnotator.CowExecute<?> SERVER_ERROR_RESPONSE_COW_EXECUTE =
+      () -> {
+        throw new ResourceManagerException(500, ERROR_MESSAGE);
+      };
+
   private static final OperationAnnotator.CowSerialize SERIALIZE =
       () -> {
         return PROJECT_REQUEST;
@@ -262,5 +280,46 @@ public class OperationAnnotatorTest {
 
     // Verify logger was invoked with an exception
     verify(mockLogger, times(1)).debug(anyString(), any(JsonObject.class), any(Exception.class));
+  }
+
+  @Test
+  public void test500ResponseIsRetried() throws Exception {
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+
+    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
+    operationAnnotator.executeCowOperation(
+        StubCloudOperation.TEST_OPERATION, RETRIABLE_COW_EXECUTE, SERIALIZE);
+
+    // Validate the logged response has tryCount set
+    verify(mockLogger).debug(any(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    assertEquals(json.getAsJsonPrimitive("tryCount").getAsInt(), OperationAnnotator.MAX_RETRIES);
+
+    // Also validate the operation was successfully performed
+    sleepForSpansExport();
+    // One cloud api count
+    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
+  }
+
+  @Test
+  public void testMaxRetries() throws Exception {
+    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_500);
+
+    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
+    Assert.assertThrows(
+        ResourceManagerException.class,
+        () -> operationAnnotator.executeCowOperation(
+        StubCloudOperation.TEST_OPERATION, SERVER_ERROR_RESPONSE_COW_EXECUTE, SERIALIZE));
+
+    // Validate the logged response has tryCount set
+    verify(mockLogger).debug(any(), gsonArgumentCaptor.capture(), exceptionArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    assertEquals(json.getAsJsonPrimitive("tryCount").getAsInt(), OperationAnnotator.MAX_RETRIES);
+
+    // Validate the cloud API was called once and there was one 500 error.
+    sleepForSpansExport();
+    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
+    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_500, errorCount, 1);
   }
 }

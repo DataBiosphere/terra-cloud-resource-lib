@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
+
+  @VisibleForTesting public static final int MAX_RETRIES = 5;
   private static final Tracer tracer = Tracing.getTracer();
 
   private final ClientConfig clientConfig;
@@ -56,7 +58,8 @@ public class OperationAnnotator {
   }
 
   /**
-   * Executes the CowOperation and allows for checked exceptions.
+   * Executes the CowOperation and allows for checked exceptions. Retries 500 errors from cloud
+   * providers.
    *
    * @param cloudOperation: the {@link CloudOperation} to operate.
    * @param cowExecute: how to execute this cloud operation
@@ -68,19 +71,31 @@ public class OperationAnnotator {
       throws E {
     Optional<Exception> executionException = Optional.empty();
     OptionalInt httpStatusCode = OptionalInt.empty();
+    int retryCount = 0;
     Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
 
     Stopwatch stopwatch = Stopwatch.createStarted();
     try {
-      R response = cowExecute.execute();
-      return response;
-    } catch (Exception e) {
-      // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency in
-      // different scenarios.
-      httpStatusCode = getHttpErrorCode(e);
-      executionException = Optional.of(e);
-      throw e;
+      while (true) {
+        try {
+          return cowExecute.execute();
+        } catch (Exception e) {
+          // TODO(yonghao): Add success/error tag for latency for us to track differentiate latency
+          // in different scenarios.
+          httpStatusCode = getHttpErrorCode(e);
+          if (retryCount < MAX_RETRIES
+              && httpStatusCode.isPresent()
+              && httpStatusCode.getAsInt() == 500) {
+            retryCount += 1;
+            continue;
+          }
+          executionException = Optional.of(e);
+          throw e;
+        }
+      }
     } finally {
+      // Record operation and close the span exactly once, regardless of how many times the operation
+      // was retried.
       recordOperation(
           OperationData.builder()
               .setCloudOperation(cloudOperation)
@@ -88,6 +103,7 @@ public class OperationAnnotator {
               .setExecutionException(executionException)
               .setHttpStatusCode(httpStatusCode)
               .setRequestData(cowSerialize.serializeRequest())
+              .setTryCount(retryCount)
               .build());
 
       // We manually manage the span so that the expected span is still present in catch and
