@@ -134,9 +134,7 @@ public class SageMakerNotebookCow implements AutoCloseable {
     pollForNotebookStatus(instanceName, NotebookInstanceStatus.STOPPED);
   }
 
-  /**
-   * Delete a SageMaker notebook.
-   */
+  /** Delete a SageMaker notebook. */
   public void delete(String instanceName) {
     operationAnnotator.executeCowOperation(
         SageMakerNotebookOperation.AWS_DELETE_NOTEBOOK,
