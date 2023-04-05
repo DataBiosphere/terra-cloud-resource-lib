@@ -85,7 +85,7 @@ public class SageMakerNotebookCow implements AutoCloseable {
                 DescribeNotebookInstanceRequest.builder()
                     .notebookInstanceName(instanceName)
                     .build()),
-        () -> createJsonObjectWithSingleField("instanceName", instanceName));
+        () -> serializeInstanceName(instanceName));
   }
 
   /**
@@ -99,7 +99,7 @@ public class SageMakerNotebookCow implements AutoCloseable {
         () ->
             notebooksClient.startNotebookInstance(
                 StartNotebookInstanceRequest.builder().notebookInstanceName(instanceName).build()),
-        () -> createJsonObjectWithSingleField("instanceName", instanceName));
+        () -> serializeInstanceName(instanceName));
   }
 
   /**
@@ -114,7 +114,7 @@ public class SageMakerNotebookCow implements AutoCloseable {
   /**
    * Request that SageMaker stop a notebook instance. This method will return immediately after
    * sending the request, use {@link #stopAndWait(String)} to additionally wait until the instance
-   * is available to a user.
+   * is fully stopped.
    */
   public void stop(String instanceName) {
     operationAnnotator.executeCowOperation(
@@ -122,11 +122,11 @@ public class SageMakerNotebookCow implements AutoCloseable {
         () ->
             notebooksClient.stopNotebookInstance(
                 StopNotebookInstanceRequest.builder().notebookInstanceName(instanceName).build()),
-        () -> createJsonObjectWithSingleField("instanceName", instanceName));
+        () -> serializeInstanceName(instanceName));
   }
 
   /**
-   * Request that SageMaker start a notebook instance and block until the instance is usable. To
+   * Request that SageMaker stop a notebook instance and block until the instance is stopped. To
    * return immediately after making the request instead, use {@link #stop(String)}.
    */
   public void stopAndWait(String instanceName) {
@@ -141,7 +141,7 @@ public class SageMakerNotebookCow implements AutoCloseable {
         () ->
             notebooksClient.deleteNotebookInstance(
                 DeleteNotebookInstanceRequest.builder().notebookInstanceName(instanceName).build()),
-        () -> createJsonObjectWithSingleField("instanceName", instanceName));
+        () -> serializeInstanceName(instanceName));
   }
 
   private void pollForNotebookStatus(String instanceName, NotebookInstanceStatus expectedStatus) {
@@ -160,18 +160,12 @@ public class SageMakerNotebookCow implements AutoCloseable {
 
     ResponseOrException<DescribeNotebookInstanceResponse> responseOrException =
         waiterResponse.matched();
-    if (responseOrException.response().isPresent()) {
-      return;
-    } else if (responseOrException.exception().isPresent()) {
+    if (responseOrException.exception().isPresent()) {
       // Log and surface any errors from AWS, clients should handle these appropriately.
       var t = responseOrException.exception().get();
-      logger.error("Error polling notebook instance expectedStatus: " + t);
-      if (t instanceof RuntimeException) {
-        throw (RuntimeException) t;
-      } else {
-        throw new RuntimeException("Error while polling for notebook status", t);
-      }
-    } else {
+      logger.error("Error polling notebook instance expectedStatus {}: ", expectedStatus, t);
+      throw new CrlSageMakerException("Error while polling for notebook status: ", t);
+    } else if (responseOrException.response().isEmpty()) {
       logger.error(
           "Encountered ResponseOrException without response or exception. This should never happen.");
     }
@@ -183,6 +177,11 @@ public class SageMakerNotebookCow implements AutoCloseable {
     var obj = new JsonObject();
     obj.addProperty(key, value.toString());
     return obj;
+  }
+
+  @VisibleForTesting
+  public JsonObject serializeInstanceName(String instanceName) {
+    return createJsonObjectWithSingleField("instanceName", instanceName);
   }
 
   @Override

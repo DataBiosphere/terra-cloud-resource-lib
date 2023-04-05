@@ -95,12 +95,22 @@ public class S3BucketCow implements AutoCloseable {
   }
 
   public ListObjectsV2Response listBlobs(String bucketName, String prefix) {
+    // A null continuationToken is ignored by the AWS client
+    return listBlobs(bucketName, prefix, /*continuationToken=*/ null);
+  }
+
+  public ListObjectsV2Response listBlobs(
+      String bucketName, String prefix, String continuationToken) {
     return operationAnnotator.executeCowOperation(
         S3BucketOperation.AWS_LIST_S3_OBJECTS,
         () ->
             bucketClient.listObjectsV2(
-                ListObjectsV2Request.builder().bucket(bucketName).prefix(prefix).build()),
-        () -> serialize(bucketName, prefix));
+                ListObjectsV2Request.builder()
+                    .bucket(bucketName)
+                    .prefix(prefix)
+                    .continuationToken(continuationToken)
+                    .build()),
+        () -> serialize(bucketName, prefix, continuationToken));
   }
 
   /**
@@ -123,6 +133,15 @@ public class S3BucketCow implements AutoCloseable {
     var ser = new JsonObject();
     ser.addProperty("bucketName", bucketName);
     ser.addProperty("objectPath", objectPath);
+    return ser;
+  }
+
+  @VisibleForTesting
+  public JsonObject serialize(String bucketName, String objectPath, String continuationToken) {
+    var ser = new JsonObject();
+    ser.addProperty("bucketName", bucketName);
+    ser.addProperty("objectPath", objectPath);
+    ser.addProperty("continuationToken", continuationToken);
     return ser;
   }
 

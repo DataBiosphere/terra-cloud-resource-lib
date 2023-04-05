@@ -69,8 +69,7 @@ public class SageMakerNotebookCowTest {
     notebookCow.get(instanceName);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        notebookCow.createJsonObjectWithSingleField("instanceName", instanceName);
+    JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(),
@@ -84,8 +83,7 @@ public class SageMakerNotebookCowTest {
     notebookCow.start(instanceName);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        notebookCow.createJsonObjectWithSingleField("instanceName", instanceName);
+    JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(),
@@ -99,8 +97,7 @@ public class SageMakerNotebookCowTest {
     notebookCow.stop(instanceName);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        notebookCow.createJsonObjectWithSingleField("instanceName", instanceName);
+    JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(),
@@ -114,8 +111,7 @@ public class SageMakerNotebookCowTest {
     notebookCow.delete(instanceName);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        notebookCow.createJsonObjectWithSingleField("instanceName", instanceName);
+    JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(),

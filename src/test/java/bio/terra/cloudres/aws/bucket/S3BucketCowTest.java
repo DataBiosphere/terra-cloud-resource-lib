@@ -135,7 +135,24 @@ public class S3BucketCowTest {
     bucketCow.listBlobs(fakeBucketName, fakeBlobPrefix);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeBlobPrefix);
+    JsonObject serializedRequest =
+        bucketCow.serialize(fakeBucketName, fakeBlobPrefix, (String) null);
+    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(
+        json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
+  }
+
+  @Test
+  public void listBlobsWithContinuationTest() {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    String fakeBlobPrefix = "fake/prefix/to/object";
+    String continuationToken = "more_objects_please";
+    bucketCow.listBlobs(fakeBucketName, fakeBlobPrefix, continuationToken);
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    JsonObject serializedRequest =
+        bucketCow.serialize(fakeBucketName, fakeBlobPrefix, continuationToken);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
