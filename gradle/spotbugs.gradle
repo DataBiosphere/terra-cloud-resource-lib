@@ -2,7 +2,6 @@
 spotbugs {
     effort = 'max'
     extraArgs = ['-emacs']
-    includeFilter = file('gradle/config/spotbugs/exclude.xml')
 }
 
 spotbugsMain {
