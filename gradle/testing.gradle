@@ -19,7 +19,7 @@ processTestResources {
 // part of the standard `./gradlew build` invocation.
 task integrationTest(type: Test) {
     useJUnitPlatform {
-        includeTags "integration"
+        includeTags 'integration'
     }
     shouldRunAfter test
     // Force tests to always be re-run, since integration tests involve communicating with external
