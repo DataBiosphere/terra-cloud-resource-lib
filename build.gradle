@@ -6,6 +6,7 @@ plugins {
 
     id 'com.diffplug.spotless' version '6.10.0'
     id 'com.jfrog.artifactory' version '4.29.0'
+    id 'org.sonarqube' version '4.0.0.2929'
 }
 
 group = 'bio.terra'
@@ -139,8 +140,10 @@ if (hasProperty('buildScan')) {
     }
 }
 
-apply from: "$rootDir/gradle/dependency-locking.gradle"
-apply from: "$rootDir/gradle/javadoc.gradle"
-apply from: "$rootDir/gradle/publishing.gradle"
-apply from: "$rootDir/gradle/spotless.gradle"
-apply from: "$rootDir/gradle/test.gradle"
+def gradleIncDir= "$rootDir/gradle"
+apply from: "$gradleIncDir/dependency-locking.gradle"
+apply from: "$gradleIncDir/javadoc.gradle"
+apply from: "$gradleIncDir/publishing.gradle"
+apply from: "$gradleIncDir/sonarqube.gradle"
+apply from: "$gradleIncDir/spotless.gradle"
+apply from: "$gradleIncDir/test.gradle"
