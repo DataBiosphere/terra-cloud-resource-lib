@@ -81,6 +81,14 @@ dependencies {
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-batch', version: azureRsrcMgBatch
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: azureRsrcMg
 
+    // AWS dependencies
+    implementation platform('software.amazon.awssdk:bom:2.18.34')
+    implementation 'software.amazon.awssdk:auth'
+    implementation 'software.amazon.awssdk:regions'
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'software.amazon.awssdk:sagemaker'
+    implementation 'software.amazon.awssdk:sts'
+
     // Terra libraries
     ext {
         janitorclient = '0.113.16-SNAPSHOT'
@@ -112,6 +120,8 @@ dependencies {
     testFixturesImplementation group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '2.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
+    // Allow mocking final classes
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
     testFixturesImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
 }
 

@@ -2,6 +2,7 @@ package bio.terra.cloudres.common;
 
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.gax.rpc.ApiException;
 import com.google.cloud.http.BaseHttpServiceException;
 import com.google.common.annotations.VisibleForTesting;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.slf4j.Logger;
+import software.amazon.awssdk.core.exception.SdkServiceException;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
@@ -67,7 +69,7 @@ public class OperationAnnotator {
       CloudOperation cloudOperation, CowCheckedExecute<R, E> cowExecute, CowSerialize cowSerialize)
       throws E {
     Optional<Exception> executionException = Optional.empty();
-    OptionalInt httpStatusCode = OptionalInt.empty();
+    OptionalInt httpStatusCode = OptionalInt.of(HttpStatusCodes.STATUS_CODE_OK);
     Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
 
     Stopwatch stopwatch = Stopwatch.createStarted();
@@ -215,6 +217,10 @@ public class OperationAnnotator {
     // com.google.api library standard HTTP exception.
     if (e instanceof HttpResponseException) {
       return OptionalInt.of(((HttpResponseException) e).getStatusCode());
+    }
+    // Base class for AWS SDK service exceptions.
+    if (e instanceof SdkServiceException) {
+      return OptionalInt.of(((SdkServiceException) e).statusCode());
     }
     return OptionalInt.empty();
   }
