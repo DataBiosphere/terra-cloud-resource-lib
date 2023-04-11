@@ -11,7 +11,9 @@ plugins {
     id 'org.sonarqube' version '4.0.0.2929'
 }
 
-group = 'bio.terra'
+project.ext {
+    isCiServer = System.getenv().containsKey("CI")
+}
 
 // If true, search local repository (~/.m2/repository/) first for dependencies.
 def useMavenLocal = false

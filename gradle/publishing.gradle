@@ -18,8 +18,9 @@ gradle.taskGraph.whenReady { taskGraph ->
 publishing {
     publications {
         terraCloudResourceLib(MavenPublication) {
-            version = gradle.crlVersion
+            groupId = gradle.projectGroup
             artifactId = rootProject.name
+            version = gradle.crlVersion
             from components.java
         }
     }

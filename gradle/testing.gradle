@@ -22,6 +22,7 @@ task integrationTest(type: Test) {
         includeTags 'integration'
     }
     shouldRunAfter test
+    finalizedBy jacocoTestReport
     // Force tests to always be re-run, since integration tests involve communicating with external
     // resources.
     outputs.upToDateWhen { false }
