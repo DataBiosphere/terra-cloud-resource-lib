@@ -1,0 +1,26 @@
+// static analysis
+spotbugs {
+    effort = 'max'
+    extraArgs = ['-emacs']
+    ignoreFailures = true
+}
+
+spotbugsMain {
+    reports {
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/main.html")
+            stylesheet = 'fancy.xsl'
+        }
+    }
+}
+
+spotbugsTest {
+    reports {
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/test.html")
+            stylesheet = 'fancy.xsl'
+        }
+    }
+}

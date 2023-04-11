@@ -1,10 +1,9 @@
-
-
 // Modify the standard :test task to only include unit-tagged tests.
 test {
     useJUnitPlatform {
         includeTags 'unit'
     }
+    finalizedBy jacocoTestReport
 }
 
 configurations {
@@ -20,9 +19,10 @@ processTestResources {
 // part of the standard `./gradlew build` invocation.
 task integrationTest(type: Test) {
     useJUnitPlatform {
-        includeTags "integration"
+        includeTags 'integration'
     }
     shouldRunAfter test
+    finalizedBy jacocoTestReport
     // Force tests to always be re-run, since integration tests involve communicating with external
     // resources.
     outputs.upToDateWhen { false }
