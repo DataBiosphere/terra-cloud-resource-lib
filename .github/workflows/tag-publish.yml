@@ -78,7 +78,7 @@ jobs:
           OVERRIDE_BUMP: ${{ steps.controls.outputs.semver-part }}
           RELEASE_BRANCHES: master
           VERSION_FILE_PATH: settings.gradle
-          VERSION_LINE_MATCH: "^gradle.ext.crlVersion\\s*=\\s*\".*\""
+          VERSION_LINE_MATCH: "^\\s*gradle.ext.crlVersion\\s*=\\s*'.*'"
           VERSION_SUFFIX: SNAPSHOT
       - name: Set up JDK 17
         if: steps.skiptest.outputs.is-bump == 'no'
