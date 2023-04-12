@@ -11,6 +11,8 @@ plugins {
     id 'org.sonarqube' version '4.0.0.2929'
 }
 
+group = gradle.projectGroup
+
 project.ext {
     isCiServer = System.getenv().containsKey("CI")
 }
