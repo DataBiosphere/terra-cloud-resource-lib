@@ -2,6 +2,7 @@ package bio.terra.cloudres.aws.bucket;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,9 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 /**
  * Note: For AWS APIs, we do not significantly modify the API surface, we just decorate with useful
@@ -39,6 +44,13 @@ public class S3BucketCowTest {
   @Mock private Logger mockLogger = mock(Logger.class);
   private final String fakeBucketName = "fakeBucketName";
   private final String fakeObjectPath = "fake/path/to/object";
+  private final List<software.amazon.awssdk.services.s3.model.Tag> defaultTags =
+      List.of(
+          software.amazon.awssdk.services.s3.model.Tag.builder().key("foo").value("bar").build(),
+          software.amazon.awssdk.services.s3.model.Tag.builder()
+              .key("secondKey")
+              .value("secondValue")
+              .build());
 
   @BeforeEach
   public void setupMocks() {
@@ -53,10 +65,11 @@ public class S3BucketCowTest {
     ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
     RequestBody requestBody = RequestBody.fromString("thisIsABlob");
-    bucketCow.putBlob(fakeBucketName, fakeObjectPath, requestBody);
+    bucketCow.putBlob(fakeBucketName, fakeObjectPath, defaultTags, requestBody);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeObjectPath, requestBody);
+    JsonObject serializedRequest =
+        bucketCow.serialize(fakeBucketName, fakeObjectPath, defaultTags, requestBody);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(), S3BucketOperation.AWS_CREATE_S3_OBJECT.toString());
@@ -69,9 +82,8 @@ public class S3BucketCowTest {
     String validFolderPath = "fake/path/to/folder/";
     // Create a folder with an invalid path, expect CRL to log an error
     try {
-      bucketCow.createFolder(fakeBucketName, fakeObjectPath);
-      // We should never reach this point without throwing an exception.
-      fail();
+      bucketCow.createFolder(fakeBucketName, fakeObjectPath, defaultTags);
+      fail("CRL should not allow creating a folder with a name that does not end in /");
     } catch (IllegalArgumentException e) {
       // Expected exception, do nothing.
     }
@@ -85,7 +97,7 @@ public class S3BucketCowTest {
     // Create a folder with a valid path, expect success
     ArgumentCaptor<String> secondStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<JsonObject> secondGsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
-    bucketCow.createFolder(fakeBucketName, validFolderPath);
+    bucketCow.createFolder(fakeBucketName, validFolderPath, defaultTags);
     verify(mockLogger)
         .debug(secondStringArgumentCaptor.capture(), secondGsonArgumentCaptor.capture());
     JsonObject json = secondGsonArgumentCaptor.getValue();
@@ -105,6 +117,28 @@ public class S3BucketCowTest {
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(), S3BucketOperation.AWS_DELETE_S3_OBJECT.toString());
+  }
+
+  @Test
+  public void deleteFolderTest() {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    // Mock a response, as we hit an NPE otherwise. The real S3 API will not return null as a
+    // response.
+    ListObjectsV2Response mockResponse = mock(ListObjectsV2Response.class);
+    S3Object mockObject = mock(S3Object.class);
+    when(mockResponse.contents()).thenReturn(List.of(mockObject));
+    when(mockS3Client.listObjectsV2((ListObjectsV2Request) any())).thenReturn(mockResponse);
+
+    bucketCow.deleteFolder(fakeBucketName, fakeObjectPath);
+    // Expect one AWS call to list objects with a prefix and one call to delete them.
+    verify(mockLogger, times(2))
+        .debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeObjectPath + "/");
+    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(
+        json.get("operation").getAsString(), S3BucketOperation.AWS_DELETE_S3_FOLDER.toString());
   }
 
   @Test
@@ -156,5 +190,31 @@ public class S3BucketCowTest {
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
         json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
+  }
+
+  @Test
+  public void folderExistsTest() {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    String missingFolderPrefix = "this/path/does/not/exist/";
+    String realFolderPrefix = "this/path/exists/";
+    ListObjectsV2Response emptyResponse = ListObjectsV2Response.builder().build();
+    S3Object fakeObject = mock(S3Object.class);
+    ListObjectsV2Response responseWithObject =
+        ListObjectsV2Response.builder().contents(fakeObject).build();
+    // Return an empty response for the missingFolderPrefix folder and a non-empty response for
+    // the realFolderPrefix.
+    when(mockS3Client.listObjectsV2((ListObjectsV2Request) any())).thenReturn(emptyResponse);
+    assertFalse(bucketCow.folderExists(fakeBucketName, missingFolderPrefix));
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    JsonObject serializedRequest =
+        bucketCow.serialize(fakeBucketName, missingFolderPrefix, (String) null);
+    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(
+        json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
+
+    when(mockS3Client.listObjectsV2((ListObjectsV2Request) any())).thenReturn(responseWithObject);
+    assertTrue(bucketCow.folderExists(fakeBucketName, realFolderPrefix));
   }
 }
