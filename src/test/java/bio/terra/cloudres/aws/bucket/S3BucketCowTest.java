@@ -267,6 +267,10 @@ public class S3BucketCowTest {
     ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
     String prefixWithoutSlash = "this/path/exists";
+    S3Object fakeObject = mock(S3Object.class);
+    ListObjectsV2Response responseWithObject =
+        ListObjectsV2Response.builder().contents(fakeObject).build();
+    when(mockS3Client.listObjectsV2((ListObjectsV2Request) any())).thenReturn(responseWithObject);
 
     // Verify that prefix is always treated as if it has a trailing /, including for serialization
     assertTrue(bucketCow.folderExists(fakeBucketName, prefixWithoutSlash));
