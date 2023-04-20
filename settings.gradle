@@ -1,4 +1,4 @@
 rootProject.name = 'terra-cloud-resource-lib'
 
 gradle.ext.projectGroup = 'bio.terra'
-gradle.ext.crlVersion = '1.2.14-SNAPSHOT'
+gradle.ext.crlVersion = '1.2.15-SNAPSHOT'
