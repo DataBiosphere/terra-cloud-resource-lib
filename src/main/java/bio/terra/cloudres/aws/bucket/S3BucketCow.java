@@ -106,9 +106,9 @@ public class S3BucketCow implements AutoCloseable {
   }
 
   /**
-   * Delete all objects in an AWS bucket with a common prefix. Because AWS can only support up to
-   * 1000 object deletions from a single request, this method may make multiple calls to AWS
-   * infrastructure, each of which will be logged separately.
+   * Delete all objects in an AWS bucket with a common prefix, including the folder itself. Because
+   * AWS can only support up to 1000 object deletions from a single request, this method may make
+   * multiple calls to AWS infrastructure, each of which will be logged separately.
    */
   public void deleteFolder(String bucketName, String prefix)
       throws AwsServiceException, SdkClientException, S3Exception {
@@ -128,7 +128,7 @@ public class S3BucketCow implements AutoCloseable {
                               .bucket(bucketName)
                               .delete(Delete.builder().objects(partitionedObjectList).build())
                               .build()),
-                  () -> serialize(bucketName, folderKey));
+                  () -> serialize(bucketName, folderKey, partitionedObjectList.size()));
             });
   }
 
@@ -149,21 +149,35 @@ public class S3BucketCow implements AutoCloseable {
   public ListObjectsV2Response listBlobs(String bucketName, String prefix)
       throws AwsServiceException, SdkClientException, S3Exception {
     // A null continuationToken is ignored by the AWS client
-    return listBlobs(bucketName, prefix, /*continuationToken=*/ null);
+    return listBlobs(ListObjectsV2Request.builder().bucket(bucketName).prefix(prefix).build());
   }
 
   public ListObjectsV2Response listBlobs(String bucketName, String prefix, String continuationToken)
       throws AwsServiceException, SdkClientException, S3Exception {
+    return listBlobs(
+        ListObjectsV2Request.builder()
+            .bucket(bucketName)
+            .prefix(prefix)
+            .continuationToken(continuationToken)
+            .build());
+  }
+
+  public ListObjectsV2Response listBlobs(String bucketName, String prefix, int maxObjects)
+      throws AwsServiceException, SdkClientException, S3Exception {
+    return listBlobs(
+        ListObjectsV2Request.builder()
+            .bucket(bucketName)
+            .prefix(prefix)
+            .maxKeys(maxObjects)
+            .build());
+  }
+
+  public ListObjectsV2Response listBlobs(ListObjectsV2Request request)
+      throws AwsServiceException, SdkClientException, S3Exception {
     return operationAnnotator.executeCowOperation(
         S3BucketOperation.AWS_LIST_S3_OBJECTS,
-        () ->
-            bucketClient.listObjectsV2(
-                ListObjectsV2Request.builder()
-                    .bucket(bucketName)
-                    .prefix(prefix)
-                    .continuationToken(continuationToken)
-                    .build()),
-        () -> serialize(bucketName, prefix, continuationToken));
+        () -> bucketClient.listObjectsV2(request),
+        () -> serialize(request));
   }
 
   /**
@@ -214,11 +228,21 @@ public class S3BucketCow implements AutoCloseable {
   }
 
   @VisibleForTesting
-  public JsonObject serialize(String bucketName, String objectPath, String continuationToken) {
+  public JsonObject serialize(String bucketName, String objectPath, int numObjects) {
     var ser = new JsonObject();
     ser.addProperty("bucketName", bucketName);
     ser.addProperty("objectPath", objectPath);
-    ser.addProperty("continuationToken", continuationToken);
+    ser.addProperty("numObjects", numObjects);
+    return ser;
+  }
+
+  @VisibleForTesting
+  public JsonObject serialize(ListObjectsV2Request request) {
+    var ser = new JsonObject();
+    ser.addProperty("bucketName", request.bucket());
+    ser.addProperty("objectPath", request.prefix());
+    ser.addProperty("continuationToken", request.continuationToken());
+    ser.addProperty("maxKeys", request.maxKeys());
     return ser;
   }
 

@@ -70,9 +70,9 @@ public class S3BucketCowTest {
     JsonObject json = gsonArgumentCaptor.getValue();
     JsonObject serializedRequest =
         bucketCow.serialize(fakeBucketName, fakeObjectPath, defaultTags, requestBody);
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_CREATE_S3_OBJECT.toString());
+        S3BucketOperation.AWS_CREATE_S3_OBJECT.toString(), json.get("operation").getAsString());
   }
 
   @Test
@@ -102,7 +102,7 @@ public class S3BucketCowTest {
         .debug(secondStringArgumentCaptor.capture(), secondGsonArgumentCaptor.capture());
     JsonObject json = secondGsonArgumentCaptor.getValue();
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_CREATE_S3_OBJECT.toString());
+        S3BucketOperation.AWS_CREATE_S3_OBJECT.toString(), json.get("operation").getAsString());
     assertFalse(json.has("exception"));
   }
 
@@ -114,9 +114,9 @@ public class S3BucketCowTest {
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
     JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeObjectPath);
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_DELETE_S3_OBJECT.toString());
+        S3BucketOperation.AWS_DELETE_S3_OBJECT.toString(), json.get("operation").getAsString());
   }
 
   @Test
@@ -135,10 +135,27 @@ public class S3BucketCowTest {
     verify(mockLogger, times(2))
         .debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeObjectPath + "/");
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    // Expect the serialized request to have a trailing / appended, as fakeObjectPath does not end
+    // in /
+    JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeObjectPath + "/", 1);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_DELETE_S3_FOLDER.toString());
+        S3BucketOperation.AWS_DELETE_S3_FOLDER.toString(), json.get("operation").getAsString());
+
+    // Repeat the folder delete using a folder path with a trailing / to verify the method does
+    // not append an additional /.
+    String fakeObjectPathWithTrailingSlash = fakeObjectPath + "/";
+    ArgumentCaptor<String> secondStringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> secondGsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    verify(mockLogger, times(2))
+        .debug(secondStringArgumentCaptor.capture(), secondGsonArgumentCaptor.capture());
+    JsonObject secondJson = secondGsonArgumentCaptor.getValue();
+    JsonObject serializedRequestWithSlash =
+        bucketCow.serialize(fakeBucketName, fakeObjectPathWithTrailingSlash, 1);
+    assertEquals(serializedRequestWithSlash, secondJson.getAsJsonObject("requestData"));
+    assertEquals(
+        S3BucketOperation.AWS_DELETE_S3_FOLDER.toString(),
+        secondJson.get("operation").getAsString());
   }
 
   @Test
@@ -156,9 +173,9 @@ public class S3BucketCowTest {
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
     JsonObject serializedRequest = bucketCow.serialize(fakeBucketName, fakeObjectPath);
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_GET_S3_OBJECT.toString());
+        S3BucketOperation.AWS_GET_S3_OBJECT.toString(), json.get("operation").getAsString());
   }
 
   @Test
@@ -169,11 +186,12 @@ public class S3BucketCowTest {
     bucketCow.listBlobs(fakeBucketName, fakeBlobPrefix);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        bucketCow.serialize(fakeBucketName, fakeBlobPrefix, (String) null);
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    ListObjectsV2Request expectedRequest =
+        ListObjectsV2Request.builder().bucket(fakeBucketName).prefix(fakeBlobPrefix).build();
+    JsonObject serializedRequest = bucketCow.serialize(expectedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
+        S3BucketOperation.AWS_LIST_S3_OBJECTS.toString(), json.get("operation").getAsString());
   }
 
   @Test
@@ -185,11 +203,36 @@ public class S3BucketCowTest {
     bucketCow.listBlobs(fakeBucketName, fakeBlobPrefix, continuationToken);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        bucketCow.serialize(fakeBucketName, fakeBlobPrefix, continuationToken);
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    ListObjectsV2Request expectedRequest =
+        ListObjectsV2Request.builder()
+            .bucket(fakeBucketName)
+            .prefix(fakeBlobPrefix)
+            .continuationToken(continuationToken)
+            .build();
+    JsonObject serializedRequest = bucketCow.serialize(expectedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
+        S3BucketOperation.AWS_LIST_S3_OBJECTS.toString(), json.get("operation").getAsString());
+  }
+
+  @Test
+  public void listBlobsWithMaxKeysTest() {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    String fakeBlobPrefix = "fake/prefix/to/object";
+    bucketCow.listBlobs(fakeBucketName, fakeBlobPrefix, 100);
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    ListObjectsV2Request expectedRequest =
+        ListObjectsV2Request.builder()
+            .bucket(fakeBucketName)
+            .prefix(fakeBlobPrefix)
+            .maxKeys(100)
+            .build();
+    JsonObject serializedRequest = bucketCow.serialize(expectedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
+    assertEquals(
+        S3BucketOperation.AWS_LIST_S3_OBJECTS.toString(), json.get("operation").getAsString());
   }
 
   @Test
@@ -208,13 +251,36 @@ public class S3BucketCowTest {
     assertFalse(bucketCow.folderExists(fakeBucketName, missingFolderPrefix));
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedRequest =
-        bucketCow.serialize(fakeBucketName, missingFolderPrefix, (String) null);
-    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    ListObjectsV2Request expectedRequest =
+        ListObjectsV2Request.builder().bucket(fakeBucketName).prefix(missingFolderPrefix).build();
+    JsonObject serializedRequest = bucketCow.serialize(expectedRequest);
+    assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
     assertEquals(
-        json.get("operation").getAsString(), S3BucketOperation.AWS_LIST_S3_OBJECTS.toString());
+        S3BucketOperation.AWS_LIST_S3_OBJECTS.toString(), json.get("operation").getAsString());
 
     when(mockS3Client.listObjectsV2((ListObjectsV2Request) any())).thenReturn(responseWithObject);
     assertTrue(bucketCow.folderExists(fakeBucketName, realFolderPrefix));
+  }
+
+  @Test
+  public void folderExistsHandlesTrailingSlash() {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    String prefixWithoutSlash = "this/path/exists";
+
+    // Verify that prefix is always treated as if it has a trailing /, including for serialization
+    assertTrue(bucketCow.folderExists(fakeBucketName, prefixWithoutSlash));
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    // Expect the serialized request to have a trailing / appended
+    ListObjectsV2Request expectedRequest =
+        ListObjectsV2Request.builder()
+            .bucket(fakeBucketName)
+            .prefix(prefixWithoutSlash + "/")
+            .build();
+    JsonObject expectedSerializedRequest = bucketCow.serialize(expectedRequest);
+    assertEquals(expectedSerializedRequest, json.getAsJsonObject("requestData"));
+    assertEquals(
+        S3BucketOperation.AWS_LIST_S3_OBJECTS.toString(), json.get("operation").getAsString());
   }
 }
