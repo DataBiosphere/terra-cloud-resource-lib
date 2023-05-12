@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.gson.JsonObject;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,7 @@ import software.amazon.awssdk.arns.Arn;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
-import software.amazon.awssdk.services.sts.model.AssumeRoleWithWebIdentityRequest;
 import software.amazon.awssdk.services.sts.model.Credentials;
-import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * Note: For AWS APIs, we do not significantly modify the API surface, we just decorate with useful
@@ -44,37 +43,32 @@ public class SecurityTokenServiceCowTest {
   }
 
   @Test
-  public void createRefreshRequestTest() {
+  public void createCredentialsProviderTest() {
     ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
 
     Arn fakeArn = Arn.fromString("arn:this:is:a:fake:value/resource");
+    Duration staleTime = Duration.ofMinutes(1);
     String serviceAccountEmail = "my-fake-service-account@gserviceaccount.com";
     String idToken = "real-id-token-trust-me";
-    stsCow.createRefreshRequest(
+    stsCow.createAssumeRoleCredentialsProvider(
         fakeArn,
         SecurityTokenServiceCow.MIN_ROLE_SESSION_TOKEN_DURATION,
+        staleTime,
         serviceAccountEmail,
-        idToken);
+        () -> idToken);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
     JsonObject serializedRequest =
         stsCow.serialize(
-            fakeArn, SecurityTokenServiceCow.MIN_ROLE_SESSION_TOKEN_DURATION, serviceAccountEmail);
+            fakeArn,
+            SecurityTokenServiceCow.MIN_ROLE_SESSION_TOKEN_DURATION,
+            staleTime,
+            serviceAccountEmail);
     assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
-  }
-
-  @Test
-  public void createRefreshRequestTruncatesSessionName() {
-    Arn fakeArn = Arn.fromString("arn:this:is:a:fake:value/resource");
-    String sessionName =
-        StringUtils.repeat("a", SecurityTokenServiceCow.MAX_ROLE_SESSION_NAME_LENGTH * 2);
-    String idToken = "real-id-token-trust-me";
-    AssumeRoleWithWebIdentityRequest request =
-        stsCow.createRefreshRequest(
-            fakeArn, SecurityTokenServiceCow.MIN_ROLE_SESSION_TOKEN_DURATION, sessionName, idToken);
     assertEquals(
-        SecurityTokenServiceCow.MAX_ROLE_SESSION_NAME_LENGTH, request.roleSessionName().length());
+        SecurityTokenServiceOperation.AWS_CREATE_GCP_CREDENTIALS_PROVIDER.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -100,5 +94,8 @@ public class SecurityTokenServiceCowTest {
     JsonObject json = gsonArgumentCaptor.getValue();
     JsonObject serializedRequest = stsCow.serialize(request);
     assertEquals(serializedRequest, json.getAsJsonObject("requestData"));
+    assertEquals(
+        SecurityTokenServiceOperation.AWS_ASSUME_ROLE_WITH_WEB_IDENTITY.toString(),
+        json.get("operation").getAsString());
   }
 }
