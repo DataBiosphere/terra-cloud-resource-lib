@@ -60,8 +60,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.createJsonObjectWithSingleField("request", request);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_CREATE_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_CREATE_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -74,8 +74,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_GET_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_GET_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -93,8 +93,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_CREATE_PRESIGNED_URL_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_CREATE_PRESIGNED_URL_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -107,8 +107,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_START_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_START_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -121,8 +121,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_STOP_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_STOP_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -135,7 +135,7 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_DELETE_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_DELETE_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 }
