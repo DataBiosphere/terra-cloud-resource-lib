@@ -35,4 +35,4 @@ task minniekenny(type: Exec) {
     commandLine 'sh', file('minnie-kenny.sh')
 }
 
-//test.dependsOn minniekenny
+test.dependsOn minniekenny
