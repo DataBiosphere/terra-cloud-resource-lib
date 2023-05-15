@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import software.amazon.awssdk.services.sagemaker.SageMakerClient;
 import software.amazon.awssdk.services.sagemaker.model.CreateNotebookInstanceRequest;
 import software.amazon.awssdk.services.sagemaker.model.CreateNotebookInstanceResponse;
+import software.amazon.awssdk.services.sagemaker.model.CreatePresignedNotebookInstanceUrlRequest;
+import software.amazon.awssdk.services.sagemaker.model.CreatePresignedNotebookInstanceUrlResponse;
 import software.amazon.awssdk.services.sagemaker.waiters.SageMakerWaiter;
 
 /**
@@ -58,8 +60,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.createJsonObjectWithSingleField("request", request);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_CREATE_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_CREATE_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -72,8 +74,27 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_GET_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_GET_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
+  }
+
+  @Test
+  public void createPresignedUrlNotebookTest() {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    String fakeUrl = "https://example.com";
+    when(mockSageMakerClient.createPresignedNotebookInstanceUrl(
+            (CreatePresignedNotebookInstanceUrlRequest) any()))
+        .thenReturn(
+            CreatePresignedNotebookInstanceUrlResponse.builder().authorizedUrl(fakeUrl).build());
+    assertEquals(fakeUrl, notebookCow.createPresignedUrl(instanceName));
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
+    assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
+    assertEquals(
+        SageMakerNotebookOperation.AWS_CREATE_PRESIGNED_URL_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -86,8 +107,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_START_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_START_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -100,8 +121,8 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_STOP_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_STOP_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 
   @Test
@@ -114,7 +135,7 @@ public class SageMakerNotebookCowTest {
     JsonObject serializedRequest = notebookCow.serializeInstanceName(instanceName);
     assertEquals(json.getAsJsonObject("requestData"), serializedRequest);
     assertEquals(
-        json.get("operation").getAsString(),
-        SageMakerNotebookOperation.AWS_DELETE_NOTEBOOK.toString());
+        SageMakerNotebookOperation.AWS_DELETE_NOTEBOOK.toString(),
+        json.get("operation").getAsString());
   }
 }

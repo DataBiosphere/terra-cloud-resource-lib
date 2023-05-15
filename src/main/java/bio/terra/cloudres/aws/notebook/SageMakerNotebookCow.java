@@ -15,6 +15,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sagemaker.SageMakerClient;
 import software.amazon.awssdk.services.sagemaker.model.CreateNotebookInstanceRequest;
 import software.amazon.awssdk.services.sagemaker.model.CreateNotebookInstanceResponse;
+import software.amazon.awssdk.services.sagemaker.model.CreatePresignedNotebookInstanceUrlRequest;
 import software.amazon.awssdk.services.sagemaker.model.DeleteNotebookInstanceRequest;
 import software.amazon.awssdk.services.sagemaker.model.DescribeNotebookInstanceRequest;
 import software.amazon.awssdk.services.sagemaker.model.DescribeNotebookInstanceResponse;
@@ -86,6 +87,19 @@ public class SageMakerNotebookCow implements AutoCloseable {
                     .notebookInstanceName(instanceName)
                     .build()),
         () -> serializeInstanceName(instanceName));
+  }
+
+  public String createPresignedUrl(String instanceName) {
+    return operationAnnotator
+        .executeCowOperation(
+            SageMakerNotebookOperation.AWS_CREATE_PRESIGNED_URL_NOTEBOOK,
+            () ->
+                notebooksClient.createPresignedNotebookInstanceUrl(
+                    CreatePresignedNotebookInstanceUrlRequest.builder()
+                        .notebookInstanceName(instanceName)
+                        .build()),
+            () -> serializeInstanceName(instanceName))
+        .authorizedUrl();
   }
 
   /**
