@@ -53,9 +53,10 @@ public class CloudComputeCowTest {
         List.of(
             new AttachedDisk()
                 .setBoot(true)
+                .setAutoDelete(true)
                 .setInitializeParams(
                     new AttachedDiskInitializeParams()
-                        .setSourceImage("projects/debian-cloud/global/images/family/debian-9")
+                        .setSourceImage("projects/debian-cloud/global/images/family/debian-11")
                         .setDiskSizeGb(Long.valueOf(10))));
 
     OperationCow<Operation> createOperation =
