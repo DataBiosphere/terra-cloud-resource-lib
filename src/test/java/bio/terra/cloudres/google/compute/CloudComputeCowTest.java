@@ -5,6 +5,7 @@ import static bio.terra.cloudres.google.compute.testing.NetworkUtils.randomNetwo
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -39,6 +41,175 @@ public class CloudComputeCowTest {
   @BeforeAll
   public static void createReusableProject() throws Exception {
     reusableProject = createPreparedProject();
+  }
+
+  /**
+   * Creates an instance for the zone. Blocks until the instance is created successfully or fails
+   */
+  private void createInstance(String projectId, String zone, String instanceName) throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    OperationCow<Operation> createOperation =
+        cloudComputeCow
+            .zoneOperations()
+            .operationCow(
+                projectId,
+                zone,
+                cloudComputeCow
+                    .instances()
+                    .insert(projectId, zone, new Instance().setName(instanceName))
+                    .execute());
+    OperationTestUtils.pollAndAssertSuccess(
+        createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
+  }
+
+  @Test
+  public void createGetListDeleteInstance() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    String projectId = reusableProject.getProjectId();
+    String zone = "us-central1-a";
+    String name = "default-name";
+
+    createInstance(projectId, zone, name);
+
+    Instance retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
+    assertEquals(name, retrievedInstance.getName());
+
+    InstanceList instanceList = cloudComputeCow.instances().list(projectId, zone).execute();
+    assertThat(instanceList.getItems().size(), Matchers.greaterThan(0));
+    assertThat(
+        instanceList.getItems().stream().map(Instance::getName).collect(Collectors.toList()),
+        Matchers.hasItem(name));
+
+    OperationCow<Operation> deleteOperation =
+        cloudComputeCow
+            .zoneOperations()
+            .operationCow(
+                projectId,
+                zone,
+                cloudComputeCow.instances().delete(projectId, zone, name).execute());
+    OperationTestUtils.pollAndAssertSuccess(
+        deleteOperation, Duration.ofSeconds(30), Duration.ofMinutes(5));
+
+    GoogleJsonResponseException e =
+        assertThrows(
+            GoogleJsonResponseException.class,
+            () -> cloudComputeCow.instances().get(projectId, zone, name).execute());
+    assertEquals(404, e.getStatusCode());
+  }
+
+  @Test
+  public void setInstanceMetadata() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    String projectId = reusableProject.getProjectId();
+    String zone = "us-central1-a";
+    String name = "gce-instance-with-metadata";
+
+    createInstance(projectId, zone, name);
+
+    Instance retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
+    assertEquals(name, retrievedInstance.getName());
+
+    cloudComputeCow
+        .instances()
+        .setMetadata(projectId, zone, name, new Metadata().set("foo", "bar").set("count", "3"))
+        .execute();
+
+    retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
+    var metadata = retrievedInstance.getMetadata();
+    assertEquals("bar", metadata.get("foo"));
+    assertEquals("3", metadata.get("count"));
+
+    cloudComputeCow.instances().delete(projectId, zone, name).execute();
+  }
+
+  @Test
+  public void setGetTestIamPolicyInstance() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    String projectId = reusableProject.getProjectId();
+    String zone = "us-central1-a";
+    String name = "instance-iam-set-get";
+
+    createInstance(projectId, zone, name);
+
+    String userEmail = IntegrationCredentials.getUserGoogleCredentialsOrDie().getClientEmail();
+    Binding binding =
+        new Binding()
+            .setRole("roles/compute.viewer")
+            .setMembers(ImmutableList.of("serviceAccount:" + userEmail));
+    Policy policy = cloudComputeCow.instances().getIamPolicy(projectId, zone, name).execute();
+    policy.setBindings(ImmutableList.of(binding));
+
+    Policy updatedPolicy =
+        cloudComputeCow
+            .instances()
+            .setIamPolicy(projectId, zone, name, new ZoneSetPolicyRequest().setPolicy(policy))
+            .execute();
+
+    assertThat(updatedPolicy.getBindings(), Matchers.hasItem(binding));
+    Policy secondRetrieval =
+        cloudComputeCow.instances().getIamPolicy(projectId, zone, name).execute();
+    assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
+
+    // Test the permissions of the user for which the IAM policy was set.
+    CloudComputeCow userInstances =
+        CloudComputeCow.create(
+            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
+            IntegrationCredentials.getUserGoogleCredentialsOrDie());
+    // Instance get permission from "roles/compute.viewer".
+    String getInstancePermission = "compute.instances.get";
+    TestPermissionsResponse iamResponse =
+        userInstances
+            .instances()
+            .testIamPermissions(
+                projectId,
+                zone,
+                name,
+                new TestPermissionsRequest()
+                    .setPermissions(ImmutableList.of(getInstancePermission)))
+            .execute();
+    assertThat(iamResponse.getPermissions(), Matchers.contains(getInstancePermission));
+
+    cloudComputeCow.instances().delete(projectId, zone, name).execute();
+  }
+
+  @Test
+  public void stopStartInstance() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    String projectId = reusableProject.getProjectId();
+    String zone = "us-central1-a";
+    String name = "instance-stop-start";
+
+    createInstance(projectId, zone, name);
+
+    OperationCow<Operation> stopOperation =
+        cloudComputeCow
+            .zoneOperations()
+            .operationCow(
+                projectId, zone, cloudComputeCow.instances().stop(projectId, zone, name).execute());
+    OperationTestUtils.pollAndAssertSuccess(
+        stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
+    assertEquals(
+        "TERMINATED", cloudComputeCow.instances().get(projectId, zone, name).execute().getStatus());
+
+    OperationCow<Operation> startOperation =
+        cloudComputeCow
+            .zoneOperations()
+            .operationCow(
+                projectId,
+                zone,
+                cloudComputeCow.instances().start(projectId, zone, name).execute());
+    OperationTestUtils.pollAndAssertSuccess(
+        startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
+    assertEquals(
+        "PROVISIONING",
+        cloudComputeCow.instances().get(projectId, zone, name).execute().getStatus());
+
+    cloudComputeCow.instances().delete(projectId, zone, name).execute();
   }
 
   @Test
@@ -263,6 +434,143 @@ public class CloudComputeCowTest {
   public void listZone() throws Exception {
     ZoneList zoneList = defaultCompute().zones().list(reusableProject.getProjectId()).execute();
     assertThat(zoneList.getItems().size(), Matchers.greaterThan(0));
+  }
+
+  @Test
+  public void instanceCreateSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"zone\":\"us-east1-b\","
+            + "\"instance\":{\"name\":\"my-id\"}}",
+        cloudComputeCow
+            .instances()
+            .insert("my-project", "us-east1-b", new Instance().setName("my-id"))
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceGetSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"zone\":\"us-east1-b\",\"instance\":\"my-id\"}",
+        cloudComputeCow
+            .instances()
+            .get("my-project", "us-east1-b", "my-id")
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceDeleteSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"zone\":\"us-east1-b\",\"instance\":\"my-id\"}",
+        cloudComputeCow
+            .instances()
+            .delete("my-project", "us-east1-b", "my-id")
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceListSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"project\":\"my-project\",\"zone\":\"us-east1-b\",\"max_results\":10,"
+            + "\"page_token\":\"my-page-token\"}",
+        cloudComputeCow
+            .instances()
+            .list("my-project", "us-east1-b")
+            .setMaxResults(Long.valueOf(10))
+            .setPageToken("my-page-token")
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceGetIamPolicySerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"project\":\"my-project\",\"zone\":\"us-east1-b\","
+            + "\"resource\":\"my-id\",\"options_requested_policy_version\":3}",
+        cloudComputeCow
+            .instances()
+            .getIamPolicy("my-project", "us-east1-b", "my-id")
+            .setOptionsRequestedPolicyVersion(3)
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceSetIamPolicySerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    Binding binding =
+        new Binding()
+            .setRole("roles/compute.viewer")
+            .setMembers(ImmutableList.of("userEmail:foo@gmail.com"));
+    ZoneSetPolicyRequest request =
+        new ZoneSetPolicyRequest().setPolicy(new Policy().setBindings(ImmutableList.of(binding)));
+    assertEquals(
+        "{\"project\":\"my-project\",\"zone\":\"us-east1-b\","
+            + "\"resource\":\"my-id\",\"content\":{\"policy\":{"
+            + "\"bindings\":[{\"members\":[\"userEmail:foo@gmail.com\"],"
+            + "\"role\":\"roles/compute.viewer\"}]}}}",
+        cloudComputeCow
+            .instances()
+            .setIamPolicy("my-project", "us-east1-b", "my-id", request)
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceStartSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"zone\":\"us-east1-b\",\"instance\":\"my-id\"}",
+        cloudComputeCow
+            .instances()
+            .start("my-project", "us-east1-b", "my-id")
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceStopSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"zone\":\"us-east1-b\",\"instance\":\"my-id\"}",
+        cloudComputeCow
+            .instances()
+            .stop("my-project", "us-east1-b", "my-id")
+            .serialize()
+            .toString());
+  }
+
+  @Test
+  public void instanceTestIamPermissionsSerialize() throws Exception {
+    CloudComputeCow cloudComputeCow = defaultCompute();
+
+    assertEquals(
+        "{\"projectId\":\"my-project\",\"zone\":\"us-east1-b\","
+            + "\"resource\":\"my-id\",\"content\":{\"permissions\":[\"myPermission\"]}}",
+        cloudComputeCow
+            .instances()
+            .testIamPermissions(
+                "my-project",
+                "us-east1-b",
+                "my-id",
+                new TestPermissionsRequest().setPermissions(ImmutableList.of("myPermission")))
+            .serialize()
+            .toString());
   }
 
   @Test
