@@ -44,6 +44,446 @@ public class CloudComputeCow {
             .setApplicationName(clientConfig.getClientName()));
   }
 
+  public Instances instances() {
+    return new Instances(compute.instances());
+  }
+
+  /** See {@link Compute.Instances}. */
+  public class Instances {
+    private final Compute.Instances instances;
+
+    private Instances(Compute.Instances instances) {
+      this.instances = instances;
+    }
+
+    public Insert insert(String project, String zone, Instance instance) throws IOException {
+      return new Insert(instances.insert(project, zone, instance), instance);
+    }
+
+    /** See {@link Compute.Instances.Insert}. */
+    public class Insert extends AbstractRequestCow<Operation> {
+      private final Compute.Instances.Insert insert;
+      private final Instance instance;
+
+      private Insert(Compute.Instances.Insert insert, Instance instance) {
+        super(
+            CloudComputeOperation.GOOGLE_INSERT_INSTANCE, clientConfig, operationAnnotator, insert);
+        this.instance = instance;
+        this.insert = insert;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", insert.getProject());
+        result.addProperty("zone", insert.getZone());
+        result.add("instance", new Gson().toJsonTree(instance));
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#delete(String, String, String)}. */
+    public Delete delete(String project, String zone, String instance) throws IOException {
+      return new Delete(instances.delete(project, zone, instance));
+    }
+
+    /** See {@link Compute.Instances.Delete}. */
+    public class Delete extends AbstractRequestCow<Operation> {
+      private final Compute.Instances.Delete delete;
+
+      private Delete(Compute.Instances.Delete delete) {
+        super(
+            CloudComputeOperation.GOOGLE_DELETE_INSTANCE, clientConfig, operationAnnotator, delete);
+        this.delete = delete;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", delete.getProject());
+        result.addProperty("zone", delete.getZone());
+        result.addProperty("instance", delete.getInstance());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#get(String, String, String)}. */
+    public Get get(String project, String zone, String instance) throws IOException {
+      return new Get(instances.get(project, zone, instance));
+    }
+
+    /** See {@link Compute.Instances.Get}. */
+    public class Get extends AbstractRequestCow<Instance> {
+      private final Compute.Instances.Get get;
+
+      private Get(Compute.Instances.Get get) {
+        super(CloudComputeOperation.GOOGLE_GET_INSTANCE, clientConfig, operationAnnotator, get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", get.getProject());
+        result.addProperty("zone", get.getZone());
+        result.addProperty("instance", get.getInstance());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#list(String, String)}. */
+    public List list(String project, String zone) throws IOException {
+      return new List(instances.list(project, zone));
+    }
+
+    /** See {@link Compute.Instances.List}. */
+    public class List extends AbstractRequestCow<InstanceList> {
+
+      private final Compute.Instances.List list;
+
+      private List(Compute.Instances.List list) {
+        super(CloudComputeOperation.GOOGLE_LIST_INSTANCE, clientConfig, operationAnnotator, list);
+        this.list = list;
+      }
+
+      /** See {@link Compute.Instances.List#getProject()}. */
+      public String getProject() {
+        return list.getProject();
+      }
+
+      public List setProject(String project) {
+        list.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.List#getZone()}. */
+      public String getZone() {
+        return list.getZone();
+      }
+
+      public List setZone(String zone) {
+        list.setZone(zone);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.List#getMaxResults()}. */
+      public Long getMaxResults() {
+        return list.getMaxResults();
+      }
+
+      public List setMaxResults(Long maxResults) {
+        list.setMaxResults(maxResults);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.List#getPageToken()}. */
+      public String getPageToken() {
+        return list.getPageToken();
+      }
+
+      public List setPageToken(String pageToken) {
+        list.setPageToken(pageToken);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project", list.getProject());
+        result.addProperty("zone", list.getZone());
+        result.addProperty("max_results", list.getMaxResults());
+        result.addProperty("page_token", list.getPageToken());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#getIamPolicy(String, String, String)} */
+    public GetIamPolicy getIamPolicy(String project, String zone, String resource)
+        throws IOException {
+      return new GetIamPolicy(instances.getIamPolicy(project, zone, resource));
+    }
+
+    /** See {@link Compute.Instances.GetIamPolicy}. */
+    public class GetIamPolicy extends AbstractRequestCow<Policy> {
+      private final Compute.Instances.GetIamPolicy getIamPolicy;
+
+      private GetIamPolicy(Compute.Instances.GetIamPolicy getIamPolicy) {
+        super(
+            CloudComputeOperation.GOOGLE_GET_IAM_POLICY_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            getIamPolicy);
+        this.getIamPolicy = getIamPolicy;
+      }
+
+      /** See {@link Compute.Instances.GetIamPolicy#getProject()}. */
+      public String getProject() {
+        return getIamPolicy.getProject();
+      }
+
+      public GetIamPolicy setProject(String project) {
+        getIamPolicy.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.GetIamPolicy#getZone()}. */
+      public String getZone() {
+        return getIamPolicy.getZone();
+      }
+
+      public GetIamPolicy setZone(String zone) {
+        getIamPolicy.setZone(zone);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.GetIamPolicy#getResource()} */
+      public String getResource() {
+        return getIamPolicy.getResource();
+      }
+
+      public GetIamPolicy setResource(String resource) {
+        getIamPolicy.setResource(resource);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.GetIamPolicy#getOptionsRequestedPolicyVersion()} */
+      public Integer getOptionsRequestedPolicyVersion() {
+        return getIamPolicy.getOptionsRequestedPolicyVersion();
+      }
+
+      public GetIamPolicy setOptionsRequestedPolicyVersion(Integer version) {
+        getIamPolicy.setOptionsRequestedPolicyVersion(version);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project", getIamPolicy.getProject());
+        result.addProperty("zone", getIamPolicy.getZone());
+        result.addProperty("resource", getIamPolicy.getResource());
+        result.addProperty(
+            "options_requested_policy_version", getIamPolicy.getOptionsRequestedPolicyVersion());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#setIamPolicy(String, String, String, ZoneSetPolicyRequest)} */
+    public SetIamPolicy setIamPolicy(
+        String project, String zone, String resource, ZoneSetPolicyRequest content)
+        throws IOException {
+      return new SetIamPolicy(instances.setIamPolicy(project, zone, resource, content));
+    }
+
+    /** See {@link Compute.Instances.SetIamPolicy}. */
+    public class SetIamPolicy extends AbstractRequestCow<Policy> {
+      private final Compute.Instances.SetIamPolicy setIamPolicy;
+
+      private SetIamPolicy(Compute.Instances.SetIamPolicy setIamPolicy) {
+        super(
+            CloudComputeOperation.GOOGLE_SET_IAM_POLICY_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            setIamPolicy);
+        this.setIamPolicy = setIamPolicy;
+      }
+
+      /** See {@link Compute.Instances.SetIamPolicy#getProject()}. */
+      public String getProject() {
+        return setIamPolicy.getProject();
+      }
+
+      public SetIamPolicy setProject(String project) {
+        setIamPolicy.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.SetIamPolicy#getZone()}. */
+      public String getZone() {
+        return setIamPolicy.getZone();
+      }
+
+      public SetIamPolicy setZone(String zone) {
+        setIamPolicy.setZone(zone);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.SetIamPolicy#getResource()} */
+      public String getResource() {
+        return setIamPolicy.getResource();
+      }
+
+      public SetIamPolicy setResource(String resource) {
+        setIamPolicy.setResource(resource);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project", setIamPolicy.getProject());
+        result.addProperty("zone", setIamPolicy.getZone());
+        result.addProperty("resource", setIamPolicy.getResource());
+        result.add(
+            "content", new Gson().toJsonTree(setIamPolicy.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#start(String, String, String)}. */
+    public Start start(String project, String zone, String instance) throws IOException {
+      return new Start(instances.start(project, zone, instance));
+    }
+
+    /** See {@link Compute.Instances.Start}. */
+    public class Start extends AbstractRequestCow<Operation> {
+      private final Compute.Instances.Start start;
+
+      private Start(Compute.Instances.Start start) {
+        super(CloudComputeOperation.GOOGLE_START_INSTANCE, clientConfig, operationAnnotator, start);
+        this.start = start;
+      }
+
+      public String getInstance() {
+        return start.getInstance();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", start.getProject());
+        result.addProperty("zone", start.getZone());
+        result.addProperty("instance", start.getInstance());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#stop(String, String, String)}. */
+    public Stop stop(String porject, String zone, String instance) throws IOException {
+      return new Stop(instances.stop(porject, zone, instance));
+    }
+
+    /** See {@link Compute.Instances.Stop}. */
+    public class Stop extends AbstractRequestCow<Operation> {
+      private final Compute.Instances.Stop stop;
+
+      private Stop(Compute.Instances.Stop stop) {
+        super(CloudComputeOperation.GOOGLE_STOP_INSTANCE, clientConfig, operationAnnotator, stop);
+        this.stop = stop;
+      }
+
+      public String getInstance() {
+        return stop.getInstance();
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", stop.getProject());
+        result.addProperty("zone", stop.getZone());
+        result.addProperty("instance", stop.getInstance());
+        return result;
+      }
+    }
+
+    /** See {@link Compute.Instances#setMetadata(String, String, String, Metadata)}. */
+    public SetMetadata setMetadata(String project, String zone, String instance, Metadata content)
+        throws IOException {
+      return new SetMetadata(instances.setMetadata(project, zone, instance, content));
+    }
+
+    /** See {@link Compute.Instances.SetMetadata}. */
+    public class SetMetadata extends AbstractRequestCow<Operation> {
+      private final Compute.Instances.SetMetadata setMetadata;
+
+      private SetMetadata(Compute.Instances.SetMetadata setMetadata) {
+        super(
+            CloudComputeOperation.GOOGLE_SET_METADATA_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            setMetadata);
+        this.setMetadata = setMetadata;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", setMetadata.getProject());
+        result.addProperty("zone", setMetadata.getZone());
+        result.addProperty("instance", setMetadata.getInstance());
+        result.add(
+            "content", new Gson().toJsonTree(setMetadata.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+
+    /**
+     * See {@link Compute.Instances#testIamPermissions(String, String, String,
+     * TestPermissionsRequest)}.
+     */
+    public TestIamPermissions testIamPermissions(
+        String project, String zone, String resource, TestPermissionsRequest content)
+        throws IOException {
+      return new TestIamPermissions(instances.testIamPermissions(project, zone, resource, content));
+    }
+
+    /** See {@link Compute.Instances.TestIamPermissions}. */
+    public class TestIamPermissions extends AbstractRequestCow<TestPermissionsResponse> {
+      private final Compute.Instances.TestIamPermissions testIamPermissions;
+
+      private TestIamPermissions(Compute.Instances.TestIamPermissions testIamPermissions) {
+        super(
+            CloudComputeOperation.GOOGLE_TEST_IAM_PERMISSIONS_INSTANCE,
+            clientConfig,
+            operationAnnotator,
+            testIamPermissions);
+        this.testIamPermissions = testIamPermissions;
+      }
+
+      /** See {@link Compute.Instances.TestIamPermissions#getProject()}. */
+      public String getProject() {
+        return testIamPermissions.getProject();
+      }
+
+      public TestIamPermissions setProject(String project) {
+        testIamPermissions.setProject(project);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.TestIamPermissions#getZone()}. */
+      public String getZone() {
+        return testIamPermissions.getZone();
+      }
+
+      public TestIamPermissions setZone(String zone) {
+        testIamPermissions.setZone(zone);
+        return this;
+      }
+
+      /** See {@link Compute.Instances.TestIamPermissions#getResource()} */
+      public String getResource() {
+        return testIamPermissions.getResource();
+      }
+
+      public TestIamPermissions setResource(String resource) {
+        testIamPermissions.setResource(resource);
+        return this;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("projectId", testIamPermissions.getProject());
+        result.addProperty("zone", testIamPermissions.getZone());
+        result.addProperty("resource", testIamPermissions.getResource());
+        result.add(
+            "content",
+            new Gson().toJsonTree(testIamPermissions.getJsonContent()).getAsJsonObject());
+        return result;
+      }
+    }
+  }
+
   public Networks networks() {
     return new Networks(compute.networks());
   }
@@ -779,6 +1219,60 @@ public class CloudComputeCow {
         String projectId, String region, Operation operation) {
       return new OperationCow<>(
           operation, ComputeOperationAdapter::new, op -> get(projectId, region, op.getName()));
+    }
+  }
+
+  /**
+   * See {@link Compute#zoneOperations()}.
+   *
+   * <p>Operations can be global, regional or zonal
+   *
+   * @see <a
+   *     href="https://cloud.google.com/compute/docs/regions-zones/global-regional-zonal-resources">Global,
+   *     Regional, and Zonal Resources</a>
+   */
+  public ZoneOperations zoneOperations() {
+    return new ZoneOperations(compute.zoneOperations());
+  }
+
+  public class ZoneOperations {
+    private final Compute.ZoneOperations operations;
+
+    private ZoneOperations(Compute.ZoneOperations operations) {
+      this.operations = operations;
+    }
+
+    /** See {@link Compute.ZoneOperations#get(String, String, String)} */
+    public Get get(String projectId, String zone, String operationName) throws IOException {
+      return new Get(operations.get(projectId, zone, operationName));
+    }
+
+    public class Get extends AbstractRequestCow<Operation> {
+      private final Compute.ZoneOperations.Get get;
+
+      public Get(Compute.ZoneOperations.Get get) {
+        super(
+            CloudComputeOperation.GOOGLE_COMPUTE_ZONE_OPERATION_GET,
+            clientConfig,
+            operationAnnotator,
+            get);
+        this.get = get;
+      }
+
+      @Override
+      protected JsonObject serialize() {
+        JsonObject result = new JsonObject();
+        result.addProperty("project_id", get.getProject());
+        result.addProperty("zone", get.getZone());
+        result.addProperty("operation_name", get.getOperation());
+        return result;
+      }
+    }
+
+    public OperationCow<Operation> operationCow(
+        String projectId, String zone, Operation operation) {
+      return new OperationCow<>(
+          operation, ComputeOperationAdapter::new, op -> get(projectId, zone, op.getName()));
     }
   }
 }
