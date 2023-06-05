@@ -9,6 +9,7 @@ import bio.terra.cloudres.google.api.services.common.OperationCow;
 import bio.terra.cloudres.google.api.services.common.testing.OperationTestUtils;
 import bio.terra.cloudres.google.billing.testing.CloudBillingUtils;
 import bio.terra.cloudres.google.cloudresourcemanager.testing.ProjectUtils;
+import bio.terra.cloudres.google.compute.testing.NetworkUtils;
 import bio.terra.cloudres.google.serviceusage.testing.ServiceUsageUtils;
 import bio.terra.cloudres.testing.IntegrationCredentials;
 import bio.terra.cloudres.testing.IntegrationUtils;
@@ -32,6 +33,8 @@ public class CloudComputeCowTest {
 
   private static Project reusableProject;
 
+  private static Network reusableNetwork;
+
   private static CloudComputeCow defaultCompute() throws GeneralSecurityException, IOException {
     return CloudComputeCow.create(
         IntegrationUtils.DEFAULT_CLIENT_CONFIG,
@@ -41,6 +44,7 @@ public class CloudComputeCowTest {
   @BeforeAll
   public static void createReusableProject() throws Exception {
     reusableProject = createPreparedProject();
+    reusableNetwork = NetworkUtils.exceuteCreateNetwork(reusableProject.getProjectId(), true);
   }
 
   /**
@@ -59,6 +63,9 @@ public class CloudComputeCowTest {
                         .setSourceImage("projects/debian-cloud/global/images/family/debian-11")
                         .setDiskSizeGb(Long.valueOf(10))));
 
+    List<NetworkInterface> networks =
+        List.of(new NetworkInterface().setNetwork(reusableNetwork.getSelfLink()));
+
     OperationCow<Operation> createOperation =
         cloudComputeCow
             .zoneOperations()
@@ -73,7 +80,8 @@ public class CloudComputeCowTest {
                         new Instance()
                             .setName(instanceName)
                             .setMachineType("zones/us-central1-a/machineTypes/n1-standard-1")
-                            .setDisks(disks))
+                            .setDisks(disks)
+                            .setNetworkInterfaces(networks))
                     .execute());
     OperationTestUtils.pollAndAssertSuccess(
         createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
