@@ -230,7 +230,7 @@ public class CloudComputeCowTest {
     OperationTestUtils.pollAndAssertSuccess(
         startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
     assertEquals(
-        "PROVISIONING",
+        "RUNNING",
         cloudComputeCow.instances().get(projectId, zone, name).execute().getStatus());
 
     cloudComputeCow.instances().delete(projectId, zone, name).execute();
