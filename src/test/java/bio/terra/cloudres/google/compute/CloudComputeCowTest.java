@@ -138,7 +138,14 @@ public class CloudComputeCowTest {
 
     cloudComputeCow
         .instances()
-        .setMetadata(projectId, zone, name, new Metadata().set("foo", "bar").set("count", "3"))
+        .setMetadata(
+            projectId,
+            zone,
+            name,
+            new Metadata()
+                .set("foo", "bar")
+                .set("count", "3")
+                .setFingerprint(retrievedInstance.getMetadata().getFingerprint()))
         .execute();
 
     retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
@@ -230,8 +237,7 @@ public class CloudComputeCowTest {
     OperationTestUtils.pollAndAssertSuccess(
         startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
     assertEquals(
-        "RUNNING",
-        cloudComputeCow.instances().get(projectId, zone, name).execute().getStatus());
+        "RUNNING", cloudComputeCow.instances().get(projectId, zone, name).execute().getStatus());
 
     cloudComputeCow.instances().delete(projectId, zone, name).execute();
   }
