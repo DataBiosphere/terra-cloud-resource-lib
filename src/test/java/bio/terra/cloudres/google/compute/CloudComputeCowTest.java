@@ -57,7 +57,12 @@ public class CloudComputeCowTest {
                 zone,
                 cloudComputeCow
                     .instances()
-                    .insert(projectId, zone, new Instance().setName(instanceName))
+                    .insert(
+                        projectId,
+                        zone,
+                        new Instance()
+                            .setName(instanceName)
+                            .setMachineType("zones/us-central1-a/machineTypes/n1-standard-1"))
                     .execute());
     OperationTestUtils.pollAndAssertSuccess(
         createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
