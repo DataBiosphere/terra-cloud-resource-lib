@@ -185,15 +185,9 @@ public class CloudComputeCowTest {
         cloudComputeCow.instances().getIamPolicy(projectId, zone, name).execute();
     assertThat(secondRetrieval.getBindings(), Matchers.hasItem(binding));
 
-    // Test the permissions of the user for which the IAM policy was set.
-    CloudComputeCow userInstances =
-        CloudComputeCow.create(
-            IntegrationUtils.DEFAULT_CLIENT_CONFIG,
-            IntegrationCredentials.getUserGoogleCredentialsOrDie());
-    // Instance get permission from "roles/compute.viewer".
     String getInstancePermission = "compute.instances.get";
     TestPermissionsResponse iamResponse =
-        userInstances
+        cloudComputeCow
             .instances()
             .testIamPermissions(
                 projectId,
