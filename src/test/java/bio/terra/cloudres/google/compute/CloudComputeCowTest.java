@@ -16,6 +16,7 @@ import bio.terra.cloudres.testing.IntegrationUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudresourcemanager.v3.model.Project;
 import com.google.api.services.compute.model.*;
+import com.google.api.services.compute.model.Metadata.Items;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -143,13 +144,17 @@ public class CloudComputeCowTest {
             zone,
             name,
             new Metadata()
-                .set("foo", "bar")
-                .set("count", "3")
+                .setItems(
+                    List.of(
+                        new Items().setKey("foo").setValue("bar"),
+                        new Items().setKey("count").setValue("3")))
                 .setFingerprint(retrievedInstance.getMetadata().getFingerprint()))
         .execute();
 
     retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
-    var metadata = retrievedInstance.getMetadata();
+    var metadata =
+        retrievedInstance.getMetadata().getItems().stream()
+            .collect(Collectors.toMap(Items::getKey, item -> item.getValue()));
     assertEquals("bar", metadata.get("foo"));
     assertEquals("3", metadata.get("count"));
 
