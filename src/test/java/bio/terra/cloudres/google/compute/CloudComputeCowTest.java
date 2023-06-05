@@ -49,6 +49,15 @@ public class CloudComputeCowTest {
   private void createInstance(String projectId, String zone, String instanceName) throws Exception {
     CloudComputeCow cloudComputeCow = defaultCompute();
 
+    List<AttachedDisk> disks =
+        List.of(
+            new AttachedDisk()
+                .setBoot(true)
+                .setInitializeParams(
+                    new AttachedDiskInitializeParams()
+                        .setSourceImage("projects/debian-cloud/global/images/family/debian-9")
+                        .setDiskSizeGb(Long.valueOf(10))));
+
     OperationCow<Operation> createOperation =
         cloudComputeCow
             .zoneOperations()
@@ -62,7 +71,8 @@ public class CloudComputeCowTest {
                         zone,
                         new Instance()
                             .setName(instanceName)
-                            .setMachineType("zones/us-central1-a/machineTypes/n1-standard-1"))
+                            .setMachineType("zones/us-central1-a/machineTypes/n1-standard-1")
+                            .setDisks(disks))
                     .execute());
     OperationTestUtils.pollAndAssertSuccess(
         createOperation, Duration.ofSeconds(30), Duration.ofMinutes(12));
