@@ -154,7 +154,7 @@ public class CloudComputeCowTest {
     retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
     var metadata =
         retrievedInstance.getMetadata().getItems().stream()
-            .collect(Collectors.toMap(Items::getKey, item -> item.getValue()));
+            .collect(Collectors.toMap(Items::getKey, Items::getValue));
     assertEquals("bar", metadata.get("foo"));
     assertEquals("3", metadata.get("count"));
 
