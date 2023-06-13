@@ -137,26 +137,32 @@ public class CloudComputeCowTest {
     Instance retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
     assertEquals(name, retrievedInstance.getName());
 
-    cloudComputeCow
-        .instances()
-        .setMetadata(
-            projectId,
-            zone,
-            name,
-            new Metadata()
-                .setItems(
-                    List.of(
-                        new Items().setKey("foo").setValue("bar"),
-                        new Items().setKey("count").setValue("3")))
-                .setFingerprint(retrievedInstance.getMetadata().getFingerprint()))
-        .execute();
+    var metadataToSet =
+        new Metadata()
+            .setItems(
+                List.of(
+                    new Items().setKey("foo").setValue("bar"),
+                    new Items().setKey("count").setValue("3")))
+            .setFingerprint(retrievedInstance.getMetadata().getFingerprint());
+    OperationCow<Operation> updateOperation =
+        cloudComputeCow
+            .zoneOperations()
+            .operationCow(
+                projectId,
+                zone,
+                cloudComputeCow
+                    .instances()
+                    .setMetadata(projectId, zone, name, metadataToSet)
+                    .execute());
+    OperationTestUtils.pollAndAssertSuccess(
+        updateOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
 
     retrievedInstance = cloudComputeCow.instances().get(projectId, zone, name).execute();
-    var metadata =
+    var retrievedMetadata =
         retrievedInstance.getMetadata().getItems().stream()
             .collect(Collectors.toMap(Items::getKey, Items::getValue));
-    assertEquals("bar", metadata.get("foo"));
-    assertEquals("3", metadata.get("count"));
+    assertEquals("bar", retrievedMetadata.get("foo"));
+    assertEquals("3", retrievedMetadata.get("count"));
 
     cloudComputeCow.instances().delete(projectId, zone, name).execute();
   }
