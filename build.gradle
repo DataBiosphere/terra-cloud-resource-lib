@@ -99,7 +99,7 @@ dependencies {
 
     // Terra libraries
     ext {
-        janitorclient = '0.113.16-SNAPSHOT'
+        janitorclient = '0.113.29-SNAPSHOT'
     }
     implementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
     testFixturesImplementation group: 'bio.terra', name: 'terra-resource-janitor-client', version: janitorclient
