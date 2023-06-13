@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -125,7 +124,6 @@ public class CloudComputeCowTest {
     assertEquals(404, e.getStatusCode());
   }
 
-  @Disabled
   @Test
   public void setInstanceMetadata() throws Exception {
     CloudComputeCow cloudComputeCow = defaultCompute();
