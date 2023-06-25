@@ -37,7 +37,6 @@ import java.security.GeneralSecurityException;
 import java.time.Duration;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -135,8 +134,7 @@ public class DataprocCowTest {
         Matchers.hasItem(clusterName.name()));
 
     OperationCow<Operation> deleteOperation =
-
-  dataproc.regionOperations().operationCow(dataproc.clusters().delete(clusterName).execute());
+        dataproc.regionOperations().operationCow(dataproc.clusters().delete(clusterName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         deleteOperation, Duration.ofSeconds(30), Duration.ofMinutes(10));
 
@@ -196,20 +194,16 @@ public class DataprocCowTest {
     createCluster(clusterName);
 
     OperationCow<Operation> stopOperation =
-
-  dataproc.regionOperations().operationCow(dataproc.clusters().stop(clusterName).execute());
+        dataproc.regionOperations().operationCow(dataproc.clusters().stop(clusterName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         stopOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertEquals("STOPPED",
-  dataproc.clusters().get(clusterName).execute().getStatus().getState());
+    assertEquals("STOPPED", dataproc.clusters().get(clusterName).execute().getStatus().getState());
 
     OperationCow<Operation> startOperation =
-
-  dataproc.regionOperations().operationCow(dataproc.clusters().start(clusterName).execute());
+        dataproc.regionOperations().operationCow(dataproc.clusters().start(clusterName).execute());
     OperationTestUtils.pollAndAssertSuccess(
         startOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
-    assertEquals(
-        "RUNNING", dataproc.clusters().get(clusterName).execute().getStatus().getState());
+    assertEquals("RUNNING", dataproc.clusters().get(clusterName).execute().getStatus().getState());
 
     dataproc.clusters().delete(clusterName).execute();
   }
@@ -239,7 +233,8 @@ public class DataprocCowTest {
 
   @Test
   public void clusterGetSerialize() throws Exception {
-    String expected = "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"cluster\":\"my-id\"}";
+    String expected =
+        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"cluster\":\"my-id\"}";
     String actual =
         dataproc
             .clusters()
@@ -256,46 +251,52 @@ public class DataprocCowTest {
 
   @Test
   public void clusterDeleteSerialize() throws Exception {
-    String expected = "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"clusterName\":\"my-id\"}";
-    String actual = dataproc
-        .clusters()
-        .delete(
-            ClusterName.builder()
-                .projectId("my-project")
-                .region("us-east1")
-                .name("my-id")
-                .build())
-        .serialize()
-        .toString();
+    String expected =
+        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"clusterName\":\"my-id\"}";
+    String actual =
+        dataproc
+            .clusters()
+            .delete(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build())
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 
   @Test
   public void clusterListSerialize() throws Exception {
-    String expected = "{\"project\":\"my-project\",\"region\":\"us-east1\",\"filter\":null,\"page_size\":10,\"page_token\":\"my-page-token\"}";
-    String actual = dataproc
-        .clusters()
-        .list("my-project", "us-east1")
-        .setPageSize(10)
-        .setPageToken("my-page-token")
-        .serialize()
-        .toString();
+    String expected =
+        "{\"project\":\"my-project\",\"region\":\"us-east1\",\"filter\":null,\"page_size\":10,\"page_token\":\"my-page-token\"}";
+    String actual =
+        dataproc
+            .clusters()
+            .list("my-project", "us-east1")
+            .setPageSize(10)
+            .setPageToken("my-page-token")
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 
   @Test
   public void clusterGetIamPolicySerialize() throws Exception {
-    String expected = "{\"resource\":\"projects/my-project/regions/us-east1/clusters/my-id\",\"content\":{}}";
-    String actual = dataproc
-        .clusters()
-        .getIamPolicy(
-            ClusterName.builder()
-                .projectId("my-project")
-                .region("us-east1")
-                .name("my-id")
-                .build())
-        .serialize()
-        .toString();
+    String expected =
+        "{\"resource\":\"projects/my-project/regions/us-east1/clusters/my-id\",\"content\":{}}";
+    String actual =
+        dataproc
+            .clusters()
+            .getIamPolicy(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build())
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 
@@ -308,67 +309,75 @@ public class DataprocCowTest {
     SetIamPolicyRequest request =
         new SetIamPolicyRequest().setPolicy(new Policy().setBindings(ImmutableList.of(binding)));
 
-    String expected = "{\"resource\":\"projects/my-project/regions/us-east1/clusters/my-id\",\"content\":{\"policy\":{\"bindings\":[{\"members\":[\"userEmail:foo@gmail.com\"],\"role\":\"roles/dataproc.viewer\"}]}}}";
-    String actual = dataproc
-        .clusters()
-        .setIamPolicy(
-            ClusterName.builder()
-                .projectId("my-project")
-                .region("us-east1")
-                .name("my-id")
-                .build(),
-            request)
-        .serialize()
-        .toString();
+    String expected =
+        "{\"resource\":\"projects/my-project/regions/us-east1/clusters/my-id\",\"content\":{\"policy\":{\"bindings\":[{\"members\":[\"userEmail:foo@gmail.com\"],\"role\":\"roles/dataproc.viewer\"}]}}}";
+    String actual =
+        dataproc
+            .clusters()
+            .setIamPolicy(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build(),
+                request)
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 
   @Test
   public void clusterStartSerialize() throws Exception {
-    String expected = "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"clusterName\":\"my-id\"}";
-    String actual = dataproc
-        .clusters()
-        .start(
-            ClusterName.builder()
-                .projectId("my-project")
-                .region("us-east1")
-                .name("my-id")
-                .build())
-        .serialize()
-        .toString();
+    String expected =
+        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"clusterName\":\"my-id\"}";
+    String actual =
+        dataproc
+            .clusters()
+            .start(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build())
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 
   @Test
   public void clusterStopSerialize() throws Exception {
-    String expected = "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"cluster\":\"my-id\"}";
-    String actual = dataproc
-        .clusters()
-        .stop(
-            ClusterName.builder()
-                .projectId("my-project")
-                .region("us-east1")
-                .name("my-id")
-                .build())
-        .serialize()
-        .toString();
+    String expected =
+        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"cluster\":\"my-id\"}";
+    String actual =
+        dataproc
+            .clusters()
+            .stop(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build())
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 
   @Test
   public void clusterTestIamPermissionsSerialize() throws Exception {
-    String expected = "{\"resource\":\"projects/my-project/regions/us-east1/clusters/my-id\",\"content\":{\"permissions\":[\"myPermission\"]}}";
-    String actual = dataproc
-        .clusters()
-        .testIamPermissions(
-            ClusterName.builder()
-                .projectId("my-project")
-                .region("us-east1")
-                .name("my-id")
-                .build(),
-            new TestIamPermissionsRequest().setPermissions(ImmutableList.of("myPermission")))
-        .serialize()
-        .toString();
+    String expected =
+        "{\"resource\":\"projects/my-project/regions/us-east1/clusters/my-id\",\"content\":{\"permissions\":[\"myPermission\"]}}";
+    String actual =
+        dataproc
+            .clusters()
+            .testIamPermissions(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build(),
+                new TestIamPermissionsRequest().setPermissions(ImmutableList.of("myPermission")))
+            .serialize()
+            .toString();
     assertEquals(expected, actual);
   }
 }
