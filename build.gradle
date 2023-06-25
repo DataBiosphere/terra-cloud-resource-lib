@@ -57,6 +57,7 @@ dependencies {
     api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20220716-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20220710-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220720-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-dataproc', version: 'v1-rev20220726-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v2-rev20220505-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220526-1.32.1'
     api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220716-1.32.1'
