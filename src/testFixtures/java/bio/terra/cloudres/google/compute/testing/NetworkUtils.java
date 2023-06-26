@@ -40,6 +40,7 @@ public class NetworkUtils {
     return getCloudComputeCow().networks().get(projectId, netWorkName).execute();
   }
 
+  /** Creates an allow all ingress firewall rule in a given network. */
   public static void executeCreateIngressFirewallRule(String projectId, String networkName)
       throws Exception {
     String firewallName = "allow-ingress-all";

@@ -25,7 +25,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,15 +96,15 @@ public class DataprocCow {
     }
 
     public Patch patch(
-        String project,
-        String region,
+        ClusterName clusterName,
         Cluster cluster,
-        @Nullable String updateMask,
-        @Nullable String gracefulDecommissionTimeout)
+        String updateMask,
+        String gracefulDecommissionTimeout)
         throws IOException {
       return new Patch(
           clusters
-              .patch(project, region, cluster.getClusterName(), cluster)
+              .patch(
+                  clusterName.projectId(), clusterName.region(), cluster.getClusterName(), cluster)
               .setUpdateMask(updateMask)
               .setGracefulDecommissionTimeout(gracefulDecommissionTimeout));
     }
@@ -126,6 +125,7 @@ public class DataprocCow {
         result.addProperty("region", patch.getRegion());
         result.addProperty("clusterName", patch.getClusterName());
         result.add("updateMask", new Gson().toJsonTree(patch.getUpdateMask()));
+        result.addProperty("gracefulDecommissionTimeout", patch.getGracefulDecommissionTimeout());
         return result;
       }
     }

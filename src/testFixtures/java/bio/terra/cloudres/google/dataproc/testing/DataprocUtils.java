@@ -81,8 +81,6 @@ public class DataprocUtils {
       SetIamPolicyRequest setIamPolicyRequest = new SetIamPolicyRequest();
       setIamPolicyRequest.setPolicy(projectPolicy);
       defaultManager().projects().setIamPolicy(projectResourceName, setIamPolicyRequest).execute();
-
-      System.out.println("Dataproc worker role added to the service account successfully.");
     } catch (IOException | GeneralSecurityException e) {
       System.err.println("Error granting dataproc worker permissions: " + e.getMessage());
     }

@@ -88,6 +88,9 @@ Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadins
 #### google-notebooks
 Wraps [Google Cloud AI Notebooks Client API](https://cloud.google.com/ai-platform/notebooks/docs/reference/rest).
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-notebooks).
+#### google-dataproc
+Wraps [Google Cloud Dataproc Client API](https://cloud.google.com/dataproc/docs/reference/rest).
+Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-dataproc).
 #### google-serviceusage
 Wraps [Google Service Usage API](https://cloud.google.com/service-usage/docs/overview).  
 Artifact Repository can be found [here](https://broadinstitute.jfrog.io/broadinstitute/webapp/#/artifacts/browse/tree/General/libs-snapshot-local/bio/terra/cloud-resource-lib/google-serviceusage).

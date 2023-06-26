@@ -51,15 +51,27 @@ public class DataprocCowTest {
   /** A custom dataproc worker service account for dataproc VMs to use. */
   private static ServiceAccount dataprocWorkerServiceAccount;
 
+  /**
+   * Configure a dynamic gcp project to support dataproc cluster management. This includes:
+   *
+   * <p>1. Creating a custom service account with the dataproc worker role to be attached to
+   * dataproc vm nodes.
+   *
+   * <p>2. Create an allow all ingress firewall rule in the project's vpc network to allow
+   * inter-node communication.
+   *
+   * @throws Exception on failure.
+   */
   @BeforeAll
   public static void setupProject() throws Exception {
     reusableProject = ProjectUtils.executeCreateProject();
-    System.out.println("Created project: " + reusableProject.getProjectId());
     CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
     ServiceUsageUtils.enableServices(
         reusableProject.getProjectId(), ImmutableList.of("dataproc.googleapis.com"));
+
     reusableNetwork = NetworkUtils.exceuteCreateNetwork(reusableProject.getProjectId(), true);
     executeCreateIngressFirewallRule(reusableProject.getProjectId(), reusableNetwork.getName());
+
     dataprocWorkerServiceAccount = createServiceAccount(reusableProject, "dataproc-worker");
     grantDataprocWorkerRole(reusableProject, dataprocWorkerServiceAccount);
   }
@@ -94,7 +106,7 @@ public class DataprocCowTest {
                     .create(clusterName, defaultCluster().setClusterName(clusterName.name()))
                     .execute());
     OperationTestUtils.pollAndAssertSuccess(
-        createOperation, Duration.ofSeconds(30), Duration.ofMinutes(15));
+        createOperation, Duration.ofSeconds(30), Duration.ofMinutes(20));
   }
 
   /** Default {@link Cluster} used to create clusters in tests. */
@@ -107,6 +119,8 @@ public class DataprocCowTest {
                         .setNetworkUri(reusableNetwork.getSelfLink())
                         .setServiceAccount(dataprocWorkerServiceAccount.getEmail()))
                 .setMasterConfig(
+                    // use e2-standard-2 instance because n1-standard-1 instances are not supported
+                    // by dataproc
                     new InstanceGroupConfig().setNumInstances(1).setMachineTypeUri("e2-standard-2"))
                 .setWorkerConfig(
                     new InstanceGroupConfig()
@@ -116,7 +130,7 @@ public class DataprocCowTest {
 
   @Test
   public void createGetListDeleteDataprocCluster() throws Exception {
-    ClusterName clusterName = defaultClusterName().build();
+    ClusterName clusterName = defaultClusterName().name("create-delete-cluster").build();
     createCluster(clusterName);
 
     Cluster retrievedCluster = dataproc.clusters().get(clusterName).execute();
@@ -143,6 +157,36 @@ public class DataprocCowTest {
             GoogleJsonResponseException.class,
             () -> dataproc.clusters().get(clusterName).execute());
     assertEquals(404, e.getStatusCode());
+  }
+
+  @Test
+  public void updateDataprocCluster() throws Exception {
+    ClusterName clusterName = defaultClusterName().name("update-cluster").build();
+    createCluster(clusterName);
+
+    Cluster retrievedCluster = dataproc.clusters().get(clusterName).execute();
+    assertEquals(clusterName.name(), retrievedCluster.getClusterName());
+
+    String updateMask = "config.worker_config.num_instances";
+    retrievedCluster.setConfig(
+        retrievedCluster
+            .getConfig()
+            .setWorkerConfig(retrievedCluster.getConfig().getWorkerConfig().setNumInstances(3)));
+
+    OperationCow<Operation> patchOperation =
+        dataproc
+            .regionOperations()
+            .operationCow(
+                dataproc
+                    .clusters()
+                    .patch(clusterName, retrievedCluster, updateMask, null)
+                    .execute());
+
+    OperationTestUtils.pollAndAssertSuccess(
+        patchOperation, Duration.ofSeconds(10), Duration.ofMinutes(4));
+
+    Cluster updatedCluster = dataproc.clusters().get(clusterName).execute();
+    assertEquals(updatedCluster.getConfig().getWorkerConfig().getNumInstances(), 3);
   }
 
   @Test
@@ -295,6 +339,34 @@ public class DataprocCowTest {
                     .region("us-east1")
                     .name("my-id")
                     .build())
+            .serialize()
+            .toString();
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void clusterUpdateSerialize() throws Exception {
+    Cluster defaultCluster = defaultCluster().setClusterName("my-id");
+    defaultCluster.setConfig(
+        defaultCluster
+            .getConfig()
+            .setWorkerConfig(defaultCluster.getConfig().getWorkerConfig().setNumInstances(3)));
+    String updateMask = "config.worker_config.num_instances";
+
+    String expected =
+        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"clusterName\":\"my-id\",\"updateMask\":\"config.worker_config.num_instances\",\"gracefulDecommissionTimeout\":null}";
+    String actual =
+        dataproc
+            .clusters()
+            .patch(
+                ClusterName.builder()
+                    .projectId("my-project")
+                    .region("us-east1")
+                    .name("my-id")
+                    .build(),
+                defaultCluster,
+                updateMask,
+                null)
             .serialize()
             .toString();
     assertEquals(expected, actual);
