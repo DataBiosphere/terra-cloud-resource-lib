@@ -1,9 +1,9 @@
 package bio.terra.cloudres.google.dataproc;
 
 import static bio.terra.cloudres.google.compute.testing.NetworkUtils.executeCreateIngressFirewallRule;
-import static bio.terra.cloudres.google.dataproc.testing.DataprocUtils.createServiceAccount;
-import static bio.terra.cloudres.google.dataproc.testing.DataprocUtils.grantDataprocWorkerRole;
 import static bio.terra.cloudres.testing.IntegrationCredentials.getAdminGoogleCredentialsOrDie;
+import static bio.terra.cloudres.testing.IntegrationUtils.createServiceAccount;
+import static bio.terra.cloudres.testing.IntegrationUtils.grantServiceAccountRole;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,7 +55,7 @@ public class DataprocCowTest {
    * Configure a dynamic gcp project to support dataproc cluster management. This includes:
    *
    * <p>1. Creating a custom service account with the dataproc worker role to be attached to
-   * dataproc vm nodes.
+   * dataproc vm nodes. See https://cloud.google.com/dataproc/docs/concepts/iam/dataproc-principals.
    *
    * <p>2. Create an allow all ingress firewall rule in the project's vpc network to allow
    * inter-node communication.
@@ -73,7 +73,7 @@ public class DataprocCowTest {
     executeCreateIngressFirewallRule(reusableProject.getProjectId(), reusableNetwork.getName());
 
     dataprocWorkerServiceAccount = createServiceAccount(reusableProject, "dataproc-worker");
-    grantDataprocWorkerRole(reusableProject, dataprocWorkerServiceAccount);
+    grantServiceAccountRole(reusableProject, dataprocWorkerServiceAccount, "roles/dataproc.worker");
   }
 
   private static DataprocCow defaultDataprocCow() {
