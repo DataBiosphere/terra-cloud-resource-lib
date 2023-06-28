@@ -82,7 +82,6 @@ public class IntegrationUtils {
     };
   }
 
-
   /* Create a service account in the project. */
   public static ServiceAccount createServiceAccount(Project project, String serviceAccountName)
       throws IOException, GeneralSecurityException {
@@ -103,7 +102,8 @@ public class IntegrationUtils {
    * <p>See
    * https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/service-accounts#dataproc_service_accounts_2.
    */
-  public static void grantServiceAccountRole(Project project, ServiceAccount serviceAccount, String role) {
+  public static void grantServiceAccountRole(
+      Project project, ServiceAccount serviceAccount, String role) {
     try {
       CloudResourceManagerCow crmCow = defaultManager();
 
