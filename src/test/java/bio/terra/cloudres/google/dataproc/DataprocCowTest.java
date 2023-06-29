@@ -119,7 +119,7 @@ public class DataprocCowTest {
                     new GceClusterConfig()
                         .setNetworkUri(reusableNetwork.getSelfLink())
                         .setServiceAccount(dataprocWorkerServiceAccount.getEmail())
-                        .setTags(List.of("dataproc")))
+                        .setTags(List.of("dataproc"))) // Set tag required for firewall rule
                 .setMasterConfig(
                     // use e2-standard-2 instance because n1-standard-1 instances are not supported
                     // by dataproc
@@ -261,7 +261,7 @@ public class DataprocCowTest {
             + reusableNetwork.getSelfLink()
             + "\",\"serviceAccount\":\""
             + dataprocWorkerServiceAccount.getEmail()
-            + "\"},\"masterConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":1},\"workerConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":2}}}}";
+            + "\",\"tags\":[\"dataproc\"]},\"masterConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":1},\"workerConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":2}}}}";
     String actual =
         dataproc
             .clusters()

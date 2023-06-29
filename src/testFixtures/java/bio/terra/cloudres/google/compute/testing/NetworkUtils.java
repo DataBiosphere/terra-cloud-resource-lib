@@ -59,6 +59,7 @@ public class NetworkUtils {
             .setDirection("INGRESS")
             .setSourceRanges(
                 List.of("10.128.0.0/9")) // Source range for internal dataproc VPC traffic
+            .setSourceTags(List.of("dataproc"))
             .setAllowed(List.of(new Allowed().setIPProtocol("all"))); // Allow all protocols
 
     Operation firewallOperation =
