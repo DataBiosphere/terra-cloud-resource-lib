@@ -40,21 +40,28 @@ public class NetworkUtils {
     return getCloudComputeCow().networks().get(projectId, netWorkName).execute();
   }
 
-  /** Creates an allow all ingress firewall rule in a given network. */
-  public static void executeCreateIngressFirewallRule(String projectId, String networkName)
+  /**
+   * Creates dataproc ingress firewall rule in a given network for Google Cloud Dataproc. See
+   * https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/network#firewall_rule_requirement.
+   */
+  public static void createDataprocIngressRule(String projectId, String networkName)
       throws Exception {
-    String firewallName = "allow-ingress-all";
+    String firewallName = "allow-dataproc-ingress";
     String networkUrl =
         String.format(
             "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
             projectId, networkName);
-    Allowed allowed = new Allowed().setIPProtocol("all");
+
     Firewall firewall =
         new Firewall()
             .setName(firewallName)
             .setNetwork(networkUrl)
             .setDirection("INGRESS")
-            .setAllowed(List.of(allowed));
+            .setSourceRanges(
+                List.of("10.128.0.0/9")) // Source range for internal dataproc VPC traffic
+            .setSourceTags(List.of("dataproc"))
+            .setAllowed(List.of(new Allowed().setIPProtocol("all"))); // Allow all protocols
+
     Operation firewallOperation =
         getCloudComputeCow().firewalls().insert(projectId, firewall).execute();
     OperationTestUtils.pollAndAssertSuccess(

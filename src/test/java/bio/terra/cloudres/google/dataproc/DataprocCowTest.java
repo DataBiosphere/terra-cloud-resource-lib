@@ -1,6 +1,6 @@
 package bio.terra.cloudres.google.dataproc;
 
-import static bio.terra.cloudres.google.compute.testing.NetworkUtils.executeCreateIngressFirewallRule;
+import static bio.terra.cloudres.google.compute.testing.NetworkUtils.createDataprocIngressRule;
 import static bio.terra.cloudres.testing.IntegrationCredentials.getAdminGoogleCredentialsOrDie;
 import static bio.terra.cloudres.testing.IntegrationUtils.createServiceAccount;
 import static bio.terra.cloudres.testing.IntegrationUtils.grantServiceAccountRole;
@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,7 +71,7 @@ public class DataprocCowTest {
         reusableProject.getProjectId(), ImmutableList.of("dataproc.googleapis.com"));
 
     reusableNetwork = NetworkUtils.exceuteCreateNetwork(reusableProject.getProjectId(), true);
-    executeCreateIngressFirewallRule(reusableProject.getProjectId(), reusableNetwork.getName());
+    createDataprocIngressRule(reusableProject.getProjectId(), reusableNetwork.getName());
 
     dataprocWorkerServiceAccount = createServiceAccount(reusableProject, "dataproc-worker");
     grantServiceAccountRole(reusableProject, dataprocWorkerServiceAccount, "roles/dataproc.worker");
@@ -117,7 +118,8 @@ public class DataprocCowTest {
                 .setGceClusterConfig(
                     new GceClusterConfig()
                         .setNetworkUri(reusableNetwork.getSelfLink())
-                        .setServiceAccount(dataprocWorkerServiceAccount.getEmail()))
+                        .setServiceAccount(dataprocWorkerServiceAccount.getEmail())
+                        .setTags(List.of("dataproc"))) // Set tag required for firewall rule
                 .setMasterConfig(
                     // use e2-standard-2 instance because n1-standard-1 instances are not supported
                     // by dataproc
@@ -259,7 +261,7 @@ public class DataprocCowTest {
             + reusableNetwork.getSelfLink()
             + "\",\"serviceAccount\":\""
             + dataprocWorkerServiceAccount.getEmail()
-            + "\"},\"masterConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":1},\"workerConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":2}}}}";
+            + "\",\"tags\":[\"dataproc\"]},\"masterConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":1},\"workerConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":2}}}}";
     String actual =
         dataproc
             .clusters()
