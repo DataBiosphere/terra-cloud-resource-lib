@@ -24,6 +24,7 @@ import com.google.api.services.dataproc.model.Cluster;
 import com.google.api.services.dataproc.model.ClusterConfig;
 import com.google.api.services.dataproc.model.GceClusterConfig;
 import com.google.api.services.dataproc.model.InstanceGroupConfig;
+import com.google.api.services.dataproc.model.LifecycleConfig;
 import com.google.api.services.dataproc.model.ListClustersResponse;
 import com.google.api.services.dataproc.model.Operation;
 import com.google.api.services.dataproc.model.Policy;
@@ -125,9 +126,10 @@ public class DataprocCowTest {
                     // by dataproc
                     new InstanceGroupConfig().setNumInstances(1).setMachineTypeUri("e2-standard-2"))
                 .setWorkerConfig(
-                    new InstanceGroupConfig()
-                        .setNumInstances(2)
-                        .setMachineTypeUri("e2-standard-2")));
+                    new InstanceGroupConfig().setNumInstances(2).setMachineTypeUri("e2-standard-2"))
+                .setLifecycleConfig(
+                    // 30m. GCP expects the duration in seconds suffixed with "s"
+                    new LifecycleConfig().setAutoDeleteTtl("1800s")));
   }
 
   @Test
@@ -189,6 +191,8 @@ public class DataprocCowTest {
 
     Cluster updatedCluster = dataproc.clusters().get(clusterName).execute();
     assertEquals(updatedCluster.getConfig().getWorkerConfig().getNumInstances(), 3);
+
+    dataproc.clusters().delete(clusterName).execute();
   }
 
   @Test
