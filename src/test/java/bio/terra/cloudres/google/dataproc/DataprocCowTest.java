@@ -265,7 +265,7 @@ public class DataprocCowTest {
             + reusableNetwork.getSelfLink()
             + "\",\"serviceAccount\":\""
             + dataprocWorkerServiceAccount.getEmail()
-            + "\",\"tags\":[\"dataproc\"]},\"masterConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":1},\"workerConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":2}}}}";
+            + "\",\"tags\":[\"dataproc\"]},\"lifecycleConfig\":{\"autoDeleteTtl\":\"1800s\"},\"masterConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":1},\"workerConfig\":{\"machineTypeUri\":\"e2-standard-2\",\"numInstances\":2}}}}";
     String actual =
         dataproc
             .clusters()
