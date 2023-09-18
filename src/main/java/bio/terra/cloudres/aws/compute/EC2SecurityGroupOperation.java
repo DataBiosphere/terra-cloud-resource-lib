@@ -9,4 +9,5 @@ public enum EC2SecurityGroupOperation implements CloudOperation {
   AWS_CREATE_EC2_SECURITY_GROUP,
   AWS_DELETE_EC2_SECURITY_GROUP,
   AWS_GET_EC2_SECURITY_GROUP,
+  AWS_GET_BY_TAG_EC2_SECURITY_GROUP,
 }

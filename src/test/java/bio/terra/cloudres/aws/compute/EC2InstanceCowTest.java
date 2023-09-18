@@ -1,6 +1,8 @@
 package bio.terra.cloudres.aws.compute;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -10,6 +12,7 @@ import static org.mockito.Mockito.when;
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.gson.JsonObject;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Reservation;
@@ -111,10 +115,42 @@ public class EC2InstanceCowTest {
         ArgumentCaptor.forClass(DescribeInstancesRequest.class);
     verify(mockClient).describeInstances(requestArgumentCaptor.capture());
     DescribeInstancesRequest capturedRequest = requestArgumentCaptor.getValue();
+    assertTrue(capturedRequest.hasInstanceIds());
     assertEquals(1, capturedRequest.instanceIds().size());
     assertEquals(instanceId, capturedRequest.instanceIds().get(0));
 
     verifyInstanceIdLogging(EC2InstanceOperation.AWS_GET_EC2_INSTANCE);
+  }
+
+  @Test
+  void getByTagTest() {
+    final String tagName = "ResourceID";
+    final String tagValue = UUID.randomUUID().toString();
+
+    DescribeInstancesResponse response =
+        DescribeInstancesResponse.builder()
+            .reservations(List.of(Reservation.builder().instances(List.of(fakeInstance)).build()))
+            .build();
+
+    when(mockClient.describeInstances((DescribeInstancesRequest) any())).thenReturn(response);
+    assertEquals(response, cow.getByTag(tagName, tagValue));
+
+    ArgumentCaptor<DescribeInstancesRequest> requestArgumentCaptor =
+        ArgumentCaptor.forClass(DescribeInstancesRequest.class);
+
+    verify(mockClient).describeInstances(requestArgumentCaptor.capture());
+    DescribeInstancesRequest capturedRequest = requestArgumentCaptor.getValue();
+    assertFalse(capturedRequest.hasInstanceIds());
+    assertTrue(capturedRequest.hasFilters());
+    assertEquals(1, capturedRequest.filters().size());
+
+    Filter filter = capturedRequest.filters().get(0);
+    assertEquals(String.format("tag:%s", tagName), filter.name());
+    assertTrue(filter.hasValues());
+    assertEquals(1, filter.values().size());
+    assertEquals(tagValue, filter.values().get(0));
+
+    verifyRequestLogging(capturedRequest, EC2InstanceOperation.AWS_GET_BY_TAG_EC2_INSTANCE);
   }
 
   private WaiterResponse<DescribeInstancesResponse> prepareWaiterResponse() {

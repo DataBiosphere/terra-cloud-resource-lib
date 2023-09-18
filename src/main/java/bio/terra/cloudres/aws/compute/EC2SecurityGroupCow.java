@@ -16,10 +16,12 @@ import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupIngressRe
 import software.amazon.awssdk.services.ec2.model.CreateSecurityGroupRequest;
 import software.amazon.awssdk.services.ec2.model.CreateSecurityGroupResponse;
 import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Ec2Request;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
@@ -119,6 +121,38 @@ public class EC2SecurityGroupCow extends EC2CowBase {
         response,
         DescribeSecurityGroupsResponse::hasSecurityGroups,
         DescribeSecurityGroupsResponse::securityGroups);
+  }
+
+  /**
+   * Queries for the description of one or more EC2 Security Groups by the value of a tag attached
+   * to the instance
+   *
+   * <p>Note that there is no guarantee of uniqueness of an EC2 Security group based on tags, thus
+   * the returned response may contain multiple Security Group descriptions. Any uniqueness
+   * expectations by the consuming application must enforce (and validate) this uniqueness in its
+   * own logic.
+   *
+   * @param key name of the EC2 Security Group key to query
+   * @param value value of key to query for
+   * @return a {@link DescribeInstancesResponse} describing the results of the query
+   */
+  public DescribeSecurityGroupsResponse getByTag(String key, String value) {
+
+    DescribeSecurityGroupsRequest request =
+        DescribeSecurityGroupsRequest.builder()
+            .filters(
+                List.of(
+                    Filter.builder()
+                        .name(String.format("tag:%s", key))
+                        .values(List.of(value))
+                        .build()))
+            .build();
+
+    return getOperationAnnotator()
+        .executeCowOperation(
+            EC2SecurityGroupOperation.AWS_GET_BY_TAG_EC2_SECURITY_GROUP,
+            () -> getClient().describeSecurityGroups(request),
+            () -> createJsonObjectWithSingleField("request", request));
   }
 
   private <RequestType extends Ec2Request, ReturnValue> void executeSecurityRuleOperation(

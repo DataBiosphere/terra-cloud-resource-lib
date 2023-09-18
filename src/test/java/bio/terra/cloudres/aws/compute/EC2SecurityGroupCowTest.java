@@ -3,6 +3,7 @@ package bio.terra.cloudres.aws.compute;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
@@ -108,6 +110,38 @@ public class EC2SecurityGroupCowTest {
     DescribeSecurityGroupsRequest capturedRequest = requestArgumentCaptor.getValue();
     Assertions.assertEquals(1, capturedRequest.groupIds().size());
     Assertions.assertEquals(securityGroupId, capturedRequest.groupIds().get(0));
+  }
+
+  @Test
+  public void getByTagTest() {
+
+    final String tagName = "ResourceID";
+    final String tagValue = UUID.randomUUID().toString();
+
+    DescribeSecurityGroupsResponse response =
+        DescribeSecurityGroupsResponse.builder().securityGroups(List.of(fakeSecurityGroup)).build();
+
+    when(mockClient.describeSecurityGroups((DescribeSecurityGroupsRequest) any()))
+        .thenReturn(response);
+
+    assertEquals(response, cow.getByTag(tagName, tagValue));
+
+    ArgumentCaptor<DescribeSecurityGroupsRequest> requestArgumentCaptor =
+        ArgumentCaptor.forClass(DescribeSecurityGroupsRequest.class);
+    verify(mockClient).describeSecurityGroups(requestArgumentCaptor.capture());
+    DescribeSecurityGroupsRequest capturedRequest = requestArgumentCaptor.getValue();
+    assertFalse(capturedRequest.hasGroupIds());
+    assertTrue(capturedRequest.hasFilters());
+    Assertions.assertEquals(1, capturedRequest.filters().size());
+
+    Filter filter = capturedRequest.filters().get(0);
+    Assertions.assertEquals(String.format("tag:%s", tagName), filter.name());
+    assertTrue(filter.hasValues());
+    Assertions.assertEquals(1, filter.values().size());
+    Assertions.assertEquals(tagValue, filter.values().get(0));
+
+    verifyRequestLogging(
+        capturedRequest, EC2SecurityGroupOperation.AWS_GET_BY_TAG_EC2_SECURITY_GROUP);
   }
 
   @Test

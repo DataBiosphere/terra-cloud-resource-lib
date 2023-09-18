@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
@@ -108,6 +109,37 @@ public class EC2InstanceCow extends EC2CowBase {
             DescribeInstancesResponse::reservations),
         Reservation::hasInstances,
         Reservation::instances);
+  }
+
+  /**
+   * Queries for the description of one or more EC2 Instances by the value of a tag attached to the
+   * instance
+   *
+   * <p>Note that there is no guarantee of uniqueness of an EC2 Instance based on tags, thus the
+   * returned response may contain multiple Instance descriptions. Any uniqueness expectations by
+   * the consuming application must enforce (and validate) this uniqueness in its own logic.
+   *
+   * @param key name of the EC2 Instance key to query
+   * @param value value of key to query for
+   * @return a {@link DescribeInstancesResponse} describing the results of the query
+   */
+  public DescribeInstancesResponse getByTag(String key, String value) {
+
+    DescribeInstancesRequest request =
+        DescribeInstancesRequest.builder()
+            .filters(
+                List.of(
+                    Filter.builder()
+                        .name(String.format("tag:%s", key))
+                        .values(List.of(value))
+                        .build()))
+            .build();
+
+    return getOperationAnnotator()
+        .executeCowOperation(
+            EC2InstanceOperation.AWS_GET_BY_TAG_EC2_INSTANCE,
+            () -> getClient().describeInstances(request),
+            () -> createJsonObjectWithSingleField("request", request));
   }
 
   /**
