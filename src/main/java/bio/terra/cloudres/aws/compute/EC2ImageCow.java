@@ -29,6 +29,9 @@ import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
  * underlying Ec2Client properly after use.
  */
 public class EC2ImageCow extends EC2CowBase {
+
+  private static final Integer MAX_IMAGES_PER_REQUEST = 1000;
+
   private static Logger logger = LoggerFactory.getLogger(EC2ImageCow.class);
 
   @VisibleForTesting
@@ -99,7 +102,7 @@ public class EC2ImageCow extends EC2CowBase {
                       .values(List.of(imageChannel.getFilterName()))
                       .build(),
                   Filter.builder().name("architecture").values(instanceArchitectures).build()),
-              1000,
+              MAX_IMAGES_PER_REQUEST,
               nextToken);
 
       nextToken = describeImagesResponse.nextToken();
