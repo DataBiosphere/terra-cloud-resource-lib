@@ -18,10 +18,10 @@ public class EC2Utils {
    * @param responseOrException response/error union returned by AWS API call
    * @param logger logger to log exception info to
    * @param message message to log if an exception is present
-   * @param <ResponseType> response type wrapped by the {@link ResponseOrException}
+   * @param <ResponseT> response type wrapped by the {@link ResponseOrException}
    */
-  public static <ResponseType> void checkResponseOrException(
-      ResponseOrException<ResponseType> responseOrException, Logger logger, String message) {
+  public static <ResponseT> void checkResponseOrException(
+          ResponseOrException<ResponseT> responseOrException, Logger logger, String message) {
     if (responseOrException.exception().isPresent()) {
       // Log and surface any errors from AWS, clients should handle these appropriately.
       var t = responseOrException.exception().get();
@@ -47,22 +47,22 @@ public class EC2Utils {
    * @param hasFunction function to call on the response object to test for existence of a value
    * @param getFunction function to call on the response object to get the list of values
    * @return {@code getFunction.apply(response).get(0)}
-   * @param <ResponseType>
-   * @param <ValueType>
+   * @param <ResponseT>
+   * @param <ValueT>
    * @throws NoSuchElementException if the passed hasFunction returns false when called on the
    *     response object
    * @throws AssertionError if the list returned by calling getFunction on the response object does
    *     not have exactly one item
    */
-  public static <ResponseType, ValueType> ValueType extractSingleValue(
-      ResponseType response,
-      Function<ResponseType, Boolean> hasFunction,
-      Function<ResponseType, List<ValueType>> getFunction) {
+  public static <ResponseT, ValueT> ValueT extractSingleValue(
+      ResponseT response,
+      Function<ResponseT, Boolean> hasFunction,
+      Function<ResponseT, List<ValueT>> getFunction) {
     if (!hasFunction.apply(response)) {
       throw new NoSuchElementException("No elements returned from describe call.");
     }
 
-    List<ValueType> list = getFunction.apply(response);
+    List<ValueT> list = getFunction.apply(response);
     if (list.size() != 1) {
       throw new AssertionError("List should have exactly one element.");
     }

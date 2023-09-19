@@ -11,11 +11,11 @@ import software.amazon.awssdk.services.ec2.model.Ec2Request;
  * duplicate rule already existing.
  */
 public class CrlEC2DuplicateSecurityRuleException extends CrlEC2Exception {
-  public <RequestType extends Ec2Request> CrlEC2DuplicateSecurityRuleException(
-      RequestType message, Throwable cause) {
+  public <RequestT extends Ec2Request> CrlEC2DuplicateSecurityRuleException(
+          RequestT request, Throwable cause) {
     super(
         String.format(
-            "Duplicate security rule already exists matching request: %s", message.toString()),
+            "Duplicate security rule already exists matching request: %s", request.toString()),
         cause);
   }
 }
