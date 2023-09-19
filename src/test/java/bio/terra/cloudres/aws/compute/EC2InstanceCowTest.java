@@ -67,7 +67,7 @@ public class EC2InstanceCowTest {
     ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
     verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
     JsonObject json = gsonArgumentCaptor.getValue();
-    JsonObject serializedId = cow.createJsonObjectWithSingleField("instanceId", instanceId);
+    JsonObject serializedId = cow.serializeInstanceId(instanceId);
     assertEquals(json.getAsJsonObject("requestData"), serializedId);
     assertEquals(operation.toString(), json.get("operation").getAsString());
   }
@@ -124,8 +124,8 @@ public class EC2InstanceCowTest {
 
   @Test
   void getByTagTest() {
-    final String tagName = "ResourceID";
-    final String tagValue = UUID.randomUUID().toString();
+    String tagName = "ResourceID";
+    String tagValue = UUID.randomUUID().toString();
 
     DescribeInstancesResponse response =
         DescribeInstancesResponse.builder()

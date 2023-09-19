@@ -21,7 +21,7 @@ public class EC2Utils {
    * @param <ResponseT> response type wrapped by the {@link ResponseOrException}
    */
   public static <ResponseT> void checkResponseOrException(
-          ResponseOrException<ResponseT> responseOrException, Logger logger, String message) {
+      ResponseOrException<ResponseT> responseOrException, Logger logger, String message) {
     if (responseOrException.exception().isPresent()) {
       // Log and surface any errors from AWS, clients should handle these appropriately.
       var t = responseOrException.exception().get();

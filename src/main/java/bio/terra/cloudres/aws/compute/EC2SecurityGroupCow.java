@@ -232,7 +232,7 @@ public class EC2SecurityGroupCow extends EC2CowBase {
   }
 
   @VisibleForTesting
-  public JsonObject serializeSecurityGroupId(String instanceId) {
-    return createJsonObjectWithSingleField("securityGroupId", instanceId);
+  public JsonObject serializeSecurityGroupId(String securityGroupId) {
+    return createJsonObjectWithSingleField("securityGroupId", securityGroupId);
   }
 }

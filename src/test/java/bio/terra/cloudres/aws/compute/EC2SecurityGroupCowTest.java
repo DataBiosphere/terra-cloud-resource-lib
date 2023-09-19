@@ -63,6 +63,16 @@ public class EC2SecurityGroupCowTest {
     cow = new EC2SecurityGroupCow(unitTestConfig, mockClient, mockWaiter);
   }
 
+  private void verifySecurityGroupIdLogging(EC2SecurityGroupOperation operation) {
+    ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
+    verify(mockLogger).debug(stringArgumentCaptor.capture(), gsonArgumentCaptor.capture());
+    JsonObject json = gsonArgumentCaptor.getValue();
+    JsonObject serializedId = cow.serializeSecurityGroupId(securityGroupId);
+    Assertions.assertEquals(json.getAsJsonObject("requestData"), serializedId);
+    Assertions.assertEquals(operation.toString(), json.get("operation").getAsString());
+  }
+
   private void verifyRequestLogging(Object request, EC2SecurityGroupOperation operation) {
     ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
@@ -110,13 +120,14 @@ public class EC2SecurityGroupCowTest {
     DescribeSecurityGroupsRequest capturedRequest = requestArgumentCaptor.getValue();
     Assertions.assertEquals(1, capturedRequest.groupIds().size());
     Assertions.assertEquals(securityGroupId, capturedRequest.groupIds().get(0));
+    verifySecurityGroupIdLogging(EC2SecurityGroupOperation.AWS_GET_EC2_SECURITY_GROUP);
   }
 
   @Test
   public void getByTagTest() {
 
-    final String tagName = "ResourceID";
-    final String tagValue = UUID.randomUUID().toString();
+    String tagName = "ResourceID";
+    String tagValue = UUID.randomUUID().toString();
 
     DescribeSecurityGroupsResponse response =
         DescribeSecurityGroupsResponse.builder().securityGroups(List.of(fakeSecurityGroup)).build();
@@ -153,6 +164,7 @@ public class EC2SecurityGroupCowTest {
     verify(mockClient).deleteSecurityGroup(requestArgumentCaptor.capture());
     DeleteSecurityGroupRequest capturedRequest = requestArgumentCaptor.getValue();
     Assertions.assertEquals(securityGroupId, capturedRequest.groupId());
+    verifySecurityGroupIdLogging(EC2SecurityGroupOperation.AWS_DELETE_EC2_SECURITY_GROUP);
   }
 
   @Test
@@ -179,14 +191,18 @@ public class EC2SecurityGroupCowTest {
 
   @Test
   public void authorizeIngressTest() {
-    cow.authorizeIngress(
-        AuthorizeSecurityGroupIngressRequest.builder().groupId(securityGroupId).build());
+
+    AuthorizeSecurityGroupIngressRequest request =
+        AuthorizeSecurityGroupIngressRequest.builder().groupId(securityGroupId).build();
+    cow.authorizeIngress(request);
 
     ArgumentCaptor<AuthorizeSecurityGroupIngressRequest> requestArgumentCaptor =
         ArgumentCaptor.forClass(AuthorizeSecurityGroupIngressRequest.class);
     verify(mockClient).authorizeSecurityGroupIngress(requestArgumentCaptor.capture());
     AuthorizeSecurityGroupIngressRequest capturedRequest = requestArgumentCaptor.getValue();
     Assertions.assertEquals(securityGroupId, capturedRequest.groupId());
+    verifyRequestLogging(
+        request, EC2SecurityGroupOperation.AWS_AUTHORIZE_INGRESS_EC2_SECURITY_GROUP);
   }
 
   @Test
@@ -218,14 +234,17 @@ public class EC2SecurityGroupCowTest {
 
   @Test
   public void authorizeEgressTest() {
-    cow.authorizeEgress(
-        AuthorizeSecurityGroupEgressRequest.builder().groupId(securityGroupId).build());
+    AuthorizeSecurityGroupEgressRequest request =
+        AuthorizeSecurityGroupEgressRequest.builder().groupId(securityGroupId).build();
+    cow.authorizeEgress(request);
 
     ArgumentCaptor<AuthorizeSecurityGroupEgressRequest> requestArgumentCaptor =
         ArgumentCaptor.forClass(AuthorizeSecurityGroupEgressRequest.class);
     verify(mockClient).authorizeSecurityGroupEgress(requestArgumentCaptor.capture());
     AuthorizeSecurityGroupEgressRequest capturedRequest = requestArgumentCaptor.getValue();
     Assertions.assertEquals(securityGroupId, capturedRequest.groupId());
+    verifyRequestLogging(
+        request, EC2SecurityGroupOperation.AWS_AUTHORIZE_EGRESS_EC2_SECURITY_GROUP);
   }
 
   @Test
