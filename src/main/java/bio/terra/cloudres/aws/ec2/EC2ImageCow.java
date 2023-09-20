@@ -1,4 +1,4 @@
-package bio.terra.cloudres.aws.compute;
+package bio.terra.cloudres.aws.ec2;
 
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.common.annotations.VisibleForTesting;

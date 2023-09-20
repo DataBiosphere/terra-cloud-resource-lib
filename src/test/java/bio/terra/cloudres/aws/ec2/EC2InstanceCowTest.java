@@ -1,4 +1,4 @@
-package bio.terra.cloudres.aws.compute;
+package bio.terra.cloudres.aws.ec2;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;

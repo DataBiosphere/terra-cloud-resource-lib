@@ -1,4 +1,4 @@
-package bio.terra.cloudres.aws.compute;
+package bio.terra.cloudres.aws.ec2;
 
 /**
  * Enumeration representing EC2 Instance states as described in the <a

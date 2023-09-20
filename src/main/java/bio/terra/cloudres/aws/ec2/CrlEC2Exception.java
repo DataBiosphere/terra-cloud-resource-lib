@@ -1,4 +1,4 @@
-package bio.terra.cloudres.aws.compute;
+package bio.terra.cloudres.aws.ec2;
 
 /**
  * Exception thrown when CRL encounters an error from the underlying EC2 client. Generally, this is

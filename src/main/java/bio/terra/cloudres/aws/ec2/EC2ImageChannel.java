@@ -1,4 +1,4 @@
-package bio.terra.cloudres.aws.compute;
+package bio.terra.cloudres.aws.ec2;
 
 /**
  * Channels are families of AWS EC2 VM Images (AMI) running a specific operating system version.
