@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
  * Base class to allow reuse of {@link OperationAnnotator}, {@link Ec2Client}, and {@link Ec2Waiter}
  * instance management code among EC2 COW classes.
  */
-public class EC2CowBase implements AutoCloseable {
+public abstract class EC2CowBase implements AutoCloseable {
   private static final Duration EC2_WAITER_TIMEOUT_DURATION = Duration.ofSeconds(900);
 
   private final OperationAnnotator operationAnnotator;
