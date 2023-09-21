@@ -45,6 +45,8 @@ dependencies {
 
     // Google dependencies
     constraints {
+        api group: 'com.google.protobuf', name: 'protobuf-java', version: '3.21.7'
+        api group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.21.7'
         implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre' for Java 8 or higher
         testFixturesImplementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre" for Java 8 or higher
     }
@@ -75,13 +77,13 @@ dependencies {
 
     // Azure dependencies
     ext {
-        azureCore = '1.32.0'
-        azureRsrcMg = '2.19.0'
+        azureCore = '1.42.0'
+        azureRsrcMg = '2.30.0'
         azureRsrcMgBatch = '1.0.0'
     }
     api group: 'com.azure', name: 'azure-core', version: azureCore
     testFixturesImplementation group: 'com.azure', name: 'azure-core', version: azureCore
-    api group: 'com.azure', name: 'azure-identity', version: '1.8.2'
+    api group: 'com.azure', name: 'azure-identity', version: '1.10.1'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: azureRsrcMg
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-containerinstance', version: azureRsrcMg
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-msi', version: azureRsrcMg
@@ -91,8 +93,9 @@ dependencies {
     testFixturesImplementation group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: azureRsrcMg
 
     // AWS dependencies
-    implementation platform('software.amazon.awssdk:bom:2.18.34')
+    implementation platform('software.amazon.awssdk:bom:2.20.115')
     implementation 'software.amazon.awssdk:auth'
+    implementation 'software.amazon.awssdk:ec2'
     implementation 'software.amazon.awssdk:regions'
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sagemaker'
