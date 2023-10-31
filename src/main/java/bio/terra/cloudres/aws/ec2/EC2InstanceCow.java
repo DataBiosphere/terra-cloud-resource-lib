@@ -4,13 +4,17 @@ import bio.terra.cloudres.aws.notebook.SageMakerNotebookCow;
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.JsonObject;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
@@ -21,6 +25,7 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
@@ -288,6 +293,75 @@ public class EC2InstanceCow extends EC2CowBase {
         String.format(
             "Error waiting for Instance ID %s to enter state %s.",
             instanceId, expectedState.toString()));
+  }
+
+  /**
+   * Add or overwrite one or more tags on an EC2 instance.
+   *
+   * @param instanceId ID of instance to tag
+   * @param tags tags to add/overwrite
+   */
+  public void createTags(String instanceId, Collection<Tag> tags) {
+    getOperationAnnotator()
+        .executeCowOperation(
+            EC2InstanceOperation.AWS_CREATE_TAGS_EC2_INSTANCE,
+            () ->
+                getClient()
+                    .createTags(
+                        CreateTagsRequest.builder()
+                            .resources(List.of(instanceId))
+                            .tags(tags)
+                            .build()),
+            () -> serializeInstanceId(instanceId));
+  }
+
+  /**
+   * Delete one or more tags from an instance.
+   *
+   * <p>Note that the AWS DeleteTags API will delete ALL tags if it is called with no tags. To avoid
+   * doing this inadvertently we disallow calling this method with an empty list of keys; method
+   * {@link EC2InstanceCow#deleteAllTags} can be used for this purpose.
+   *
+   * @param instanceId ID of instance to delete tags from
+   * @param keys of tags to delete
+   * @throws {@link IllegalArgumentException} if an empty collection of keys is passed.
+   */
+  public void deleteTags(String instanceId, Collection<String> keys) {
+
+    if (keys.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Must pass at least one tag key; to delete all tags call deleteAllTags method.");
+    }
+
+    getOperationAnnotator()
+        .executeCowOperation(
+            EC2InstanceOperation.AWS_DELETE_TAGS_EC2_INSTANCE,
+            () ->
+                getClient()
+                    .deleteTags(
+                        DeleteTagsRequest.builder()
+                            .resources(List.of(instanceId))
+                            .tags(
+                                keys.stream()
+                                    .map(key -> Tag.builder().key(key).build())
+                                    .collect(Collectors.toList()))
+                            .build()),
+            () -> serializeInstanceId(instanceId));
+  }
+
+  /**
+   * Delete all tags from an instance
+   *
+   * @param instanceId ID of instance to delete tags from
+   */
+  public void deleteAllTags(String instanceId) {
+    getOperationAnnotator()
+        .executeCowOperation(
+            EC2InstanceOperation.AWS_DELETE_TAGS_EC2_INSTANCE,
+            () ->
+                getClient()
+                    .deleteTags(DeleteTagsRequest.builder().resources(List.of(instanceId)).build()),
+            () -> serializeInstanceId(instanceId));
   }
 
   @VisibleForTesting
