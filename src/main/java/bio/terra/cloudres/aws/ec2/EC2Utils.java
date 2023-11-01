@@ -3,30 +3,32 @@ package bio.terra.cloudres.aws.ec2;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
-import org.slf4j.Logger;
-import software.amazon.awssdk.core.internal.waiters.ResponseOrException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 /**
  * Static utility functions for frequently used error checking and result parsing when using the AWS
  * EC2 API's.
  */
 public class EC2Utils {
+  private static final String UNREACHABLE_STATE_ERROR_MESSAGE =
+      "A waiter acceptor was matched and transitioned the waiter to failure state";
 
   /**
-   * Log and surface errors returned via {@link ResponseOrException} to CRL clients.
+   * Differentiate an "unreachable state" SDK Client Error from other client errors (such as network
+   * glitches).
    *
-   * @param responseOrException response/error union returned by AWS API call
-   * @param logger logger to log exception info to
-   * @param message message to log if an exception is present
-   * @param <ResponseT> response type wrapped by the {@link ResponseOrException}
+   * @param resourceId id of resource that was being waited on
+   * @param clientException {@link SdkClientException} that was caught
+   * @throws {@link CrlEC2UnreachableStateException} if the wait failed due to waiting on an
+   *     unreachable state, otherwise the passed {@link SdkClientException} is rethrown
    */
-  public static <ResponseT> void checkResponseOrException(
-      ResponseOrException<ResponseT> responseOrException, Logger logger, String message) {
-    if (responseOrException.exception().isPresent()) {
-      // Log and surface any errors from AWS, clients should handle these appropriately.
-      var t = responseOrException.exception().get();
-      logger.error(message, t);
-      throw new CrlEC2Exception(message, t);
+  public static void checkWaiterException(String resourceId, SdkClientException clientException) {
+    if (clientException.getMessage().contains(UNREACHABLE_STATE_ERROR_MESSAGE)) {
+      // Unreachable state was detected... throw exception indicating this.
+      throw new CrlEC2UnreachableStateException(resourceId, clientException);
+    } else {
+      // Otherwise just rethrow
+      throw clientException;
     }
   }
 

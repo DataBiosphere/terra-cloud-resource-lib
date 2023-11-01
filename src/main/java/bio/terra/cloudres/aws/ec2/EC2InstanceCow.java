@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.core.waiters.WaiterResponse;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
@@ -180,7 +181,7 @@ public class EC2InstanceCow extends EC2CowBase {
    */
   public void terminateAndWait(String instanceId) {
     terminate(instanceId);
-    waitForState(instanceId, EC2InstanceState.TERMINATED);
+    waitForState(instanceId, InstanceStateName.TERMINATED);
   }
 
   /**
@@ -208,7 +209,7 @@ public class EC2InstanceCow extends EC2CowBase {
    */
   public void startAndWait(String instanceId) {
     start(instanceId);
-    waitForState(instanceId, EC2InstanceState.RUNNING);
+    waitForState(instanceId, InstanceStateName.RUNNING);
   }
 
   /**
@@ -236,7 +237,7 @@ public class EC2InstanceCow extends EC2CowBase {
    */
   public void stopAndWait(String instanceId) {
     stop(instanceId);
-    waitForState(instanceId, EC2InstanceState.STOPPED);
+    waitForState(instanceId, InstanceStateName.STOPPED);
   }
 
   /**
@@ -248,13 +249,13 @@ public class EC2InstanceCow extends EC2CowBase {
    *     OK status
    */
   public void waitForStatusOK(String instanceId) {
-    EC2Utils.checkResponseOrException(
-        getWaiter()
-            .waitUntilInstanceStatusOk(
-                DescribeInstanceStatusRequest.builder().instanceIds(List.of(instanceId)).build())
-            .matched(),
-        logger,
-        "Error waiting for Instance ID %s to reach OK status.");
+    try {
+      getWaiter()
+          .waitUntilInstanceStatusOk(
+              DescribeInstanceStatusRequest.builder().instanceIds(List.of(instanceId)).build());
+    } catch (SdkClientException e) {
+      EC2Utils.checkWaiterException(instanceId, e);
+    }
   }
 
   /**
@@ -264,35 +265,32 @@ public class EC2InstanceCow extends EC2CowBase {
    * implementation aligns to the SDK.
    *
    * @param instanceId ID of Instance to wait for
-   * @param expectedState {@link EC2InstanceState} to wait for
+   * @param expectedState {@link InstanceStateName} to wait for
    * @throws {@link UnsupportedOperationException} if a state other than [RUNNING, STOPPED,
    *     TERMINATED] is passed
    * @throws {@link CrlEC2Exception} if the API call determines that the passed state can never be
    *     reached
    */
-  public void waitForState(String instanceId, EC2InstanceState expectedState) {
+  public void waitForState(String instanceId, InstanceStateName expectedState) {
 
     DescribeInstancesRequest describeRequest =
         DescribeInstancesRequest.builder().instanceIds(List.of(instanceId)).build();
 
     Ec2Waiter ec2Waiter = getWaiter();
-    WaiterResponse<DescribeInstancesResponse> waiterResponse =
-        switch (expectedState) {
-          case RUNNING -> ec2Waiter.waitUntilInstanceRunning(describeRequest);
-          case STOPPED -> ec2Waiter.waitUntilInstanceStopped(describeRequest);
-          case TERMINATED -> ec2Waiter.waitUntilInstanceTerminated(describeRequest);
-          default -> throw new UnsupportedOperationException(
-              "Unsupported wait state "
-                  + expectedState.toString()
-                  + ", accepts [RUNNING, STOPPED, TERMINATED]");
-        };
 
-    EC2Utils.checkResponseOrException(
-        waiterResponse.matched(),
-        logger,
-        String.format(
-            "Error waiting for Instance ID %s to enter state %s.",
-            instanceId, expectedState.toString()));
+    try {
+      switch (expectedState) {
+        case RUNNING -> ec2Waiter.waitUntilInstanceRunning(describeRequest);
+        case STOPPED -> ec2Waiter.waitUntilInstanceStopped(describeRequest);
+        case TERMINATED -> ec2Waiter.waitUntilInstanceTerminated(describeRequest);
+        default -> throw new UnsupportedOperationException(
+            "Unsupported wait state "
+                + expectedState.toString()
+                + ", accepts [RUNNING, STOPPED, TERMINATED]");
+      }
+    } catch (SdkClientException e) {
+      EC2Utils.checkWaiterException(instanceId, e);
+    }
   }
 
   /**

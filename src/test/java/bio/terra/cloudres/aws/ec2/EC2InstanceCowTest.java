@@ -32,6 +32,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
@@ -276,10 +277,10 @@ public class EC2InstanceCowTest {
   void waitForStateUnsupportedTest() {
     assertThrows(
         UnsupportedOperationException.class,
-        () -> cow.waitForState(instanceId, EC2InstanceState.PENDING));
+        () -> cow.waitForState(instanceId, InstanceStateName.PENDING));
     assertThrows(
         UnsupportedOperationException.class,
-        () -> cow.waitForState(instanceId, EC2InstanceState.SHUTTING_DOWN));
+        () -> cow.waitForState(instanceId, InstanceStateName.SHUTTING_DOWN));
   }
 
   @Test
