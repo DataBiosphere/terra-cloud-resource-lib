@@ -11,8 +11,10 @@ import static org.mockito.Mockito.when;
 
 import bio.terra.cloudres.common.ClientConfig;
 import com.google.gson.JsonObject;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -22,12 +24,15 @@ import org.slf4j.Logger;
 import software.amazon.awssdk.core.internal.waiters.ResponseOrException;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteTagsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceStateName;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
@@ -53,6 +58,14 @@ public class EC2InstanceCowTest {
           .instanceType(instanceType)
           .imageId(instanceAmi)
           .build();
+
+  private static final Collection<software.amazon.awssdk.services.ec2.model.Tag> testTags =
+      List.of(
+          software.amazon.awssdk.services.ec2.model.Tag.builder().key("TagWithoutValue").build(),
+          software.amazon.awssdk.services.ec2.model.Tag.builder()
+              .key("TagWithValue")
+              .value("TagValue")
+              .build());
 
   @BeforeEach
   public void setupMocks() {
@@ -264,9 +277,79 @@ public class EC2InstanceCowTest {
   void waitForStateUnsupportedTest() {
     assertThrows(
         UnsupportedOperationException.class,
-        () -> cow.waitForState(instanceId, EC2InstanceState.PENDING));
+        () -> cow.waitForState(instanceId, InstanceStateName.PENDING));
     assertThrows(
         UnsupportedOperationException.class,
-        () -> cow.waitForState(instanceId, EC2InstanceState.SHUTTING_DOWN));
+        () -> cow.waitForState(instanceId, InstanceStateName.SHUTTING_DOWN));
+  }
+
+  @Test
+  void createTags() {
+    cow.createTags(instanceId, testTags);
+
+    ArgumentCaptor<CreateTagsRequest> requestArgumentCaptor =
+        ArgumentCaptor.forClass(CreateTagsRequest.class);
+    verify(mockClient).createTags(requestArgumentCaptor.capture());
+    CreateTagsRequest capturedRequest = requestArgumentCaptor.getValue();
+
+    // Make sure ID matches
+    assertTrue(capturedRequest.hasResources());
+    assertEquals(1, capturedRequest.resources().size());
+    assertEquals(instanceId, capturedRequest.resources().get(0));
+
+    // Make sure tags match
+    assertTrue(capturedRequest.hasTags());
+    assertTrue(capturedRequest.tags().containsAll(testTags));
+
+    verifyInstanceIdLogging(EC2InstanceOperation.AWS_CREATE_TAGS_EC2_INSTANCE);
+  }
+
+  @Test
+  void deleteTags() {
+    Collection<String> testTagKeys =
+        testTags.stream().map(tag -> tag.key()).collect(Collectors.toList());
+
+    cow.deleteTags(instanceId, testTagKeys);
+
+    ArgumentCaptor<DeleteTagsRequest> requestArgumentCaptor =
+        ArgumentCaptor.forClass(DeleteTagsRequest.class);
+    verify(mockClient).deleteTags(requestArgumentCaptor.capture());
+    DeleteTagsRequest capturedRequest = requestArgumentCaptor.getValue();
+
+    // Make sure ID matches
+    assertTrue(capturedRequest.hasResources());
+    assertEquals(1, capturedRequest.resources().size());
+    assertEquals(instanceId, capturedRequest.resources().get(0));
+
+    var expectedTags =
+        testTagKeys.stream()
+            .map(key -> software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).build())
+            .collect(Collectors.toList());
+
+    // Make sure tags match
+    assertTrue(capturedRequest.hasTags());
+    assertTrue(capturedRequest.tags().containsAll(expectedTags));
+
+    verifyInstanceIdLogging(EC2InstanceOperation.AWS_DELETE_TAGS_EC2_INSTANCE);
+  }
+
+  @Test
+  void deleteAllTags() {
+    cow.deleteAllTags(instanceId);
+
+    ArgumentCaptor<DeleteTagsRequest> requestArgumentCaptor =
+        ArgumentCaptor.forClass(DeleteTagsRequest.class);
+    verify(mockClient).deleteTags(requestArgumentCaptor.capture());
+    DeleteTagsRequest capturedRequest = requestArgumentCaptor.getValue();
+
+    // Make sure ID matches
+    assertTrue(capturedRequest.hasResources());
+    assertEquals(1, capturedRequest.resources().size());
+    assertEquals(instanceId, capturedRequest.resources().get(0));
+
+    // Make sure no tags
+    assertFalse(capturedRequest.hasTags());
+
+    verifyInstanceIdLogging(EC2InstanceOperation.AWS_DELETE_TAGS_EC2_INSTANCE);
   }
 }

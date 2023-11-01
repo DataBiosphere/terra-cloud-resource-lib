@@ -8,20 +8,11 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.core.internal.waiters.ResponseOrException;
 
 @Tag("unit")
 public class EC2UtilsTest {
 
   private static final Logger logger = LoggerFactory.getLogger(EC2UtilsTest.class);
-
-  @Test
-  public void withException() {
-    ResponseOrException withException = ResponseOrException.exception(new RuntimeException());
-    assertThrows(
-        CrlEC2Exception.class,
-        () -> EC2Utils.checkResponseOrException(withException, logger, "expected"));
-  }
 
   private class FakeResponse {
     private final List<Integer> list;

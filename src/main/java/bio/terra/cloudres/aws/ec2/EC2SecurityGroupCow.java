@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
@@ -85,17 +86,15 @@ public class EC2SecurityGroupCow extends EC2CowBase {
    * Wait until EC2 group is fully created and can have rules and instances added to it
    *
    * @param securityGroupId ID of Security Group to wait for
-   * @throws {@link CrlEC2Exception} if the API call determines that created state can never be
-   *     reached
    */
   public void waitForExistence(String securityGroupId) {
-    EC2Utils.checkResponseOrException(
-        getWaiter()
-            .waitUntilSecurityGroupExists(
-                DescribeSecurityGroupsRequest.builder().groupIds(List.of(securityGroupId)).build())
-            .matched(),
-        logger,
-        String.format("Error waiting for existence of Security Group with ID %s", securityGroupId));
+    try {
+      getWaiter()
+          .waitUntilSecurityGroupExists(
+              DescribeSecurityGroupsRequest.builder().groupIds(List.of(securityGroupId)).build());
+    } catch (SdkClientException e) {
+      EC2Utils.checkWaiterException(securityGroupId, e);
+    }
   }
 
   /**
