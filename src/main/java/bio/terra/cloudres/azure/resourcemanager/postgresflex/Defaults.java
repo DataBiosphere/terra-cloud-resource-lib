@@ -8,6 +8,8 @@ import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager;
 
 public class Defaults {
+  private Defaults() {}
+
   /**
    * Configures a client for CRL usage.
    *
