@@ -4,8 +4,8 @@ import bio.terra.cloudres.azure.resourcemanager.common.ResourceManagerRequestDat
 import com.google.gson.JsonObject;
 
 /**
- * Extends {@link ResourceManagerRequestData} to add common fields for working with the Postgres
- * Flex API.
+ * Extends {@link ResourceManagerRequestData} to add common fields for working with the Kubernetes
+ * API.
  */
 public abstract class BaseKubernetesRequestData implements ResourceManagerRequestData {
   /** The tenant of the resource. */

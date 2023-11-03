@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @AutoValue
 public abstract class CreateKubernetesNamespaceRequestData extends BaseKubernetesRequestData {
-  /** The name of the database. */
+  /** The name of the namespace. */
   public abstract String namespaceName();
 
   @Override
