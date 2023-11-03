@@ -19,7 +19,7 @@ public abstract class CreateRelayHybridConnectionRequestData extends BaseRelayRe
 
   @Override
   public final CloudOperation cloudOperation() {
-    return RelayManagerOperation.AZURE_CREATE_RELAY_HYBRID_CONNNECTION;
+    return RelayManagerOperation.AZURE_CREATE_RELAY_HYBRID_CONNECTION;
   }
 
   @Override

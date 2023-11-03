@@ -1,6 +1,7 @@
 package bio.terra.cloudres.azure.resourcemanager.common;
 
 import bio.terra.cloudres.common.ClientConfig;
+import bio.terra.cloudres.common.cleanup.CleanupRecorder;
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.core.util.Context;
@@ -66,5 +67,22 @@ public class Defaults {
             // Since we are providing our own loggers this value isn't actually used; however it
             // does need to be set to a value other than NONE for the loggers to fire.
             .setLogLevel(HttpLogDetailLevel.BASIC));
+  }
+
+  /**
+   * Manually records a resource for cleanup. This is useful for cleaning up resources created
+   * outside of Azure Resource Manager API calls.
+   *
+   * @param requestData the request data object
+   * @param clientConfig the client config
+   */
+  public static void recordCleanup(
+      ResourceManagerRequestData requestData, ClientConfig clientConfig) {
+    requestData
+        .resourceUidCreation()
+        .ifPresent(
+            uid ->
+                CleanupRecorder.record(
+                    uid, requestData.resourceCreationMetadata().orElse(null), clientConfig));
   }
 }

@@ -6,9 +6,6 @@ import static org.mockito.Mockito.when;
 
 import bio.terra.cloudres.azure.resourcemanager.compute.data.BaseComputeRequestData;
 import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateDiskRequestData;
-import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateNetworkRequestData;
-import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateNetworkSecurityGroupRequestData;
-import bio.terra.cloudres.azure.resourcemanager.compute.data.CreatePublicIpRequestData;
 import bio.terra.cloudres.azure.resourcemanager.compute.data.CreateVirtualMachineRequestData;
 import bio.terra.janitor.model.AzureDisk;
 import bio.terra.janitor.model.AzureNetwork;

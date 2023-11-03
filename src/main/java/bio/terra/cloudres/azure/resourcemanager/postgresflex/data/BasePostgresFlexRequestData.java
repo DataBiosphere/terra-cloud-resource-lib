@@ -1,23 +1,13 @@
-package bio.terra.cloudres.azure.resourcemanager.containerinstance.data;
+package bio.terra.cloudres.azure.resourcemanager.postgresflex.data;
 
 import bio.terra.cloudres.azure.resourcemanager.common.ResourceManagerRequestData;
-import com.azure.core.management.Region;
 import com.google.gson.JsonObject;
 
 /**
- * Extends {@link ResourceManagerRequestData} to add common fields for working with the Container
- * Instance Manager API.
+ * Extends {@link ResourceManagerRequestData} to add common fields for working with the Postgres
+ * Flex API.
  */
-public abstract class BaseContainerInstanceRequestData implements ResourceManagerRequestData {
-  /**
-   * The name of the resource - name of the container group. Azure REST API and CLI have different
-   * name for this: Azure REST API uses 'containerGroupName' Azure CLI uses - 'name'
-   */
-  public abstract String containerGroupName();
-
-  /** The region of the resource. */
-  public abstract Region region();
-
+public abstract class BasePostgresFlexRequestData implements ResourceManagerRequestData {
   /** The tenant of the resource. */
   public abstract String tenantId();
 
@@ -26,6 +16,9 @@ public abstract class BaseContainerInstanceRequestData implements ResourceManage
 
   /** The resource group of the resource. */
   public abstract String resourceGroupName();
+
+  /** The postgres server name. */
+  public abstract String serverName();
 
   /**
    * Serializes this object to JSON. Not overriding {@link ResourceManagerRequestData#serialize()}
@@ -36,8 +29,7 @@ public abstract class BaseContainerInstanceRequestData implements ResourceManage
     requestData.addProperty("tenantId", tenantId());
     requestData.addProperty("subscriptionId", subscriptionId());
     requestData.addProperty("resourceGroupName", resourceGroupName());
-    requestData.addProperty("containerGroupName", containerGroupName());
-    requestData.addProperty("region", region().name());
+    requestData.addProperty("serverName", serverName());
     return requestData;
   }
 }
