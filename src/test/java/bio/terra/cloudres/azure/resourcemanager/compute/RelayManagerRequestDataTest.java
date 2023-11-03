@@ -3,7 +3,7 @@ package bio.terra.cloudres.azure.resourcemanager.compute;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import bio.terra.cloudres.azure.resourcemanager.relay.RelayManagerOperation;
-import com.azure.core.management.Region;
+import bio.terra.cloudres.azure.resourcemanager.relay.data.CreateRelayHybridConnectionRequestData;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -11,36 +11,19 @@ import org.junit.jupiter.api.Test;
 public class RelayManagerRequestDataTest {
 
   @Test
-  public void serializeCreateAzureRelay() {
-    CreateRelayRequestData create =
-        CreateRelayRequestData.builder()
-            .setName("my-relay")
-            .setTenantId("my-tenant")
-            .setSubscriptionId("my-sub")
-            .setResourceGroupName("my-rg")
-            .setRegion(Region.US_EAST)
-            .build();
-
-    assertEquals(RelayManagerOperation.AZURE_CREATE_RELAY, create.cloudOperation());
-    assertEquals(
-        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\",\"name\":\"my-relay\",\"region\":\"eastus\"}",
-        create.serialize().toString());
-  }
-
-  @Test
   public void serializeCreateAzureRelayHybridConnection() {
-    CreateRelayRequestData create =
-        CreateRelayRequestData.builder()
+    CreateRelayHybridConnectionRequestData create =
+        CreateRelayHybridConnectionRequestData.builder()
             .setName("my-relay-hc")
             .setTenantId("my-tenant")
             .setSubscriptionId("my-sub")
             .setResourceGroupName("my-rg")
-            .setRegion(Region.US_EAST)
             .build();
 
-    assertEquals(RelayManagerOperation.AZURE_CREATE_RELAY, create.cloudOperation());
     assertEquals(
-        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\",\"name\":\"my-relay-hc\",\"region\":\"eastus\"}",
+        RelayManagerOperation.AZURE_CREATE_RELAY_HYBRID_CONNECTION, create.cloudOperation());
+    assertEquals(
+        "{\"tenantId\":\"my-tenant\",\"subscriptionId\":\"my-sub\",\"resourceGroupName\":\"my-rg\",\"name\":\"my-relay-hc\"}",
         create.serialize().toString());
   }
 }
