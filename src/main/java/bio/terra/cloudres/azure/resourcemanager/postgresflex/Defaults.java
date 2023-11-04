@@ -1,11 +1,11 @@
-package bio.terra.cloudres.azure.resourcemanager.batch;
+package bio.terra.cloudres.azure.resourcemanager.postgresflex;
 
 import bio.terra.cloudres.azure.resourcemanager.common.AzureResourceCleanupRecorder;
 import bio.terra.cloudres.azure.resourcemanager.common.AzureResponseLogger;
 import bio.terra.cloudres.common.ClientConfig;
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
-import com.azure.resourcemanager.batch.BatchManager;
+import com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager;
 
 public class Defaults {
   private Defaults() {}
@@ -16,7 +16,7 @@ public class Defaults {
    * <p>Example usage:
    *
    * <pre>
-   *    crlConfigure(clientConfig, BatchManager.configure())
+   *    crlConfigure(clientConfig, PostgreSqlManager.configure())
    *        .authenticate(tokenCredential, azureProfile);
    * </pre>
    *
@@ -24,8 +24,8 @@ public class Defaults {
    * @param configurable Azure client to configure.
    * @return a configured Azure client.
    */
-  public static BatchManager.Configurable crlConfigure(
-      ClientConfig clientConfig, BatchManager.Configurable configurable) {
+  public static PostgreSqlManager.Configurable crlConfigure(
+      ClientConfig clientConfig, PostgreSqlManager.Configurable configurable) {
     return configurable.withLogOptions(
         new HttpLogOptions()
             .setRequestLogger(new AzureResourceCleanupRecorder(clientConfig))
