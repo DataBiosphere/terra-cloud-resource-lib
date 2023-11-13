@@ -3,18 +3,22 @@ package bio.terra.cloudres.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import bio.terra.cloudres.common.cleanup.CleanupConfig;
+import io.opentelemetry.api.OpenTelemetry;
+
 import java.util.Optional;
 
 /** Configuration class to manage CRL behavior. */
 public class ClientConfig {
   private final String clientName;
   private final Optional<CleanupConfig> cleanupConfig;
+  private final OpenTelemetry openTelemetry;
 
-  private ClientConfig(String clientName, Optional<CleanupConfig> cleanupConfig) {
+  private ClientConfig(String clientName, Optional<CleanupConfig> cleanupConfig, OpenTelemetry openTelemetry) {
     checkNotNull(clientName, "client name must be set");
 
     this.clientName = clientName;
     this.cleanupConfig = cleanupConfig;
+    this.openTelemetry = openTelemetry;
   }
 
   /** The name of the client running CRL, e.g. the name of the service. */
@@ -30,9 +34,14 @@ public class ClientConfig {
     return cleanupConfig;
   }
 
+  public OpenTelemetry getOpenTelemetry() {
+    return openTelemetry;
+  }
+
   public static class Builder {
     private String client;
     private Optional<CleanupConfig> cleanupConfig = Optional.empty();
+    private OpenTelemetry openTelemetry = OpenTelemetry.noop();
 
     private Builder() {}
 
@@ -52,8 +61,13 @@ public class ClientConfig {
       return this;
     }
 
+    public Builder setOpenTelemetry(OpenTelemetry openTelemetry) {
+      this.openTelemetry = openTelemetry;
+      return this;
+    }
+
     public ClientConfig build() {
-      return new ClientConfig(this.client, cleanupConfig);
+      return new ClientConfig(this.client, cleanupConfig, openTelemetry);
     }
   }
 }

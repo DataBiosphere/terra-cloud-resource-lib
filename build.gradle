@@ -123,10 +123,10 @@ dependencies {
 
     // Metrics & Tracing
     ext {
-        opencensus = '0.31.1'
+        openTelemetryVersion = '1.31.0'
     }
-    implementation group: 'io.opencensus', name: 'opencensus-api', version: opencensus
-    implementation group: 'io.opencensus', name: 'opencensus-impl', version: opencensus
+    implementation "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}"
+    implementation "io.opentelemetry.semconv:opentelemetry-semconv:1.21.0-alpha"
 
     // Testing
     ext {

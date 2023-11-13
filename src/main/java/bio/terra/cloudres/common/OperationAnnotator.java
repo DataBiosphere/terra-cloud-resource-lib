@@ -1,5 +1,7 @@
 package bio.terra.cloudres.common;
 
+import static io.opentelemetry.semconv.SemanticAttributes.HTTP_RESPONSE_STATUS_CODE;
+
 import bio.terra.cloudres.util.MetricsHelper;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpStatusCodes;
@@ -9,20 +11,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.opencensus.contrib.http.util.HttpTraceAttributeConstants;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Tracer;
-import io.opencensus.trace.Tracing;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.slf4j.Logger;
+
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import software.amazon.awssdk.core.exception.SdkServiceException;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
 public class OperationAnnotator {
-  private static final Tracer tracer = Tracing.getTracer();
+  private final Tracer tracer;
 
   private final ClientConfig clientConfig;
 
@@ -32,6 +33,7 @@ public class OperationAnnotator {
   public OperationAnnotator(ClientConfig clientConfig, Logger logger) {
     this.clientConfig = clientConfig;
     this.logger = logger;
+    this.tracer = clientConfig.getOpenTelemetry().getTracer(OperationAnnotator.class.getName());
   }
 
   /**
@@ -73,7 +75,7 @@ public class OperationAnnotator {
     Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
 
     Stopwatch stopwatch = Stopwatch.createStarted();
-    try {
+    try(Scope ignored = span.makeCurrent()) {
       R response = cowExecute.execute();
       return response;
     } catch (Exception e) {
@@ -95,6 +97,8 @@ public class OperationAnnotator {
       // We manually manage the span so that the expected span is still present in catch and
       // finally.
       // See warning on SpanBuilder#startScopedSpan.
+      // Trace the http status code
+      httpStatusCode.ifPresent(s -> span.setAttribute(HTTP_RESPONSE_STATUS_CODE, s));
       span.end();
     }
   }
@@ -118,13 +122,6 @@ public class OperationAnnotator {
 
     // Record errors as a metric
     recordErrors(operationData.httpStatusCode(), operationData.cloudOperation());
-
-    // Trace the http status code
-    tracer
-        .getCurrentSpan()
-        .putAttribute(
-            HttpTraceAttributeConstants.HTTP_STATUS_CODE,
-            AttributeValue.longAttributeValue(operationData.httpStatusCode().orElse(-1)));
 
     // Log the event
     logEvent(operationData);
