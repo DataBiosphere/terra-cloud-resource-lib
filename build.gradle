@@ -50,9 +50,10 @@ dependencies {
         implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre' for Java 8 or higher
         testFixturesImplementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre" for Java 8 or higher
     }
-    implementation platform('com.google.cloud:libraries-bom:26.0.0') // use common bom
+    implementation platform('com.google.cloud:libraries-bom:26.27.0') // use common bom
     implementation group: 'com.google.cloud', name: 'google-cloud-pubsub'
-    api platform('com.google.cloud:libraries-bom:26.0.0')
+    implementation group: 'com.fatboyindustrial.gson-javatime-serialisers', name: 'gson-javatime-serialisers', version: '1.1.2'
+    api platform('com.google.cloud:libraries-bom:26.27.0')
     api group: 'com.google.cloud', name: 'google-cloud-billing'
     api group: 'com.google.cloud', name: 'google-cloud-core-http'
     api group: 'com.google.cloud', name: 'google-cloud-storage'
@@ -66,7 +67,7 @@ dependencies {
     api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1beta1-rev20220615-1.32.1'
     api group: 'com.google.auth', name: 'google-auth-library-oauth2-http'
     api group: 'com.google.guava', name: 'guava'
-    testFixturesImplementation platform('com.google.cloud:libraries-bom:26.0.0')
+    testFixturesImplementation platform('com.google.cloud:libraries-bom:26.27.0')
     testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
 
     ext {
