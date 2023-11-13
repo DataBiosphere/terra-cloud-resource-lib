@@ -53,7 +53,7 @@ public class DnsCowTest {
     DnsCow dnsCow = defaultDns();
     String zoneName = "zone-name";
     String dnsName = "googleapis.com.";
-    String visibility = "PRIVATE";
+    String visibility = "private";
     ManagedZone managedZone =
         new ManagedZone()
             .setName(zoneName)
