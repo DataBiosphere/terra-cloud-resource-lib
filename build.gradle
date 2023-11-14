@@ -50,24 +50,27 @@ dependencies {
         implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre' for Java 8 or higher
         testFixturesImplementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre" for Java 8 or higher
     }
-    implementation platform('com.google.cloud:libraries-bom:26.0.0') // use common bom
+    implementation platform('com.google.cloud:libraries-bom:26.27.0') // use common bom
+
     implementation group: 'com.google.cloud', name: 'google-cloud-pubsub'
-    api platform('com.google.cloud:libraries-bom:26.0.0')
+    implementation group: 'com.fatboyindustrial.gson-javatime-serialisers', name: 'gson-javatime-serialisers', version: '1.1.2'
+    api platform('com.google.cloud:libraries-bom:26.27.0')
     api group: 'com.google.cloud', name: 'google-cloud-billing'
     api group: 'com.google.cloud', name: 'google-cloud-core-http'
     api group: 'com.google.cloud', name: 'google-cloud-storage'
-    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20220716-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20220710-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20220720-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-dataproc', version: 'v1-rev20220726-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v2-rev20220505-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20220526-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20220716-1.32.1'
-    api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1beta1-rev20220615-1.32.1'
+    api group: 'com.google.apis', name: 'google-api-services-bigquery', version: 'v2-rev20231008-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20231022-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev20231031-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-dataproc', version: 'v1-rev20231028-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-dns', version: 'v1-rev20230831-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-iam', version: 'v1-rev20230914-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-notebooks', version: 'v1-rev20231019-2.0.0'
+    api group: 'com.google.apis', name: 'google-api-services-serviceusage', version: 'v1beta1-rev20230309-2.0.0'
     api group: 'com.google.auth', name: 'google-auth-library-oauth2-http'
     api group: 'com.google.guava', name: 'guava'
-    testFixturesImplementation platform('com.google.cloud:libraries-bom:26.0.0')
+    testFixturesImplementation platform('com.google.cloud:libraries-bom:26.27.0')
     testImplementation group: 'com.google.cloud', name: 'google-cloud-resourcemanager'
+    testImplementation group: 'com.google.apis', name: 'google-api-services-cloudresourcemanager', version: 'v3-rev20231022-2.0.0'
 
     ext {
         autoValue = '1.9'

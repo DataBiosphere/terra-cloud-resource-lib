@@ -58,7 +58,7 @@ public class SerializeUtilsTest {
   public void bucketNameAndBlobListOption() {
     JsonObject jsonObject = SerializeUtils.convert("my-name", Storage.BlobListOption.pageSize(1));
     assertEquals(
-        "{\"bucketName\":\"my-name\",\"blobListOption\":[{\"rpcOption\":\"MAX_RESULTS\",\"value\":1}]}",
+        "{\"bucketName\":\"my-name\",\"blobListOption\":[{\"opt\":{\"key\":\"MAX_RESULTS\",\"val\":1}}]}",
         jsonObject.toString());
   }
 
@@ -67,9 +67,9 @@ public class SerializeUtilsTest {
     JsonObject jsonObject =
         SerializeUtils.convert(
             BucketInfo.newBuilder("my-name").build(),
-            Storage.BucketTargetOption.metagenerationMatch());
+            Storage.BucketTargetOption.userProject("my-project"));
     assertEquals(
-        "{\"bucketInfo\":{\"name\":\"my-name\"},\"bucketTargetOption\":[{\"rpcOption\":\"IF_METAGENERATION_MATCH\"}]}",
+        "{\"bucketInfo\":{\"name\":\"my-name\"},\"bucketTargetOption\":[{\"opt\":{\"key\":\"USER_PROJECT\",\"val\":\"my-project\"}}]}",
         jsonObject.toString());
   }
 
