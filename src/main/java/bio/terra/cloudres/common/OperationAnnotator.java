@@ -2,7 +2,6 @@ package bio.terra.cloudres.common;
 
 import static io.opentelemetry.semconv.SemanticAttributes.HTTP_RESPONSE_STATUS_CODE;
 
-import bio.terra.cloudres.util.MetricsHelper;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.gax.rpc.ApiException;
@@ -11,14 +10,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.OptionalInt;
 import org.slf4j.Logger;
-
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
 import software.amazon.awssdk.core.exception.SdkServiceException;
 
 /** Annotates executing cloud operations with logs, traces, and metrics to record what happens. */
@@ -75,7 +73,7 @@ public class OperationAnnotator {
     Span span = tracer.spanBuilder(cloudOperation.name()).startSpan();
 
     Stopwatch stopwatch = Stopwatch.createStarted();
-    try(Scope ignored = span.makeCurrent()) {
+    try (Scope ignored = span.makeCurrent()) {
       R response = cowExecute.execute();
       return response;
     } catch (Exception e) {
@@ -128,15 +126,19 @@ public class OperationAnnotator {
   }
 
   private void recordApiCount(CloudOperation operation) {
-    MetricsHelper.recordApiCount(clientConfig.getClientName(), operation);
+    clientConfig.getMetricsHelper().recordApiCount(clientConfig.getClientName(), operation);
   }
 
   private void recordErrors(OptionalInt httpStatusCode, CloudOperation operation) {
-    MetricsHelper.recordError(clientConfig.getClientName(), operation, httpStatusCode);
+    clientConfig
+        .getMetricsHelper()
+        .recordError(clientConfig.getClientName(), operation, httpStatusCode);
   }
 
   private void recordLatency(Duration duration, CloudOperation operation) {
-    MetricsHelper.recordLatency(clientConfig.getClientName(), operation, duration);
+    clientConfig
+        .getMetricsHelper()
+        .recordLatency(clientConfig.getClientName(), operation, duration);
   }
 
   /**

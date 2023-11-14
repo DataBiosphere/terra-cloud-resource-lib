@@ -2,14 +2,12 @@ package bio.terra.cloudres.azure.resourcemanager.common;
 
 import bio.terra.cloudres.common.ClientConfig;
 import bio.terra.cloudres.common.cleanup.CleanupRecorder;
-import io.opentelemetry.api.trace.Span;
-
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.core.util.Context;
 import com.azure.core.util.tracing.Tracer;
 import com.azure.resourcemanager.resources.fluentcore.arm.AzureConfigurable;
-
+import io.opentelemetry.api.trace.Span;
 import java.util.Map;
 
 /** Provides defaults for working with the Azure Resource Manager API. */
@@ -46,10 +44,13 @@ public class Defaults {
    * </pre>
    */
   public static Context buildContext(ResourceManagerRequestData requestData) {
-    return Context.of(Map.of(
-        CLOUD_RESOURCE_REQUEST_DATA_KEY, requestData,
-        // azure has built-in handling of tracing, nice!
-        Tracer.PARENT_TRACE_CONTEXT_KEY, Span.current()));
+    return Context.of(
+        Map.of(
+            CLOUD_RESOURCE_REQUEST_DATA_KEY,
+            requestData,
+            // azure has built-in handling of tracing, nice!
+            Tracer.PARENT_TRACE_CONTEXT_KEY,
+            Span.current()));
   }
 
   /**

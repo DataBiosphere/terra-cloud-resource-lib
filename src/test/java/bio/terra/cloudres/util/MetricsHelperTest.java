@@ -1,100 +1,128 @@
 package bio.terra.cloudres.util;
 
-import static bio.terra.cloudres.testing.MetricsTestUtil.*;
-import static bio.terra.cloudres.util.MetricsHelper.CLOUD_RESOURCE_PREFIX;
 import static bio.terra.cloudres.util.MetricsHelper.GENERIC_UNKNOWN_ERROR_CODE;
+import static bio.terra.cloudres.util.MetricsHelper.KEY_ERROR;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import bio.terra.cloudres.testing.StubCloudOperation;
-import io.opencensus.stats.View;
-import io.opencensus.tags.TagValue;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.SdkMeterProvider;
+import io.opentelemetry.sdk.metrics.data.HistogramPointData;
+import io.opentelemetry.sdk.metrics.data.LongPointData;
+import io.opentelemetry.sdk.metrics.data.MetricData;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 import java.util.OptionalInt;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /** Test for {@link MetricsHelper} */
 @Tag("unit")
 public class MetricsHelperTest {
-  private static final List<TagValue> ERROR_401_COUNT =
-      Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
-          TagValue.create("401"));
-  private static final List<TagValue> ERROR_403_COUNT =
-      Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
-          TagValue.create("403"));
-  private static final List<TagValue> ERROR_GENERIC_COUNT =
-      Arrays.asList(
-          TagValue.create(CLIENT),
-          TagValue.create(StubCloudOperation.TEST_OPERATION.name()),
-          TagValue.create(String.valueOf(GENERIC_UNKNOWN_ERROR_CODE)));
+  public static final String CLIENT = "TestClient";
 
-  private static final View.Name LATENCY_VIEW_NAME =
-      View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/latency");
-  private static final View.Name API_VIEW_NAME =
-      View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/api");
-  private static final View.Name ERROR_VIEW_NAME =
-      View.Name.create(CLOUD_RESOURCE_PREFIX + "/cloud/error");
+  private static final Duration METRICS_COLLECTION_INTERVAL = Duration.ofMillis(10);
+  private MetricsHelper metricsHelper;
+  private TestMetricExporter testMetricExporter;
+
+  @BeforeEach
+  void setup() {
+    testMetricExporter = new TestMetricExporter();
+    metricsHelper = new MetricsHelper(openTelemetry(testMetricExporter));
+  }
+
+  public OpenTelemetry openTelemetry(TestMetricExporter testMetricExporter) {
+    var sdkMeterProviderBuilder =
+        SdkMeterProvider.builder()
+            .registerMetricReader(
+                PeriodicMetricReader.builder(testMetricExporter)
+                    .setInterval(METRICS_COLLECTION_INTERVAL)
+                    .build());
+
+    return OpenTelemetrySdk.builder().setMeterProvider(sdkMeterProviderBuilder.build()).build();
+  }
+
+  public MetricData waitForMetrics() {
+    await()
+        .atMost(METRICS_COLLECTION_INTERVAL.multipliedBy(10))
+        .pollInterval(METRICS_COLLECTION_INTERVAL)
+        .until(
+            () ->
+                testMetricExporter.getLastMetrics() != null
+                    && testMetricExporter.getLastMetrics().size() == 1);
+    return testMetricExporter.getLastMetrics().iterator().next();
+  }
 
   @Test
   public void testRecordApiCount() throws Exception {
-    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
-    MetricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    metricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    metricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    metricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
+    metricsHelper.recordApiCount(CLIENT, StubCloudOperation.TEST_OPERATION);
 
-    sleepForSpansExport();
+    var metric = waitForMetrics();
 
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 4);
+    assertEquals(MetricsHelper.API_COUNT_METER_NAME, metric.getName());
+    assertEquals(1, metric.getData().getPoints().size());
+    assertEquals(4, ((LongPointData) metric.getData().getPoints().iterator().next()).getValue());
   }
 
   @Test
   public void testRecordErrorCount() throws Exception {
-    long errorCount403 = getCurrentCount(ERROR_VIEW_NAME, ERROR_403_COUNT);
-    long errorCount401 = getCurrentCount(ERROR_VIEW_NAME, ERROR_401_COUNT);
-    long errorCountGeneric = getCurrentCount(ERROR_VIEW_NAME, ERROR_GENERIC_COUNT);
+    metricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
+    metricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
+    metricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
+    metricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(403));
+    metricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.empty());
 
-    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
-    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
-    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(401));
-    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.of(403));
-    MetricsHelper.recordError(CLIENT, StubCloudOperation.TEST_OPERATION, OptionalInt.empty());
+    var metric = waitForMetrics();
 
-    sleepForSpansExport();
-
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_401_COUNT, errorCount401, 3);
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_403_COUNT, errorCount403, 1);
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_GENERIC_COUNT, errorCountGeneric, 1);
+    assertEquals(MetricsHelper.ERROR_COUNT_METER_NAME, metric.getName());
+    assertEquals(3, metric.getData().getPoints().size());
+    assertEquals(
+        3,
+        ((LongPointData)
+                metric.getData().getPoints().stream()
+                    .filter(p -> "401".equals(p.getAttributes().get(KEY_ERROR)))
+                    .findFirst()
+                    .get())
+            .getValue());
+    assertEquals(
+        1,
+        ((LongPointData)
+                metric.getData().getPoints().stream()
+                    .filter(p -> "403".equals(p.getAttributes().get(KEY_ERROR)))
+                    .findFirst()
+                    .get())
+            .getValue());
+    assertEquals(
+        1,
+        ((LongPointData)
+                metric.getData().getPoints().stream()
+                    .filter(
+                        p ->
+                            String.valueOf(GENERIC_UNKNOWN_ERROR_CODE)
+                                .equals(p.getAttributes().get(KEY_ERROR)))
+                    .findFirst()
+                    .get())
+            .getValue());
   }
 
   @Test
   public void testRecordLatency() throws Exception {
-    // this is mapped to the Distribution defined in MetricsHelper, i.e.
-    // 0ms being within the first bucket & 1 ms in the 2nd.
-    final int zeroMsBucketIndex = 0;
-    final int oneMsBucketIndex = 1;
+    metricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
+    metricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
+    metricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(0));
 
-    long current0MsCount =
-        getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, zeroMsBucketIndex);
-    long current1MsCount =
-        getCurrentDistributionDataCount(LATENCY_VIEW_NAME, API_COUNT, oneMsBucketIndex);
+    var metric = waitForMetrics();
 
-    MetricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
-    MetricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(1));
-    MetricsHelper.recordLatency(CLIENT, StubCloudOperation.TEST_OPERATION, Duration.ofMillis(0));
-
-    sleepForSpansExport();
-
-    // 1 ms,
-    assertLatencyCountIncremented(
-        LATENCY_VIEW_NAME, API_COUNT, current0MsCount, 1, zeroMsBucketIndex);
-    // 2ms
-    assertLatencyCountIncremented(
-        LATENCY_VIEW_NAME, API_COUNT, current1MsCount, 2, oneMsBucketIndex);
+    assertEquals(MetricsHelper.LATENCY_METER_NAME, metric.getName());
+    assertEquals(1, metric.getData().getPoints().size());
+    var point = (HistogramPointData) metric.getData().getPoints().iterator().next();
+    assertEquals(1, point.getCounts().get(0));
+    assertEquals(2, point.getCounts().get(1));
   }
 }

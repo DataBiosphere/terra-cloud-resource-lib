@@ -3,8 +3,6 @@ package bio.terra.cloudres.azure.resourcemanager.batch;
 import bio.terra.cloudres.azure.resourcemanager.common.AzureResourceCleanupRecorder;
 import bio.terra.cloudres.azure.resourcemanager.common.AzureResponseLogger;
 import bio.terra.cloudres.common.ClientConfig;
-import io.opentelemetry.api.trace.Span;
-
 import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.resourcemanager.batch.BatchManager;
