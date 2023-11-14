@@ -1,6 +1,5 @@
 package bio.terra.cloudres.common;
 
-import static bio.terra.cloudres.testing.MetricsTestUtil.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -11,16 +10,18 @@ import com.google.cloud.resourcemanager.ResourceManagerException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import io.opencensus.stats.AggregationData;
 import java.time.Duration;
+import java.util.OptionalInt;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Test for {@link OperationAnnotator} */
 @Tag("unit")
@@ -63,65 +64,64 @@ public class OperationAnnotatorTest {
   ArgumentCaptor<JsonObject> gsonArgumentCaptor = ArgumentCaptor.forClass(JsonObject.class);
   ArgumentCaptor<Exception> exceptionArgumentCaptor = ArgumentCaptor.forClass(Exception.class);
 
-  private final Logger logger = LoggerFactory.getLogger(OperationAnnotatorTest.class);
+  @Mock private Logger mockLogger;
+  @Mock private MetricsHelper mockMetricsHelper;
 
-  @Mock private Logger mockLogger = mock(Logger.class);
+  private ClientConfig clientConfig;
+  private OperationAnnotator operationAnnotator;
+  private AutoCloseable closeableMocks;
 
-  private ClientConfig clientConfig = ClientConfig.Builder.newBuilder().setClient(CLIENT).build();
-  private OperationAnnotator operationAnnotator = new OperationAnnotator(clientConfig, logger);
+  @BeforeEach
+  public void setup() {
+    closeableMocks = MockitoAnnotations.openMocks(this);
+    clientConfig =
+        ClientConfig.Builder.newBuilder()
+            .setClient(CLIENT)
+            .setMetricsHelper(mockMetricsHelper)
+            .build();
+    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
+  }
 
-  @Test
-  public void testExecuteGoogleCloudCall_success() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
-    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
-
-    operationAnnotator.executeCowOperation(
-        StubCloudOperation.TEST_OPERATION, SUCCESS_COW_EXECUTE, SERIALIZE);
-
-    sleepForSpansExport();
-
-    // One cloud api count
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
-
-    // No error
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
-
-    // This rely on the latency DistributionData defined in {@link MetricHelper} where 4s - 8s are
-    // in the same bucket.
-    // This would expect the latency falls into the 4s-8s bucket(25th).
-    AggregationData.DistributionData data =
-        (AggregationData.DistributionData)
-            MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
-
-    // 4~8s bucket,
-    assertEquals(data.getBucketCounts().get(24).longValue(), 1);
+  @AfterEach
+  public void tearDown() throws Exception {
+    closeableMocks.close();
   }
 
   @Test
-  public void testExecuteGoogleCloudCall_withException() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
-    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
+  public void testExecuteGoogleCloudCall_success() {
+    operationAnnotator.executeCowOperation(
+        StubCloudOperation.TEST_OPERATION, SUCCESS_COW_EXECUTE, SERIALIZE);
 
+    verify(mockMetricsHelper)
+        .recordLatency(
+            eq(clientConfig.getClientName()), eq(StubCloudOperation.TEST_OPERATION), any());
+    verify(mockMetricsHelper)
+        .recordError(
+            clientConfig.getClientName(), StubCloudOperation.TEST_OPERATION, OptionalInt.of(200));
+    verify(mockMetricsHelper)
+        .recordApiCount(clientConfig.getClientName(), StubCloudOperation.TEST_OPERATION);
+    verify(mockLogger).debug(anyString(), any(JsonObject.class));
+  }
+
+  @Test
+  public void testExecuteGoogleCloudCall_withException() {
     Assert.assertThrows(
         ResourceManagerException.class,
         () ->
             operationAnnotator.executeCowOperation(
                 StubCloudOperation.TEST_OPERATION, FAILED_COW_EXECUTE, SERIALIZE));
 
-    sleepForSpansExport();
-
-    // Assert cloud api count increase by 1
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
-
-    // Assert error count increase by 1
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
+    verify(mockMetricsHelper)
+        .recordError(
+            clientConfig.getClientName(), StubCloudOperation.TEST_OPERATION, OptionalInt.of(404));
+    verify(mockMetricsHelper)
+        .recordApiCount(clientConfig.getClientName(), StubCloudOperation.TEST_OPERATION);
+    verify(mockLogger)
+        .debug(anyString(), any(JsonObject.class), any(ResourceManagerException.class));
   }
 
   @Test
   public void testExecuteGoogleCloudCall_withCheckedException() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
-    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
-
     Assert.assertThrows(
         InterruptedException.class,
         () ->
@@ -132,19 +132,16 @@ public class OperationAnnotatorTest {
                 },
                 SERIALIZE));
 
-    sleepForSpansExport();
-
-    // Assert cloud api count increase by 1
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
-
-    // No 404 error
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
+    verify(mockMetricsHelper)
+        .recordError(
+            clientConfig.getClientName(), StubCloudOperation.TEST_OPERATION, OptionalInt.empty());
+    verify(mockMetricsHelper)
+        .recordApiCount(clientConfig.getClientName(), StubCloudOperation.TEST_OPERATION);
+    verify(mockLogger).debug(anyString(), any(JsonObject.class), any(InterruptedException.class));
   }
 
   @Test
-  public void testLogEvent() throws Exception {
-    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-
+  public void testLogEvent() {
     operationAnnotator.logEvent(
         OperationData.builder()
             .setCloudOperation(StubCloudOperation.TEST_OPERATION)
@@ -166,9 +163,7 @@ public class OperationAnnotatorTest {
   }
 
   @Test
-  public void testLogEvent_withException() throws Exception {
-    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-
+  public void testLogEvent_withException() {
     operationAnnotator.logEvent(
         OperationData.builder()
             .setCloudOperation(StubCloudOperation.TEST_OPERATION)
@@ -190,77 +185,5 @@ public class OperationAnnotatorTest {
     // Verify that the exception is also included as a separate logger argument, so it can be picked
     // up by SLF4J.
     assertEquals(exceptionArgumentCaptor.getValue(), RM_EXCEPTION);
-  }
-
-  @Test
-  public void testRecordOperation() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
-    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
-
-    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-
-    operationAnnotator.recordOperation(
-        OperationData.builder()
-            .setCloudOperation(StubCloudOperation.TEST_OPERATION)
-            .setRequestData(PROJECT_REQUEST)
-            .setDuration(Duration.ofMillis(1100))
-            .build());
-
-    sleepForSpansExport();
-
-    // One cloud api count
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
-
-    // No error
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 0);
-
-    // This rely on the latency DistributionData defined in {@link MetricHelper} where 1s - 2s are
-    // in the same bucket.
-    // This would expect the latency falls into the 1s-2s bucket(23rd).
-    AggregationData.DistributionData data =
-        (AggregationData.DistributionData)
-            MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
-
-    assertEquals(data.getBucketCounts().get(22).longValue(), 1);
-
-    // Verify logger was invoked
-    verify(mockLogger, times(1)).debug(anyString(), any(JsonObject.class));
-  }
-
-  @Test
-  public void testRecordOperation_withException() throws Exception {
-    long errorCount = getCurrentCount(ERROR_VIEW_NAME, ERROR_COUNT_404);
-    long apiCount = getCurrentCount(API_VIEW_NAME, API_COUNT);
-
-    operationAnnotator = new OperationAnnotator(clientConfig, mockLogger);
-
-    operationAnnotator.recordOperation(
-        OperationData.builder()
-            .setCloudOperation(StubCloudOperation.TEST_OPERATION)
-            .setRequestData(PROJECT_REQUEST)
-            .setDuration(Duration.ofMillis(8100))
-            .setExecutionException(RM_EXCEPTION)
-            .setHttpStatusCode(404)
-            .build());
-
-    sleepForSpansExport();
-
-    // Assert cloud api count increase by 1
-    assertCountIncremented(API_VIEW_NAME, API_COUNT, apiCount, 1);
-
-    // Assert error count increase by 1
-    assertCountIncremented(ERROR_VIEW_NAME, ERROR_COUNT_404, errorCount, 1);
-
-    // This rely on the latency DistributionData defined in {@link MetricHelper} where 8s - 16s are
-    // in the same bucket.
-    // This would expect the latency falls into the 8s-16s bucket(26th).
-    AggregationData.DistributionData data =
-        (AggregationData.DistributionData)
-            MetricsHelper.viewManager.getView(LATENCY_VIEW_NAME).getAggregationMap().get(API_COUNT);
-
-    assertEquals(data.getBucketCounts().get(25).longValue(), 1);
-
-    // Verify logger was invoked with an exception
-    verify(mockLogger, times(1)).debug(anyString(), any(JsonObject.class), any(Exception.class));
   }
 }
