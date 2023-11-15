@@ -123,7 +123,7 @@ public class MetricsHelper {
     apiCounter.add(1, Attributes.of(KEY_CLOUD_API, method.toString(), KEY_CLIENT, client));
   }
 
-  public Map<String, View> getMetricsViews() {
+  public static Map<String, View> getMetricsViews() {
     var latencyView =
         View.builder()
             .setName(LATENCY_METER_NAME)
