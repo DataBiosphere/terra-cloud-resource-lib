@@ -17,14 +17,14 @@ public class AzureIntegrationUtils {
   /** Property prefix for properties in {@link #AZURE_PROPERTIES_PATH}. */
   private static final String AZURE_PROPERTY_PREFIX = "integration.azure";
 
-  // 8201533_Interactive Analysis Playground
+  // 8201558-dsp-azure-testing
   public static final AzureProfile DEFAULT_AZURE_PROFILE =
       new AzureProfile(
-          "0cb7a640-45a2-4ed6-be9f-63519f86e04b",
-          "3efc5bdf-be0e-44e7-b1d7-c08931e3c16c",
+          "fad90753-2022-4456-9b0a-c7e5b934e408",
+          "f557c728-871d-408c-a28b-eb6b2141a087",
           AzureEnvironment.AZURE);
 
-  public static final String DEFAULT_AZURE_RESOURCE_GROUP = "mrg-terra-integration-test-20211118";
+  public static final String DEFAULT_AZURE_RESOURCE_GROUP = "e2e-xmx74y";
 
   /**
    * Gets an Azure TokenCredential object for an Azure admin account. This account has the roles
