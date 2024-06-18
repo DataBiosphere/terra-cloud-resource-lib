@@ -81,7 +81,7 @@ dependencies {
     // Azure dependencies
     ext {
         azureCore = '1.44.1'
-        azureRsrcMg = '2.32.0'
+        azureRsrcMg = '2.39.0'
         azureRsrcMgBatch = '1.0.0'
         azureRsrcMgPostgres = '1.0.0'
     }
