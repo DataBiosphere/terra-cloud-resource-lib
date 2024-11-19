@@ -71,7 +71,7 @@ public class CloudBillingClientCowTest {
   public void serializeProjectName() {
     assertEquals(
         "{\"project_name\":\"projects/my-project\"}",
-            SerializeBillingUtils.convert("projects/my-project").toString());
+        SerializeBillingUtils.convert("projects/my-project").toString());
   }
 
   @Test
@@ -82,7 +82,7 @@ public class CloudBillingClientCowTest {
             + "\"billingAccountName_\":\"billingAccounts/01A82E-CA8A14-367457\",\"billingEnabled_\":false,"
             + "\"memoizedIsInitialized\":1,\"unknownFields\":{\"fields\":{}},"
             + "\"memoizedSize\":-1,\"memoizedHashCode\":0}}",
-            SerializeBillingUtils.convert(
+        SerializeBillingUtils.convert(
                 "projects/my-project",
                 ProjectBillingInfo.newBuilder()
                     .setProjectId("my-project")
@@ -96,7 +96,7 @@ public class CloudBillingClientCowTest {
     assertEquals(
         "{\"resource\":\"billingAccounts/01A82E-CA8A14-367457\","
             + "\"permissions\":[\"billing.resourceAssociations.create\"]}",
-            SerializeBillingUtils.convert(
+        SerializeBillingUtils.convert(
                 TestIamPermissionsRequest.newBuilder()
                     .setResource("billingAccounts/01A82E-CA8A14-367457")
                     .addPermissions("billing.resourceAssociations.create")

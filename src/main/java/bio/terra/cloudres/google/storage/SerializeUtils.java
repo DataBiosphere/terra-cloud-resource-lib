@@ -57,5 +57,4 @@ public class SerializeUtils extends SerializeHelper {
   static JsonObject convert(Policy policy) {
     return convertWithGson(policy, Policy.class);
   }
-
 }

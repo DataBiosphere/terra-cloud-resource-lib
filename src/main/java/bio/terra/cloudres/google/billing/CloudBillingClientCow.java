@@ -13,7 +13,6 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * A Cloud Object Wrapper (COW) for {@link CloudBillingClient}.
  *

@@ -2,7 +2,6 @@ package bio.terra.cloudres.util;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.*;
-
 import java.lang.reflect.Type;
 import java.time.Duration;
 

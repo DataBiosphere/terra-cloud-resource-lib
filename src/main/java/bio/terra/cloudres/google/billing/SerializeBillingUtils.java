@@ -33,5 +33,4 @@ public class SerializeBillingUtils extends SerializeHelper {
     result.add("permissions", permissions);
     return result;
   }
-
 }
