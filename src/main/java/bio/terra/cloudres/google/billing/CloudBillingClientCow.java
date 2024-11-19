@@ -17,6 +17,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static bio.terra.cloudres.util.SerializeHelper.createGson;
+
 /**
  * A Cloud Object Wrapper (COW) for {@link CloudBillingClient}.
  *
@@ -79,7 +81,8 @@ public class CloudBillingClientCow implements AutoCloseable {
   @VisibleForTesting
   static JsonObject serialize(String projectName, ProjectBillingInfo projectBillingInfo) {
     JsonObject result = serializeProjectName(projectName);
-    result.add("project_billing_info", new Gson().toJsonTree(projectBillingInfo));
+    Gson gson = createGson();
+    result.add("project_billing_info", gson.toJsonTree(projectBillingInfo));
     return result;
   }
 
