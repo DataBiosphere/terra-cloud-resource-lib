@@ -10,9 +10,7 @@ import com.google.gson.JsonObject;
 
 /** Utils for serializing {@link com.google.cloud.storage} objects. */
 public class SerializeUtils extends SerializeHelper {
-  private SerializeUtils() {
-    super();
-  }
+  private SerializeUtils() {}
 
   static CloudResourceUid create(BlobId blobId) {
     return new CloudResourceUid()
