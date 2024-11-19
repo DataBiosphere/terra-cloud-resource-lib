@@ -16,7 +16,6 @@ env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
   VAULT_SERVICE_ACCOUNT_ADMIN_PATH: secret/dsde/terra/crl-test/default/service-account-admin.json
   VAULT_SERVICE_ACCOUNT_USER_PATH: secret/dsde/terra/crl-test/default/service-account-user.json
-  VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH: secret/dsde/terra/kernel/integration/tools/crl_janitor/client-sa
   VAULT_AZURE_MANAGED_APP_CLIENT_PATH: secret/dsde/terra/azure/common/managed-app-publisher
   # Where to store the retrieved service accounts credentials for Google integration tests.
   SERVICE_ACCOUNT_ADMIN_FILE: src/testFixtures/resources/integration_service_account_admin.json
@@ -63,14 +62,15 @@ jobs:
             -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
             -e "VAULT_ADDR=${VAULT_ADDR}" \
             vault:1.1.0 \
-            vault read -format json $VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH \
-            | jq -r .data.key | base64 -d > $SERVICE_ACCOUNT_JANITOR_CLIENT_FILE &&#
-          docker run --rm --cap-add IPC_LOCK \
-            -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
-            -e "VAULT_ADDR=${VAULT_ADDR}" \
-            vault:1.1.0 \
             vault read -format json $VAULT_AZURE_MANAGED_APP_CLIENT_PATH \
             | jq .data > $AZURE_MANAGED_APP_CLIENT_FILE
+      - name: Write Janitor Client SA file
+        run: |
+          JANITOR_SA_B64=${{ secrets.CRL_JANITOR_CLIENT_SA_B64 }}
+          echo ::add-mask::$JANITOR_SA_B64
+          JANITOR_SA=$(echo $JANITOR_SA_B64 | base64 --decode)
+          echo ::add-mask::$JANITOR_SA
+          echo $JANITOR_SA > $SERVICE_ACCOUNT_JANITOR_CLIENT_FILE
       - name: Write Azure properties file
         run: |
           AZURE_MANAGED_APP_CLIENT_ID=$(jq -r '."client-id"' ${AZURE_MANAGED_APP_CLIENT_FILE})
