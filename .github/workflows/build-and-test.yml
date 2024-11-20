@@ -68,9 +68,7 @@ jobs:
         run: |
           JANITOR_SA_B64=${{ secrets.CRL_JANITOR_CLIENT_SA_B64 }}
           echo ::add-mask::$JANITOR_SA_B64
-          JANITOR_SA=$(echo $JANITOR_SA_B64 | base64 --decode)
-          echo ::add-mask::$JANITOR_SA
-          echo $JANITOR_SA > $SERVICE_ACCOUNT_JANITOR_CLIENT_FILE
+          echo $JANITOR_SA_B64 | base64 --decode > ${SERVICE_ACCOUNT_JANITOR_CLIENT_FILE}
       - name: Write Azure properties file
         run: |
           AZURE_MANAGED_APP_CLIENT_ID=$(jq -r '."client-id"' ${AZURE_MANAGED_APP_CLIENT_FILE})
