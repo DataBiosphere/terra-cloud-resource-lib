@@ -120,7 +120,8 @@ public class DataprocCowTest {
                     new GceClusterConfig()
                         .setNetworkUri(reusableNetwork.getSelfLink())
                         .setServiceAccount(dataprocWorkerServiceAccount.getEmail())
-                        .setTags(List.of("dataproc"))) // Set tag required for firewall rule
+                        .setTags(List.of("dataproc")) // Set tag required for firewall rule
+                        .setInternalIpOnly(false))
                 .setMasterConfig(
                     // use e2-standard-2 instance because n1-standard-1 instances are not supported
                     // by dataproc
