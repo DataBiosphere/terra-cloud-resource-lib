@@ -262,7 +262,7 @@ public class DataprocCowTest {
   @Test
   public void clusterCreateSerialize() throws Exception {
     String expected =
-        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"cluster\":{\"config\":{\"gceClusterConfig\":{\"networkUri\":\""
+        "{\"projectId\":\"my-project\",\"region\":\"us-east1\",\"cluster\":{\"config\":{\"gceClusterConfig\":{\"internalIpOnly\": false,\" + \"networkUri\":\""
             + reusableNetwork.getSelfLink()
             + "\",\"serviceAccount\":\""
             + dataprocWorkerServiceAccount.getEmail()
