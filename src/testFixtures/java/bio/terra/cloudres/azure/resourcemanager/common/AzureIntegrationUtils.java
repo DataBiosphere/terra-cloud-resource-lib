@@ -24,7 +24,7 @@ public class AzureIntegrationUtils {
           "f557c728-871d-408c-a28b-eb6b2141a087",
           AzureEnvironment.AZURE);
 
-  public static final String DEFAULT_AZURE_RESOURCE_GROUP = "e2e-xmx74y";
+  public static final String DEFAULT_AZURE_RESOURCE_GROUP = "DefaultResourceGroup-EUS2";
 
   /**
    * Gets an Azure TokenCredential object for an Azure admin account. This account has the roles
