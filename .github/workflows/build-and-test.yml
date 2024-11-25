@@ -16,14 +16,13 @@ env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
   VAULT_SERVICE_ACCOUNT_ADMIN_PATH: secret/dsde/terra/crl-test/default/service-account-admin.json
   VAULT_SERVICE_ACCOUNT_USER_PATH: secret/dsde/terra/crl-test/default/service-account-user.json
-  VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH: secret/dsde/terra/kernel/integration/tools/crl_janitor/client-sa
   VAULT_AZURE_MANAGED_APP_CLIENT_PATH: secret/dsde/terra/azure/common/managed-app-publisher
   # Where to store the retrieved service accounts credentials for Google integration tests.
   SERVICE_ACCOUNT_ADMIN_FILE: src/testFixtures/resources/integration_service_account_admin.json
   SERVICE_ACCOUNT_USER_FILE: src/testFixtures/resources/integration_service_account_user.json
   SERVICE_ACCOUNT_JANITOR_CLIENT_FILE: src/testFixtures/resources/integration_service_account_janitor_client.json
-  AZURE_MANAGED_APP_CLIENT_FILE: src/testFixtures/resources/integration_azure_managed_app_client.json
-  AZURE_PROPERTIES_FILE: src/testFixtures/resources/integration_azure_env.properties
+  AZURE_MANAGED_APP_FILE: src/testFixtures/resources/integration_azure_managed_app_client.json
+  AZURE_CREDENTIALS_FILE: src/testFixtures/resources/integration_azure_env.properties
 
 jobs:
   build-and-test:
@@ -63,20 +62,19 @@ jobs:
             -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
             -e "VAULT_ADDR=${VAULT_ADDR}" \
             vault:1.1.0 \
-            vault read -format json $VAULT_SERVICE_ACCOUNT_JANITOR_CLIENT_PATH \
-            | jq -r .data.key | base64 -d > $SERVICE_ACCOUNT_JANITOR_CLIENT_FILE &&#
-          docker run --rm --cap-add IPC_LOCK \
-            -e "VAULT_TOKEN=${{ steps.vault-token-step.outputs.vault-token }}" \
-            -e "VAULT_ADDR=${VAULT_ADDR}" \
-            vault:1.1.0 \
             vault read -format json $VAULT_AZURE_MANAGED_APP_CLIENT_PATH \
-            | jq .data > $AZURE_MANAGED_APP_CLIENT_FILE
+            | jq .data > $AZURE_MANAGED_APP_FILE
+      - name: Write Janitor Client SA file
+        run: |
+          JANITOR_SA_B64=${{ secrets.CRL_JANITOR_CLIENT_SA_B64 }}
+          echo ::add-mask::$JANITOR_SA_B64
+          echo $JANITOR_SA_B64 | base64 --decode > ${SERVICE_ACCOUNT_JANITOR_CLIENT_FILE}
       - name: Write Azure properties file
         run: |
-          AZURE_MANAGED_APP_CLIENT_ID=$(jq -r '."client-id"' ${AZURE_MANAGED_APP_CLIENT_FILE})
-          AZURE_MANAGED_APP_CLIENT_SECRET=$(jq -r '."client-secret"' ${AZURE_MANAGED_APP_CLIENT_FILE})
-          AZURE_MANAGED_APP_TENANT_ID=$(jq -r '."tenant-id"' ${AZURE_MANAGED_APP_CLIENT_FILE})
-          cat > ${AZURE_PROPERTIES_FILE} <<EOF
+          AZURE_MANAGED_APP_CLIENT_ID=$(jq -r '."client-id"' ${AZURE_MANAGED_APP_FILE})
+          AZURE_MANAGED_APP_CLIENT_SECRET=$(jq -r '."client-secret"' ${AZURE_MANAGED_APP_FILE})
+          AZURE_MANAGED_APP_TENANT_ID=$(jq -r '."tenant-id"' ${AZURE_MANAGED_APP_FILE})
+          cat > ${AZURE_CREDENTIALS_FILE} <<EOF
           integration.azure.admin.clientId=${AZURE_MANAGED_APP_CLIENT_ID}
           integration.azure.admin.clientSecret=${AZURE_MANAGED_APP_CLIENT_SECRET}
           integration.azure.admin.tenantId=${AZURE_MANAGED_APP_TENANT_ID}

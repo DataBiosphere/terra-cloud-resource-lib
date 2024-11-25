@@ -48,7 +48,8 @@ public class AIPlatformNotebooksCowTest {
     reusableProject = ProjectUtils.executeCreateProject();
     CloudBillingUtils.setDefaultProjectBilling(reusableProject.getProjectId());
     ServiceUsageUtils.enableServices(
-        reusableProject.getProjectId(), ImmutableList.of("notebooks.googleapis.com"));
+        reusableProject.getProjectId(),
+        ImmutableList.of("notebooks.googleapis.com", "compute.googleapis.com"));
     reusableNetwork = NetworkUtils.exceuteCreateNetwork(reusableProject.getProjectId(), true);
   }
 
