@@ -1,20 +1,15 @@
 package bio.terra.cloudres.google.storage;
 
+import bio.terra.cloudres.util.SerializeHelper;
 import bio.terra.janitor.model.CloudResourceUid;
 import bio.terra.janitor.model.GoogleBlobUid;
-import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.cloud.Policy;
 import com.google.cloud.storage.*;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializer;
-import java.lang.reflect.Type;
-import java.time.Duration;
 
 /** Utils for serializing {@link com.google.cloud.storage} objects. */
-class SerializeUtils {
+public class SerializeUtils extends SerializeHelper {
   private SerializeUtils() {}
 
   static CloudResourceUid create(BlobId blobId) {
@@ -61,22 +56,5 @@ class SerializeUtils {
 
   static JsonObject convert(Policy policy) {
     return convertWithGson(policy, Policy.class);
-  }
-
-  /**
-   * Helper for Gson convertible classes. Should only be used with classes that play nicely with
-   * Gson.
-   */
-  private static <R> JsonObject convertWithGson(R r, Type t) {
-    return createGson().toJsonTree(r, t).getAsJsonObject();
-  }
-
-  private static Gson createGson() {
-    return Converters.registerAll(new GsonBuilder())
-        .registerTypeAdapter(
-            Duration.class,
-            (JsonSerializer<Duration>)
-                (src, typeOfSrc, context) -> new JsonPrimitive(src.toMillis()))
-        .create();
   }
 }

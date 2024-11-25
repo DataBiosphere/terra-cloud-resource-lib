@@ -7,10 +7,6 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.billing.v1.CloudBillingClient;
 import com.google.cloud.billing.v1.CloudBillingSettings;
 import com.google.cloud.billing.v1.ProjectBillingInfo;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.iam.v1.TestIamPermissionsRequest;
 import com.google.iam.v1.TestIamPermissionsResponse;
 import java.io.IOException;
@@ -49,7 +45,7 @@ public class CloudBillingClientCow implements AutoCloseable {
     return operationAnnotator.executeCowOperation(
         CloudBillingOperation.GOOGLE_GET_PROJECT_BILLING,
         () -> billing.getProjectBillingInfo(name),
-        () -> serializeProjectName(name));
+        () -> SerializeBillingUtils.convert(name));
   }
 
   /** See {@link CloudBillingClient#updateProjectBillingInfo(String, ProjectBillingInfo)} */
@@ -58,7 +54,7 @@ public class CloudBillingClientCow implements AutoCloseable {
     return operationAnnotator.executeCowOperation(
         CloudBillingOperation.GOOGLE_UPDATE_PROJECT_BILLING,
         () -> billing.updateProjectBillingInfo(name, projectBillingInfo),
-        () -> serialize(name, projectBillingInfo));
+        () -> SerializeBillingUtils.convert(name, projectBillingInfo));
   }
 
   /** See {@link CloudBillingClient#testIamPermissions(TestIamPermissionsRequest)} */
@@ -66,31 +62,7 @@ public class CloudBillingClientCow implements AutoCloseable {
     return operationAnnotator.executeCowOperation(
         CloudBillingOperation.GOOGLE_TEST_IAM_PERMISSIONS,
         () -> billing.testIamPermissions(request),
-        () -> serializeTestIamPermissions(request));
-  }
-
-  @VisibleForTesting
-  static JsonObject serializeProjectName(String name) {
-    JsonObject result = new JsonObject();
-    result.addProperty("project_name", name);
-    return result;
-  }
-
-  @VisibleForTesting
-  static JsonObject serialize(String projectName, ProjectBillingInfo projectBillingInfo) {
-    JsonObject result = serializeProjectName(projectName);
-    result.add("project_billing_info", new Gson().toJsonTree(projectBillingInfo));
-    return result;
-  }
-
-  @VisibleForTesting
-  static JsonObject serializeTestIamPermissions(TestIamPermissionsRequest request) {
-    JsonObject result = new JsonObject();
-    result.addProperty("resource", request.getResource());
-    JsonArray permissions = new JsonArray();
-    request.getPermissionsList().forEach(permissions::add);
-    result.add("permissions", permissions);
-    return result;
+        () -> SerializeBillingUtils.convert(request));
   }
 
   @Override
