@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.billing;
 
 import bio.terra.cloudres.util.SerializeHelper;
 import com.google.cloud.billing.v1.ProjectBillingInfo;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.iam.v1.TestIamPermissionsRequest;
