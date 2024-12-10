@@ -78,10 +78,8 @@ public class CloudBillingClientCowTest {
   public void serialize() {
     assertEquals(
         "{\"project_name\":\"projects/my-project\","
-            + "\"project_billing_info\":{\"name_\":\"\",\"projectId_\":\"my-project\","
-            + "\"billingAccountName_\":\"billingAccounts/01A82E-CA8A14-367457\",\"billingEnabled_\":false,"
-            + "\"memoizedIsInitialized\":1,\"unknownFields\":{\"fields\":{}},"
-            + "\"memoizedSize\":-1,\"memoizedHashCode\":0}}",
+            + "\"project_billing_info\":{\"name_\":\"projects/my-project\",\"projectId_\":\"my-project\","
+            + "\"billingAccountName_\":\"billingAccounts/01A82E-CA8A14-367457\",\"billingEnabled_\":false}}",
         SerializeBillingUtils.convert(
                 "projects/my-project",
                 ProjectBillingInfo.newBuilder()

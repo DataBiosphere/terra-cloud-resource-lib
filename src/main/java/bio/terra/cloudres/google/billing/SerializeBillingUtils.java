@@ -20,8 +20,12 @@ public class SerializeBillingUtils extends SerializeHelper {
 
   static JsonObject convert(String projectName, ProjectBillingInfo projectBillingInfo) {
     JsonObject result = convert(projectName);
-    Gson gson = createGson();
-    result.add("project_billing_info", gson.toJsonTree(projectBillingInfo));
+    JsonObject billingInfo = new JsonObject();
+    billingInfo.addProperty("name_", projectName);
+    billingInfo.addProperty("projectId_", projectBillingInfo.getProjectId());
+    billingInfo.addProperty("billingAccountName_", projectBillingInfo.getBillingAccountName());
+    billingInfo.addProperty("billingEnabled_", projectBillingInfo.getBillingEnabled());
+    result.add("project_billing_info", billingInfo);
     return result;
   }
 
