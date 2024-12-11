@@ -2,7 +2,6 @@ package bio.terra.cloudres.google.billing;
 
 import bio.terra.cloudres.util.SerializeHelper;
 import com.google.cloud.billing.v1.ProjectBillingInfo;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.iam.v1.TestIamPermissionsRequest;
@@ -20,8 +19,12 @@ public class SerializeBillingUtils extends SerializeHelper {
 
   static JsonObject convert(String projectName, ProjectBillingInfo projectBillingInfo) {
     JsonObject result = convert(projectName);
-    Gson gson = createGson();
-    result.add("project_billing_info", gson.toJsonTree(projectBillingInfo));
+    JsonObject billingInfo = new JsonObject();
+    billingInfo.addProperty("name_", projectName);
+    billingInfo.addProperty("projectId_", projectBillingInfo.getProjectId());
+    billingInfo.addProperty("billingAccountName_", projectBillingInfo.getBillingAccountName());
+    billingInfo.addProperty("billingEnabled_", projectBillingInfo.getBillingEnabled());
+    result.add("project_billing_info", billingInfo);
     return result;
   }
 
