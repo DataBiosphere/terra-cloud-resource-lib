@@ -87,7 +87,7 @@ dependencies {
     }
     api group: 'com.azure', name: 'azure-core', version: azureCore
     testFixturesImplementation group: 'com.azure', name: 'azure-core', version: azureCore
-    api group: 'com.azure', name: 'azure-identity', version: '1.10.1'
+    api group: 'com.azure', name: 'azure-identity', version: '1.15.4'
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-compute', version: azureRsrcMg
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-containerservice', version: azureRsrcMg
     api group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-msi', version: azureRsrcMg
