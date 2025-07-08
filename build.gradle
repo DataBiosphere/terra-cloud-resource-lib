@@ -9,6 +9,7 @@ plugins {
     id 'com.github.spotbugs' version '5.0.13'
     id 'com.jfrog.artifactory' version '4.29.0'
     id 'org.sonarqube' version '4.0.0.2929'
+    id 'com.google.cloud.artifactregistry.gradle-plugin' version '2.1.5'
 }
 
 group = gradle.projectGroup
