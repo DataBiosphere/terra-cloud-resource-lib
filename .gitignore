@@ -37,6 +37,9 @@ out/
 ### Mac directory metadata
 .DS_Store
 
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
+
 ### Jenv directory-local version setting
 .java-version
 
