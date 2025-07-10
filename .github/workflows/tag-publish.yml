@@ -15,7 +15,7 @@ name: Bump, Tag, and Publish
 # - BROADBOT_TOKEN - the broadbot token, so we can avoid two reviewer rule on GHA operations
 on:
   push:
-    # branches: [ master ]
+    branches: [ master, core-593-jfrog-to-gar ]
     paths-ignore: [ '**.md', '.github/**' ]
   workflow_dispatch:
     inputs:
