@@ -17,6 +17,8 @@ on:
   push:
     branches: [ master, core-593-jfrog-to-gar ]
     paths-ignore: [ '**.md', '.github/**' ]
+  pull_request:
+    branches: [ '**' ]
   workflow_dispatch:
     inputs:
       bump:
