@@ -15,10 +15,8 @@ name: Bump, Tag, and Publish
 # - BROADBOT_TOKEN - the broadbot token, so we can avoid two reviewer rule on GHA operations
 on:
   push:
-    branches: [ master, core-593-jfrog-to-gar ]
+    branches: [ master ]
     paths-ignore: [ '**.md', '.github/**' ]
-  pull_request:
-    branches: [ '**' ]
   workflow_dispatch:
     inputs:
       bump:
@@ -91,7 +89,7 @@ jobs:
           java-version: 17
           cache: 'gradle'
       - name: Grant execute permission for gradlew
-        # if: steps.skiptest.outputs.is-bump == 'no'
+        if: steps.skiptest.outputs.is-bump == 'no'
         run: chmod +x gradlew
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -105,10 +103,3 @@ jobs:
           GOOGLE_CLOUD_PROJECT: dsp-artifact-registry
           GAR_LOCATION: us-central1
           GAR_REPOSITORY_ID: libs-release-standard
-#      - name: Publish to Artifactory
-#        if: steps.skiptest.outputs.is-bump == 'no'
-#        run: ./gradlew artifactoryPublish --scan
-#        env:
-#          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-#          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-#          ARTIFACTORY_REPO_KEY: libs-snapshot-local
