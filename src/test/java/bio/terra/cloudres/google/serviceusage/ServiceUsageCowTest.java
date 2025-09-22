@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 @Tag("integration")
 public class ServiceUsageCowTest {
 
-  public static final long OVERRIDE_VALUE_BYTES = 209_715_199L; // previously 1_099_511_627_776L;
+  public static final long OVERRIDE_VALUE_BYTES = 209_715_199L;
 
   private static final String STORAGE_SERVICE_ID = "storage-api.googleapis.com";
   private static final String ENABLED_FILTER = "state:ENABLED";
