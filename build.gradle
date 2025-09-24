@@ -48,7 +48,8 @@ dependencies {
         api group: 'com.google.protobuf', name: 'protobuf-java', version: '3.21.7'
         api group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.21.7'
         implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre' for Java 8 or higher
-        testFixturesImplementation group: 'com.google.guava', name: 'guava', version: '31.1-jre' // "-jre" for Java 8 or higher
+        testFixturesImplementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+        // "-jre" for Java 8 or higher
     }
     implementation platform('com.google.cloud:libraries-bom:26.68.0') // use common bom
 
@@ -123,12 +124,12 @@ dependencies {
 
     // Metrics & Tracing
     ext {
-        openTelemetryVersion = '1.31.0'
+        openTelemetryVersion = '1.49.0'
     }
     implementation "io.opentelemetry:opentelemetry-api:${openTelemetryVersion}"
     testImplementation "io.opentelemetry:opentelemetry-sdk:${openTelemetryVersion}"
     implementation "io.opentelemetry:opentelemetry-sdk-metrics:${openTelemetryVersion}"
-    implementation "io.opentelemetry.semconv:opentelemetry-semconv:1.21.0-alpha"
+    implementation "io.opentelemetry.semconv:opentelemetry-semconv:1.32.0"
 
     // Testing
     ext {
@@ -160,7 +161,7 @@ if (hasProperty('buildScan')) {
     }
 }
 
-def gradleIncDir= "$rootDir/gradle"
+def gradleIncDir = "$rootDir/gradle"
 apply from: "$gradleIncDir/dependency-locking.gradle"
 apply from: "$gradleIncDir/jacoco.gradle"
 apply from: "$gradleIncDir/javadoc.gradle"
